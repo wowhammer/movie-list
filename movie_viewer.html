@@ -23,7 +23,11 @@ header{background:#fff;border-bottom:1px solid #e5e5e5;padding:12px 16px;positio
 input[type=text]{width:100%;padding:9px 12px 9px 34px;border:1px solid #ddd;border-radius:10px;font-size:14px;font-family:inherit;background:#f9f9f9;outline:none;}
 input[type=text]:focus{border-color:#999;background:#fff;}
 select{width:100%;padding:9px 12px;border:1px solid #ddd;border-radius:10px;font-size:14px;font-family:inherit;background:#f9f9f9;outline:none;-webkit-appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23888' d='M6 8L1 3h10z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;}
-.count{font-size:12px;color:#aaa;padding:8px 16px 4px;}
+.count-row{display:flex;align-items:center;justify-content:space-between;padding:8px 16px 4px;}
+.count{font-size:12px;color:#aaa;}
+.sort-btns{display:flex;gap:4px;}
+.sort-btn{background:none;border:1px solid #e5e5e5;border-radius:8px;font-size:11px;padding:3px 8px;cursor:pointer;color:#888;font-family:inherit;}
+.sort-btn.on{background:#1a1a1a;color:#fff;border-color:#1a1a1a;font-weight:600;}
 .list{padding:8px 12px 80px;}
 .card{background:#fff;border-radius:12px;margin-bottom:8px;box-shadow:0 1px 3px rgba(0,0,0,0.06);overflow:hidden;cursor:pointer;}
 .card-header{padding:12px 14px;}
@@ -127,7 +131,15 @@ select{width:100%;padding:9px 12px;border:1px solid #ddd;border-radius:10px;font
   </div>
 </header>
 
-<div class="count" id="count-lbl"></div>
+<div class="count-row">
+  <div class="count" id="count-lbl"></div>
+  <div class="sort-btns">
+    <button class="sort-btn on" data-sort="default">기본</button>
+    <button class="sort-btn" data-sort="rating">평점↓</button>
+    <button class="sort-btn" data-sort="year">연도↓</button>
+    <button class="sort-btn" data-sort="rec">추천↓</button>
+  </div>
+</div>
 <div class="list" id="list"><div class="loading">불러오는 중...</div></div>
 <button class="more-btn" id="more-btn" style="display:none;">더 보기 ↓</button>
 
@@ -171,7 +183,7 @@ const IMG_BASE='https://image.tmdb.org/t/p/w200';
 const PERSON_IMG='https://image.tmdb.org/t/p/w185';
 const SC={넷플릭스:{bg:'#FFEBEB',c:'#b33'},티빙:{bg:'#FFF0D9',c:'#834'},왓챠:{bg:'#FDE8F0',c:'#833'},'디즈니+':{bg:'#E6F0FB',c:'#336'},웨이브:{bg:'#E8F5E9',c:'#363'},쿠팡플레이:{bg:'#EDEBFE',c:'#449'},'U+모바일':{bg:'#FFF0E6',c:'#c44'},'U+모바일구매':{bg:'#FFF0E6',c:'#c44'}};
 const PER=25;
-let ALL=[],filtered=[],page=0,curTab='title',searchQ='',selectQ='';
+let ALL=[],filtered=[],page=0,curTab='title',searchQ='',selectQ='',curSort='default';
 const tmdbCache={};
 const personCache={};
 
@@ -566,8 +578,39 @@ function filter(){
     if(curTab==='rec'&&selectQ)return rec.includes(selectQ);
     return true;
   });
+
+  // 정렬
+  if(curSort==='rating'){
+    filtered.sort((a,b)=>{
+      const ra=parseFloat(re(a['TMDB평점']))||0;
+      const rb=parseFloat(re(b['TMDB평점']))||0;
+      return rb-ra;
+    });
+  } else if(curSort==='year'){
+    filtered.sort((a,b)=>{
+      const ya=parseInt(re(a['개봉연도']))||0;
+      const yb=parseInt(re(b['개봉연도']))||0;
+      return yb-ya;
+    });
+  } else if(curSort==='rec'){
+    filtered.sort((a,b)=>{
+      const ra=(re(a['추천']).match(/\//g)||[]).length+1;
+      const rb=(re(b['추천']).match(/\//g)||[]).length+1;
+      return rb-ra;
+    });
+  }
+
   page=0;renderCards();
 }
+
+document.querySelectorAll('.sort-btn').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    document.querySelectorAll('.sort-btn').forEach(b=>b.classList.remove('on'));
+    btn.classList.add('on');
+    curSort=btn.dataset.sort;
+    filter();
+  });
+});
 
 document.getElementById('search-input').addEventListener('input',e=>{searchQ=e.target.value;filter();});
 document.getElementById('select-box').addEventListener('change',e=>{selectQ=e.target.value;filter();});
