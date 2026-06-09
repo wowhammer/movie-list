@@ -38,7 +38,9 @@ select{width:100%;padding:9px 12px;border:1px solid #ddd;border-radius:10px;font
 .badge-O{background:#dcfce7;color:#16a34a;}
 .badge-△{background:#fef9c3;color:#b45309;}
 .card-orig{font-size:11px;color:#bbb;margin-bottom:4px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-.card-sub{font-size:12px;color:#888;margin-bottom:6px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.card-sub{font-size:12px;color:#888;margin-bottom:6px;}
+.person-link{display:inline-block;cursor:pointer;border-bottom:1px dashed #bbb;color:#555;transition:color .15s;}
+.person-link:active{color:#1a1a1a;}
 .badges{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:3px;}
 .sbadge{font-size:11px;padding:2px 8px;border-radius:10px;font-weight:500;}
 .rbadge{font-size:10px;padding:2px 7px;border-radius:8px;background:#f0f0f0;color:#666;}
@@ -55,6 +57,29 @@ select{width:100%;padding:9px 12px;border:1px solid #ddd;border-radius:10px;font
 .action-btn:active{background:#f5f5f5;}
 .more-btn{display:block;width:calc(100% - 24px);margin:0 12px;padding:12px;background:#fff;border:1px solid #e5e5e5;border-radius:12px;font-size:14px;color:#555;cursor:pointer;font-family:inherit;}
 .loading{text-align:center;padding:40px 16px;color:#aaa;font-size:14px;}
+
+/* 인물 모달 */
+.person-modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:500;display:flex;align-items:flex-end;justify-content:center;animation:fadeIn .2s;}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+.person-modal{background:#fff;border-radius:20px 20px 0 0;width:100%;max-width:480px;max-height:80vh;overflow:hidden;display:flex;flex-direction:column;animation:slideUp .25s ease-out;}
+@keyframes slideUp{from{transform:translateY(40px);opacity:0}to{transform:translateY(0);opacity:1}}
+.person-modal-header{display:flex;align-items:center;gap:14px;padding:18px 16px 14px;border-bottom:1px solid #f0f0f0;flex-shrink:0;}
+.person-modal-photo{width:64px;height:64px;border-radius:50%;object-fit:cover;background:#eee;flex-shrink:0;}
+.person-modal-photo-placeholder{width:64px;height:64px;border-radius:50%;background:#f0f0f0;display:flex;align-items:center;justify-content:center;font-size:28px;flex-shrink:0;}
+.person-modal-name{font-size:17px;font-weight:700;margin-bottom:2px;}
+.person-modal-dept{font-size:12px;color:#888;}
+.person-modal-close{margin-left:auto;width:30px;height:30px;border-radius:50%;border:none;background:#f0f0f0;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#555;flex-shrink:0;}
+.person-modal-body{overflow-y:auto;padding:14px 16px 32px;}
+.person-section-title{font-size:12px;font-weight:600;color:#aaa;text-transform:uppercase;letter-spacing:.05em;margin-bottom:10px;}
+.person-filmography{display:flex;flex-direction:column;gap:8px;}
+.person-film-item{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:10px;background:#f9f9f9;}
+.person-film-poster{width:36px;height:52px;border-radius:5px;object-fit:cover;background:#eee;flex-shrink:0;}
+.person-film-poster-placeholder{width:36px;height:52px;border-radius:5px;background:#ebebeb;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:16px;}
+.person-film-info{flex:1;min-width:0;}
+.person-film-title{font-size:13px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.person-film-meta{font-size:11px;color:#999;margin-top:2px;}
+.person-film-char{font-size:11px;color:#bbb;margin-top:1px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.person-modal-loading{text-align:center;padding:30px;color:#aaa;font-size:13px;}
 </style>
 </head>
 <body>
@@ -87,15 +112,34 @@ select{width:100%;padding:9px 12px;border:1px solid #ddd;border-radius:10px;font
 <div class="list" id="list"><div class="loading">불러오는 중...</div></div>
 <button class="more-btn" id="more-btn" style="display:none;">더 보기 ↓</button>
 
+<!-- 인물 모달 -->
+<div id="person-modal-overlay" class="person-modal-overlay" style="display:none;">
+  <div class="person-modal" id="person-modal">
+    <div class="person-modal-header">
+      <div class="person-modal-photo-placeholder" id="person-modal-photo">👤</div>
+      <div>
+        <div class="person-modal-name" id="person-modal-name">-</div>
+        <div class="person-modal-dept" id="person-modal-dept">-</div>
+      </div>
+      <button class="person-modal-close" id="person-modal-close-btn">✕</button>
+    </div>
+    <div class="person-modal-body" id="person-modal-body">
+      <div class="person-modal-loading">불러오는 중...</div>
+    </div>
+  </div>
+</div>
+
 <script>
 const API='https://script.google.com/macros/s/AKfycbyfEqz3U7qircviRqSKx2KrBYSYfjsxjznP9UWN00Z19Y0sUF6uaJXy06OmHaSBpK4/exec';
 const TMDB_KEY='0b9515d29e91abc6465d342963c92482';
 const TMDB_BASE='https://api.themoviedb.org/3';
 const IMG_BASE='https://image.tmdb.org/t/p/w200';
+const PERSON_IMG='https://image.tmdb.org/t/p/w185';
 const SC={넷플릭스:{bg:'#FFEBEB',c:'#b33'},티빙:{bg:'#FFF0D9',c:'#834'},왓챠:{bg:'#FDE8F0',c:'#833'},'디즈니+':{bg:'#E6F0FB',c:'#336'},웨이브:{bg:'#E8F5E9',c:'#363'},쿠팡플레이:{bg:'#EDEBFE',c:'#449'}};
 const PER=25;
 let ALL=[],filtered=[],page=0,curTab='title',searchQ='',selectQ='';
 const tmdbCache={};
+const personCache={};
 
 function re(s){return String(s||'').replace(/=HYPERLINK\("[^"]*",\s*"([^"]+)"\)/,'$1').trim();}
 
@@ -125,26 +169,35 @@ function sbadges(s){
   if(!s||s==='-')return '';
   return s.split(/[,\/]+/).map(p=>p.trim()).filter(Boolean).slice(0,3).map(p=>{
     const x=SC[p]||{bg:'#f0f0f0',c:'#666'};
-    return `<span class="sbadge" style="background:${x.bg};color:${x.c}">${p}</span>`;
+    return '<span class="sbadge" style="background:'+x.bg+';color:'+x.c+'">'+p+'</span>';
   }).join('');
 }
 function rbadges(r){
   if(!r||r==='-')return '';
-  return r.split('/').map(p=>p.trim()).filter(Boolean).slice(0,4).map(p=>`<span class="rbadge">${p}</span>`).join('');
+  return r.split('/').map(p=>p.trim()).filter(Boolean).slice(0,4).map(p=>'<span class="rbadge">'+p+'</span>').join('');
 }
 
-async function fetchTMDB(titleEn, titleKo, year){
+function personSpans(nameStr,role){
+  if(!nameStr||nameStr==='-')return '';
+  return nameStr.split(/[,，]+/).map(p=>{
+    const name=p.trim();
+    if(!name)return '';
+    return '<span class="person-link" data-name="'+name+'" data-role="'+role+'">'+name+'</span>';
+  }).join('<span style="color:#ccc"> · </span>');
+}
+
+async function fetchTMDB(titleEn,titleKo,year){
   const cacheKey=titleEn||titleKo;
-  if(tmdbCache[cacheKey]) return tmdbCache[cacheKey];
+  if(tmdbCache[cacheKey])return tmdbCache[cacheKey];
   try{
     const q=encodeURIComponent(titleEn||titleKo);
-    const y=year?`&year=${year}`:'';
-    const res=await fetch(`${TMDB_BASE}/search/movie?api_key=${TMDB_KEY}&query=${q}${y}&language=ko-KR`);
+    const y=year?'&year='+year:'';
+    const res=await fetch(TMDB_BASE+'/search/movie?api_key='+TMDB_KEY+'&query='+q+y+'&language=ko-KR');
     const data=await res.json();
     if(data.results&&data.results.length>0){
       const m=data.results[0];
       tmdbCache[cacheKey]={poster:m.poster_path?IMG_BASE+m.poster_path:null,overview:m.overview||'줄거리 정보 없음',rating:m.vote_average?m.vote_average.toFixed(1):'-'};
-    } else {
+    }else{
       tmdbCache[cacheKey]={poster:null,overview:'정보 없음',rating:'-'};
     }
   }catch(e){
@@ -152,6 +205,103 @@ async function fetchTMDB(titleEn, titleKo, year){
   }
   return tmdbCache[cacheKey];
 }
+
+async function fetchPerson(name){
+  if(personCache[name])return personCache[name];
+  try{
+    const q=encodeURIComponent(name);
+    const res=await fetch(TMDB_BASE+'/search/person?api_key='+TMDB_KEY+'&query='+q+'&language=ko-KR');
+    const data=await res.json();
+    if(!data.results||data.results.length===0)return personCache[name]={found:false};
+    const p=data.results[0];
+    const credRes=await fetch(TMDB_BASE+'/person/'+p.id+'/movie_credits?api_key='+TMDB_KEY+'&language=ko-KR');
+    const credData=await credRes.json();
+    const castList=(credData.cast||[]).filter(m=>m.poster_path||m.release_date).sort((a,b)=>(b.popularity||0)-(a.popularity||0)).slice(0,12);
+    const crewList=(credData.crew||[]).filter(m=>m.job==='Director'&&(m.poster_path||m.release_date)).sort((a,b)=>(b.popularity||0)-(a.popularity||0)).slice(0,12);
+    personCache[name]={
+      found:true,id:p.id,name:p.name,
+      photo:p.profile_path?PERSON_IMG+p.profile_path:null,
+      dept:p.known_for_department==='Acting'?'배우':p.known_for_department==='Directing'?'감독':'영화인',
+      cast:castList,crew:crewList
+    };
+  }catch(e){
+    personCache[name]={found:false};
+  }
+  return personCache[name];
+}
+
+async function openPersonModal(name,role){
+  const overlay=document.getElementById('person-modal-overlay');
+  const modalBody=document.getElementById('person-modal-body');
+
+  document.getElementById('person-modal-name').textContent=name;
+  document.getElementById('person-modal-dept').textContent='불러오는 중...';
+  const photoEl=document.getElementById('person-modal-photo');
+  photoEl.className='person-modal-photo-placeholder';
+  photoEl.textContent='👤';
+  if(photoEl.tagName==='IMG'){
+    const ph=document.createElement('div');
+    ph.className='person-modal-photo-placeholder';
+    ph.id='person-modal-photo';
+    ph.textContent='👤';
+    photoEl.replaceWith(ph);
+  }
+  modalBody.innerHTML='<div class="person-modal-loading">불러오는 중...</div>';
+  overlay.style.display='flex';
+  document.body.style.overflow='hidden';
+
+  const p=await fetchPerson(name);
+
+  const currentPhoto=document.getElementById('person-modal-photo');
+  if(p.found&&p.photo){
+    const img=document.createElement('img');
+    img.className='person-modal-photo';
+    img.id='person-modal-photo';
+    img.src=p.photo;
+    img.alt=name;
+    currentPhoto.replaceWith(img);
+  }
+
+  document.getElementById('person-modal-name').textContent=p.found?p.name:name;
+  document.getElementById('person-modal-dept').textContent=p.found?p.dept:'정보 없음';
+
+  if(!p.found){
+    modalBody.innerHTML='<div style="text-align:center;padding:30px;color:#aaa;font-size:13px;">TMDB에서 정보를 찾을 수 없습니다</div>';
+    return;
+  }
+
+  const isDirector=(role==='director')||(p.dept==='감독'&&p.crew.length>0);
+  const films=isDirector&&p.crew.length>0?p.crew:p.cast;
+  const sectionLabel=isDirector&&p.crew.length>0?'감독 작품':'주요 출연작';
+
+  if(films.length===0){
+    modalBody.innerHTML='<div style="text-align:center;padding:30px;color:#aaa;font-size:13px;">작품 정보 없음</div>';
+    return;
+  }
+
+  const filmHTML=films.map(m=>{
+    const title=m.title||m.original_title||'제목 없음';
+    const year=m.release_date?m.release_date.slice(0,4):'';
+    const rating=m.vote_average?'⭐ '+m.vote_average.toFixed(1):'';
+    const charLine=(m.character&&!isDirector)?'<div class="person-film-char">'+m.character+'</div>':'';
+    const posterEl=m.poster_path
+      ?'<img class="person-film-poster" src="'+IMG_BASE+m.poster_path+'" alt="'+title+'" loading="lazy">'
+      :'<div class="person-film-poster-placeholder">🎬</div>';
+    return '<div class="person-film-item">'+posterEl+'<div class="person-film-info"><div class="person-film-title">'+title+'</div><div class="person-film-meta">'+[year,rating].filter(Boolean).join(' · ')+'</div>'+charLine+'</div></div>';
+  }).join('');
+
+  modalBody.innerHTML='<div class="person-section-title">'+sectionLabel+'</div><div class="person-filmography">'+filmHTML+'</div>';
+}
+
+function closePersonModal(){
+  document.getElementById('person-modal-overlay').style.display='none';
+  document.body.style.overflow='';
+}
+
+document.getElementById('person-modal-overlay').addEventListener('click',function(e){
+  if(e.target===this)closePersonModal();
+});
+document.getElementById('person-modal-close-btn').addEventListener('click',closePersonModal);
 
 function renderCards(){
   const el=document.getElementById('list');
@@ -167,64 +317,68 @@ function renderCards(){
     const dir=re(m['감독']),actor=re(m['배우']),stream=re(m['스트리밍']),rec=re(m['추천']);
     const watched=re(m['시청여부']);
     const title=kor||orig;
-    const sub=dir?(dir+(actor?` · ${actor.split(',')[0].trim()}`:'')):'';
-    const watchedBadge=watched==='O'?`<span class="watched-badge badge-O">시청</span>`:watched==='△'?`<span class="watched-badge badge-△">다시볼것</span>`:'';
+    const watchedBadge=watched==='O'?'<span class="watched-badge badge-O">시청</span>':watched==='△'?'<span class="watched-badge badge-△">다시볼것</span>':'';
+
+    const dirSpan=personSpans(dir,'director');
+    const actorFirst=actor?actor.split(/[,，]/)[0].trim():'';
+    const actorSpan=actorFirst?personSpans(actorFirst,'actor'):'';
+    const subHTML=(dirSpan||actorSpan)?dirSpan+(dirSpan&&actorSpan?'<span style="color:#ddd"> / </span>':'')+actorSpan:'';
 
     const d=document.createElement('div');
     d.className='card';
-    d.innerHTML=`
-      <div class="card-header">
-        <div class="card-top">
-          <div class="card-poster-placeholder" data-orig="${orig}" data-kor="${kor}" data-year="${year}">🎬</div>
-          <div class="card-info">
-            <div class="card-title-row">
-              <span class="card-title">${title}${watchedBadge}</span>
-              <span class="card-year">${year}</span>
-            </div>
-            ${kor&&orig&&kor!==orig?`<div class="card-orig">${orig}</div>`:''}
-            ${sub?`<div class="card-sub">${sub}</div>`:''}
-            <div class="badges">${sbadges(stream)||'<span class="rbadge" style="color:#ccc">스트리밍 정보 없음</span>'}</div>
-            <div class="badges">${rbadges(rec)}</div>
-          </div>
-        </div>
-      </div>
-      <div class="card-detail">
-        <div class="detail-loading">불러오는 중...</div>
-      </div>`;
+    d.innerHTML=
+      '<div class="card-header">'+
+        '<div class="card-top">'+
+          '<div class="card-poster-placeholder">🎬</div>'+
+          '<div class="card-info">'+
+            '<div class="card-title-row">'+
+              '<span class="card-title">'+title+watchedBadge+'</span>'+
+              '<span class="card-year">'+year+'</span>'+
+            '</div>'+
+            (kor&&orig&&kor!==orig?'<div class="card-orig">'+orig+'</div>':'')+
+            (subHTML?'<div class="card-sub">'+subHTML+'</div>':'')+
+            '<div class="badges">'+(sbadges(stream)||'<span class="rbadge" style="color:#ccc">스트리밍 정보 없음</span>')+'</div>'+
+            '<div class="badges">'+rbadges(rec)+'</div>'+
+          '</div>'+
+        '</div>'+
+      '</div>'+
+      '<div class="card-detail"><div class="detail-loading">불러오는 중...</div></div>';
 
-    // 카드 클릭 → 상세 펼치기
-    d.querySelector('.card-header').addEventListener('click', async()=>{
+    d.querySelectorAll('.person-link').forEach(link=>{
+      link.addEventListener('click',e=>{
+        e.stopPropagation();
+        openPersonModal(link.dataset.name,link.dataset.role);
+      });
+    });
+
+    d.querySelector('.card-header').addEventListener('click',async()=>{
       const detail=d.querySelector('.card-detail');
       const isOpen=detail.classList.contains('open');
-      // 다른 카드 닫기
       document.querySelectorAll('.card-detail.open').forEach(x=>x.classList.remove('open'));
-      if(isOpen) return;
+      if(isOpen)return;
       detail.classList.add('open');
-      if(detail.dataset.loaded) return;
+      if(detail.dataset.loaded)return;
       detail.dataset.loaded='1';
       const info=await fetchTMDB(orig,kor,year);
       const naverQ=encodeURIComponent((kor||orig)+' 영화');
       const jwQ=encodeURIComponent(orig||kor);
-      detail.innerHTML=`
-        <div class="detail-inner">
-          ${info.poster?`<img class="detail-poster" src="${info.poster}" alt="포스터">`:`<div class="card-poster-placeholder" style="width:80px;height:116px;border-radius:8px;">🎬</div>`}
-          <div class="detail-text">
-            <div class="detail-rating">⭐ ${info.rating} / 10</div>
-            <div class="detail-overview">${info.overview}</div>
-          </div>
-        </div>
-        <div class="detail-actions">
-          <a class="action-btn" href="https://search.naver.com/search.naver?query=${naverQ}" target="_blank">🔍 네이버</a>
-          <a class="action-btn" href="https://www.justwatch.com/kr/search?q=${jwQ}" target="_blank">▶ JustWatch</a>
-        </div>`;
-
-      // 포스터 썸네일도 업데이트
+      detail.innerHTML=
+        '<div class="detail-inner">'+
+          (info.poster?'<img class="detail-poster" src="'+info.poster+'" alt="포스터">'
+            :'<div class="card-poster-placeholder" style="width:80px;height:116px;border-radius:8px;">🎬</div>')+
+          '<div class="detail-text">'+
+            '<div class="detail-rating">⭐ '+info.rating+' / 10</div>'+
+            '<div class="detail-overview">'+info.overview+'</div>'+
+          '</div>'+
+        '</div>'+
+        '<div class="detail-actions">'+
+          '<a class="action-btn" href="https://search.naver.com/search.naver?query='+naverQ+'" target="_blank">🔍 네이버</a>'+
+          '<a class="action-btn" href="https://www.justwatch.com/kr/search?q='+jwQ+'" target="_blank">▶ JustWatch</a>'+
+        '</div>';
       const placeholder=d.querySelector('.card-poster-placeholder');
       if(placeholder&&info.poster){
         const img=document.createElement('img');
-        img.className='card-poster';
-        img.src=info.poster;
-        img.alt='포스터';
+        img.className='card-poster';img.src=info.poster;img.alt='포스터';
         placeholder.replaceWith(img);
       }
     });
@@ -233,7 +387,7 @@ function renderCards(){
   });
   page++;
   document.getElementById('more-btn').style.display=filtered.length>page*PER?'block':'none';
-  document.getElementById('count-lbl').textContent=`총 ${filtered.length}편`;
+  document.getElementById('count-lbl').textContent='총 '+filtered.length+'편';
 }
 
 function filter(){
@@ -276,10 +430,9 @@ async function load(){
     if(!res.ok)throw new Error('HTTP '+res.status);
     ALL=await res.json();
     ALL=ALL.filter(m=>(re(m['한국 개봉명'])||re(m['원제']))&&!re(m['원제']).startsWith('★'));
-    updateStats();
-    filter();
+    updateStats();filter();
   }catch(e){
-    document.getElementById('list').innerHTML=`<div class="loading">데이터 로드 실패: ${e.message}</div>`;
+    document.getElementById('list').innerHTML='<div class="loading">데이터 로드 실패: '+e.message+'</div>';
   }
 }
 load();
