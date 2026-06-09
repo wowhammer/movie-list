@@ -414,20 +414,24 @@ async function openPersonModal(name,role){
     item.addEventListener('click',()=>{
       if(match){
         closePersonModal();
-        const cards=document.querySelectorAll('.card');
-        for(const card of cards){
-          const cardTitle=card.querySelector('.card-title');
-          if(!cardTitle)continue;
-          const cardText=cardTitle.textContent.toLowerCase();
-          if(cardText.includes(clickedTitle)||cardText.includes(clickedOrig)){
-            setTimeout(()=>{
-              card.scrollIntoView({behavior:'smooth',block:'center'});
-              const header=card.querySelector('.card-header');
-              if(header)header.click();
-            },300);
-            break;
-          }
+        // 매칭 영화를 filtered 맨 앞으로 이동 후 전체 재렌더링
+        const idx=filtered.indexOf(match);
+        if(idx>0){
+          filtered.splice(idx,1);
+          filtered.unshift(match);
         }
+        page=0;
+        document.getElementById('list').innerHTML='';
+        renderCards();
+        // 렌더링 후 첫 번째 카드(=매칭 영화)로 스크롤 + 상세 오픈
+        setTimeout(()=>{
+          const firstCard=document.querySelector('.card');
+          if(firstCard){
+            firstCard.scrollIntoView({behavior:'smooth',block:'center'});
+            const header=firstCard.querySelector('.card-header');
+            if(header)header.click();
+          }
+        },300);
       } else {
         window.open('https://www.themoviedb.org/movie/'+tmdbId,'_blank');
       }
