@@ -196,9 +196,9 @@ async function fetchTMDB(titleEn,titleKo,year){
     const data=await res.json();
     if(data.results&&data.results.length>0){
       const m=data.results[0];
-      tmdbCache[cacheKey]={poster:m.poster_path?IMG_BASE+m.poster_path:null,overview:m.overview||'줄거리 정보 없음',rating:m.vote_average?m.vote_average.toFixed(1):'-'};
+      tmdbCache[cacheKey]={poster:m.poster_path?IMG_BASE+m.poster_path:null,overview:m.overview||'줄거리 정보 없음',rating:m.vote_average?m.vote_average.toFixed(1):'-',tmdbId:m.id};
     }else{
-      tmdbCache[cacheKey]={poster:null,overview:'정보 없음',rating:'-'};
+      tmdbCache[cacheKey]={poster:null,overview:'정보 없음',rating:'-',tmdbId:null};
     }
   }catch(e){
     tmdbCache[cacheKey]={poster:null,overview:'로드 실패',rating:'-'};
@@ -315,9 +315,11 @@ function renderCards(){
   filtered.slice(page*PER,(page+1)*PER).forEach(m=>{
     const kor=re(m['한국 개봉명']),orig=re(m['원제']),year=re(m['개봉연도']);
     const dir=re(m['감독']),actor=re(m['배우']),stream=re(m['스트리밍']),rec=re(m['추천']);
+    const country=re(m['국적']);
     const watched=re(m['시청여부']);
     const title=kor||orig;
     const watchedBadge=watched==='O'?'<span class="watched-badge badge-O">시청</span>':watched==='△'?'<span class="watched-badge badge-△">다시볼것</span>':'';
+    const yearCountry=[year,country].filter(Boolean).join(' · ');
 
     const dirSpan=personSpans(dir,'director');
     const actorFirst=actor?actor.split(/[,，]/)[0].trim():'';
@@ -333,7 +335,7 @@ function renderCards(){
           '<div class="card-info">'+
             '<div class="card-title-row">'+
               '<span class="card-title">'+title+watchedBadge+'</span>'+
-              '<span class="card-year">'+year+'</span>'+
+              '<span class="card-year">'+yearCountry+'</span>'+
             '</div>'+
             (kor&&orig&&kor!==orig?'<div class="card-orig">'+orig+'</div>':'')+
             (subHTML?'<div class="card-sub">'+subHTML+'</div>':'')+
@@ -361,7 +363,8 @@ function renderCards(){
       detail.dataset.loaded='1';
       const info=await fetchTMDB(orig,kor,year);
       const naverQ=encodeURIComponent((kor||orig)+' 영화');
-      const jwQ=encodeURIComponent(orig||kor);
+      const watchaQ=encodeURIComponent(kor||orig);
+      const tmdbId=info.tmdbId?'https://www.themoviedb.org/movie/'+info.tmdbId:'https://www.themoviedb.org/search?query='+encodeURIComponent(orig||kor);
       detail.innerHTML=
         '<div class="detail-inner">'+
           (info.poster?'<img class="detail-poster" src="'+info.poster+'" alt="포스터">'
@@ -372,8 +375,9 @@ function renderCards(){
           '</div>'+
         '</div>'+
         '<div class="detail-actions">'+
+          '<a class="action-btn" href="'+tmdbId+'" target="_blank">🎬 TMDB</a>'+
+          '<a class="action-btn" href="https://pedia.watcha.com/ko/search?query='+watchaQ+'" target="_blank">🍿 Watcha</a>'+
           '<a class="action-btn" href="https://search.naver.com/search.naver?query='+naverQ+'" target="_blank">🔍 네이버</a>'+
-          '<a class="action-btn" href="https://www.justwatch.com/kr/search?q='+jwQ+'" target="_blank">▶ JustWatch</a>'+
         '</div>';
       const placeholder=d.querySelector('.card-poster-placeholder');
       if(placeholder&&info.poster){
