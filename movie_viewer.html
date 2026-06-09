@@ -379,10 +379,60 @@ async function openPersonModal(name,role){
     const posterEl=m.poster_path
       ?'<img class="person-film-poster" src="'+IMG_BASE+m.poster_path+'" alt="'+title+'" loading="lazy">'
       :'<div class="person-film-poster-placeholder">🎬</div>';
-    return '<div class="person-film-item">'+posterEl+'<div class="person-film-info"><div class="person-film-title">'+title+'</div><div class="person-film-meta">'+[year,rating].filter(Boolean).join(' · ')+'</div>'+charLine+'</div></div>';
+    return '<div class="person-film-item" style="cursor:pointer;" data-tmdb-id="'+m.id+'" data-title="'+title+'" data-orig="'+(m.original_title||'')+'" data-year="'+year+'">'+posterEl+'<div class="person-film-info"><div class="person-film-title">'+title+'</div><div class="person-film-meta">'+[year,rating].filter(Boolean).join(' · ')+'</div>'+charLine+'</div></div>';
   }).join('');
 
   modalBody.innerHTML='<div class="person-section-title">'+sectionLabel+'</div><div class="person-filmography">'+filmHTML+'</div>';
+
+  // 영화 클릭 이벤트 + 목록 포함 여부 표시
+  modalBody.querySelectorAll('.person-film-item').forEach(item=>{
+    const clickedTitle=item.dataset.title.toLowerCase();
+    const clickedOrig=item.dataset.orig.toLowerCase();
+    const clickedYear=item.dataset.year;
+    const tmdbId=item.dataset.tmdbId;
+
+    // 목록 포함 여부 확인
+    const match=ALL.find(m=>{
+      const kor=re(m['한국 개봉명']).toLowerCase();
+      const orig=re(m['원제']).toLowerCase();
+      const year=re(m['개봉연도']).replace('.0','');
+      const titleMatch=kor===clickedTitle||orig===clickedOrig||kor===clickedOrig||orig===clickedTitle;
+      const yearMatch=!clickedYear||year===clickedYear;
+      return titleMatch&&yearMatch;
+    });
+
+    // 목록에 있으면 뱃지 표시
+    if(match){
+      const info=item.querySelector('.person-film-info');
+      const badge=document.createElement('span');
+      badge.textContent='📋 내 목록';
+      badge.style.cssText='font-size:10px;background:#dcfce7;color:#16a34a;padding:1px 6px;border-radius:6px;font-weight:600;margin-top:3px;display:inline-block;';
+      info.appendChild(badge);
+      item.style.background='#f0fdf4';
+    }
+
+    item.addEventListener('click',()=>{
+      if(match){
+        closePersonModal();
+        const cards=document.querySelectorAll('.card');
+        for(const card of cards){
+          const cardTitle=card.querySelector('.card-title');
+          if(!cardTitle)continue;
+          const cardText=cardTitle.textContent.toLowerCase();
+          if(cardText.includes(clickedTitle)||cardText.includes(clickedOrig)){
+            setTimeout(()=>{
+              card.scrollIntoView({behavior:'smooth',block:'center'});
+              const header=card.querySelector('.card-header');
+              if(header)header.click();
+            },300);
+            break;
+          }
+        }
+      } else {
+        window.open('https://www.themoviedb.org/movie/'+tmdbId,'_blank');
+      }
+    });
+  });
 }
 
 function closePersonModal(){
