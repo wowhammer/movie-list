@@ -472,10 +472,12 @@ function renderCards(){
     const dir=re(m['감독']),actor=re(m['배우']),stream=re(m['스트리밍']),rec=re(m['추천']);
     const country=re(m['국적']);
     const verified=re(m['직업검색']);
+    const rating=re(m['TMDB평점']);
     const watched=re(m['시청여부']);
     const title=kor||orig;
     const watchedBadge=watched==='O'?'<span class="watched-badge badge-O">시청</span>':watched==='△'?'<span class="watched-badge badge-△">다시볼것</span>':'';
-    const yearCountry=[year,country].filter(Boolean).join(' · ');
+    const ratingStr=rating?'⭐'+rating:'';
+    const yearCountry=[year,country,ratingStr].filter(Boolean).join(' · ');
 
     const dirSpan=personSpans(dir,'director');
     const actorFirst=actor?actor.split(/[,，]/)[0].trim():'';
