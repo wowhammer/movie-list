@@ -169,7 +169,7 @@ const TMDB_KEY='0b9515d29e91abc6465d342963c92482';
 const TMDB_BASE='https://api.themoviedb.org/3';
 const IMG_BASE='https://image.tmdb.org/t/p/w200';
 const PERSON_IMG='https://image.tmdb.org/t/p/w185';
-const SC={넷플릭스:{bg:'#FFEBEB',c:'#b33'},티빙:{bg:'#FFF0D9',c:'#834'},왓챠:{bg:'#FDE8F0',c:'#833'},'디즈니+':{bg:'#E6F0FB',c:'#336'},웨이브:{bg:'#E8F5E9',c:'#363'},쿠팡플레이:{bg:'#EDEBFE',c:'#449'}};
+const SC={넷플릭스:{bg:'#FFEBEB',c:'#b33'},티빙:{bg:'#FFF0D9',c:'#834'},왓챠:{bg:'#FDE8F0',c:'#833'},'디즈니+':{bg:'#E6F0FB',c:'#336'},웨이브:{bg:'#E8F5E9',c:'#363'},쿠팡플레이:{bg:'#EDEBFE',c:'#449'},'U+모바일':{bg:'#FFF0E6',c:'#c44'},'U+모바일구매':{bg:'#FFF0E6',c:'#c44'}};
 const PER=25;
 let ALL=[],filtered=[],page=0,curTab='title',searchQ='',selectQ='';
 const tmdbCache={};
@@ -201,12 +201,14 @@ function buildSelect(tab){
 
 // OTT 검색 URL
 const OTT_URL={
-  '넷플릭스': q=>'https://www.netflix.com/search?q='+encodeURIComponent(q),
-  '티빙':     q=>'https://www.tving.com/search?searchText='+encodeURIComponent(q),
-  '왓챠':     q=>'https://watcha.com/search?query='+encodeURIComponent(q),
-  '디즈니+':  q=>'https://www.disneyplus.com/ko-kr/search?q='+encodeURIComponent(q),
-  '웨이브':   q=>'https://www.wavve.com/search?keyword='+encodeURIComponent(q),
-  '쿠팡플레이':q=>'https://www.coupangplay.com/search?q='+encodeURIComponent(q),
+  '넷플릭스':   q=>'https://www.netflix.com/search?q='+encodeURIComponent(q),
+  '티빙':       q=>'https://www.tving.com/search?searchText='+encodeURIComponent(q),
+  '왓챠':       q=>'https://watcha.com/search?query='+encodeURIComponent(q),
+  '디즈니+':    q=>'https://www.disneyplus.com/ko-kr',
+  '웨이브':     q=>'https://www.wavve.com/search?keyword='+encodeURIComponent(q),
+  '쿠팡플레이': q=>'https://www.coupangplay.com/search?q='+encodeURIComponent(q),
+  'U+모바일':   q=>'https://mobiletvtb.uplus.co.kr/',
+  'U+모바일구매':q=>'https://mobiletvtb.uplus.co.kr/',
 };
 
 // 추천기관 정보
