@@ -207,8 +207,8 @@ const OTT_URL={
   '디즈니+':    q=>'https://www.disneyplus.com/ko-kr',
   '웨이브':     q=>'https://www.wavve.com/search?keyword='+encodeURIComponent(q),
   '쿠팡플레이': q=>'https://www.coupangplay.com/search?q='+encodeURIComponent(q),
-  'U+모바일':   q=>'https://utvmobile.lguplus.co.kr/',
-  'U+모바일구매':q=>'https://utvmobile.lguplus.co.kr/',
+  'U+모바일':   q=>'https://mobiletvtb.uplus.co.kr/',
+  'U+모바일구매':q=>'https://mobiletvtb.uplus.co.kr/',
 };
 
 // 추천기관 정보
@@ -581,7 +581,7 @@ async function load(){
     const res=await fetch(API);
     if(!res.ok)throw new Error('HTTP '+res.status);
     ALL=await res.json();
-    ALL=ALL.filter(m=>(re(m['한국 개봉명'])||re(m['원제']))&&!re(m['원제']).startsWith('★'));
+    ALL=ALL.filter(m=>(re(m['한국 개봉명'])||re(m['원제']))&&re(m['개봉연도'])&&!re(m['원제']).startsWith('★'));
     updateStats();filter();
   }catch(e){
     document.getElementById('list').innerHTML='<div class="loading">데이터 로드 실패: '+e.message+'</div>';
