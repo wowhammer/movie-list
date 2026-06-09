@@ -80,6 +80,25 @@ select{width:100%;padding:9px 12px;border:1px solid #ddd;border-radius:10px;font
 .person-film-meta{font-size:11px;color:#999;margin-top:2px;}
 .person-film-char{font-size:11px;color:#bbb;margin-top:1px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
 .person-modal-loading{text-align:center;padding:30px;color:#aaa;font-size:13px;}
+
+/* OTT / 추천기관 클릭 가능 */
+.sbadge{cursor:pointer;}
+.sbadge:active{opacity:.7;}
+.rbadge{cursor:pointer;transition:background .15s;}
+.rbadge:hover{background:#e0e0e0;}
+.rbadge:active{background:#d0d0d0;}
+
+/* 추천기관 모달 */
+.rec-modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:600;display:flex;align-items:flex-end;justify-content:center;animation:fadeIn .2s;}
+.rec-modal{background:#fff;border-radius:20px 20px 0 0;width:100%;max-width:480px;max-height:70vh;overflow:hidden;display:flex;flex-direction:column;animation:slideUp .25s ease-out;}
+.rec-modal-header{display:flex;align-items:center;gap:12px;padding:18px 16px 14px;border-bottom:1px solid #f0f0f0;flex-shrink:0;}
+.rec-modal-icon{font-size:32px;flex-shrink:0;}
+.rec-modal-title{font-size:17px;font-weight:700;}
+.rec-modal-sub{font-size:12px;color:#888;margin-top:2px;}
+.rec-modal-close{margin-left:auto;width:30px;height:30px;border-radius:50%;border:none;background:#f0f0f0;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#555;flex-shrink:0;}
+.rec-modal-body{overflow-y:auto;padding:16px 16px 32px;font-size:13px;color:#444;line-height:1.7;}
+.rec-modal-tag{display:inline-block;font-size:11px;padding:2px 8px;border-radius:10px;background:#f0f0f0;color:#666;margin-bottom:10px;}
+.rec-modal-link{display:block;margin-top:14px;text-align:center;color:#888;font-size:12px;text-decoration:none;border-top:1px solid #f0f0f0;padding-top:12px;}
 </style>
 </head>
 <body>
@@ -129,6 +148,21 @@ select{width:100%;padding:9px 12px;border:1px solid #ddd;border-radius:10px;font
   </div>
 </div>
 
+<!-- 추천기관 모달 -->
+<div id="rec-modal-overlay" class="rec-modal-overlay" style="display:none;">
+  <div class="rec-modal">
+    <div class="rec-modal-header">
+      <div class="rec-modal-icon" id="rec-modal-icon">🏆</div>
+      <div>
+        <div class="rec-modal-title" id="rec-modal-title">-</div>
+        <div class="rec-modal-sub" id="rec-modal-sub">-</div>
+      </div>
+      <button class="rec-modal-close" id="rec-modal-close-btn">✕</button>
+    </div>
+    <div class="rec-modal-body" id="rec-modal-body"></div>
+  </div>
+</div>
+
 <script>
 const API='https://script.google.com/macros/s/AKfycbyfEqz3U7qircviRqSKx2KrBYSYfjsxjznP9UWN00Z19Y0sUF6uaJXy06OmHaSBpK4/exec';
 const TMDB_KEY='0b9515d29e91abc6465d342963c92482';
@@ -165,17 +199,75 @@ function buildSelect(tab){
   items.forEach(v=>{const o=document.createElement('option');o.value=v;o.textContent=v;sel.appendChild(o);});
 }
 
-function sbadges(s){
+// OTT 검색 URL
+const OTT_URL={
+  '넷플릭스': q=>'https://www.netflix.com/search?q='+encodeURIComponent(q),
+  '티빙':     q=>'https://www.tving.com/search/total?kwd='+encodeURIComponent(q),
+  '왓챠':     q=>'https://watcha.com/search?query='+encodeURIComponent(q),
+  '디즈니+':  q=>'https://www.disneyplus.com/search/'+encodeURIComponent(q),
+  '웨이브':   q=>'https://www.wavve.com/search?keyword='+encodeURIComponent(q),
+  '쿠팡플레이':q=>'https://www.coupangplay.com/search?keyword='+encodeURIComponent(q),
+};
+
+// 추천기관 정보
+const REC_INFO={
+  'BBC':{icon:'📺',sub:'영국 공영방송 · 2000년대 선정',desc:'영국 공영방송 BBC가 선정한 21세기 최고의 영화 100편. 전 세계 177명의 영화 평론가가 참여한 투표로 선정되어 높은 공신력을 자랑합니다.',tag:'100대 영화 리스트',url:'https://www.bbc.com/culture/article/20150930-the-100-greatest-films-of-the-21st-century'},
+  '뉴욕타임즈':{icon:'📰',sub:'미국 유력 일간지',desc:'뉴욕타임즈 영화 평론가들이 선정한 추천작. 140년 이상의 역사를 가진 미국 최고 권위지로, 영화 비평 분야에서도 독보적인 위치를 차지하고 있습니다.',tag:'영화 비평',url:'https://www.nytimes.com/section/movies'},
+  'Sight & Sound':{icon:'🎞️',sub:'영국 BFI 영화잡지 · 10년마다 선정',desc:'영국영화협회(BFI)가 발행하는 세계 최고 권위의 영화 잡지. 10년마다 전 세계 영화 전문가들의 투표로 역대 최고 영화를 선정합니다. 영화계의 올림픽이라 불릴 만큼 권위 있습니다.',tag:'역대 최고 영화',url:'https://www.bfi.org.uk/sight-and-sound'},
+  '로저 이버트':{icon:'⭐',sub:'미국 영화 평론가 · 퓰리처상 수상',desc:'퓰리처상을 수상한 미국 최고의 영화 평론가. 40년 넘게 시카고 선타임즈에서 활동하며 엄지척/엄지다운 시스템을 대중화했습니다. 그의 호평을 받은 영화는 대부분 걸작입니다.',tag:'4성급 이상 추천작',url:'https://www.rogerebert.com'},
+  'AFI':{icon:'🏛️',sub:'미국영화연구소 · 1998/2007 선정',desc:'미국영화연구소(American Film Institute)가 선정한 미국 영화 100대 걸작. 1998년과 2007년 두 차례 발표하여 미국 영화사의 정전(正典)으로 평가받습니다.',tag:'미국 100대 영화',url:'https://www.afi.com/afis-100-years-100-movies/'},
+  'Letterboxd':{icon:'🎬',sub:'영화 소셜 플랫폼 · 사용자 평점',desc:'전 세계 영화 애호가들이 모인 소셜 플랫폼 Letterboxd의 높은 평점 영화. 평론가가 아닌 열정적인 영화 팬들의 집단지성으로 선정된 만큼, 대중적 공감도가 높습니다.',tag:'사용자 평점 상위',url:'https://letterboxd.com/films/popular/'},
+  '레딧':{icon:'🤖',sub:'Reddit 영화 커뮤니티 추천',desc:'세계 최대 온라인 커뮤니티 Reddit의 영화 관련 서브레딧(r/movies, r/TrueFilm 등)에서 반복적으로 추천되는 영화들. 다양한 연령대의 영화팬들이 검증한 작품입니다.',tag:'커뮤니티 추천',url:'https://www.reddit.com/r/movies/'},
+  '오스카':{icon:'🏆',sub:'아카데미 시상식 수상작',desc:'미국영화예술과학아카데미(AMPAS)가 수여하는 오스카(아카데미상) 작품상 수상작. 100년 가까운 역사를 가진 영화계 최고 권위의 시상식입니다.',tag:'작품상 수상',url:'https://www.oscars.org'},
+  '칸':{icon:'🌴',sub:'칸 영화제 황금종려상',desc:'프랑스 칸에서 매년 열리는 세계 3대 영화제 중 하나. 황금종려상은 영화제 최고 영예로, 작품성과 예술성을 최우선으로 평가합니다.',tag:'황금종려상',url:'https://www.festival-cannes.com'},
+  '베를린':{icon:'🐻',sub:'베를린 국제영화제 황금곰상',desc:'독일 베를린에서 매년 열리는 세계 3대 영화제 중 하나. 황금곰상이 최고상으로, 사회적·정치적 메시지가 강한 작품을 선호하는 경향이 있습니다.',tag:'황금곰상',url:'https://www.berlinale.de'},
+  '베니스':{icon:'🦁',sub:'베니스 국제영화제 황금사자상',desc:'이탈리아 베니스에서 매년 열리는 세계에서 가장 오래된 영화제. 황금사자상이 최고상으로, 예술적 실험성이 높은 작품들이 주목받습니다.',tag:'황금사자상',url:'https://www.labiennale.org/en/cinema'},
+  '골든글로브':{icon:'🌐',sub:'골든글로브 시상식 수상작',desc:'할리우드 외신기자협회(HFPA)가 수여하는 골든글로브 시상식 수상작. 오스카 전초전으로 불리며, 영화와 TV 드라마 부문을 함께 시상합니다.',tag:'작품상 수상',url:'https://goldenglobes.com'},
+  '이동진':{icon:'🎙️',sub:'한국 영화 평론가',desc:'한국의 대표적인 영화 평론가. 오랜 기간 조선일보 기자로 활동하며 영화 비평을 해왔고, 팟캐스트·유튜브를 통해 대중과 소통하고 있습니다. 까다로운 기준으로 유명하여 그의 호평은 신뢰도가 높습니다.',tag:'한국 영화 평론',url:'https://www.youtube.com/@movietalk_dj'},
+};
+
+function sbadges(s, titleForLink){
   if(!s||s==='-')return '';
   return s.split(/[,\/]+/).map(p=>p.trim()).filter(Boolean).slice(0,3).map(p=>{
     const x=SC[p]||{bg:'#f0f0f0',c:'#666'};
-    return '<span class="sbadge" style="background:'+x.bg+';color:'+x.c+'">'+p+'</span>';
+    const url=OTT_URL[p]?OTT_URL[p](titleForLink||''):'';
+    const onclick=url?'onclick="event.stopPropagation();window.open(\''+url+'\',\'_blank\')"':'';
+    return '<span class="sbadge" style="background:'+x.bg+';color:'+x.c+'" '+onclick+'>'+p+'</span>';
   }).join('');
 }
+
 function rbadges(r){
   if(!r||r==='-')return '';
-  return r.split('/').map(p=>p.trim()).filter(Boolean).slice(0,4).map(p=>'<span class="rbadge">'+p+'</span>').join('');
+  return r.split('/').map(p=>p.trim()).filter(Boolean).slice(0,6).map(p=>{
+    const key=Object.keys(REC_INFO).find(k=>p.includes(k));
+    if(key) return '<span class="rbadge" onclick="event.stopPropagation();openRecModal(\''+key+'\')">'+p+'</span>';
+    return '<span class="rbadge">'+p+'</span>';
+  }).join('');
 }
+
+function openRecModal(key){
+  const info=REC_INFO[key];
+  if(!info)return;
+  document.getElementById('rec-modal-icon').textContent=info.icon;
+  document.getElementById('rec-modal-title').textContent=key;
+  document.getElementById('rec-modal-sub').textContent=info.sub;
+  document.getElementById('rec-modal-body').innerHTML=
+    '<span class="rec-modal-tag">'+info.tag+'</span>'+
+    '<p>'+info.desc+'</p>'+
+    '<a class="rec-modal-link" href="'+info.url+'" target="_blank" onclick="event.stopPropagation()">공식 사이트 바로가기 →</a>';
+  document.getElementById('rec-modal-overlay').style.display='flex';
+  document.body.style.overflow='hidden';
+}
+
+function closeRecModal(){
+  document.getElementById('rec-modal-overlay').style.display='none';
+  document.body.style.overflow='';
+}
+
+document.getElementById('rec-modal-overlay').addEventListener('click',function(e){
+  if(e.target===this)closeRecModal();
+});
+document.getElementById('rec-modal-close-btn').addEventListener('click',closeRecModal);
 
 function personSpans(nameStr,role){
   if(!nameStr||nameStr==='-')return '';
@@ -339,7 +431,7 @@ function renderCards(){
             '</div>'+
             (kor&&orig&&kor!==orig?'<div class="card-orig">'+orig+'</div>':'')+
             (subHTML?'<div class="card-sub">'+subHTML+'</div>':'')+
-            '<div class="badges">'+(sbadges(stream)||'<span class="rbadge" style="color:#ccc">스트리밍 정보 없음</span>')+'</div>'+
+            '<div class="badges">'+(sbadges(stream, kor||orig)||'<span class="rbadge" style="color:#ccc">스트리밍 정보 없음</span>')+'</div>'+
             '<div class="badges">'+rbadges(rec)+'</div>'+
           '</div>'+
         '</div>'+
