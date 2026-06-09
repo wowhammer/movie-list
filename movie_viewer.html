@@ -547,12 +547,14 @@ function renderCards(){
 }
 
 function filter(){
-  const q=searchQ.toLowerCase();
+  const q=searchQ.toLowerCase().replace(/\s/g,'');
   filtered=ALL.filter(m=>{
-    const kor=re(m['한국 개봉명']).toLowerCase(),orig=re(m['원제']).toLowerCase();
-    const dir=re(m['감독']),actor=re(m['배우']),stream=re(m['스트리밍']),rec=re(m['추천']);
+    const kor=re(m['한국 개봉명']).toLowerCase().replace(/\s/g,'');
+    const orig=re(m['원제']).toLowerCase().replace(/\s/g,'');
+    const actor=re(m['배우']).toLowerCase().replace(/\s/g,'');
+    const dir=re(m['감독']),stream=re(m['스트리밍']),rec=re(m['추천']);
     if(curTab==='title'&&q)return kor.includes(q)||orig.includes(q);
-    if(curTab==='actor'&&q)return actor.toLowerCase().includes(q);
+    if(curTab==='actor'&&q)return actor.includes(q);
     if(curTab==='director'&&selectQ)return dir.includes(selectQ);
     if(curTab==='stream'&&selectQ)return stream.includes(selectQ);
     if(curTab==='rec'&&selectQ)return rec.includes(selectQ);
