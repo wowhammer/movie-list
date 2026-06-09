@@ -232,13 +232,16 @@ const REC_INFO={
   '영화평론가협회상':{icon:'✍️',sub:'한국영화평론가협회 · 1997년 창설',desc:'한국영화평론가협회가 수여하는 시상식으로 1997년 시작됐습니다. 홍상수·이창동 등 작가주의 감독의 작품이 자주 선정되며, 상업성보다 예술성과 비평적 가치를 중시하는 것으로 유명합니다. 영화 마니아들 사이에서 신뢰도가 높습니다.',tag:'최우수 작품상',url:'https://www.koreafilmcritics.org'},
 };
 
-function sbadges(s, titleForLink){
+function sbadges(s, titleForLink, verified){
   if(!s||s==='-')return '';
-  return s.split(/[,\/]+/).map(p=>p.trim()).filter(Boolean).slice(0,3).map(p=>{
+  const verifiedSet=new Set((verified||'').split(/[,]+/).map(p=>p.trim()).filter(Boolean));
+  return s.split(/[,\/]+/).map(p=>p.trim()).filter(Boolean).slice(0,4).map(p=>{
     const x=SC[p]||{bg:'#f0f0f0',c:'#666'};
     const url=OTT_URL[p]?OTT_URL[p](titleForLink||''):'';
     const onclick=url?'onclick="event.stopPropagation();window.open(\''+url+'\',\'_blank\')"':'';
-    return '<span class="sbadge" style="background:'+x.bg+';color:'+x.c+'" '+onclick+'>'+p+'</span>';
+    const check=verifiedSet.has(p)?' ✓':'';
+    const extra=check?'font-weight:700;':'';
+    return '<span class="sbadge" style="background:'+x.bg+';color:'+x.c+';'+extra+'" '+onclick+'>'+p+check+'</span>';
   }).join('');
 }
 
@@ -468,6 +471,7 @@ function renderCards(){
     const kor=re(m['한국 개봉명']),orig=re(m['원제']),year=re(m['개봉연도']);
     const dir=re(m['감독']),actor=re(m['배우']),stream=re(m['스트리밍']),rec=re(m['추천']);
     const country=re(m['국적']);
+    const verified=re(m['직업검색']);
     const watched=re(m['시청여부']);
     const title=kor||orig;
     const watchedBadge=watched==='O'?'<span class="watched-badge badge-O">시청</span>':watched==='△'?'<span class="watched-badge badge-△">다시볼것</span>':'';
@@ -491,7 +495,7 @@ function renderCards(){
             '</div>'+
             (kor&&orig&&kor!==orig?'<div class="card-orig">'+orig+'</div>':'')+
             (subHTML?'<div class="card-sub">'+subHTML+'</div>':'')+
-            '<div class="badges">'+(sbadges(stream, kor||orig)||'<span class="rbadge" style="color:#ccc">스트리밍 정보 없음</span>')+'</div>'+
+            '<div class="badges">'+(sbadges(stream, kor||orig, verified)||'<span class="rbadge" style="color:#ccc">스트리밍 정보 없음</span>')+'</div>'+
             '<div class="badges">'+rbadges(rec)+'</div>'+
           '</div>'+
         '</div>'+
