@@ -202,11 +202,11 @@ function buildSelect(tab){
 // OTT 검색 URL
 const OTT_URL={
   '넷플릭스': q=>'https://www.netflix.com/search?q='+encodeURIComponent(q),
-  '티빙':     q=>'https://www.tving.com/search/total?kwd='+encodeURIComponent(q),
+  '티빙':     q=>'https://www.tving.com/search?searchText='+encodeURIComponent(q),
   '왓챠':     q=>'https://watcha.com/search?query='+encodeURIComponent(q),
-  '디즈니+':  q=>'https://www.disneyplus.com/search/'+encodeURIComponent(q),
+  '디즈니+':  q=>'https://www.disneyplus.com/ko-kr/search?q='+encodeURIComponent(q),
   '웨이브':   q=>'https://www.wavve.com/search?keyword='+encodeURIComponent(q),
-  '쿠팡플레이':q=>'https://www.coupangplay.com/search?keyword='+encodeURIComponent(q),
+  '쿠팡플레이':q=>'https://www.coupangplay.com/search?q='+encodeURIComponent(q),
 };
 
 // 추천기관 정보
