@@ -7,9 +7,16 @@
 <style>
 *{box-sizing:border-box;margin:0;padding:0;}
 body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f5f5f5;color:#1a1a1a;max-width:480px;margin:0 auto;}
-header{background:#fff;border-bottom:1px solid #e5e5e5;padding:14px 16px;position:sticky;top:0;z-index:100;}
-.tabs{display:flex;gap:0;margin-bottom:12px;border-bottom:1px solid #e5e5e5;}
-.tab{flex:1;background:none;border:none;border-bottom:2px solid transparent;color:#888;font-size:13px;padding:8px 4px;cursor:pointer;font-family:inherit;}
+header{background:#fff;border-bottom:1px solid #e5e5e5;padding:12px 16px;position:sticky;top:0;z-index:100;}
+.stats{display:flex;gap:0;margin-bottom:10px;}
+.stat{flex:1;text-align:center;padding:6px 4px;border-radius:8px;}
+.stat-num{font-size:18px;font-weight:700;color:#1a1a1a;}
+.stat-label{font-size:10px;color:#aaa;margin-top:1px;}
+.stat.total .stat-num{color:#1a1a1a;}
+.stat.watched .stat-num{color:#22c55e;}
+.stat.rewatch .stat-num{color:#f59e0b;}
+.tabs{display:flex;gap:0;margin-bottom:10px;border-bottom:1px solid #e5e5e5;}
+.tab{flex:1;background:none;border:none;border-bottom:2px solid transparent;color:#888;font-size:13px;padding:7px 4px;cursor:pointer;font-family:inherit;}
 .tab.on{color:#1a1a1a;border-bottom-color:#1a1a1a;font-weight:600;}
 .search-wrap{position:relative;}
 .search-wrap svg{position:absolute;left:10px;top:50%;transform:translateY(-50%);color:#aaa;}
@@ -18,22 +25,46 @@ input[type=text]:focus{border-color:#999;background:#fff;}
 select{width:100%;padding:9px 12px;border:1px solid #ddd;border-radius:10px;font-size:14px;font-family:inherit;background:#f9f9f9;outline:none;-webkit-appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23888' d='M6 8L1 3h10z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;}
 .count{font-size:12px;color:#aaa;padding:8px 16px 4px;}
 .list{padding:8px 12px 80px;}
-.card{background:#fff;border-radius:12px;padding:12px 14px;margin-bottom:8px;box-shadow:0 1px 3px rgba(0,0,0,0.06);}
-.card-title{font-size:15px;font-weight:600;color:#1a1a1a;display:flex;justify-content:space-between;align-items:baseline;gap:8px;}
-.card-title span.year{font-size:12px;color:#aaa;font-weight:400;flex-shrink:0;}
-.card-orig{font-size:11px;color:#bbb;margin:2px 0 5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.card{background:#fff;border-radius:12px;margin-bottom:8px;box-shadow:0 1px 3px rgba(0,0,0,0.06);overflow:hidden;cursor:pointer;}
+.card-header{padding:12px 14px;}
+.card-top{display:flex;align-items:flex-start;gap:10px;}
+.card-poster{width:52px;height:74px;border-radius:6px;object-fit:cover;background:#eee;flex-shrink:0;}
+.card-poster-placeholder{width:52px;height:74px;border-radius:6px;background:#f0f0f0;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:20px;}
+.card-info{flex:1;min-width:0;}
+.card-title-row{display:flex;justify-content:space-between;align-items:baseline;gap:6px;margin-bottom:2px;}
+.card-title{font-size:15px;font-weight:600;color:#1a1a1a;}
+.card-year{font-size:12px;color:#aaa;flex-shrink:0;}
+.watched-badge{font-size:10px;padding:1px 6px;border-radius:6px;font-weight:600;margin-left:4px;}
+.badge-O{background:#dcfce7;color:#16a34a;}
+.badge-△{background:#fef9c3;color:#b45309;}
+.card-orig{font-size:11px;color:#bbb;margin-bottom:4px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
 .card-sub{font-size:12px;color:#888;margin-bottom:6px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-.badges{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:4px;}
+.badges{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:3px;}
 .sbadge{font-size:11px;padding:2px 8px;border-radius:10px;font-weight:500;}
 .rbadge{font-size:10px;padding:2px 7px;border-radius:8px;background:#f0f0f0;color:#666;}
+.card-detail{display:none;border-top:1px solid #f0f0f0;padding:12px 14px;background:#fafafa;}
+.card-detail.open{display:block;}
+.detail-loading{text-align:center;padding:16px;color:#aaa;font-size:13px;}
+.detail-inner{display:flex;gap:12px;}
+.detail-poster{width:80px;height:116px;border-radius:8px;object-fit:cover;flex-shrink:0;}
+.detail-text{flex:1;min-width:0;}
+.detail-rating{font-size:13px;font-weight:600;color:#f59e0b;margin-bottom:6px;}
+.detail-overview{font-size:12px;color:#555;line-height:1.6;max-height:120px;overflow-y:auto;}
+.detail-actions{display:flex;gap:8px;margin-top:10px;}
+.action-btn{flex:1;padding:8px;border-radius:8px;border:1px solid #e5e5e5;background:#fff;font-size:12px;font-weight:600;cursor:pointer;color:#444;font-family:inherit;text-align:center;text-decoration:none;display:block;}
+.action-btn:active{background:#f5f5f5;}
 .more-btn{display:block;width:calc(100% - 24px);margin:0 12px;padding:12px;background:#fff;border:1px solid #e5e5e5;border-radius:12px;font-size:14px;color:#555;cursor:pointer;font-family:inherit;}
 .loading{text-align:center;padding:40px 16px;color:#aaa;font-size:14px;}
-.error{text-align:center;padding:40px 16px;color:#e55;font-size:13px;line-height:1.6;}
 </style>
 </head>
 <body>
 
 <header>
+  <div class="stats" id="stats">
+    <div class="stat total"><div class="stat-num" id="s-total">-</div><div class="stat-label">전체</div></div>
+    <div class="stat watched"><div class="stat-num" id="s-watched">-</div><div class="stat-label">시청완료</div></div>
+    <div class="stat rewatch"><div class="stat-num" id="s-rewatch">-</div><div class="stat-label">다시볼것</div></div>
+  </div>
   <div class="tabs" id="tabs">
     <button class="tab on" data-tab="title">제목</button>
     <button class="tab" data-tab="director">감독</button>
@@ -58,11 +89,24 @@ select{width:100%;padding:9px 12px;border:1px solid #ddd;border-radius:10px;font
 
 <script>
 const API='https://script.google.com/macros/s/AKfycbyfEqz3U7qircviRqSKx2KrBYSYfjsxjznP9UWN00Z19Y0sUF6uaJXy06OmHaSBpK4/exec';
+const TMDB_KEY='0b9515d29e91abc6465d342963c92482';
+const TMDB_BASE='https://api.themoviedb.org/3';
+const IMG_BASE='https://image.tmdb.org/t/p/w200';
 const SC={넷플릭스:{bg:'#FFEBEB',c:'#b33'},티빙:{bg:'#FFF0D9',c:'#834'},왓챠:{bg:'#FDE8F0',c:'#833'},'디즈니+':{bg:'#E6F0FB',c:'#336'},웨이브:{bg:'#E8F5E9',c:'#363'},쿠팡플레이:{bg:'#EDEBFE',c:'#449'}};
 const PER=25;
 let ALL=[],filtered=[],page=0,curTab='title',searchQ='',selectQ='';
+const tmdbCache={};
 
 function re(s){return String(s||'').replace(/=HYPERLINK\("[^"]*",\s*"([^"]+)"\)/,'$1').trim();}
+
+function updateStats(){
+  const total=ALL.length;
+  const watched=ALL.filter(m=>re(m['시청여부'])==='O').length;
+  const rewatch=ALL.filter(m=>re(m['시청여부'])==='△').length;
+  document.getElementById('s-total').textContent=total;
+  document.getElementById('s-watched').textContent=watched;
+  document.getElementById('s-rewatch').textContent=rewatch;
+}
 
 function buildSelect(tab){
   const sel=document.getElementById('select-box');
@@ -86,25 +130,105 @@ function sbadges(s){
 }
 function rbadges(r){
   if(!r||r==='-')return '';
-  return r.split('/').map(p=>p.trim()).filter(Boolean).slice(0,5).map(p=>`<span class="rbadge">${p}</span>`).join('');
+  return r.split('/').map(p=>p.trim()).filter(Boolean).slice(0,4).map(p=>`<span class="rbadge">${p}</span>`).join('');
 }
 
-function render(){
+async function fetchTMDB(titleEn, titleKo, year){
+  const cacheKey=titleEn||titleKo;
+  if(tmdbCache[cacheKey]) return tmdbCache[cacheKey];
+  try{
+    const q=encodeURIComponent(titleEn||titleKo);
+    const y=year?`&year=${year}`:'';
+    const res=await fetch(`${TMDB_BASE}/search/movie?api_key=${TMDB_KEY}&query=${q}${y}&language=ko-KR`);
+    const data=await res.json();
+    if(data.results&&data.results.length>0){
+      const m=data.results[0];
+      tmdbCache[cacheKey]={poster:m.poster_path?IMG_BASE+m.poster_path:null,overview:m.overview||'줄거리 정보 없음',rating:m.vote_average?m.vote_average.toFixed(1):'-'};
+    } else {
+      tmdbCache[cacheKey]={poster:null,overview:'정보 없음',rating:'-'};
+    }
+  }catch(e){
+    tmdbCache[cacheKey]={poster:null,overview:'로드 실패',rating:'-'};
+  }
+  return tmdbCache[cacheKey];
+}
+
+function renderCards(){
   const el=document.getElementById('list');
   if(page===0)el.innerHTML='';
-  if(filtered.length===0&&page===0){el.innerHTML='<div class="loading">검색 결과 없음</div>';document.getElementById('more-btn').style.display='none';document.getElementById('count-lbl').textContent='0편';return;}
+  if(filtered.length===0&&page===0){
+    el.innerHTML='<div class="loading">검색 결과 없음</div>';
+    document.getElementById('more-btn').style.display='none';
+    document.getElementById('count-lbl').textContent='0편';
+    return;
+  }
   filtered.slice(page*PER,(page+1)*PER).forEach(m=>{
-    const kor=re(m['한국 개봉명']),orig=re(m['원제']),year=re(m['개봉연도']),dir=re(m['감독']),actor=re(m['배우']),stream=re(m['스트리밍']),rec=re(m['추천']);
+    const kor=re(m['한국 개봉명']),orig=re(m['원제']),year=re(m['개봉연도']);
+    const dir=re(m['감독']),actor=re(m['배우']),stream=re(m['스트리밍']),rec=re(m['추천']);
+    const watched=re(m['시청여부']);
     const title=kor||orig;
     const sub=dir?(dir+(actor?` · ${actor.split(',')[0].trim()}`:'')):'';
+    const watchedBadge=watched==='O'?`<span class="watched-badge badge-O">시청</span>`:watched==='△'?`<span class="watched-badge badge-△">다시볼것</span>`:'';
+
     const d=document.createElement('div');
     d.className='card';
     d.innerHTML=`
-      <div class="card-title"><span>${title}</span><span class="year">${year}</span></div>
-      ${kor&&orig&&kor!==orig?`<div class="card-orig">${orig}</div>`:''}
-      ${sub?`<div class="card-sub">${sub}</div>`:''}
-      <div class="badges">${sbadges(stream)||'<span class="rbadge" style="color:#ccc">스트리밍 정보 없음</span>'}</div>
-      <div class="badges">${rbadges(rec)}</div>`;
+      <div class="card-header">
+        <div class="card-top">
+          <div class="card-poster-placeholder" data-orig="${orig}" data-kor="${kor}" data-year="${year}">🎬</div>
+          <div class="card-info">
+            <div class="card-title-row">
+              <span class="card-title">${title}${watchedBadge}</span>
+              <span class="card-year">${year}</span>
+            </div>
+            ${kor&&orig&&kor!==orig?`<div class="card-orig">${orig}</div>`:''}
+            ${sub?`<div class="card-sub">${sub}</div>`:''}
+            <div class="badges">${sbadges(stream)||'<span class="rbadge" style="color:#ccc">스트리밍 정보 없음</span>'}</div>
+            <div class="badges">${rbadges(rec)}</div>
+          </div>
+        </div>
+      </div>
+      <div class="card-detail">
+        <div class="detail-loading">불러오는 중...</div>
+      </div>`;
+
+    // 카드 클릭 → 상세 펼치기
+    d.querySelector('.card-header').addEventListener('click', async()=>{
+      const detail=d.querySelector('.card-detail');
+      const isOpen=detail.classList.contains('open');
+      // 다른 카드 닫기
+      document.querySelectorAll('.card-detail.open').forEach(x=>x.classList.remove('open'));
+      if(isOpen) return;
+      detail.classList.add('open');
+      if(detail.dataset.loaded) return;
+      detail.dataset.loaded='1';
+      const info=await fetchTMDB(orig,kor,year);
+      const naverQ=encodeURIComponent((kor||orig)+' 영화');
+      const jwQ=encodeURIComponent(orig||kor);
+      detail.innerHTML=`
+        <div class="detail-inner">
+          ${info.poster?`<img class="detail-poster" src="${info.poster}" alt="포스터">`:`<div class="card-poster-placeholder" style="width:80px;height:116px;border-radius:8px;">🎬</div>`}
+          <div class="detail-text">
+            <div class="detail-rating">⭐ ${info.rating} / 10</div>
+            <div class="detail-overview">${info.overview}</div>
+          </div>
+        </div>
+        <div class="detail-actions">
+          <a class="action-btn" href="https://search.naver.com/search.naver?query=${naverQ}" target="_blank">🔍 네이버</a>
+          <a class="action-btn" href="https://www.justwatch.com/kr/search?q=${jwQ}" target="_blank">▶ JustWatch</a>
+        </div>`;
+
+      // 포스터 썸네일도 업데이트
+      const placeholder=d.querySelector('.card-poster-placeholder');
+      if(placeholder&&info.poster){
+        const img=document.createElement('img');
+        img.className='card-poster';
+        img.src=info.poster;
+        img.alt='포스터';
+        placeholder.replaceWith(img);
+      }
+    });
+
     el.appendChild(d);
   });
   page++;
@@ -124,12 +248,12 @@ function filter(){
     if(curTab==='rec'&&selectQ)return rec.includes(selectQ);
     return true;
   });
-  page=0;render();
+  page=0;renderCards();
 }
 
 document.getElementById('search-input').addEventListener('input',e=>{searchQ=e.target.value;filter();});
 document.getElementById('select-box').addEventListener('change',e=>{selectQ=e.target.value;filter();});
-document.getElementById('more-btn').addEventListener('click',render);
+document.getElementById('more-btn').addEventListener('click',renderCards);
 document.getElementById('tabs').querySelectorAll('.tab').forEach(btn=>{
   btn.addEventListener('click',()=>{
     document.querySelectorAll('.tab').forEach(b=>b.classList.remove('on'));
@@ -151,11 +275,11 @@ async function load(){
     const res=await fetch(API);
     if(!res.ok)throw new Error('HTTP '+res.status);
     ALL=await res.json();
-    ALL=ALL.filter(m=>(m['한국 개봉명']||m['원제'])&&!re(m['원제']).startsWith('★'));
+    ALL=ALL.filter(m=>(re(m['한국 개봉명'])||re(m['원제']))&&!re(m['원제']).startsWith('★'));
+    updateStats();
     filter();
   }catch(e){
-    document.getElementById('list').innerHTML=`<div class="error">데이터 로드 실패<br>${e.message}</div>`;
-    document.getElementById('count-lbl').textContent='';
+    document.getElementById('list').innerHTML=`<div class="loading">데이터 로드 실패: ${e.message}</div>`;
   }
 }
 load();
