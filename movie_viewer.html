@@ -24,7 +24,10 @@ input[type=text]{width:100%;padding:9px 12px 9px 34px;border:1px solid #ddd;bord
 input[type=text]:focus{border-color:#999;background:#fff;}
 select{width:100%;padding:9px 12px;border:1px solid #ddd;border-radius:10px;font-size:14px;font-family:inherit;background:#f9f9f9;outline:none;-webkit-appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23888' d='M6 8L1 3h10z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;}
 .count-row{display:flex;align-items:center;justify-content:space-between;padding:8px 16px 4px;}
+.count-left{display:flex;align-items:center;gap:8px;}
 .count{font-size:12px;color:#aaa;}
+.watch-plan-btn{font-size:11px;padding:3px 8px;border-radius:8px;border:1px solid #e5e5e5;background:#fff;color:#888;cursor:pointer;font-family:inherit;}
+.watch-plan-btn.on{background:#f59e0b;color:#fff;border-color:#f59e0b;font-weight:600;}
 .sort-btns{display:flex;gap:4px;}
 .sort-btn{background:none;border:1px solid #e5e5e5;border-radius:8px;font-size:11px;padding:3px 8px;cursor:pointer;color:#888;font-family:inherit;}
 .sort-btn.on{background:#1a1a1a;color:#fff;border-color:#1a1a1a;font-weight:600;}
@@ -132,7 +135,10 @@ select{width:100%;padding:9px 12px;border:1px solid #ddd;border-radius:10px;font
 </header>
 
 <div class="count-row">
-  <div class="count" id="count-lbl"></div>
+  <div class="count-left">
+    <div class="count" id="count-lbl"></div>
+    <button class="watch-plan-btn" id="watch-plan-btn">볼예정</button>
+  </div>
   <div class="sort-btns">
     <button class="sort-btn on" data-sort="default">기본</button>
     <button class="sort-btn" data-sort="rating">평점↓</button>
@@ -183,7 +189,7 @@ const IMG_BASE='https://image.tmdb.org/t/p/w200';
 const PERSON_IMG='https://image.tmdb.org/t/p/w185';
 const SC={넷플릭스:{bg:'#FFEBEB',c:'#b33'},티빙:{bg:'#FFF0D9',c:'#834'},왓챠:{bg:'#FDE8F0',c:'#833'},'디즈니+':{bg:'#E6F0FB',c:'#336'},웨이브:{bg:'#E8F5E9',c:'#363'},쿠팡플레이:{bg:'#EDEBFE',c:'#449'},'U+모바일':{bg:'#FFF0E6',c:'#c44'},'U+모바일구매':{bg:'#FFF0E6',c:'#c44'}};
 const PER=25;
-let ALL=[],filtered=[],page=0,curTab='title',searchQ='',selectQ='',curSort='default';
+let ALL=[],filtered=[],page=0,curTab='title',searchQ='',selectQ='',curSort='default',sortAsc=false,watchPlanOnly=false;
 const tmdbCache={};
 const personCache={};
 
@@ -483,7 +489,7 @@ function renderCards(){
     const kor=re(m['한국 개봉명']),orig=re(m['원제']),year=re(m['개봉연도']);
     const dir=re(m['감독']),actor=re(m['배우']),stream=re(m['스트리밍']),rec=re(m['추천']);
     const country=re(m['국적']);
-    const verified=re(m['직업검색']);
+    const verified=re(m['직접검색']);
     const rating=re(m['TMDB평점']);
     const watched=re(m['시청여부']);
     const title=kor||orig;
@@ -571,6 +577,8 @@ function filter(){
     const orig=re(m['원제']).toLowerCase().replace(/\s/g,'');
     const actor=re(m['배우']).toLowerCase().replace(/\s/g,'');
     const dir=re(m['감독']),stream=re(m['스트리밍']),rec=re(m['추천']);
+    const watched=re(m['시청여부']);
+    if(watchPlanOnly&&watched!=='OO') return false;
     if(curTab==='title'&&q)return kor.includes(q)||orig.includes(q);
     if(curTab==='actor'&&q)return actor.includes(q);
     if(curTab==='director'&&selectQ)return dir.includes(selectQ);
@@ -584,19 +592,19 @@ function filter(){
     filtered.sort((a,b)=>{
       const ra=parseFloat(re(a['TMDB평점']))||0;
       const rb=parseFloat(re(b['TMDB평점']))||0;
-      return rb-ra;
+      return sortAsc?ra-rb:rb-ra;
     });
   } else if(curSort==='year'){
     filtered.sort((a,b)=>{
       const ya=parseInt(re(a['개봉연도']))||0;
       const yb=parseInt(re(b['개봉연도']))||0;
-      return yb-ya;
+      return sortAsc?ya-yb:yb-ya;
     });
   } else if(curSort==='rec'){
     filtered.sort((a,b)=>{
       const ra=(re(a['추천']).match(/\//g)||[]).length+1;
       const rb=(re(b['추천']).match(/\//g)||[]).length+1;
-      return rb-ra;
+      return sortAsc?ra-rb:rb-ra;
     });
   }
 
@@ -605,11 +613,30 @@ function filter(){
 
 document.querySelectorAll('.sort-btn').forEach(btn=>{
   btn.addEventListener('click',()=>{
-    document.querySelectorAll('.sort-btn').forEach(b=>b.classList.remove('on'));
-    btn.classList.add('on');
-    curSort=btn.dataset.sort;
+    const newSort=btn.dataset.sort;
+    if(newSort==='default'){
+      curSort='default';sortAsc=false;
+      document.querySelectorAll('.sort-btn').forEach(b=>{b.classList.remove('on');b.textContent=b.textContent.replace('↑','↓');});
+      btn.classList.add('on');
+    } else if(curSort===newSort){
+      // 같은 버튼 재클릭 → 역순 토글
+      sortAsc=!sortAsc;
+      btn.textContent=btn.textContent.replace(sortAsc?'↓':'↑', sortAsc?'↑':'↓');
+    } else {
+      curSort=newSort;sortAsc=false;
+      document.querySelectorAll('.sort-btn').forEach(b=>{b.classList.remove('on');
+        if(b.dataset.sort!=='default') b.textContent=b.textContent.replace('↑','↓');
+      });
+      btn.classList.add('on');
+    }
     filter();
   });
+});
+
+document.getElementById('watch-plan-btn').addEventListener('click',function(){
+  watchPlanOnly=!watchPlanOnly;
+  this.classList.toggle('on',watchPlanOnly);
+  filter();
 });
 
 document.getElementById('search-input').addEventListener('input',e=>{searchQ=e.target.value;filter();});
