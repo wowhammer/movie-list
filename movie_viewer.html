@@ -49,6 +49,14 @@ select{width:100%;padding:9px 12px;border:1px solid #ddd;border-radius:10px;font
 .watched-badge{font-size:10px;padding:1px 6px;border-radius:6px;font-weight:600;margin-left:4px;}
 .badge-O{background:#dcfce7;color:#16a34a;}
 .badge-△{background:#fef9c3;color:#b45309;}
+.badge-OO{background:#ffedd5;color:#c2410c;}
+.status-btns{display:flex;gap:6px;margin-top:8px;}
+.status-btn{flex:1;font-size:12px;padding:7px 4px;border-radius:8px;border:1.5px solid #e5e5e5;background:#fff;color:#888;font-weight:600;cursor:pointer;transition:all .15s;-webkit-tap-highlight-color:transparent;}
+.status-btn:active{transform:scale(.96);}
+.status-btn.on-O{background:#dcfce7;color:#16a34a;border-color:#86efac;}
+.status-btn.on-△{background:#fef9c3;color:#b45309;border-color:#fde047;}
+.status-btn.on-OO{background:#ffedd5;color:#c2410c;border-color:#fdba74;}
+.status-btn.saving{opacity:.5;pointer-events:none;}
 .card-orig{font-size:11px;color:#bbb;margin-bottom:4px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
 .card-sub{font-size:12px;color:#888;margin-bottom:6px;}
 .person-link{display:inline-block;cursor:pointer;border-bottom:1px dashed #bbb;color:#555;transition:color .15s;}
@@ -578,7 +586,18 @@ function renderCards(){
           '<a class="action-btn" href="'+tmdbId+'" target="_blank">🎬 TMDB</a>'+
           '<a class="action-btn" href="https://pedia.watcha.com/ko/search?query='+watchaQ+'" target="_blank">🍿 Watcha</a>'+
           '<a class="action-btn" href="https://search.naver.com/search.naver?query='+naverQ+'" target="_blank">🔍 네이버</a>'+
+        '</div>'+
+        '<div class="status-btns">'+
+          '<button class="status-btn'+(re(m['시청여부'])==='O'?' on-O':'')+'" data-st="O">시청완료</button>'+
+          '<button class="status-btn'+(re(m['시청여부'])==='△'?' on-△':'')+'" data-st="△">다시볼것</button>'+
+          '<button class="status-btn'+(re(m['시청여부'])==='OO'?' on-OO':'')+'" data-st="OO">볼예정</button>'+
         '</div>';
+      detail.querySelectorAll('.status-btn').forEach(btn=>{
+        btn.addEventListener('click',e=>{
+          e.stopPropagation();
+          setWatchStatus(m, btn.dataset.st, detail);
+        });
+      });
       const placeholder=d.querySelector('.card-poster-placeholder');
       if(placeholder&&info.poster){
         const img=document.createElement('img');
@@ -688,6 +707,42 @@ document.getElementById('tabs').querySelectorAll('.tab').forEach(btn=>{
     filter();
   });
 });
+
+async function setWatchStatus(m, st, detail){
+  const cur=re(m['시청여부']);
+  const next=(cur===st)?'':st;  // 같은 버튼 재클릭 → 해제
+  const origTitle=re(m['원제']);
+  const btns=detail.querySelectorAll('.status-btn');
+  btns.forEach(b=>b.classList.add('saving'));
+  // 낙관적 UI: 화면 먼저 갱신
+  const prev=m['시청여부'];
+  m['시청여부']=next;
+  btns.forEach(b=>{
+    b.classList.remove('on-O','on-△','on-OO');
+    if(b.dataset.st===next)b.classList.add('on-'+next);
+  });
+  try{
+    const res=await fetch(API,{
+      method:'POST',
+      // Apps Script는 CORS preflight를 못 받으므로 text/plain로 보냄(중요)
+      headers:{'Content-Type':'text/plain;charset=utf-8'},
+      body:JSON.stringify({action:'updateStatus', orig:origTitle, status:next})
+    });
+    const data=await res.json();
+    if(!data.ok)throw new Error(data.error||'저장 실패');
+    updateStats();  // 상단 통계 갱신
+  }catch(err){
+    // 실패 시 롤백
+    m['시청여부']=prev;
+    btns.forEach(b=>{
+      b.classList.remove('on-O','on-△','on-OO');
+      if(b.dataset.st===re(prev))b.classList.add('on-'+re(prev));
+    });
+    alert('저장 실패: '+err.message+'\n네트워크 또는 Apps Script 재배포를 확인하세요.');
+  }finally{
+    btns.forEach(b=>b.classList.remove('saving'));
+  }
+}
 
 async function load(){
   try{
