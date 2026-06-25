@@ -15,11 +15,13 @@ header{background:#fff;border-bottom:1px solid #e5e5e5;padding:12px 16px;positio
 .stat.total .stat-num{color:#1a1a1a;}
 .stat.watched .stat-num{color:#22c55e;}
 .stat.rewatch .stat-num{color:#f59e0b;}
+.stat.plan .stat-num{color:#ea580c;}
 .stat{cursor:pointer;transition:background .15s;border-radius:8px;}
 .stat:active{background:#f0f0f0;}
 .stat.stat-active{background:#f5f5f5;box-shadow:inset 0 0 0 1.5px #e0e0e0;}
 .stat.watched.stat-active{background:#f0fdf4;box-shadow:inset 0 0 0 1.5px #bbf7d0;}
 .stat.rewatch.stat-active{background:#fffbeb;box-shadow:inset 0 0 0 1.5px #fde68a;}
+.stat.plan.stat-active{background:#fff7ed;box-shadow:inset 0 0 0 1.5px #fed7aa;}
 .tabs{display:flex;gap:0;margin-bottom:10px;border-bottom:1px solid #e5e5e5;}
 .tab{flex:1;background:none;border:none;border-bottom:2px solid transparent;color:#888;font-size:13px;padding:7px 4px;cursor:pointer;font-family:inherit;}
 .tab.on{color:#1a1a1a;border-bottom-color:#1a1a1a;font-weight:600;}
@@ -128,6 +130,7 @@ select{width:100%;padding:9px 12px;border:1px solid #ddd;border-radius:10px;font
     <div class="stat total"><div class="stat-num" id="s-total">-</div><div class="stat-label">전체</div></div>
     <div class="stat watched"><div class="stat-num" id="s-watched">-</div><div class="stat-label">시청완료</div></div>
     <div class="stat rewatch"><div class="stat-num" id="s-rewatch">-</div><div class="stat-label">다시볼것</div></div>
+    <div class="stat plan"><div class="stat-num" id="s-plan">-</div><div class="stat-label">볼예정</div></div>
   </div>
   <div class="tabs" id="tabs">
     <button class="tab on" data-tab="title">제목</button>
@@ -150,7 +153,6 @@ select{width:100%;padding:9px 12px;border:1px solid #ddd;border-radius:10px;font
 <div class="count-row">
   <div class="count-left">
     <div class="count" id="count-lbl"></div>
-    <button class="watch-plan-btn" id="watch-plan-btn">볼예정</button>
   </div>
   <div class="sort-btns">
     <button class="sort-btn on" data-sort="default">기본</button>
@@ -202,7 +204,7 @@ const IMG_BASE='https://image.tmdb.org/t/p/w200';
 const PERSON_IMG='https://image.tmdb.org/t/p/w185';
 const SC={넷플릭스:{bg:'#FFEBEB',c:'#b33'},티빙:{bg:'#FFF0D9',c:'#834'},왓챠:{bg:'#FDE8F0',c:'#833'},'디즈니+':{bg:'#E6F0FB',c:'#336'},웨이브:{bg:'#E8F5E9',c:'#363'},쿠팡플레이:{bg:'#EDEBFE',c:'#449'},'U+모바일':{bg:'#FFF0E6',c:'#c44'},'U+모바일구매':{bg:'#FFF0E6',c:'#c44'}};
 const PER=25;
-let ALL=[],filtered=[],page=0,curTab='title',searchQ='',selectQ='',curSort='default',sortAsc=false,watchPlanOnly=false,watchedFilter='';
+let ALL=[],filtered=[],page=0,curTab='title',searchQ='',selectQ='',curSort='default',sortAsc=false,watchedFilter='';
 const tmdbCache={};
 const personCache={};
 
@@ -212,19 +214,20 @@ function updateStats(){
   const total=ALL.length;
   const watched=ALL.filter(m=>re(m['시청여부'])==='O').length;
   const rewatch=ALL.filter(m=>re(m['시청여부'])==='△').length;
+  const plan=ALL.filter(m=>re(m['시청여부'])==='OO').length;
   document.getElementById('s-total').textContent=total;
   document.getElementById('s-watched').textContent=watched;
   document.getElementById('s-rewatch').textContent=rewatch;
+  document.getElementById('s-plan').textContent=plan;
 }
 
 function setWatchedFilter(val){
   watchedFilter=val;
-  // 볼예정 필터 해제
-  if(val!==''){watchPlanOnly=false;document.getElementById('watch-plan-btn').classList.remove('on');}
   // stat 활성 표시
   document.querySelectorAll('.stat').forEach(s=>s.classList.remove('stat-active'));
   if(val==='O')document.querySelector('.stat.watched').classList.add('stat-active');
   else if(val==='△')document.querySelector('.stat.rewatch').classList.add('stat-active');
+  else if(val==='OO')document.querySelector('.stat.plan').classList.add('stat-active');
   filter();
 }
 
@@ -234,6 +237,9 @@ document.querySelector('.stat.watched').addEventListener('click',()=>{
 });
 document.querySelector('.stat.rewatch').addEventListener('click',()=>{
   setWatchedFilter(watchedFilter==='△'?'':'△');
+});
+document.querySelector('.stat.plan').addEventListener('click',()=>{
+  setWatchedFilter(watchedFilter==='OO'?'':'OO');
 });
 
 function buildSelect(tab){
@@ -621,9 +627,9 @@ function filter(){
     const actor=re(m['배우']).toLowerCase().replace(/\s/g,'');
     const dir=re(m['감독']),stream=re(m['스트리밍']),rec=re(m['추천']);
     const watched=re(m['시청여부']);
-    if(watchPlanOnly&&watched!=='OO') return false;
     if(watchedFilter==='O'&&watched!=='O') return false;
     if(watchedFilter==='△'&&watched!=='△') return false;
+    if(watchedFilter==='OO'&&watched!=='OO') return false;
     if(curTab==='title'&&q)return kor.includes(q)||orig.includes(q);
     if(curTab==='actor'&&q)return actor.includes(q);
     if(curTab==='director'&&selectQ)return dir.includes(selectQ);
@@ -676,17 +682,6 @@ document.querySelectorAll('.sort-btn').forEach(btn=>{
     }
     filter();
   });
-});
-
-document.getElementById('watch-plan-btn').addEventListener('click',function(){
-  watchPlanOnly=!watchPlanOnly;
-  this.classList.toggle('on',watchPlanOnly);
-  // 볼예정 ON 시 시청여부 필터 해제
-  if(watchPlanOnly){
-    watchedFilter='';
-    document.querySelectorAll('.stat').forEach(s=>s.classList.remove('stat-active'));
-  }
-  filter();
 });
 
 document.getElementById('search-input').addEventListener('input',e=>{searchQ=e.target.value;filter();});
