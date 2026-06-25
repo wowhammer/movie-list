@@ -153,6 +153,7 @@ select{width:100%;padding:9px 12px;border:1px solid #ddd;border-radius:10px;font
 <div class="count-row">
   <div class="count-left">
     <div class="count" id="count-lbl"></div>
+    <button class="watch-plan-btn" id="watch-plan-btn">볼예정</button>
   </div>
   <div class="sort-btns">
     <button class="sort-btn on" data-sort="default">기본</button>
@@ -228,6 +229,8 @@ function setWatchedFilter(val){
   if(val==='O')document.querySelector('.stat.watched').classList.add('stat-active');
   else if(val==='△')document.querySelector('.stat.rewatch').classList.add('stat-active');
   else if(val==='OO')document.querySelector('.stat.plan').classList.add('stat-active');
+  // 하단 볼예정 버튼 상태 동기화
+  document.getElementById('watch-plan-btn').classList.toggle('on',val==='OO');
   filter();
 }
 
@@ -239,6 +242,9 @@ document.querySelector('.stat.rewatch').addEventListener('click',()=>{
   setWatchedFilter(watchedFilter==='△'?'':'△');
 });
 document.querySelector('.stat.plan').addEventListener('click',()=>{
+  setWatchedFilter(watchedFilter==='OO'?'':'OO');
+});
+document.getElementById('watch-plan-btn').addEventListener('click',()=>{
   setWatchedFilter(watchedFilter==='OO'?'':'OO');
 });
 
