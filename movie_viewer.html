@@ -969,6 +969,7 @@ function previewRow(label,val){
 async function submitAddMovie(){
   if(!addSelected)return;
   const recInput=document.getElementById('add-rec-input');
+  if(recInput)recInput.blur(); // 한글 IME 조합 강제 확정 (마지막 글자 누락 방지)
   addSelected.rec=recInput?recInput.value.trim():'';
 
   const btn=document.getElementById('add-submit-btn');
@@ -995,9 +996,10 @@ async function submitAddMovie(){
       '국적':addSelected.country,'TMDB평점':addSelected.rating
     };
     ALL.push(newObj);
+    const addedTitle=addSelected.kor||addSelected.orig||''; // 닫기 전에 미리 저장
     updateStats();filter();
     closeAddModal();
-    showToast('추가 완료: '+addSelected.kor);
+    showToast('추가 완료: '+addedTitle);
   }catch(err){
     btn.disabled=false;btn.textContent='시트에 추가';
     alert('추가 실패: '+err.message+'\n네트워크 또는 Apps Script 재배포를 확인하세요.');
