@@ -49,15 +49,15 @@ select{width:100%;padding:9px 12px;border:1px solid #ddd;border-radius:10px;font
 .card-title{font-size:15px;font-weight:600;color:#1a1a1a;}
 .card-year{font-size:12px;color:#aaa;flex-shrink:0;}
 .watched-badge{font-size:10px;padding:1px 6px;border-radius:6px;font-weight:600;margin-left:4px;}
-.badge-O{background:#dcfce7;color:#16a34a;}
-.badge-△{background:#fef9c3;color:#b45309;}
-.badge-OO{background:#ffedd5;color:#c2410c;}
+.badge-W{background:#dcfce7;color:#16a34a;}
+.badge-R{background:#fef9c3;color:#b45309;}
+.badge-P{background:#ffedd5;color:#c2410c;}
 .status-btns{display:flex;gap:6px;margin-top:8px;}
 .status-btn{flex:1;font-size:12px;padding:7px 4px;border-radius:8px;border:1.5px solid #e5e5e5;background:#fff;color:#888;font-weight:600;cursor:pointer;transition:all .15s;-webkit-tap-highlight-color:transparent;}
 .status-btn:active{transform:scale(.96);}
-.status-btn.on-O{background:#dcfce7;color:#16a34a;border-color:#86efac;}
-.status-btn.on-△{background:#fef9c3;color:#b45309;border-color:#fde047;}
-.status-btn.on-OO{background:#ffedd5;color:#c2410c;border-color:#fdba74;}
+.status-btn.on-W{background:#dcfce7;color:#16a34a;border-color:#86efac;}
+.status-btn.on-R{background:#fef9c3;color:#b45309;border-color:#fde047;}
+.status-btn.on-P{background:#ffedd5;color:#c2410c;border-color:#fdba74;}
 .status-btn.saving{opacity:.5;pointer-events:none;}
 .card-orig{font-size:11px;color:#bbb;margin-bottom:4px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
 .card-sub{font-size:12px;color:#888;margin-bottom:6px;}
@@ -130,7 +130,7 @@ select{width:100%;padding:9px 12px;border:1px solid #ddd;border-radius:10px;font
     <div class="stat total"><div class="stat-num" id="s-total">-</div><div class="stat-label">전체</div></div>
     <div class="stat watched"><div class="stat-num" id="s-watched">-</div><div class="stat-label">시청완료</div></div>
     <div class="stat rewatch"><div class="stat-num" id="s-rewatch">-</div><div class="stat-label">다시볼것</div></div>
-    <div class="stat plan"><div class="stat-num" id="s-plan">-</div><div class="stat-label">볼예정</div></div>
+    <div class="stat plan"><div class="stat-num" id="s-plan">-</div><div class="stat-label">찜</div></div>
   </div>
   <div class="tabs" id="tabs">
     <button class="tab on" data-tab="title">제목</button>
@@ -153,7 +153,7 @@ select{width:100%;padding:9px 12px;border:1px solid #ddd;border-radius:10px;font
 <div class="count-row">
   <div class="count-left">
     <div class="count" id="count-lbl"></div>
-    <button class="watch-plan-btn" id="watch-plan-btn">볼예정</button>
+    <button class="watch-plan-btn" id="watch-plan-btn">찜</button>
   </div>
   <div class="sort-btns">
     <button class="sort-btn on" data-sort="default">기본</button>
@@ -211,11 +211,25 @@ const personCache={};
 
 function re(s){return String(s||'').replace(/=HYPERLINK\("[^"]*",\s*"([^"]+)"\)/,'$1').trim();}
 
+// ── 2자리 코드 파싱 헬퍼 ──
+// 코드: [1자리] W=시청완료 X=미시청 / [2자리] O=없음 R=다시볼것 P=찜
+// 예) WO WR WP XR XP XO(빈칸)
+function isW(code){return re(code).charAt(0)==='W';}          // 시청완료
+function isR(code){return re(code).charAt(1)==='R';}          // 다시볼것
+function isP(code){return re(code).charAt(1)==='P';}          // 찜
+// 시청축(W/X)과 의향축(O/R/P)을 조립해 2자리 코드 생성
+function buildCode(watched, intent){
+  const w = watched ? 'W' : 'X';
+  const i = (intent==='R'||intent==='P') ? intent : 'O';
+  const code = w+i;
+  return code==='XO' ? '' : code;  // XO는 빈칸으로 저장(표시없음)
+}
+
 function updateStats(){
   const total=ALL.length;
-  const watched=ALL.filter(m=>re(m['시청여부'])==='O').length;
-  const rewatch=ALL.filter(m=>re(m['시청여부'])==='△').length;
-  const plan=ALL.filter(m=>re(m['시청여부'])==='OO').length;
+  const watched=ALL.filter(m=>isW(m['시청여부'])).length;
+  const rewatch=ALL.filter(m=>isR(m['시청여부'])).length;
+  const plan=ALL.filter(m=>isP(m['시청여부'])).length;
   document.getElementById('s-total').textContent=total;
   document.getElementById('s-watched').textContent=watched;
   document.getElementById('s-rewatch').textContent=rewatch;
@@ -226,26 +240,26 @@ function setWatchedFilter(val){
   watchedFilter=val;
   // stat 활성 표시
   document.querySelectorAll('.stat').forEach(s=>s.classList.remove('stat-active'));
-  if(val==='O')document.querySelector('.stat.watched').classList.add('stat-active');
-  else if(val==='△')document.querySelector('.stat.rewatch').classList.add('stat-active');
-  else if(val==='OO')document.querySelector('.stat.plan').classList.add('stat-active');
-  // 하단 볼예정 버튼 상태 동기화
-  document.getElementById('watch-plan-btn').classList.toggle('on',val==='OO');
+  if(val==='W')document.querySelector('.stat.watched').classList.add('stat-active');
+  else if(val==='R')document.querySelector('.stat.rewatch').classList.add('stat-active');
+  else if(val==='P')document.querySelector('.stat.plan').classList.add('stat-active');
+  // 하단 찜 버튼 상태 동기화
+  document.getElementById('watch-plan-btn').classList.toggle('on',val==='P');
   filter();
 }
 
 document.querySelector('.stat.total').addEventListener('click',()=>setWatchedFilter(''));
 document.querySelector('.stat.watched').addEventListener('click',()=>{
-  setWatchedFilter(watchedFilter==='O'?'':'O');
+  setWatchedFilter(watchedFilter==='W'?'':'W');
 });
 document.querySelector('.stat.rewatch').addEventListener('click',()=>{
-  setWatchedFilter(watchedFilter==='△'?'':'△');
+  setWatchedFilter(watchedFilter==='R'?'':'R');
 });
 document.querySelector('.stat.plan').addEventListener('click',()=>{
-  setWatchedFilter(watchedFilter==='OO'?'':'OO');
+  setWatchedFilter(watchedFilter==='P'?'':'P');
 });
 document.getElementById('watch-plan-btn').addEventListener('click',()=>{
-  setWatchedFilter(watchedFilter==='OO'?'':'OO');
+  setWatchedFilter(watchedFilter==='P'?'':'P');
 });
 
 function buildSelect(tab){
@@ -537,7 +551,9 @@ function renderCards(){
     const rating=re(m['TMDB평점']);
     const watched=re(m['시청여부']);
     const title=kor||orig;
-    const watchedBadge=watched==='O'?'<span class="watched-badge badge-O">시청</span>':watched==='△'?'<span class="watched-badge badge-△">다시볼것</span>':'';
+    const watchedBadge=(isW(watched)?'<span class="watched-badge badge-W">시청</span>':'')
+      +(isR(watched)?'<span class="watched-badge badge-R">다시볼것</span>':'')
+      +(isP(watched)?'<span class="watched-badge badge-P">찜</span>':'');
     const ratingStr=rating?'⭐'+rating:'';
     const yearCountry=[year,country,ratingStr].filter(Boolean).join(' · ');
 
@@ -600,9 +616,9 @@ function renderCards(){
           '<a class="action-btn" href="https://search.naver.com/search.naver?query='+naverQ+'" target="_blank">🔍 네이버</a>'+
         '</div>'+
         '<div class="status-btns">'+
-          '<button class="status-btn'+(re(m['시청여부'])==='O'?' on-O':'')+'" data-st="O">시청완료</button>'+
-          '<button class="status-btn'+(re(m['시청여부'])==='△'?' on-△':'')+'" data-st="△">다시볼것</button>'+
-          '<button class="status-btn'+(re(m['시청여부'])==='OO'?' on-OO':'')+'" data-st="OO">볼예정</button>'+
+          '<button class="status-btn'+(isW(m['시청여부'])?' on-W':'')+'" data-st="W">시청완료</button>'+
+          '<button class="status-btn'+(isR(m['시청여부'])?' on-R':'')+'" data-st="R">다시볼것</button>'+
+          '<button class="status-btn'+(isP(m['시청여부'])?' on-P':'')+'" data-st="P">찜</button>'+
         '</div>';
       detail.querySelectorAll('.status-btn').forEach(btn=>{
         btn.addEventListener('click',e=>{
@@ -633,9 +649,9 @@ function filter(){
     const actor=re(m['배우']).toLowerCase().replace(/\s/g,'');
     const dir=re(m['감독']),stream=re(m['스트리밍']),rec=re(m['추천']);
     const watched=re(m['시청여부']);
-    if(watchedFilter==='O'&&watched!=='O') return false;
-    if(watchedFilter==='△'&&watched!=='△') return false;
-    if(watchedFilter==='OO'&&watched!=='OO') return false;
+    if(watchedFilter==='W'&&!isW(watched)) return false;
+    if(watchedFilter==='R'&&!isR(watched)) return false;
+    if(watchedFilter==='P'&&!isP(watched)) return false;
     if(curTab==='title'&&q)return kor.includes(q)||orig.includes(q);
     if(curTab==='actor'&&q)return actor.includes(q);
     if(curTab==='director'&&selectQ)return dir.includes(selectQ);
@@ -711,17 +727,28 @@ document.getElementById('tabs').querySelectorAll('.tab').forEach(btn=>{
 
 async function setWatchStatus(m, st, detail){
   const cur=re(m['시청여부']);
-  const next=(cur===st)?'':st;  // 같은 버튼 재클릭 → 해제
+  // 현재 두 축 상태 읽기
+  let watched=isW(cur);
+  let intent=isR(cur)?'R':(isP(cur)?'P':'O');
+
+  // 누른 버튼의 축만 토글
+  if(st==='W'){
+    watched=!watched;                          // 시청완료 토글
+  }else if(st==='R'){
+    intent=(intent==='R')?'O':'R';             // 다시볼것 토글(찜과 상호배타)
+  }else if(st==='P'){
+    intent=(intent==='P')?'O':'P';             // 찜 토글(다시볼것과 상호배타)
+  }
+  const next=buildCode(watched, intent);       // 2자리 코드 조립('' = XO)
+
   const origTitle=re(m['원제']);
   const btns=detail.querySelectorAll('.status-btn');
   btns.forEach(b=>b.classList.add('saving'));
+
   // 낙관적 UI: 화면 먼저 갱신
   const prev=m['시청여부'];
   m['시청여부']=next;
-  btns.forEach(b=>{
-    b.classList.remove('on-O','on-△','on-OO');
-    if(b.dataset.st===next)b.classList.add('on-'+next);
-  });
+  paintStatusBtns(btns, next);
   try{
     const res=await fetch(API,{
       method:'POST',
@@ -735,14 +762,22 @@ async function setWatchStatus(m, st, detail){
   }catch(err){
     // 실패 시 롤백
     m['시청여부']=prev;
-    btns.forEach(b=>{
-      b.classList.remove('on-O','on-△','on-OO');
-      if(b.dataset.st===re(prev))b.classList.add('on-'+re(prev));
-    });
+    paintStatusBtns(btns, re(prev));
     alert('저장 실패: '+err.message+'\n네트워크 또는 Apps Script 재배포를 확인하세요.');
   }finally{
     btns.forEach(b=>b.classList.remove('saving'));
   }
+}
+
+// 버튼 3개의 on 상태를 코드 기준으로 다시 칠하기
+function paintStatusBtns(btns, code){
+  btns.forEach(b=>{
+    b.classList.remove('on-W','on-R','on-P');
+    const st=b.dataset.st;
+    if(st==='W'&&isW(code))b.classList.add('on-W');
+    if(st==='R'&&isR(code))b.classList.add('on-R');
+    if(st==='P'&&isP(code))b.classList.add('on-P');
+  });
 }
 
 async function load(){
