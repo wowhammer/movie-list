@@ -121,6 +121,38 @@ select{width:100%;padding:9px 12px;border:1px solid #ddd;border-radius:10px;font
 .rec-modal-body{overflow-y:auto;padding:16px 16px 32px;font-size:13px;color:#444;line-height:1.7;}
 .rec-modal-tag{display:inline-block;font-size:11px;padding:2px 8px;border-radius:10px;background:#f0f0f0;color:#666;margin-bottom:10px;}
 .rec-modal-link{display:block;margin-top:14px;text-align:center;color:#888;font-size:12px;text-decoration:none;border-top:1px solid #f0f0f0;padding-top:12px;}
+/* 영화 추가 버튼 + 모달 */
+.add-movie-btn{position:fixed;right:16px;bottom:20px;width:54px;height:54px;border-radius:50%;border:none;background:#16a34a;color:#fff;font-size:28px;font-weight:300;line-height:1;cursor:pointer;box-shadow:0 4px 14px rgba(22,163,74,.4);z-index:400;display:flex;align-items:center;justify-content:center;-webkit-tap-highlight-color:transparent;transition:transform .15s;}
+.add-movie-btn:active{transform:scale(.92);}
+.add-modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:700;display:flex;align-items:flex-end;justify-content:center;animation:fadeIn .2s;}
+.add-modal{background:#fff;border-radius:20px 20px 0 0;width:100%;max-width:480px;max-height:88vh;overflow:hidden;display:flex;flex-direction:column;animation:slideUp .25s ease-out;}
+.add-modal-header{display:flex;align-items:center;gap:12px;padding:18px 16px 14px;border-bottom:1px solid #f0f0f0;flex-shrink:0;}
+.add-modal-title{font-size:17px;font-weight:700;}
+.add-modal-close{margin-left:auto;width:30px;height:30px;border-radius:50%;border:none;background:#f0f0f0;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#555;flex-shrink:0;}
+.add-modal-body{overflow-y:auto;padding:16px;}
+.add-search-row{display:flex;gap:8px;margin-bottom:14px;}
+.add-search-row input{flex:1;font-size:14px;padding:10px 12px;border:1.5px solid #e5e5e5;border-radius:10px;outline:none;}
+.add-search-row input:focus{border-color:#16a34a;}
+.add-search-row button{padding:10px 16px;border:none;border-radius:10px;background:#16a34a;color:#fff;font-weight:600;font-size:14px;cursor:pointer;flex-shrink:0;}
+.add-search-row button:disabled{opacity:.5;}
+.add-candidates{display:flex;flex-direction:column;gap:8px;}
+.add-cand{display:flex;gap:10px;padding:8px;border:1.5px solid #e5e5e5;border-radius:10px;cursor:pointer;align-items:center;transition:all .15s;}
+.add-cand:active{transform:scale(.98);}
+.add-cand.sel{border-color:#16a34a;background:#f0fdf4;}
+.add-cand img,.add-cand .noimg{width:46px;height:69px;border-radius:6px;object-fit:cover;background:#f0f0f0;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:20px;color:#ccc;}
+.add-cand-info{min-width:0;}
+.add-cand-title{font-size:14px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.add-cand-orig{font-size:11px;color:#aaa;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.add-cand-year{font-size:12px;color:#888;margin-top:2px;}
+.add-preview{margin-top:6px;padding:14px;border:1.5px solid #16a34a;border-radius:12px;background:#f0fdf4;}
+.add-preview-row{display:flex;font-size:13px;padding:3px 0;}
+.add-preview-row b{width:64px;flex-shrink:0;color:#555;}
+.add-preview-row span{color:#222;min-width:0;}
+.add-rec-input{width:100%;font-size:13px;padding:8px 10px;border:1.5px solid #e5e5e5;border-radius:8px;outline:none;margin-top:4px;box-sizing:border-box;}
+.add-rec-input:focus{border-color:#16a34a;}
+.add-submit{width:100%;margin-top:12px;padding:12px;border:none;border-radius:10px;background:#16a34a;color:#fff;font-weight:700;font-size:15px;cursor:pointer;}
+.add-submit:disabled{opacity:.5;}
+.add-status{text-align:center;font-size:13px;color:#888;padding:14px;}
 </style>
 </head>
 <body>
@@ -164,6 +196,9 @@ select{width:100%;padding:9px 12px;border:1px solid #ddd;border-radius:10px;font
 </div>
 <div class="list" id="list"><div class="loading">불러오는 중...</div></div>
 <button class="more-btn" id="more-btn" style="display:none;">더 보기 ↓</button>
+
+<!-- 영화 추가 버튼 -->
+<button class="add-movie-btn" id="add-movie-btn" title="새 영화 추가">+</button>
 
 <!-- 인물 모달 -->
 <div id="person-modal-overlay" class="person-modal-overlay" style="display:none;">
@@ -778,6 +813,200 @@ function paintStatusBtns(btns, code){
     if(st==='R'&&isR(code))b.classList.add('on-R');
     if(st==='P'&&isP(code))b.classList.add('on-P');
   });
+}
+
+// ════════════════════════════════════════════
+//  영화 추가 모달 (갈래 A: 아는 영화 넣기)
+// ════════════════════════════════════════════
+let addSelected=null;   // 현재 선택된 후보의 상세 데이터
+const TMDB_IMG='https://image.tmdb.org/t/p/w200';
+
+// 모달 열기
+document.getElementById('add-movie-btn').addEventListener('click',openAddModal);
+
+function openAddModal(){
+  const ov=document.createElement('div');
+  ov.className='add-modal-overlay';
+  ov.id='add-modal-overlay';
+  ov.innerHTML=
+    '<div class="add-modal">'+
+      '<div class="add-modal-header">'+
+        '<div class="add-modal-title">➕ 새 영화 추가</div>'+
+        '<button class="add-modal-close" id="add-close">✕</button>'+
+      '</div>'+
+      '<div class="add-modal-body">'+
+        '<div class="add-search-row">'+
+          '<input type="text" id="add-search-input" placeholder="영화 제목 입력 (한글/영문)" autocomplete="off">'+
+          '<button id="add-search-btn">검색</button>'+
+        '</div>'+
+        '<div id="add-result"></div>'+
+      '</div>'+
+    '</div>';
+  document.body.appendChild(ov);
+  addSelected=null;
+
+  ov.addEventListener('click',e=>{if(e.target===ov)closeAddModal();});
+  document.getElementById('add-close').addEventListener('click',closeAddModal);
+
+  const input=document.getElementById('add-search-input');
+  const btn=document.getElementById('add-search-btn');
+  btn.addEventListener('click',()=>runAddSearch(input.value.trim()));
+  input.addEventListener('keydown',e=>{if(e.key==='Enter')runAddSearch(input.value.trim());});
+  setTimeout(()=>input.focus(),100);
+}
+
+function closeAddModal(){
+  const ov=document.getElementById('add-modal-overlay');
+  if(ov)ov.remove();
+  addSelected=null;
+}
+
+// TMDB 제목 검색 → 후보 목록 표시
+async function runAddSearch(q){
+  if(!q)return;
+  const box=document.getElementById('add-result');
+  box.innerHTML='<div class="add-status">검색 중...</div>';
+  addSelected=null;
+  try{
+    const res=await fetch(TMDB_BASE+'/search/movie?api_key='+TMDB_KEY+'&query='+encodeURIComponent(q)+'&language=ko-KR&include_adult=false');
+    const data=await res.json();
+    const list=(data.results||[]).slice(0,6);
+    if(!list.length){box.innerHTML='<div class="add-status">검색 결과가 없습니다.</div>';return;}
+
+    let html='<div class="add-candidates">';
+    list.forEach(mv=>{
+      const yr=(mv.release_date||'').slice(0,4)||'-';
+      const poster=mv.poster_path?'<img src="'+TMDB_IMG+mv.poster_path+'">':'<div class="noimg">🎬</div>';
+      const kor=mv.title||mv.original_title||'';
+      const orig=mv.original_title||'';
+      html+='<div class="add-cand" data-id="'+mv.id+'">'+
+        poster+
+        '<div class="add-cand-info">'+
+          '<div class="add-cand-title">'+esc(kor)+'</div>'+
+          (orig&&orig!==kor?'<div class="add-cand-orig">'+esc(orig)+'</div>':'')+
+          '<div class="add-cand-year">'+yr+'</div>'+
+        '</div>'+
+      '</div>';
+    });
+    html+='</div><div id="add-detail-zone"></div>';
+    box.innerHTML=html;
+
+    box.querySelectorAll('.add-cand').forEach(el=>{
+      el.addEventListener('click',()=>{
+        box.querySelectorAll('.add-cand').forEach(c=>c.classList.remove('sel'));
+        el.classList.add('sel');
+        loadAddDetail(el.dataset.id);
+      });
+    });
+  }catch(err){
+    box.innerHTML='<div class="add-status">검색 실패: '+esc(err.message)+'</div>';
+  }
+}
+
+// 후보 선택 → 상세(감독/배우/국적/평점) 가져와 미리보기
+async function loadAddDetail(id){
+  const zone=document.getElementById('add-detail-zone');
+  zone.innerHTML='<div class="add-status">상세 정보 불러오는 중...</div>';
+  try{
+    const res=await fetch(TMDB_BASE+'/movie/'+id+'?api_key='+TMDB_KEY+'&language=ko-KR&append_to_response=credits');
+    const d=await res.json();
+
+    const orig=d.original_title||'';
+    const kor=d.title||orig;
+    const year=(d.release_date||'').slice(0,4)||'';
+    const rating=d.vote_average?Number(d.vote_average).toFixed(1):'';
+    // 감독: credits.crew에서 Director
+    const director=(d.credits&&d.credits.crew||[]).filter(c=>c.job==='Director').map(c=>c.name).join(', ');
+    // 배우: 상위 4명
+    const actors=(d.credits&&d.credits.cast||[]).slice(0,4).map(c=>c.name).join(', ');
+    // 국적: production_countries (한글명 없으면 영문)
+    const country=(d.production_countries||[]).map(c=>krCountry(c.iso_3166_1)||c.name).join(', ');
+
+    addSelected={orig,kor,year,director,actors,country,rating,status:'',stream:'',verified:''};
+
+    zone.innerHTML=
+      '<div class="add-preview">'+
+        previewRow('원제',orig)+
+        previewRow('한글명',kor)+
+        previewRow('연도',year)+
+        previewRow('감독',director||'-')+
+        previewRow('배우',actors||'-')+
+        previewRow('국적',country||'-')+
+        previewRow('평점',rating?'⭐'+rating:'-')+
+        '<div class="add-preview-row"><b>추천</b><span style="flex:1"><input type="text" id="add-rec-input" class="add-rec-input" placeholder="출처 태그 (예: 이동진 / 오스카) — 비워도 됨"></span></div>'+
+        '<button class="add-submit" id="add-submit-btn">시트에 추가</button>'+
+      '</div>';
+
+    document.getElementById('add-submit-btn').addEventListener('click',submitAddMovie);
+  }catch(err){
+    zone.innerHTML='<div class="add-status">상세 불러오기 실패: '+esc(err.message)+'</div>';
+  }
+}
+
+function previewRow(label,val){
+  return '<div class="add-preview-row"><b>'+label+'</b><span>'+esc(val)+'</span></div>';
+}
+
+// 시트에 추가 (doPost addMovie)
+async function submitAddMovie(){
+  if(!addSelected)return;
+  const recInput=document.getElementById('add-rec-input');
+  addSelected.rec=recInput?recInput.value.trim():'';
+
+  const btn=document.getElementById('add-submit-btn');
+  btn.disabled=true;btn.textContent='추가 중...';
+  try{
+    const res=await fetch(API,{
+      method:'POST',
+      headers:{'Content-Type':'text/plain;charset=utf-8'},
+      body:JSON.stringify({action:'addMovie', movie:addSelected})
+    });
+    const data=await res.json();
+    if(data.dup){
+      btn.disabled=false;btn.textContent='시트에 추가';
+      alert('이미 목록에 있는 영화입니다.\n('+addSelected.orig+')');
+      return;
+    }
+    if(!data.ok)throw new Error(data.error||'추가 실패');
+
+    // 로컬 ALL에도 즉시 반영 (새로고침 없이 목록에 보이도록)
+    const newObj={
+      '원제':addSelected.orig,'한국 개봉명':addSelected.kor,'개봉연도':addSelected.year,
+      '시청여부':'','감독':addSelected.director,'배우':addSelected.actors,
+      '스트리밍':'','직접검색':'','추천':addSelected.rec,
+      '국적':addSelected.country,'TMDB평점':addSelected.rating
+    };
+    ALL.push(newObj);
+    updateStats();filter();
+    closeAddModal();
+    showToast('추가 완료: '+addSelected.kor);
+  }catch(err){
+    btn.disabled=false;btn.textContent='시트에 추가';
+    alert('추가 실패: '+err.message+'\n네트워크 또는 Apps Script 재배포를 확인하세요.');
+  }
+}
+
+// 간단 토스트
+function showToast(msg){
+  const t=document.createElement('div');
+  t.textContent=msg;
+  t.style.cssText='position:fixed;left:50%;bottom:90px;transform:translateX(-50%);background:#16a34a;color:#fff;padding:10px 18px;border-radius:20px;font-size:13px;font-weight:600;z-index:800;box-shadow:0 4px 14px rgba(0,0,0,.2);animation:fadeIn .2s;';
+  document.body.appendChild(t);
+  setTimeout(()=>t.remove(),2500);
+}
+
+// HTML escape
+function esc(s){return String(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+
+// 국가코드 → 한글 (주요국만, 없으면 null로 영문 fallback)
+function krCountry(iso){
+  const map={US:'미국',KR:'한국',JP:'일본',GB:'영국',FR:'프랑스',DE:'독일',IT:'이탈리아',
+    ES:'스페인',CN:'중국',HK:'홍콩',TW:'대만',IN:'인도',CA:'캐나다',AU:'호주',
+    RU:'러시아',SE:'스웨덴',DK:'덴마크',NO:'노르웨이',FI:'핀란드',NL:'네덜란드',
+    BE:'벨기에',CH:'스위스',AT:'오스트리아',PL:'폴란드',BR:'브라질',MX:'멕시코',
+    AR:'아르헨티나',IR:'이란',TR:'터키',TH:'태국',IE:'아일랜드',NZ:'뉴질랜드',
+    PT:'포르투갈',GR:'그리스',CZ:'체코',HU:'헝가리',IS:'아이슬란드'};
+  return map[iso]||null;
 }
 
 async function load(){
