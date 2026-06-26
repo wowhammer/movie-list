@@ -880,15 +880,46 @@ function closeAddModal(){
 }
 
 // TMDB 제목 검색 → 후보 목록 표시
+// TMDB에 단일 쿼리 검색 (결과 배열 반환)
+async function tmdbSearch(query){
+  try{
+    const res=await fetch(TMDB_BASE+'/search/movie?api_key='+TMDB_KEY+'&query='+encodeURIComponent(query)+'&language=ko-KR&include_adult=false');
+    const data=await res.json();
+    return data.results||[];
+  }catch(e){return [];}
+}
+
+// 띄어쓰기 변형 후보 생성 (원본 우선, 중복 제거)
+function spacingVariants(q){
+  const variants=[q];
+  const noSpace=q.replace(/\s/g,'');
+  if(noSpace!==q)variants.push(noSpace);
+  // 글자 사이사이 띄우기 변형 (한글 2~5글자 붙은 경우 대비)
+  if(noSpace.length>=2&&noSpace.length<=6){
+    for(let i=1;i<noSpace.length;i++){
+      variants.push(noSpace.slice(0,i)+' '+noSpace.slice(i));
+    }
+  }
+  return [...new Set(variants)]; // 중복 제거
+}
+
 async function runAddSearch(q){
   if(!q)return;
   const box=document.getElementById('add-result');
   box.innerHTML='<div class="add-status">검색 중...</div>';
   addSelected=null;
   try{
-    const res=await fetch(TMDB_BASE+'/search/movie?api_key='+TMDB_KEY+'&query='+encodeURIComponent(q)+'&language=ko-KR&include_adult=false');
-    const data=await res.json();
-    const list=(data.results||[]).slice(0,6);
+    // 띄어쓰기 변형들을 순차 시도, 결과 나오면 멈춤
+    let list=[];
+    const seen=new Set();
+    for(const v of spacingVariants(q)){
+      const results=await tmdbSearch(v);
+      for(const mv of results){
+        if(!seen.has(mv.id)){seen.add(mv.id);list.push(mv);}
+      }
+      if(list.length>0)break; // 첫 변형에서 결과 나오면 중단(원본 우선)
+    }
+    list=list.slice(0,6);
     if(!list.length){box.innerHTML='<div class="add-status">검색 결과가 없습니다.</div>';return;}
 
     let html='<div class="add-candidates">';
