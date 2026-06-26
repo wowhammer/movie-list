@@ -122,7 +122,7 @@ select{width:100%;padding:9px 12px;border:1px solid #ddd;border-radius:10px;font
 .rec-modal-tag{display:inline-block;font-size:11px;padding:2px 8px;border-radius:10px;background:#f0f0f0;color:#666;margin-bottom:10px;}
 .rec-modal-link{display:block;margin-top:14px;text-align:center;color:#888;font-size:12px;text-decoration:none;border-top:1px solid #f0f0f0;padding-top:12px;}
 /* 영화 추가 버튼 + 모달 */
-.add-movie-btn{position:fixed;right:16px;bottom:20px;width:54px;height:54px;border-radius:50%;border:none;background:#16a34a;color:#fff;font-size:28px;font-weight:300;line-height:1;cursor:pointer;box-shadow:0 4px 14px rgba(22,163,74,.4);z-index:400;display:flex;align-items:center;justify-content:center;-webkit-tap-highlight-color:transparent;transition:transform .15s;}
+.add-movie-btn{position:fixed;right:max(16px, calc(50% - 240px + 16px));bottom:20px;width:50px;height:50px;border-radius:50%;border:none;background:#16a34a;color:#fff;font-size:26px;font-weight:300;line-height:1;cursor:pointer;box-shadow:0 4px 14px rgba(22,163,74,.4);z-index:400;display:flex;align-items:center;justify-content:center;-webkit-tap-highlight-color:transparent;transition:transform .15s;}
 .add-movie-btn:active{transform:scale(.92);}
 .add-modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:700;display:flex;align-items:flex-end;justify-content:center;animation:fadeIn .2s;}
 .add-modal{background:#fff;border-radius:20px 20px 0 0;width:100%;max-width:480px;max-height:88vh;overflow:hidden;display:flex;flex-direction:column;animation:slideUp .25s ease-out;}
