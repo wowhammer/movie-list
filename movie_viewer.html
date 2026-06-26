@@ -422,8 +422,14 @@ async function fetchPerson(name){
   if(personCache[name])return personCache[name];
   try{
     const q=encodeURIComponent(name);
-    const res=await fetch(TMDB_BASE+'/search/person?api_key='+TMDB_KEY+'&query='+q+'&language=ko-KR');
-    const data=await res.json();
+    // 1차: 한국어 검색
+    let res=await fetch(TMDB_BASE+'/search/person?api_key='+TMDB_KEY+'&query='+q+'&language=ko-KR');
+    let data=await res.json();
+    // 2차: 결과 없으면 언어 제한 없이 재검색 (영문 원어명 매칭 시도)
+    if(!data.results||data.results.length===0){
+      res=await fetch(TMDB_BASE+'/search/person?api_key='+TMDB_KEY+'&query='+q);
+      data=await res.json();
+    }
     if(!data.results||data.results.length===0)return personCache[name]={found:false};
     const p=data.results[0];
     const credRes=await fetch(TMDB_BASE+'/person/'+p.id+'/movie_credits?api_key='+TMDB_KEY+'&language=ko-KR');
@@ -534,16 +540,23 @@ async function openPersonModal(name,role){
     item.addEventListener('click',()=>{
       if(match){
         closePersonModal();
-        // 매칭 영화를 filtered 맨 앞으로 이동 후 전체 재렌더링
+        // 필터/검색 초기화 — match 영화가 반드시 목록에 보이도록
+        searchQ=''; selectQ=''; watchedFilter='';
+        const si=document.getElementById('search-input');
+        if(si)si.value='';
+        document.querySelectorAll('.stat').forEach(s=>s.classList.remove('stat-active'));
+        document.getElementById('watch-plan-btn').classList.remove('on');
+        // match 영화를 맨 앞으로
+        filter(); // filtered 재계산(전체 기준)
         const idx=filtered.indexOf(match);
-        if(idx>0){
+        if(idx>=0){
           filtered.splice(idx,1);
           filtered.unshift(match);
         }
         page=0;
         document.getElementById('list').innerHTML='';
         renderCards();
-        // 렌더링 후 첫 번째 카드(=매칭 영화)로 스크롤 + 상세 오픈
+        // 맨 앞 카드(=match 영화)로 스크롤 + 상세 오픈
         setTimeout(()=>{
           const firstCard=document.querySelector('.card');
           if(firstCard){
