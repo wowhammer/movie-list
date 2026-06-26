@@ -484,7 +484,15 @@ async function openPersonModal(name,role){
   document.getElementById('person-modal-dept').textContent=p.found?p.dept:'정보 없음';
 
   if(!p.found){
-    modalBody.innerHTML='<div style="text-align:center;padding:30px;color:#aaa;font-size:13px;">TMDB에서 정보를 찾을 수 없습니다</div>';
+    const tmdbSearchUrl='https://www.themoviedb.org/search/person?query='+encodeURIComponent(name);
+    modalBody.innerHTML=
+      '<div style="text-align:center;padding:30px 20px;">'+
+        '<div style="color:#aaa;font-size:13px;margin-bottom:16px;">앱에서 인물 정보를 찾지 못했어요</div>'+
+        '<a href="'+tmdbSearchUrl+'" target="_blank" rel="noopener" '+
+          'style="display:inline-block;padding:11px 20px;border-radius:22px;background:#16a34a;color:#fff;font-weight:700;font-size:13px;text-decoration:none;">'+
+          '🔍 TMDB에서 "'+esc(name)+'" 검색'+
+        '</a>'+
+      '</div>';
     return;
   }
 
