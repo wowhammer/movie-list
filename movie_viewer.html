@@ -74,6 +74,11 @@ select{width:100%;padding:9px 12px;border:1px solid #ddd;border-radius:10px;font
 .detail-text{flex:1;min-width:0;}
 .detail-rating{font-size:13px;font-weight:600;color:#f59e0b;margin-bottom:6px;}
 .detail-overview{font-size:12px;color:#555;line-height:1.6;max-height:120px;overflow-y:auto;}
+.my-review{margin-top:10px;padding:10px 12px;background:#fffbeb;border:1px solid #fde68a;border-radius:8px;}
+.my-review-label{font-size:11px;font-weight:700;color:#b45309;margin-bottom:4px;}
+.my-review-text{font-size:12.5px;color:#444;line-height:1.6;white-space:pre-wrap;word-break:break-word;}
+.edit-review-area{width:100%;min-height:90px;font-size:14px;padding:10px 11px;border:1.5px solid #e5e5e5;border-radius:8px;outline:none;box-sizing:border-box;resize:vertical;font-family:inherit;line-height:1.5;}
+.edit-review-area:focus{border-color:#16a34a;}
 .detail-actions{display:flex;gap:8px;margin-top:10px;}
 .action-btn{flex:1;padding:8px;border-radius:8px;border:1px solid #e5e5e5;background:#fff;font-size:12px;font-weight:600;cursor:pointer;color:#444;font-family:inherit;text-align:center;text-decoration:none;display:block;}
 .action-btn:active{background:#f5f5f5;}
@@ -694,6 +699,7 @@ function renderCards(){
           '<div class="detail-text">'+
             '<div class="detail-rating">⭐ '+info.rating+' / 10</div>'+
             '<div class="detail-overview">'+info.overview+'</div>'+
+            (re(m['리뷰'])?'<div class="my-review"><div class="my-review-label">📝 내 리뷰</div><div class="my-review-text">'+esc(re(m['리뷰']))+'</div></div>':'')+
           '</div>'+
         '</div>'+
         '<div class="detail-actions">'+
@@ -1131,6 +1137,11 @@ function openEditModal(m){
   });
   ottHtml+='</div><div class="hint">탭: 없음 → 있음(파랑) → 직접확인(✓) 순환</div></div>';
 
+  // 내 리뷰 textarea
+  const reviewVal=esc(re(m['리뷰']||''));
+  const reviewHtml='<div class="edit-field"><label>📝 내 리뷰</label>'+
+    '<textarea id="edit-review" class="edit-review-area" placeholder="이 영화에 대한 감상을 자유롭게 적어보세요">'+reviewVal+'</textarea></div>';
+
   ov.innerHTML=
     '<div class="add-modal">'+
       '<div class="add-modal-header">'+
@@ -1141,6 +1152,7 @@ function openEditModal(m){
         '<div class="edit-title-row">'+esc(re(m['원제']||''))+'</div>'+
         fieldsHtml+
         ottHtml+
+        reviewHtml+
         '<button class="edit-save-btn" id="edit-save-btn">저장</button>'+
       '</div>'+
     '</div>';
@@ -1173,7 +1185,7 @@ async function submitEditMovie(){
   if(!editTarget)return;
   const btn=document.getElementById('edit-save-btn');
   // 입력칸 blur로 한글 IME 조합 확정
-  document.querySelectorAll('#edit-modal-overlay input').forEach(inp=>inp.blur());
+  document.querySelectorAll('#edit-modal-overlay input, #edit-modal-overlay textarea').forEach(inp=>inp.blur());
 
   // 변경된 필드 수집
   const updates={};
@@ -1181,6 +1193,10 @@ async function submitEditMovie(){
     const inp=document.getElementById('edit-f-'+i);
     if(inp)updates[f.key]=inp.value.trim();
   });
+
+  // 리뷰 수집
+  const reviewEl=document.getElementById('edit-review');
+  if(reviewEl)updates['리뷰']=reviewEl.value.trim();
 
   // OTT 토글 → 스트리밍(상태1·2) / 직접검색(상태2만) 값으로 변환
   const streamArr=[], verifiedArr=[];
@@ -1196,10 +1212,10 @@ async function submitEditMovie(){
   const origTitle=re(editTarget['원제']);
   btn.disabled=true;btn.textContent='저장 중...';
 
-  // 낙관적 UI: 로컬 먼저 갱신
+  // 낙관적 UI: 로컬 먼저 갱신 (updates의 모든 키 반영 — 리뷰·OTT 포함)
   const prev={};
-  EDIT_FIELDS.forEach(f=>{prev[f.key]=editTarget[f.key];});
-  EDIT_FIELDS.forEach(f=>{editTarget[f.key]=updates[f.key];});
+  Object.keys(updates).forEach(k=>{prev[k]=editTarget[k];});
+  Object.keys(updates).forEach(k=>{editTarget[k]=updates[k];});
 
   try{
     const res=await fetch(API,{
@@ -1214,7 +1230,7 @@ async function submitEditMovie(){
     showToast('수정 완료');
   }catch(err){
     // 롤백
-    EDIT_FIELDS.forEach(f=>{editTarget[f.key]=prev[f.key];});
+    Object.keys(prev).forEach(k=>{editTarget[k]=prev[k];});
     btn.disabled=false;btn.textContent='저장';
     alert('수정 실패: '+err.message+'\n네트워크 또는 Apps Script 재배포를 확인하세요.');
   }
