@@ -189,6 +189,10 @@ select{width:100%;padding:9px 12px;border:1px solid #ddd;border-radius:10px;font
 .car-stat{flex:1;text-align:center;padding:6px 4px;}
 .car-stat-num{font-size:17px;font-weight:700;color:#1a1a1a;}
 .car-stat-label{font-size:10px;color:#aaa;margin-top:1px;}
+.car-veh{display:flex;gap:6px;margin-bottom:10px;}
+.veh-chip{flex:1;padding:7px 4px;border-radius:9px;border:1.5px solid #e5e5e5;background:#fff;color:#888;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;}
+.veh-chip.on{color:#fff;background:var(--vc,#1a1a1a);border-color:var(--vc,#1a1a1a);}
+.car-badge{display:inline-block;font-size:10px;font-weight:700;color:#fff;padding:1px 7px;border-radius:9px;vertical-align:middle;}
 .car-filter{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px;}
 .car-chip{font-size:12px;padding:4px 10px;border-radius:14px;border:1px solid #e5e5e5;background:#fff;color:#666;cursor:pointer;font-family:inherit;}
 .car-chip.on{background:#1a1a1a;color:#fff;border-color:#1a1a1a;font-weight:600;}
@@ -274,6 +278,7 @@ select{width:100%;padding:9px 12px;border:1px solid #ddd;border-radius:10px;font
       <div class="car-stat"><div class="car-stat-num" id="cs-total">-</div><div class="car-stat-label">총 정비비</div></div>
       <div class="car-stat"><div class="car-stat-num" id="cs-odo">-</div><div class="car-stat-label">최근 주행거리</div></div>
     </div>
+    <div class="car-veh" id="car-veh" style="display:none;"></div>
     <div class="search-wrap">
       <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
       <input type="text" id="car-search" placeholder="작업내용·정비소 검색...">
@@ -1342,8 +1347,10 @@ async function load(){
 load();
 
 /* ══════════════════ 차계부 (CARLOG) ══════════════════ */
-let CARLOG=[], carLoaded=false, carSort='date', carSortAsc=false, carWorkFilter='', carQuery='';
+let CARLOG=[], carLoaded=false, carSort='date', carSortAsc=false, carWorkFilter='', carQuery='', carVehicle='', CAR_LIST=[];
 const CAR_HEADERS={'Content-Type':'text/plain;charset=utf-8'}; // Apps Script CORS preflight 회피
+const CAR_PALETTE=['#2563eb','#16a34a','#db2777','#d97706','#7c3aed'];
+function carColor(name){ const i=CAR_LIST.indexOf(name); return CAR_PALETTE[(i<0?0:i)%CAR_PALETTE.length]; }
 
 function switchView(view){
   document.querySelectorAll('.apptab').forEach(b=>b.classList.toggle('on', b.dataset.view===view));
@@ -1361,6 +1368,8 @@ async function loadCarlog(){
     if(!res.ok) throw new Error('HTTP '+res.status);
     CARLOG=await res.json();
     CARLOG=CARLOG.filter(r=>(r['날짜']||'')!=='' || (r['작업내용']||'')!=='');
+    CAR_LIST=[...new Set(CARLOG.map(r=>(r['차량']||'').trim()).filter(Boolean))];
+    buildCarVehSelector();
     buildCarFilter();
     renderCarlog();
   }catch(e){
@@ -1368,8 +1377,24 @@ async function loadCarlog(){
   }
 }
 
+function buildCarVehSelector(){
+  const el=document.getElementById('car-veh');
+  if(CAR_LIST.length<=1){ el.style.display='none'; carVehicle=''; return; } // 1대면 선택기 숨김
+  let html='<button class="veh-chip'+(carVehicle===''?' on':'')+'" data-veh="">전체</button>';
+  CAR_LIST.forEach(c=>{
+    const on=carVehicle===c?' on':'';
+    html+='<button class="veh-chip'+on+'" data-veh="'+esc(c)+'" style="--vc:'+carColor(c)+'">'+esc(c)+'</button>';
+  });
+  el.innerHTML=html; el.style.display='';
+  el.querySelectorAll('.veh-chip').forEach(b=>{
+    b.onclick=()=>{ carVehicle=b.dataset.veh; el.querySelectorAll('.veh-chip').forEach(x=>x.classList.toggle('on',x===b)); renderCarlog(); };
+  });
+}
+
 function buildCarFilter(){
-  const works=[...new Set(CARLOG.map(r=>(r['작업내용']||'').trim()).filter(Boolean))];
+  const set=new Set();
+  CARLOG.forEach(r=>String(r['작업내용']||'').split(',').forEach(w=>{ const t=w.trim(); if(t) set.add(t); }));
+  const works=[...set];
   const el=document.getElementById('car-filter');
   let html='<button class="car-chip on" data-work="">전체</button>';
   works.slice(0,24).forEach(w=>{ html+='<button class="car-chip" data-work="'+esc(w)+'">'+esc(w)+'</button>'; });
@@ -1380,8 +1405,9 @@ function buildCarFilter(){
 }
 
 function renderCarlog(){
-  let rows=CARLOG.slice();
-  if(carWorkFilter) rows=rows.filter(r=>(r['작업내용']||'').trim()===carWorkFilter);
+  const base=carVehicle? CARLOG.filter(r=>(r['차량']||'').trim()===carVehicle) : CARLOG.slice();
+  let rows=base.slice();
+  if(carWorkFilter) rows=rows.filter(r=>String(r['작업내용']||'').split(',').map(s=>s.trim()).includes(carWorkFilter));
   if(carQuery){
     const q=carQuery.replace(/\s/g,'').toLowerCase();
     rows=rows.filter(r=>((r['작업내용']||'')+(r['정비소']||'')+(r['비고']||'')).replace(/\s/g,'').toLowerCase().includes(q));
@@ -1391,18 +1417,24 @@ function renderCarlog(){
     const av=carNum(carSort==='odo'?a['주행거리']:a['가격']), bv=carNum(carSort==='odo'?b['주행거리']:b['가격']);
     return carSortAsc?av-bv:bv-av;
   });
-  const total=CARLOG.reduce((s,r)=>s+carNum(r['가격']),0);
-  const maxOdo=CARLOG.reduce((m,r)=>Math.max(m,carNum(r['주행거리'])),0);
-  document.getElementById('cs-count').textContent=CARLOG.length;
+  const total=base.reduce((s,r)=>s+carNum(r['가격']),0);
+  document.getElementById('cs-count').textContent=base.length;
   document.getElementById('cs-total').textContent='₩'+total.toLocaleString();
-  document.getElementById('cs-odo').textContent=maxOdo?maxOdo.toLocaleString()+'km':'-';
+  // 주행거리는 차마다 별개 → 특정 차량 선택 시에만 표시, 전체면 '-'
+  if(carVehicle){
+    const maxOdo=base.reduce((m,r)=>Math.max(m,carNum(r['주행거리'])),0);
+    document.getElementById('cs-odo').textContent=maxOdo?maxOdo.toLocaleString()+'km':'-';
+  } else {
+    document.getElementById('cs-odo').textContent='-';
+  }
   document.getElementById('car-count').textContent=rows.length+'건';
   const listEl=document.getElementById('car-list');
   if(!rows.length){ listEl.innerHTML='<div class="loading">기록이 없어요.</div>'; return; }
   listEl.innerHTML=rows.map(r=>{
-    const price=carNum(r['가격']), odo=carNum(r['주행거리']);
+    const price=carNum(r['가격']), odo=carNum(r['주행거리']), car=(r['차량']||'').trim();
+    const badge=(car && CAR_LIST.length>1)?'<span class="car-badge" style="background:'+carColor(car)+'">'+esc(car)+'</span> ':'';
     return '<div class="car-card" data-id="'+esc(r['ID']||'')+'">'+
-      '<div class="car-card-top"><span class="car-date">'+esc(r['날짜']||'-')+'</span>'+
+      '<div class="car-card-top"><span class="car-date">'+badge+esc(r['날짜']||'-')+'</span>'+
         '<span class="car-odo">'+(odo?odo.toLocaleString()+'km':'')+'</span></div>'+
       '<div class="car-work">'+esc(r['작업내용']||'-')+'</div>'+
       '<div class="car-meta"><span class="car-shop">'+esc(r['정비소']||'')+'</span>'+
@@ -1435,6 +1467,8 @@ function openCarAddModal(){
       '<div class="add-modal-header"><div class="add-modal-title">🚗 정비 기록 추가</div>'+
         '<button class="add-modal-close" id="car-add-close">✕</button></div>'+
       '<div class="add-modal-body">'+
+        '<div class="car-field"><label>차량</label><input type="text" id="cadd-car" list="car-dl" placeholder="예: 싼타페" value="'+esc(carVehicle||CAR_LIST[0]||'')+'">'+
+          '<datalist id="car-dl">'+CAR_LIST.map(c=>'<option value="'+esc(c)+'">').join('')+'</datalist></div>'+
         '<div class="car-field"><label>날짜</label><input type="text" id="cadd-date" placeholder="예: 24.03.06"></div>'+
         '<div class="car-field"><label>주행거리 (km)</label><input type="text" id="cadd-odo" inputmode="numeric" placeholder="예: 119000"></div>'+
         '<div class="car-field"><label>정비소</label><input type="text" id="cadd-shop" placeholder="예: 광명카센타"></div>'+
@@ -1460,7 +1494,8 @@ function addCarItemRow(work='',price=''){
   document.getElementById('cadd-items').appendChild(row);
 }
 async function submitCarAdd(){
-  ['cadd-date','cadd-odo','cadd-shop'].forEach(id=>document.getElementById(id).blur());
+  ['cadd-car','cadd-date','cadd-odo','cadd-shop'].forEach(id=>document.getElementById(id).blur());
+  const car=document.getElementById('cadd-car').value.trim();
   const date=document.getElementById('cadd-date').value.trim();
   const odo=document.getElementById('cadd-odo').value.trim();
   const shop=document.getElementById('cadd-shop').value.trim();
@@ -1471,11 +1506,12 @@ async function submitCarAdd(){
     const price=r.querySelector('.ci-price').value.trim();
     if(work) items.push({work, price, note:''});
   });
+  if(!car){ showToast('차량을 입력해 주세요'); return; }
   if(!date){ showToast('날짜를 입력해 주세요'); return; }
   if(!items.length){ showToast('작업 항목을 하나 이상 입력해 주세요'); return; }
   const btn=document.getElementById('cadd-submit'); btn.textContent='저장 중...'; btn.disabled=true;
   try{
-    const res=await fetch(API,{method:'POST',headers:CAR_HEADERS,body:JSON.stringify({action:'addCarlog',visit:{date,odo,shop,items}})});
+    const res=await fetch(API,{method:'POST',headers:CAR_HEADERS,body:JSON.stringify({action:'addCarlog',visit:{car,date,odo,shop,items}})});
     const j=await res.json();
     if(!j.ok) throw new Error(j.error||'실패');
     document.getElementById('car-add-overlay').remove();
@@ -1494,6 +1530,8 @@ function openCarEditModal(item){
       '<div class="add-modal-header"><div class="add-modal-title">✏️ 기록 수정</div>'+
         '<button class="add-modal-close" id="cedit-close">✕</button></div>'+
       '<div class="add-modal-body">'+
+        '<div class="car-field"><label>차량</label><input type="text" id="cedit-car" list="car-dl-e" value="'+esc(item['차량']||'')+'">'+
+          '<datalist id="car-dl-e">'+CAR_LIST.map(c=>'<option value="'+esc(c)+'">').join('')+'</datalist></div>'+
         f('cedit-date','날짜',item['날짜'])+
         f('cedit-odo','주행거리 (km)',item['주행거리'],'inputmode="numeric"')+
         f('cedit-work','작업내용',item['작업내용'])+
@@ -1511,10 +1549,10 @@ function openCarEditModal(item){
   document.getElementById('cedit-del').onclick=()=>submitCarDelete(item['ID']);
 }
 async function submitCarEdit(id){
-  ['cedit-date','cedit-odo','cedit-work','cedit-shop','cedit-price','cedit-note'].forEach(x=>document.getElementById(x).blur());
+  ['cedit-car','cedit-date','cedit-odo','cedit-work','cedit-shop','cedit-price','cedit-note'].forEach(x=>document.getElementById(x).blur());
   if(!id){ showToast('이 기록은 ID가 없어요. 시트에서 backfillCarlogIds 1회 실행 필요'); return; }
   const g=id=>document.getElementById(id).value.trim();
-  const updates={'날짜':g('cedit-date'),'주행거리':g('cedit-odo'),'작업내용':g('cedit-work'),'정비소':g('cedit-shop'),'가격':g('cedit-price'),'비고':g('cedit-note')};
+  const updates={'차량':g('cedit-car'),'날짜':g('cedit-date'),'주행거리':g('cedit-odo'),'작업내용':g('cedit-work'),'정비소':g('cedit-shop'),'가격':g('cedit-price'),'비고':g('cedit-note')};
   const btn=document.getElementById('cedit-submit'); btn.textContent='저장 중...'; btn.disabled=true;
   try{
     const res=await fetch(API,{method:'POST',headers:CAR_HEADERS,body:JSON.stringify({action:'updateCarlog',id,updates})});
