@@ -4,6 +4,32 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>영화 추천 목록</title>
+
+<!-- ══════════════════════════════════════════════════════════════
+     ⚙️ 설정(CONFIG) — 이 파일에서 고칠 곳은 여기뿐. 값만 본인 것으로.
+     ══════════════════════════════════════════════════════════════ -->
+<script>
+const CONFIG = {
+  // ① Apps Script 웹앱 배포 URL
+  //    구글시트 → 확장 프로그램 → Apps Script → 배포 → 웹앱 → URL 복사
+  APPS_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbyfEqz3U7qircviRqSKx2KrBYSYfjsxjznP9UWN00Z19Y0sUF6uaJXy06OmHaSBpK4/exec',
+
+  // ② TMDB API 키  (themoviedb.org 무료 가입 → 설정 → API → 발급)
+  TMDB_KEY: '0b9515d29e91abc6465d342963c92482',
+
+  // ③ 앱 이름 (브라우저 탭 제목) — 이름 정해지면 여기만 바꾸세요
+  APP_NAME: '영화 추천 목록',
+
+  // ── 아래는 보통 안 바꿉니다 ──
+  TMDB_BASE: 'https://api.themoviedb.org/3'
+};
+// (내부 참조용 — 기존 코드 호환. 아래는 그대로 두세요)
+const API = CONFIG.APPS_SCRIPT_URL;
+const TMDB_KEY = CONFIG.TMDB_KEY;
+const TMDB_BASE = CONFIG.TMDB_BASE;
+try { document.title = CONFIG.APP_NAME; } catch (e) {}
+</script>
+
 <style>
 *{box-sizing:border-box;margin:0;padding:0;}
 body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f5f5f5;color:#1a1a1a;max-width:480px;margin:0 auto;}
@@ -331,9 +357,7 @@ select{width:100%;padding:9px 12px;border:1px solid #ddd;border-radius:10px;font
 </div>
 
 <script>
-const API='https://script.google.com/macros/s/AKfycbyfEqz3U7qircviRqSKx2KrBYSYfjsxjznP9UWN00Z19Y0sUF6uaJXy06OmHaSBpK4/exec';
-const TMDB_KEY='0b9515d29e91abc6465d342963c92482';
-const TMDB_BASE='https://api.themoviedb.org/3';
+/* 설정은 파일 맨 위 <head>의 CONFIG 블록에서 관리합니다 (API·TMDB_KEY·TMDB_BASE는 거기서 정의됨) */
 const IMG_BASE='https://image.tmdb.org/t/p/w200';
 const PERSON_IMG='https://image.tmdb.org/t/p/w185';
 const SC={넷플릭스:{bg:'#FFEBEB',c:'#b33'},티빙:{bg:'#FFF0D9',c:'#834'},왓챠:{bg:'#FDE8F0',c:'#833'},'디즈니+':{bg:'#E6F0FB',c:'#336'},웨이브:{bg:'#E8F5E9',c:'#363'},쿠팡플레이:{bg:'#EDEBFE',c:'#449'},'U+모바일':{bg:'#FFF0E6',c:'#c44'},'U+모바일구매':{bg:'#FFF0E6',c:'#c44'}};
