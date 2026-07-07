@@ -1,0 +1,639 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>내도감 — 엔진 v1.1</title>
+
+<!-- ══════════════════════════════════════════════════════════════
+     ⚙️ 설정(CONFIG) — 이 파일에서 고칠 곳은 여기뿐. 값만 본인 것으로.
+     ══════════════════════════════════════════════════════════════ -->
+<script>
+const CONFIG = {
+  // 기존 영화·차계부 백엔드(Apps Script) 주소 — 여기 하나만 본인 것으로.
+  APPS_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbyfEqz3U7qircviRqSKx2KrBYSYfjsxjznP9UWN00Z19Y0sUF6uaJXy06OmHaSBpK4/exec',
+  APP_NAME: '내도감'
+};
+try { document.title = CONFIG.APP_NAME; } catch(e){}
+</script>
+
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&family=IBM+Plex+Sans+KR:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#EDEBE3; --card:#FCFBF8; --ink:#23241F; --ink-soft:#6E6C62;
+    --line:#D8D5CA; --line-soft:#E6E3D9;
+    --accent:#7A5C2E; --accent-wash:rgba(122,92,46,.10);
+    --ok:#3d7a4e; --warn:#b25b3a;
+    --serif:"Gowun Batang",serif; --sans:"IBM Plex Sans KR",system-ui,sans-serif; --mono:"IBM Plex Mono",ui-monospace,monospace;
+  }
+  [data-domain="movies"]{ --accent:#7A5C2E; --accent-wash:rgba(122,92,46,.10); }
+  [data-domain="carlog"]{ --accent:#37596A; --accent-wash:rgba(55,89,106,.10); }
+  *{ box-sizing:border-box; }
+  body{ margin:0; background:var(--paper); color:var(--ink); font-family:var(--sans); line-height:1.5; -webkit-font-smoothing:antialiased; }
+  .wrap{ max-width:860px; margin:0 auto; padding:24px 20px 80px; }
+  .masthead{ display:flex; align-items:baseline; gap:12px; border-bottom:2px solid var(--ink); padding-bottom:10px; }
+  .masthead h1{ font-family:var(--serif); font-weight:700; font-size:26px; margin:0; }
+  .masthead .sub{ font-family:var(--mono); font-size:11px; color:var(--ink-soft); text-transform:uppercase; letter-spacing:.18em; }
+  .masthead .spacer{ flex:1; }
+  .src-chip{ font-family:var(--mono); font-size:10.5px; padding:4px 8px; border-radius:2px; border:1px solid var(--line); color:var(--ink-soft); }
+  .src-chip.live{ color:var(--ok); border-color:var(--ok); }
+  .icon-btn{ font-family:var(--mono); font-size:11px; cursor:pointer; background:none; border:1px solid var(--line); color:var(--ink-soft); padding:5px 9px; border-radius:2px; }
+  .icon-btn:hover{ border-color:var(--accent); color:var(--accent); }
+  .tabs{ display:flex; margin-top:16px; border-bottom:1px solid var(--line); }
+  .tab{ font-size:15px; font-weight:500; cursor:pointer; background:none; border:none; color:var(--ink-soft); padding:10px 16px 12px; border-bottom:2px solid transparent; margin-bottom:-1px; display:flex; align-items:center; gap:7px; }
+  .tab[aria-selected="true"]{ color:var(--ink); border-bottom-color:var(--accent); }
+  .tab .vol{ font-family:var(--mono); font-size:10px; color:var(--ink-soft); }
+  .stats{ display:flex; flex-wrap:wrap; gap:26px; padding:18px 2px 14px; }
+  .stat .n{ font-family:var(--mono); font-weight:600; font-size:22px; color:var(--accent); }
+  .stat .l{ font-size:11px; color:var(--ink-soft); }
+  .search{ width:100%; font-family:var(--sans); font-size:14px; padding:10px 12px; background:var(--card); border:1px solid var(--line); border-radius:3px; color:var(--ink); }
+  .search:focus{ outline:none; border-color:var(--accent); box-shadow:0 0 0 3px var(--accent-wash); }
+  .count{ font-family:var(--mono); font-size:11px; color:var(--ink-soft); margin:12px 2px 8px; }
+  .list{ display:flex; flex-direction:column; gap:10px; }
+  .card{ display:grid; grid-template-columns:auto 1fr auto; gap:14px; align-items:start; background:var(--card); border:1px solid var(--line-soft); border-radius:4px; padding:14px 16px; cursor:pointer; text-align:left; width:100%; font:inherit; color:inherit; }
+  .card:hover{ border-color:var(--accent); }
+  .card:focus-visible{ outline:2px solid var(--accent); outline-offset:2px; }
+  .cat-no{ font-family:var(--mono); font-size:11px; color:var(--ink-soft); padding-top:3px; min-width:44px; }
+  .thumb{ width:44px; height:62px; border-radius:3px; background:var(--accent-wash); display:flex; align-items:center; justify-content:center; font-size:20px; color:var(--accent); border:1px solid var(--line-soft); overflow:hidden; }
+  .thumb img{ width:100%; height:100%; object-fit:cover; }
+  .body h3{ font-family:var(--serif); font-size:17px; font-weight:700; margin:0 0 3px; }
+  .body .meta{ font-size:12.5px; color:var(--ink-soft); }
+  .tags{ display:flex; flex-wrap:wrap; gap:5px; margin-top:8px; }
+  .tag{ font-family:var(--mono); font-size:10px; color:var(--ink-soft); border:1px solid var(--line); border-radius:2px; padding:2px 6px; }
+  .flags{ display:flex; flex-direction:column; align-items:flex-end; gap:4px; }
+  .flag{ font-size:10.5px; font-family:var(--mono); padding:2px 7px; border-radius:2px; white-space:nowrap; }
+  .flag.on{ background:var(--accent-wash); color:var(--accent); }
+  .flag.star{ color:var(--accent); font-weight:600; font-size:12px; }
+  .kv{ display:flex; gap:18px; flex-wrap:wrap; font-family:var(--mono); font-size:12.5px; margin-top:6px; }
+  .kv b{ color:var(--accent); font-weight:600; }
+  dialog{ border:1px solid var(--line); border-radius:6px; padding:0; max-width:460px; width:92%; background:var(--card); color:var(--ink); }
+  dialog::backdrop{ background:rgba(20,20,16,.45); }
+  .dhead{ padding:16px 18px; border-bottom:1px solid var(--line-soft); }
+  .dhead h3{ font-family:var(--serif); margin:0; font-size:20px; }
+  .dbody{ padding:16px 18px; display:flex; flex-direction:column; gap:9px; }
+  .drow{ display:grid; grid-template-columns:96px 1fr; gap:10px; font-size:13.5px; }
+  .drow .k{ color:var(--ink-soft); font-family:var(--mono); font-size:11.5px; padding-top:2px; }
+  .dclose{ display:block; margin:6px 18px 18px auto; font-family:var(--mono); font-size:12px; cursor:pointer; background:var(--ink); color:var(--paper); border:none; padding:8px 16px; border-radius:3px; }
+  .set label{ display:block; font-size:12px; color:var(--ink-soft); margin:12px 0 4px; }
+  .set input{ width:100%; font-family:var(--mono); font-size:12px; padding:8px 10px; border:1px solid var(--line); border-radius:3px; background:var(--paper); }
+  .set .hint{ font-size:11px; color:var(--ink-soft); margin-top:4px; }
+  .btn{ font-family:var(--sans); font-size:13px; font-weight:500; cursor:pointer; background:var(--accent); color:#fff; border:none; padding:9px 16px; border-radius:3px; }
+  .btn.ghost{ background:none; color:var(--ink); border:1px solid var(--line); }
+  .btn.ghost.on{ background:var(--accent); color:#fff; border-color:var(--accent); }
+  .banner{ font-size:12.5px; padding:9px 12px; border-radius:3px; margin:10px 0; }
+  .banner.warn{ background:rgba(178,91,58,.10); color:var(--warn); }
+  .foot{ margin-top:24px; font-size:12px; color:var(--ink-soft); border-top:1px solid var(--line); padding-top:14px; }
+  /* 홈: 카테고리 카드 격자 */
+  .home-grid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(150px,1fr)); gap:14px; margin-top:24px; }
+  .cat-card{ background:var(--card); border:1px solid var(--line); border-radius:6px; padding:18px 16px 16px; cursor:pointer; text-align:left; font:inherit; color:inherit; display:flex; flex-direction:column; gap:8px; min-height:118px; }
+  .cat-card:hover{ border-color:var(--accent); }
+  .cat-card .ci{ font-size:28px; line-height:1; }
+  .cat-card .cn{ font-family:var(--serif); font-size:18px; font-weight:700; }
+  .cat-card .cc{ font-family:var(--mono); font-size:11px; color:var(--ink-soft); margin-top:auto; }
+  .cat-card .cv{ font-family:var(--mono); font-size:9.5px; color:var(--ink-soft); text-transform:uppercase; letter-spacing:.14em; }
+  .home-empty{ text-align:center; padding:64px 20px 40px; }
+  .home-empty .em{ font-size:40px; }
+  .home-empty h2{ font-family:var(--serif); font-size:21px; color:var(--ink); margin:14px 0 8px; font-weight:700; }
+  .home-empty p{ font-size:13.5px; color:var(--ink-soft); margin:0 0 22px; }
+  /* 차량 등 선택기 칩 */
+  .picker{ display:flex; gap:6px; flex-wrap:wrap; margin:2px 0 6px; }
+  .chip{ font-family:var(--mono); font-size:12px; padding:5px 12px; border-radius:14px; border:1px solid var(--line); background:var(--card); color:var(--ink-soft); cursor:pointer; }
+  .chip.on{ background:var(--accent); color:#fff; border-color:var(--accent); }
+  /* 설정: 카테고리 관리 */
+  .set h4{ font-family:var(--serif); font-size:15px; margin:20px 0 6px; padding-top:14px; border-top:1px solid var(--line-soft); }
+  .set h4:first-of-type{ border-top:none; padding-top:0; margin-top:4px; }
+  .cat-mrow{ display:flex; align-items:center; gap:12px; padding:11px 2px; border-bottom:1px solid var(--line-soft); }
+  .cat-mrow .mi{ font-size:20px; width:26px; text-align:center; }
+  .cat-mrow .mn{ flex:1; font-size:14.5px; }
+  .cat-mrow .mv{ font-family:var(--mono); font-size:9.5px; color:var(--ink-soft); }
+  .sw{ width:44px; height:25px; border-radius:13px; border:1px solid var(--line); background:var(--paper); position:relative; cursor:pointer; transition:.15s; flex:none; }
+  .sw::after{ content:""; position:absolute; top:2px; left:2px; width:19px; height:19px; border-radius:50%; background:#fff; border:1px solid var(--line); transition:.15s; }
+  .sw.on{ background:var(--accent); border-color:var(--accent); }
+  .sw.on::after{ left:21px; border-color:var(--accent); }
+  @media (max-width:520px){ .card{ grid-template-columns:auto 1fr; } .flags{ grid-column:2; flex-direction:row; margin-top:6px; } }
+  @media (prefers-reduced-motion:no-preference){ .card{ transition:border-color .15s ease; } }
+</style>
+</head>
+<body>
+<div class="wrap" id="root" data-domain="movies">
+  <header class="masthead">
+    <h1>내도감</h1><span class="sub">Naedogam</span>
+    <span class="spacer"></span>
+    <span class="src-chip" id="srcChip" style="display:none">데모</span>
+    <button class="icon-btn" id="setBtn" type="button">⚙ 설정</button>
+  </header>
+  <div id="banner"></div>
+
+  <!-- 홈: 켜둔 카테고리들이 카드 격자로 -->
+  <section id="home"></section>
+
+  <!-- 분야 화면: 카드를 누르면 열림 -->
+  <section id="domainView" style="display:none">
+    <button class="icon-btn" id="backBtn" type="button" style="margin:16px 0 2px">← 홈으로</button>
+    <nav class="tabs" id="tabs" role="tablist" aria-label="카테고리"></nav>
+    <div class="stats" id="stats"></div>
+    <div class="picker" id="picker" style="display:none"></div>
+    <input class="search" id="search" type="search" />
+    <button class="icon-btn" id="addBtn" type="button" style="display:none;margin:10px 0 0">+ 추가</button>
+    <div class="count" id="count"></div>
+    <div class="list" id="list"></div>
+  </section>
+</div>
+
+<dialog id="detail"></dialog>
+<dialog id="settings"></dialog>
+<dialog id="add"></dialog>
+
+<script>
+/* =====================================================================
+ *  내도감 엔진 골조 v1
+ *  구조: [MANIFESTS 설정] → [DataSource 추상화] → [Engine 렌더]
+ *  - 데모(Mock)로 즉시 구동. Client ID 입력 시 GoogleSheet로 무중단 교체.
+ *  - 화면/엔진은 데이터 출처를 모른다(영속성·배포·테스트를 동시에 해결).
+ *  실행: 브라우저로 열면 데모로 동작. 구글 연결은 http 서버(localhost)에서만 가능.
+ * ===================================================================== */
+
+/* ── 0. 안전 저장소: 배포본은 localStorage, 미리보기/샌드박스는 메모리로 자동 폴백 ── */
+const store = (() => {
+  try { const k="__nd"; localStorage.setItem(k,"1"); localStorage.removeItem(k); return localStorage; }
+  catch(e){ const m={}; return { getItem:k=>k in m?m[k]:null, setItem:(k,v)=>{m[k]=String(v);}, removeItem:k=>{delete m[k];} }; }
+})();
+
+/* ── 1. MANIFESTS: 도메인 정의(여기만 늘리면 도메인이 는다) ── */
+const MANIFESTS = {
+  /* 영화: 실제 구글시트(Apps Script)에서 라이브로 불러옴.
+     source.map = 시트 한글 헤더 → 엔진 항목 이름.  source.derive = 특수 처리(코드·수식·숫자). */
+  movies:{ id:"movies", title:"영화", icon:"🎬", vol:"卷1",
+    source:{ type:"appsscript", sheet:"",   // 영화는 기본 시트(파라미터 없음)
+      map:{ director:"감독", actors:"배우", country:"국적", recommend:"추천", review:"리뷰" },
+      derive(o, row, re){
+        o.title  = re(row['한국 개봉명']) || re(row['원제']);   // 한국명 우선, 없으면 원제
+        o.orig   = re(row['원제']);
+        o.year   = parseInt(re(row['개봉연도']),10) || null;   // "2007.0" → 2007
+        o.rating = parseFloat(re(row['TMDB평점'])) || null;
+        o.streaming = re(row['스트리밍']).split(/[,\/]+/).map(s=>s.trim()).filter(Boolean);
+        const code = re(row['시청여부']);                       // 두 글자 코드 해석
+        o.watched = code.charAt(0)==='W' ? "O" : "";           // W_ = 시청완료
+        o.rewatch = code.charAt(1)==='R';                       // _R = 다시볼것
+        o.pick    = code.charAt(1)==='P';                       // _P = 찜
+        o._id = (o.orig||o.title||'') + '_' + (o.year||'');
+      } },
+    search:["title","orig","director","actors"],
+    stats:[ {label:"전체",type:"count"},
+            {label:"시청완료",type:"countIf",field:"watched",eq:"O"},
+            {label:"다시볼것",type:"countIf",field:"rewatch",eq:true},
+            {label:"찜",type:"countIf",field:"pick",eq:true} ],
+    card:{ kind:"specimen", thumb:"🎞",
+           meta:r=>[r.year, r.director, r.actors].filter(Boolean).join(" · "),
+           tags:"streaming",
+           flags:r=>[ r.rating!=null?{t:"★ "+r.rating,cls:"star"}:0,
+                      r.watched==="O"?{t:"시청",cls:"on"}:0,
+                      r.rewatch?{t:"다시볼것",cls:"on"}:0,
+                      r.pick?{t:"찜",cls:"on"}:0 ] } },
+
+  /* 차계부: 백엔드는 이미 있지만 이번 단계는 데모(샘플) 유지.
+     실제 연결은 movies처럼 source.type:"appsscript", sheet:"carlog" + map/derive 한 벌만 추가하면 됨. */
+  /* 차계부: 실제 구글시트(정비·지출 기록)에서 라이브로 불러옴. */
+  carlog:{ id:"carlog", title:"차계부", icon:"🚗", vol:"卷2",
+    source:{ type:"appsscript", sheet:"carlog",
+      derive(o,row,re){
+        o.date = re(row['날짜']);
+        o.car  = re(row['차량']);
+        o.work = re(row['작업내용']);
+        o.shop = re(row['정비소']);
+        o.memo = re(row['비고']);
+        o.cost = parseInt(String(re(row['가격'])).replace(/[^\d]/g,''),10) || 0;   // 비숫자는 0
+        o.odo  = parseInt(String(re(row['주행거리'])).replace(/[^\d]/g,''),10) || null;
+        o._id  = re(row['ID']) || crypto.randomUUID();
+      } },
+    filterBy:{ field:"car", allLabel:"전체" },
+    search:["work","shop","car","memo"],
+    stats:[ {label:"총 지출",type:"sum",field:"cost",unit:"원"},
+            {label:"기록 수",type:"count"} ],
+    card:{ kind:"data", title:r=>`${r.date}${r.car?" · "+r.car:""}`,
+           kv:[{k:"작업",f:"work"},{k:"금액",f:"cost",u:"원"},{k:"주행",f:"odo",u:"km"},{k:"정비소",f:"shop"}] } },
+
+  /* 도서: '설정 한 장'으로 추가된 새 분야. 지금은 샘플로 화면 확인.
+     실제 시트 연결 준비되면 → source 를 { type:"appsscript", sheet:"book", map:{...}, derive(){...} } 로 교체만. */
+  books:{ id:"books", title:"도서", icon:"📖", vol:"卷3", canAdd:true,
+    source:{ type:"mysheet", sheet:"도서" },
+    search:["title","author"],
+    stats:[ {label:"전체",type:"count"},
+            {label:"읽음",type:"countIf",field:"status",eq:"읽음"},
+            {label:"읽는중",type:"countIf",field:"status",eq:"읽는중"},
+            {label:"찜",type:"countIf",field:"pick",eq:true} ],
+    card:{ kind:"specimen", thumb:"📖",
+           meta:r=>[r.year, r.author, r.genre].filter(Boolean).join(" · "),
+           tags:"tags",
+           flags:r=>[ r.rating!=null?{t:"★ "+r.rating,cls:"star"}:0,
+                      r.status==="읽음"?{t:"읽음",cls:"on"}:0,
+                      r.status==="읽는중"?{t:"읽는중",cls:"on"}:0,
+                      r.pick?{t:"찜",cls:"on"}:0 ] } },
+
+  /* 100대 명산: 오른 곳을 체크하는 목록. */
+  mountains:{ id:"mountains", title:"100대 명산", icon:"⛰", vol:"卷4",
+    source:{ type:"mysheet", sheet:"명산" },
+    search:["title","region"],
+    stats:[ {label:"전체",type:"count"},
+            {label:"오른 곳",type:"countIf",field:"climbed",eq:true} ],
+    card:{ kind:"specimen", thumb:"⛰",
+           meta:r=>[r.height?r.height+"m":"", r.region].filter(Boolean).join(" · "),
+           tags:"tags",
+           flags:r=>[ r.climbed?{t:"완등",cls:"on"}:0 ] } },
+
+  /* 러닝: 날짜·거리·시간 기록, 페이스는 자동 계산. */
+  running:{ id:"running", title:"러닝", icon:"🏃", vol:"卷5",
+    source:{ type:"mysheet", sheet:"러닝" },
+    search:["memo"],
+    computed:{ pace:{ deps:["dist","time"], calc:"pacePerKm" } },
+    stats:[ {label:"총 거리",type:"sum",field:"dist",unit:"km"},
+            {label:"평균 페이스",type:"avgComputed",field:"pace",unit:"분/km"},
+            {label:"기록 수",type:"count"} ],
+    card:{ kind:"data", title:r=>`${r.date}`,
+           kv:[{k:"거리",f:"dist",u:"km"},{k:"시간",f:"time",u:"분"},{k:"페이스",f:"pace",u:"분/km"}] } }
+};
+
+/* ── 2. DataSource 추상화 ──
+   계약: ensureReady(), list(domainId)→rows[], upsert(domainId,row), label, isLive */
+class MockDataSource {
+  constructor(){ this.isLive=false; this.label="데모 데이터"; this._d=SAMPLE; }
+  async ensureReady(){ return true; }
+  async list(id){ return (this._d[id]||[]).slice(); }
+  async upsert(id,row){ const a=this._d[id]||(this._d[id]=[]); const i=a.findIndex(x=>x._id===row._id);
+    i>=0?a[i]=row:a.push({...row,_id:row._id||crypto.randomUUID()}); return true; }
+}
+/* 구글 시트 소스: drive.file 스코프로 앱 전용 시트에 read/write. Client ID 필요. */
+/* 내 구글시트: 로그인 후 내 드라이브에 '내도감 Data'를 만들고 읽고/쓴다.
+   ★ 안전 규칙: 탭이 '없을 때만' 만든다. 있으면 절대 손대지 않는다. 지우거나 덮어쓰는 기능은 아예 없다. */
+class GoogleSheetDataSource {
+  constructor(clientId){ this.clientId=clientId; this.isLive=true; this.label="내 구글시트"; this.token=null; this.ssId=store.getItem("nd.ssId"); }
+  async ensureReady(){ await this._auth(); await this._ensureSpreadsheet(); await this._ensureTabs(); return true; }
+  _auth(){ return new Promise((res,rej)=>{
+    if(!window.google?.accounts?.oauth2) return rej(new Error("구글 로그인 스크립트 미로드(인터넷 확인)"));
+    const tc = google.accounts.oauth2.initTokenClient({
+      client_id:this.clientId, scope:"https://www.googleapis.com/auth/drive.file",
+      callback:r=>{ if(r.error) return rej(new Error("로그인 실패: "+r.error)); this.token=r.access_token; res(); } });
+    tc.requestAccessToken();
+  }); }
+  async _api(url,opt={}){
+    const res=await fetch(url,{...opt,headers:{Authorization:"Bearer "+this.token,"Content-Type":"application/json",...(opt.headers||{})}});
+    const t=await res.text(); let b; try{b=JSON.parse(t);}catch{b=t;}
+    if(!res.ok){ let h=res.status===403?" (구글 클라우드에서 Sheets·Drive 사용설정 확인)":res.status===401?" (다시 연결 필요)":"";
+      throw new Error(`HTTP ${res.status}${h}`); }
+    return b;
+  }
+  async _ensureSpreadsheet(){   // 파일이 없을 때만 새로 만든다
+    if(this.ssId) return;
+    const d=await this._api("https://sheets.googleapis.com/v4/spreadsheets",{method:"POST",
+      body:JSON.stringify({properties:{title:"내도감 Data"}})});
+    this.ssId=d.spreadsheetId; store.setItem("nd.ssId",this.ssId);
+  }
+  async _tabTitles(){
+    const d=await this._api(`https://sheets.googleapis.com/v4/spreadsheets/${this.ssId}?fields=sheets.properties.title`);
+    return (d.sheets||[]).map(s=>s.properties.title);
+  }
+  async _ensureTabs(){   // 없는 카테고리 탭만 만든다(+헤더·샘플). 있으면 그냥 통과.
+    const have=await this._tabTitles();
+    for(const m of Object.values(MANIFESTS)){
+      if(m.source?.type!=="mysheet" || have.includes(m.sheet)) continue;   // ★ 있으면 손 안 댐
+      await this._api(`https://sheets.googleapis.com/v4/spreadsheets/${this.ssId}:batchUpdate`,{method:"POST",
+        body:JSON.stringify({requests:[{addSheet:{properties:{title:m.sheet}}}]})});
+      const keys=["_id",...fieldKeys(m)];
+      const seed=(SAMPLE[m.id]||[]).map(r=>keys.map(k=>Array.isArray(r[k])?r[k].join("|"):(r[k]??"")));
+      await this._write(m.sheet, `${m.sheet}!A1`, [keys, ...seed]);   // 헤더 + 샘플은 최초 1번만
+    }
+  }
+  async _write(sheet,range,values){
+    return this._api(`https://sheets.googleapis.com/v4/spreadsheets/${this.ssId}/values/${encodeURIComponent(range)}?valueInputOption=RAW`,
+      {method:"PUT",body:JSON.stringify({values})});
+  }
+  async list(id){
+    const m=MANIFESTS[id];
+    const d=await this._api(`https://sheets.googleapis.com/v4/spreadsheets/${this.ssId}/values/${encodeURIComponent(m.sheet+"!A1:Z10000")}`);
+    const vals=d.values||[]; if(vals.length<2) return [];
+    const [head,...rows]=vals;
+    return rows.map(r=>Object.fromEntries(head.map((k,i)=>[k, coerce(r[i])])));
+  }
+  async upsert(id,row){   // 맨 아래에 한 줄만 추가(append). 기존 줄은 절대 안 건드림.
+    const m=MANIFESTS[id]; const keys=["_id",...fieldKeys(m)];
+    const line=keys.map(k=>Array.isArray(row[k])?row[k].join("|"):(row[k]??""));
+    return this._api(`https://sheets.googleapis.com/v4/spreadsheets/${this.ssId}/values/${encodeURIComponent(m.sheet+"!A1")}:append?valueInputOption=RAW`,
+      {method:"POST",body:JSON.stringify({values:[line]})});
+  }
+}
+/* Apps Script 통로: 기존 백엔드(doGet)를 그대로 재사용. 이번 단계는 읽기(list) 전용. */
+function reCell(s){ // 네이버 링크 수식이 껴 있으면 글자만 뽑고, 아니면 그대로 정리
+  return String(s==null?'':s).replace(/=HYPERLINK\("[^"]*",\s*"([^"]+)"\)/,'$1').trim();
+}
+function mapRow(m, row){ // 시트 한 줄(한글 헤더) → 엔진 항목
+  const out = {};
+  const map = m.source?.map || {};
+  for(const [key, header] of Object.entries(map)) out[key] = reCell(row[header]);
+  if(typeof m.source?.derive === "function") m.source.derive(out, row, reCell);
+  if(!out._id) out._id = crypto.randomUUID();
+  return out;
+}
+class AppsScriptDataSource {
+  constructor(url){ this.url=url; this.isLive=true; this.label="구글시트"; }
+  async ensureReady(){ if(!this.url) throw new Error("APPS_SCRIPT_URL이 비어 있습니다"); return true; }
+  async list(id){
+    const m=MANIFESTS[id];
+    const q=m.source?.sheet ? ("?sheet="+encodeURIComponent(m.source.sheet)) : "";
+    const res=await fetch(this.url+q);
+    if(!res.ok) throw new Error("HTTP "+res.status+" (Apps Script 배포/권한 확인)");
+    const raw=await res.json();
+    return (Array.isArray(raw)?raw:[]).map(row=>mapRow(m,row));
+  }
+  async upsert(){ throw new Error("이 단계는 보기 전용입니다(추가·수정은 다음 단계)"); }
+}
+const fieldKeys = m => (SAMPLE[m.id]?.[0] ? Object.keys(SAMPLE[m.id][0]).filter(k=>k!=="_id") : m.search);
+const coerce = v => v==="TRUE"?true : v==="FALSE"?false : (v!=="" && !isNaN(v) && v!==null)? +v : (typeof v==="string"&&v.includes("|")?v.split("|"):v);
+
+/* ── 3. Engine: computed·통계·검색·렌더(데이터 출처 무관) ── */
+const CALCS = { // 확장점: 새 계산식은 여기 등록
+  deltaOdoPerLiter(rows, field){ let prev=null; return rows.map(r=>{ let v=null;
+    if(r.type==="주유"&&r.liters){ if(prev!=null) v=+((r.odo-prev)/r.liters).toFixed(1); prev=r.odo; }
+    return {...r,[field]:v}; }); },
+  pacePerKm(rows, field){ return rows.map(r=>({ ...r, [field]: (r.dist? +(r.time/r.dist).toFixed(1): null) })); }
+};
+function applyComputed(m, rows){
+  if(!m.computed) return rows;
+  let out=rows;
+  for(const [field,spec] of Object.entries(m.computed)){
+    const fn=CALCS[spec.calc]; if(fn) out=fn(out, field);
+  }
+  return out;
+}
+function calcStat(s, rows){
+  try{
+    if(s.type==="count") return rows.length;
+    if(s.type==="countIf") return rows.filter(r=>r[s.field]===s.eq).length;
+    if(s.type==="sum") return rows.filter(r=>!s.where||Object.entries(s.where).every(([k,v])=>r[k]===v)).reduce((a,r)=>a+(+r[s.field]||0),0);
+    if(s.type==="avgComputed"){ const v=rows.map(r=>r[s.field]).filter(x=>x!=null); return v.length?+(v.reduce((a,b)=>a+b,0)/v.length).toFixed(1):0; }
+  }catch(e){ console.error("stat",e); return "—"; } return "—";
+}
+const fmt = n => typeof n==="number"?n.toLocaleString("ko-KR"):n;
+function filterRows(m, rows, q){ q=(q||"").trim().toLowerCase(); if(!q) return rows;
+  return rows.filter(r=>m.search.some(f=>String(r[f]??"").toLowerCase().includes(q))); }
+
+/* ── 4. State + App ── */
+const state = { view:"home", domain:null, query:"", pick:"", rows:[] };
+const src = { current:null };
+const $ = s=>document.querySelector(s);
+let _mock=null, _apps=null, _gsheet=null;
+function isGConnected(){ return !!(_gsheet && _gsheet.token); }
+
+/* 켜둔 카테고리 목록(브라우저에 기억). 처음엔 빈 상태 → 설정에서 추가. */
+function getActive(){ try{ return JSON.parse(store.getItem("nd.active")||"[]"); }catch(e){ return []; } }
+function setActive(list){ store.setItem("nd.active", JSON.stringify(list)); }
+function isActive(id){ return getActive().includes(id); }
+function toggleActive(id,on){ let a=getActive(); if(on){ if(!a.includes(id)) a.push(id); } else a=a.filter(x=>x!==id); setActive(a); }
+
+/* 화면 전환: home(카드 격자) ↔ domain(분야 목록) */
+function showView(v){ state.view=v;
+  $("#home").style.display = v==="home"?"block":"none";
+  $("#domainView").style.display = v==="domain"?"block":"none"; }
+function goHome(){ state.domain=null; state.query=""; state.pick=""; showView("home"); renderHome(); }
+function openDomain(id){ state.domain=id; state.query=""; state.pick=""; $("#search").value=""; showView("domain"); loadAndRender(); }
+
+/* 홈: 켜둔 카테고리를 카드로. 건수는 한 번 열어본 분야만 표시(홈을 빠르게 유지). */
+function renderHome(){
+  const active = getActive().map(id=>MANIFESTS[id]).filter(Boolean);
+  const home=$("#home");
+  if(!active.length){
+    home.innerHTML=`<div class="home-empty"><div class="em">🗂</div>
+      <h2>아직 담은 카테고리가 없어요</h2>
+      <p>설정에서 원하는 카테고리를 켜면<br>여기 카드로 올라옵니다.</p>
+      <button class="btn" id="emptyAdd">카테고리 추가하기</button></div>`;
+    $("#emptyAdd").onclick=openSettings; return;
+  }
+  home.innerHTML=`<div class="home-grid">`+active.map(m=>{
+    const cnt = CACHE[m.id] ? `${fmt(CACHE[m.id].length)}건` : "";
+    return `<button class="cat-card" data-id="${m.id}"><span class="cv">${m.vol}</span>
+      <span class="ci">${m.icon}</span><span class="cn">${m.title}</span><span class="cc">${cnt}</span></button>`;
+  }).join("")+`</div>`;
+  home.querySelectorAll(".cat-card").forEach(b=>b.onclick=()=>openDomain(b.dataset.id));
+}
+/* 분야가 선언한 source.type 에 따라 출처를 고른다.
+   appsscript → 기존 시트(영화·차계부) / mysheet → 내 구글시트(연결됐을 때) / 그 외·미연결 → 샘플 */
+function sourceFor(m){
+  if(m.source?.type==="appsscript" && CONFIG.APPS_SCRIPT_URL) return _apps||(_apps=new AppsScriptDataSource(CONFIG.APPS_SCRIPT_URL));
+  if(m.source?.type==="mysheet" && isGConnected()) return _gsheet;
+  return _mock||(_mock=new MockDataSource());   // 미연결 → 샘플로 보여줌
+}
+function clearCache(){ Object.keys(CACHE).forEach(k=>delete CACHE[k]); }
+async function connectGoogle(clientId){
+  const gs=new GoogleSheetDataSource(clientId);
+  await gs.ensureReady();               // 로그인 → '내도감 Data' 확인/생성 → 없는 탭만 생성(+샘플)
+  _gsheet=gs; store.setItem("nd.clientId",clientId);
+  clearCache();                          // 샘플 캐시 비우고 실제 시트에서 다시 읽게
+}
+
+/* 탭: 홈에서 켜둔 카테고리만 표시(안 켠 건 안 나옴 → 길어지지 않음) */
+function renderTabs(){ $("#tabs").innerHTML=getActive().map(id=>{ const m=MANIFESTS[id]; if(!m) return "";
+  return `<button class="tab" role="tab" data-id="${id}" aria-selected="${id===state.domain}"><span>${m.icon}</span> ${m.title}</button>`; }).join(""); }
+function renderStats(m, rows){ $("#stats").innerHTML=m.stats.map(s=>{ let n=calcStat(s,rows);
+  if(s.type==="sum"||s.type==="avgComputed") n=fmt(n)+(s.unit?` ${s.unit}`:""); return `<div class="stat"><div class="n">${n}</div><div class="l">${s.label}</div></div>`; }).join(""); }
+function renderSearch(m){ const L={title:"제목",director:"감독",actors:"배우",type:"구분",memo:"메모",work:"작업",shop:"정비소",car:"차량",region:"지역",author:"저자"};
+  $("#search").placeholder="🔍 "+m.search.map(f=>L[f]||f).join(" · ")+" 검색…"; }
+/* 선택기(예: 차량 전체|싼타페|제네시스): 데이터에서 값 자동 추출, 2개 이상일 때만 표시 */
+function renderPicker(m){
+  const p=$("#picker");
+  if(!m.filterBy){ p.style.display="none"; p.innerHTML=""; return; }
+  const vals=[...new Set(state.rows.map(r=>String(r[m.filterBy.field]||"").trim()).filter(Boolean))];
+  if(vals.length<2){ p.style.display="none"; p.innerHTML=""; state.pick=""; return; }  // 1개뿐이면 숨김
+  p.style.display="flex";
+  const opts=[{v:"",label:m.filterBy.allLabel||"전체"}, ...vals.map(v=>({v,label:v}))];
+  p.innerHTML=opts.map(o=>`<button class="chip ${o.v===state.pick?'on':''}" data-v="${o.v}">${o.label}</button>`).join("");
+  p.querySelectorAll(".chip").forEach(b=>b.onclick=()=>{ state.pick=b.dataset.v; loadAndRender(); });
+}
+function renderCard(m, r, no){ const c=m.card;
+  if(c.kind==="specimen"){ const meta=c.meta(r); const tags=(r[c.tags]||[]).map(t=>`<span class="tag">${t}</span>`).join("");
+    const flags=(typeof c.flags==="function"?c.flags(r):[]).filter(Boolean)
+      .map(f=>`<span class="flag ${f.cls||""}">${f.t}</span>`).join("");
+    return `<button class="card" data-id="${r._id}"><span class="cat-no">#${String(no).padStart(3,"0")}</span><span class="thumb">${r.cover?`<img src="${r.cover}" alt="">`:c.thumb}</span>
+      <span class="body"><h3>${r.title}</h3><div class="meta">${meta}</div><div class="tags">${tags}</div></span><span class="flags">${flags}</span></button>`; }
+  const kv=c.kv.map(col=>{ const v=r[col.f]; if(v==null) return ""; const s=(typeof v==="number"?fmt(v):v)+(col.u?` ${col.u}`:"");
+    return `<span>${col.k} <b>${s}</b></span>`; }).filter(Boolean).join("");
+  return `<button class="card" data-id="${r._id}" style="grid-template-columns:auto 1fr;"><span class="thumb">🧾</span>
+    <span class="body"><h3 style="font-size:15px">${c.title(r)}</h3><div class="kv">${kv}</div>${r.memo?`<div class="meta" style="margin-top:5px">${r.memo}</div>`:""}</span></button>`; }
+function openDetail(m, r){ const rows=Object.entries(r).filter(([k])=>k!=="_id").map(([k,v])=>
+    `<div class="drow"><span class="k">${k}</span><span>${Array.isArray(v)?v.join(", "):v===null?"—":v===true?"예":v===false?"아니오":v}</span></div>`).join("");
+  const d=$("#detail"); d.innerHTML=`<div class="dhead"><h3>${m.card.kind==="specimen"?r.title:r.date+" · "+r.type}</h3></div><div class="dbody">${rows}</div>
+    <button class="dclose" onclick="this.closest('dialog').close()">닫기</button>`; d.showModal(); }
+
+const CACHE = {};   // 분야별로 한 번 불러온 데이터를 기억 → 탭 전환·검색 때 다시 안 받음
+async function loadAndRender(){
+  const m=MANIFESTS[state.domain]; $("#root").dataset.domain=state.domain;
+  src.current = sourceFor(m);
+  const chip=$("#srcChip"); chip.textContent=src.current.label; chip.classList.toggle("live", !!src.current.isLive);
+  renderTabs(); renderSearch(m);
+  const addBtn=$("#addBtn");
+  if(m.canAdd){ addBtn.style.display="inline-block"; addBtn.textContent="+ "+m.title+" 추가"; }
+  else addBtn.style.display="none";
+  $("#banner").innerHTML="";
+  if(!CACHE[state.domain]){                       // 처음 여는 분야만 실제로 불러온다
+    $("#count").textContent="불러오는 중…";
+    try{ CACHE[state.domain] = await src.current.list(state.domain); }
+    catch(e){ $("#banner").innerHTML=`<div class="banner warn">데이터를 불러오지 못했습니다: ${e.message}</div>`; CACHE[state.domain]=[]; }
+  }
+  const raw = CACHE[state.domain];
+  state.rows = applyComputed(m, raw.map(r=>({_id:r._id||crypto.randomUUID(),...r})));
+  renderPicker(m);
+  let base = state.rows;
+  if(m.filterBy && state.pick) base = base.filter(r=>String(r[m.filterBy.field]||"").trim()===state.pick);
+  renderStats(m, base);
+  const rows=filterRows(m, base, state.query);
+  $("#count").textContent=`총 ${rows.length}건 · 출처: ${src.current.label}`;
+  $("#list").innerHTML=rows.map((r,i)=>renderCard(m,r,i+1)).join("") || `<div class="count">결과가 없습니다.</div>`;
+  document.querySelectorAll(".card").forEach(b=>b.onclick=()=>openDetail(m, state.rows.find(x=>x._id===b.dataset.id)));
+}
+
+/* ── 5. 설정: 카테고리 켜고 끄기 + 구글/개인 설정 자리 ── */
+function openSettings(){
+  const d=$("#settings");
+  const rows=Object.values(MANIFESTS).map(m=>`<div class="cat-mrow">
+     <span class="mi">${m.icon}</span>
+     <span class="mn">${m.title} <span class="mv">${m.vol}</span></span>
+     <button class="sw ${isActive(m.id)?'on':''}" data-id="${m.id}" role="switch" aria-checked="${isActive(m.id)}" type="button"></button>
+   </div>`).join("");
+  d.innerHTML=`<div class="dhead"><h3>설정</h3></div><div class="dbody set">
+    <h4>카테고리 관리</h4>
+    <div class="hint">켜면 홈에 카드가 생기고, 끄면 사라집니다. (기록한 데이터는 지워지지 않아요)</div>
+    ${rows}
+    <h4>구글 계정 연결</h4>
+    <div class="hint">연결하면 도서·명산·러닝을 <b>내 구글드라이브의 '내도감 Data' 시트</b>에 저장합니다.
+      규칙은 <b>없으면 만들고, 있으면 그대로 씀</b> — 기존 데이터는 안전합니다. (영화·차계부는 기존 시트를 그대로 씁니다.)</div>
+    <input id="cidInput" value="${store.getItem('nd.clientId')||''}" placeholder="구글에서 받은 열쇠(...apps.googleusercontent.com)" />
+    <div style="display:flex;gap:8px;align-items:center;margin-top:10px">
+      <button class="btn" id="gConnect" type="button">${isGConnected()?'다시 연결':'구글 연결'}</button>
+      <span class="mv" id="gStatus">${isGConnected()?'연결됨 ✓':'미연결 — 지금은 샘플로 표시 중'}</span>
+    </div>
+    <button class="btn ghost" id="closeSet" style="margin-top:22px">닫기</button>
+  </div>`;
+  d.showModal();
+  d.querySelectorAll(".sw").forEach(sw=>sw.onclick=()=>{
+    const id=sw.dataset.id, on=!sw.classList.contains("on");
+    sw.classList.toggle("on",on); sw.setAttribute("aria-checked",on);
+    toggleActive(id,on);
+    if(state.view==="home") renderHome();
+  });
+  $("#gConnect").onclick=async()=>{
+    const inp=$("#cidInput"); inp.blur();
+    const cid=inp.value.trim(); if(!cid){ alert("구글에서 받은 열쇠(Client ID)를 붙여넣으세요."); return; }
+    const st=$("#gStatus"); st.textContent="연결 중…";
+    try{ await connectGoogle(cid);
+      st.textContent="연결됨 ✓  ('내도감 Data' 준비 완료)"; $("#gConnect").textContent="다시 연결";
+      if(state.view==="home") renderHome(); else loadAndRender();
+    }catch(e){ st.textContent="연결 실패"; alert("연결 실패:\n"+e.message); }
+  };
+  $("#closeSet").onclick=()=>d.close();
+}
+
+/* ── 6. 부트: 저장된 Client ID 있으면 구글, 없으면 데모 ── */
+/* ── 책 추가: 구글 북스에서 제목 검색 → 저자·연도·표지 자동 채움 → 목록에 추가 ── */
+async function searchBooks(q){
+  if(!q || !q.trim()) return [];
+  // 키 없이 동작(개인 사용량엔 대개 충분). 막히면 &key=... 로 무료 키 추가 가능.
+  const url="https://www.googleapis.com/books/v1/volumes?maxResults=6&country=KR&q="+encodeURIComponent(q.trim());
+  const res=await fetch(url);
+  if(!res.ok) throw new Error("HTTP "+res.status);
+  const d=await res.json();
+  return (d.items||[]).map(it=>{ const v=it.volumeInfo||{};
+    return { title:v.title||"", author:(v.authors||[]).join(", "),
+      year:parseInt(String(v.publishedDate||"").slice(0,4),10)||null,
+      cover:String(v.imageLinks&&v.imageLinks.thumbnail||"").replace(/^http:/,"https:"),
+      genre:(v.categories||[]) }; });
+}
+let addStatus="읽고싶다";
+function openAddBook(){
+  const d=$("#add"); const statuses=["읽음","읽는중","읽고싶다"];
+  d.innerHTML=`<div class="dhead"><h3>책 추가</h3></div><div class="dbody set">
+    <label style="margin-top:0">이 책의 상태</label>
+    <div style="display:flex;gap:6px">${statuses.map(s=>`<button class="btn ghost st ${s===addStatus?'on':''}" data-s="${s}">${s}</button>`).join("")}</div>
+    <label>제목으로 검색</label>
+    <input id="bq" placeholder="책 제목 입력…" autocomplete="off" />
+    <div id="bres" style="margin-top:12px;display:flex;flex-direction:column;gap:8px;max-height:340px;overflow:auto"></div>
+    <button class="btn ghost" id="addClose" style="margin-top:14px">닫기</button></div>`;
+  d.showModal();
+  d.querySelectorAll(".st").forEach(b=>b.onclick=()=>{ addStatus=b.dataset.s;
+    d.querySelectorAll(".st").forEach(x=>x.classList.toggle("on",x.dataset.s===addStatus)); });
+  $("#addClose").onclick=()=>d.close();
+  const bq=$("#bq"), bres=$("#bres"); let timer=null, results=[];
+  bq.addEventListener("input",()=>{ clearTimeout(timer); timer=setTimeout(async()=>{
+    if(!bq.value.trim()){ bres.innerHTML=""; return; }
+    bres.innerHTML=`<div class="count">검색 중…</div>`;
+    try{ results=await searchBooks(bq.value);
+      bres.innerHTML = results.length ? results.map((b,i)=>
+        `<button class="card" data-i="${i}" style="grid-template-columns:auto 1fr">
+          <span class="thumb">${b.cover?`<img src="${b.cover}" alt="">`:"📖"}</span>
+          <span class="body"><h3 style="font-size:15px">${b.title}</h3>
+          <div class="meta">${[b.year,b.author].filter(Boolean).join(" · ")}</div></span></button>`).join("")
+        : `<div class="count">검색 결과가 없습니다.</div>`;
+      bres.querySelectorAll(".card").forEach(btn=>btn.onclick=()=>addBook(results[+btn.dataset.i]));
+    }catch(e){ bres.innerHTML=`<div class="banner warn">검색 실패: ${e.message}</div>`; }
+  },350); });
+  setTimeout(()=>bq.focus(),50);
+}
+function addBook(b){
+  const row={ _id:crypto.randomUUID(), title:b.title, author:b.author, year:b.year,
+    cover:b.cover, genre:b.genre||[], rating:null,
+    status: addStatus==="읽고싶다" ? "" : addStatus,
+    pick: addStatus==="읽고싶다" };
+  (CACHE.books || (CACHE.books=[])).push(row);
+  $("#add").close();
+  loadAndRender();
+  if(isGConnected()){                     // 연결돼 있으면 내 구글시트에 실제 저장
+    _gsheet.upsert("books", row).catch(e=>alert("구글 저장 실패(화면엔 남아있음): "+e.message));
+  }
+}
+
+async function boot(){
+  // 첫 화면은 홈(켜둔 카테고리 카드 격자). 처음엔 비어 있고, 설정에서 카테고리를 켜면 카드가 생김.
+  showView("home"); renderHome();
+}
+$("#backBtn").addEventListener("click",goHome);
+$("#tabs").addEventListener("click",e=>{ const t=e.target.closest(".tab"); if(t) openDomain(t.dataset.id); });
+$("#search").addEventListener("input",e=>{ state.query=e.target.value; loadAndRender(); });
+$("#setBtn").addEventListener("click",openSettings);
+$("#addBtn").addEventListener("click",()=>{ if(MANIFESTS[state.domain]?.canAdd) openAddBook(); });
+
+/* ── 샘플 데이터(데모 전용; 실사용 시 구글 시트에서 옴) ── */
+const SAMPLE = {
+  movies:[
+    {_id:"m1",title:"멀홀랜드 드라이브",year:2001,director:"데이빗 린치",actors:"나오미 왓츠",rating:7.8,watched:"O",rewatch:true,pick:false,streaming:["티빙","BBC"]},
+    {_id:"m2",title:"데어 윌 비 블러드",year:2007,director:"폴 토마스 앤더슨",actors:"다니엘 데이 루이스",rating:8.1,watched:"O",rewatch:true,pick:true,streaming:["U+모바일tv"]},
+    {_id:"m3",title:"센과 치히로의 행방불명",year:2001,director:"미야자키 하야오",actors:"이리노 미유",rating:8.5,watched:"O",rewatch:false,pick:false,streaming:["넷플릭스"]},
+    {_id:"m4",title:"보이후드",year:2014,director:"리처드 링클레이터",actors:"엘라 콜트레인",rating:7.5,watched:"O",rewatch:true,pick:false,streaming:["왓챠"]},
+    {_id:"m5",title:"노인을 위한 나라는 없다",year:2007,director:"코엔 형제",actors:"토미 리 존스",rating:8.0,watched:"△",rewatch:false,pick:true,streaming:["넷플릭스"]}
+  ],
+  carlog:[
+    {_id:"c1",date:"26.03.02",car:"싼타페",work:"주유",shop:"GS칼텍스",cost:78000,odo:120000,memo:""},
+    {_id:"c2",date:"26.03.20",car:"제네시스",work:"엔진오일 교체",shop:"블루핸즈",cost:150000,odo:45200,memo:"엔진오일+필터"},
+    {_id:"c3",date:"26.04.18",car:"싼타페",work:"타이어 교체",shop:"타이어뱅크",cost:320000,odo:121000,memo:"앞 2짝"}
+  ],
+  books:[
+    {_id:"b1",title:"사피엔스",author:"유발 하라리",year:2015,cover:"",status:"읽음",rating:9.0,pick:false,genre:["역사","인문"]},
+    {_id:"b2",title:"코스모스",author:"칼 세이건",year:2006,cover:"",status:"읽는중",rating:9.2,pick:true,genre:["과학","교양"]},
+    {_id:"b3",title:"몰입 Flow",author:"미하이 칙센트미하이",year:2004,cover:"",status:"",rating:null,pick:true,genre:["심리"]}
+  ],
+  mountains:[
+    {_id:"mt1",title:"지리산",height:1915,region:"경남·전남",climbed:true,tags:["국립공원"]},
+    {_id:"mt2",title:"설악산",height:1708,region:"강원",climbed:true,tags:["국립공원"]},
+    {_id:"mt3",title:"북한산",height:836,region:"서울·경기",climbed:false,tags:["국립공원"]},
+    {_id:"mt4",title:"한라산",height:1947,region:"제주",climbed:false,tags:["국립공원"]}
+  ],
+  running:[
+    {_id:"r1",date:"2026-06-14",dist:5.2,time:31,memo:"아침 강변"},
+    {_id:"r2",date:"2026-06-21",dist:10.0,time:58,memo:"주말 롱런"},
+    {_id:"r3",date:"2026-06-28",dist:3.1,time:17,memo:"인터벌"}
+  ]
+};
+
+boot();
+</script>
+</body>
+</html>
