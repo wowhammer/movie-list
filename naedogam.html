@@ -120,7 +120,7 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
 <body>
 <div class="wrap" id="root" data-domain="movies">
   <header class="masthead">
-    <h1>내도감</h1><span class="sub">Naedogam · v7</span>
+    <h1>내도감</h1><span class="sub">Naedogam · v8</span>
     <span class="spacer"></span>
     <span class="src-chip" id="srcChip" style="display:none">데모</span>
     <button class="icon-btn" id="setBtn" type="button">⚙ 설정</button>
@@ -307,15 +307,16 @@ class GoogleSheetDataSource {
     this.warnings=[];
     for(const m of Object.values(MANIFESTS)){
       if(m.source?.type!=="mysheet") continue;
+      const tab=m.source.sheet;                                      // ★ 탭 이름은 설정(source) 안에 있다
       try{
-        if(!have.includes(m.sheet)){                                 // 없으면 탭 생성
+        if(!have.includes(tab)){                                     // 없으면 탭 생성
           await this._api(`https://sheets.googleapis.com/v4/spreadsheets/${this.ssId}:batchUpdate`,{method:"POST",
-            body:JSON.stringify({requests:[{addSheet:{properties:{title:m.sheet}}}]})});
+            body:JSON.stringify({requests:[{addSheet:{properties:{title:tab}}}]})});
         }
-        if(await this._isEmpty(m.sheet)){                            // ★ 비어 있을 때만 채움(부분실패 복구 포함)
+        if(await this._isEmpty(tab)){                                // ★ 비어 있을 때만 채움(부분실패 복구 포함)
           const keys=["_id",...fieldKeys(m)];
           const seed=(SAMPLE[m.id]||[]).map(r=>keys.map(k=>this._cell(r[k])));
-          await this._write(m.sheet, [keys, ...seed]);
+          await this._write(tab, [keys, ...seed]);
         }
       }catch(e){ this.warnings.push(`${m.title}: ${e.message}`); }   // 한 탭이 실패해도 연결은 계속
     }
@@ -326,7 +327,7 @@ class GoogleSheetDataSource {
   }
   async list(id){
     const m=MANIFESTS[id];
-    const d=await this._api(`https://sheets.googleapis.com/v4/spreadsheets/${this.ssId}/values/${this._range(m.sheet,"A1:Z10000")}`);
+    const d=await this._api(`https://sheets.googleapis.com/v4/spreadsheets/${this.ssId}/values/${this._range(m.source.sheet,"A1:Z10000")}`);
     const vals=d.values||[]; if(vals.length<2) return [];
     const [head,...rows]=vals;
     return rows.map(r=>Object.fromEntries(head.map((k,i)=>[k, coerce(r[i])])));
@@ -334,7 +335,7 @@ class GoogleSheetDataSource {
   async upsert(id,row){   // 맨 아래에 한 줄만 추가(append). 기존 줄은 절대 안 건드림.
     const m=MANIFESTS[id]; const keys=["_id",...fieldKeys(m)];
     const line=keys.map(k=>this._cell(row[k]));
-    return this._api(`https://sheets.googleapis.com/v4/spreadsheets/${this.ssId}/values/${this._range(m.sheet,"A1")}:append?valueInputOption=RAW`,
+    return this._api(`https://sheets.googleapis.com/v4/spreadsheets/${this.ssId}/values/${this._range(m.source.sheet,"A1")}:append?valueInputOption=RAW`,
       {method:"POST",body:JSON.stringify({values:[line]})});
   }
 }
