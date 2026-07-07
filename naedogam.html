@@ -123,7 +123,7 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
 <body>
 <div class="wrap" id="root" data-domain="movies">
   <header class="masthead">
-    <h1>내도감</h1><span class="sub">Naedogam · v14</span>
+    <h1>내도감</h1><span class="sub">Naedogam · v15</span>
     <span class="spacer"></span>
     <span class="src-chip" id="srcChip" style="display:none">데모</span>
     <button class="icon-btn" id="setBtn" type="button">⚙ 설정</button>
@@ -577,7 +577,10 @@ function openRecordForm(m, existing){
   d.querySelectorAll(".rf-bool").forEach(b=>b.onclick=()=>{ const on=!b.classList.contains("on"); b.classList.toggle("on",on); b.textContent=on?'예':'아니오'; });
   $("#rfClose").onclick=()=>d.close();
   $("#rfSave").onclick=async()=>{
-    d.querySelectorAll("input.rf").forEach(i=>i.blur());   // 한글 마지막 글자 잘림 방지
+    // 한글 마지막 글자 잘림 방지: 조합 확정(blur) → 아주 짧은 틈 뒤 값 읽기
+    if(document.activeElement && document.activeElement.blur) document.activeElement.blur();
+    d.querySelectorAll("input.rf").forEach(i=>i.blur());
+    await new Promise(r=>setTimeout(r,60));
     const row = existing ? {...existing} : { _id: crypto.randomUUID() };
     fields.forEach(f=>{
       if(f.type==="bool"){ row[f.k]=d.querySelector(`.rf-bool[data-k="${f.k}"]`).classList.contains("on"); return; }
