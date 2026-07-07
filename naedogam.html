@@ -81,6 +81,7 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
   .dclose{ display:block; margin:6px 18px 18px auto; font-family:var(--mono); font-size:12px; cursor:pointer; background:var(--ink); color:var(--paper); border:none; padding:8px 16px; border-radius:3px; }
   .set label{ display:block; font-size:12px; color:var(--ink-soft); margin:12px 0 4px; }
   .set input{ width:100%; font-family:var(--mono); font-size:12px; padding:8px 10px; border:1px solid var(--line); border-radius:3px; background:var(--paper); }
+  .set select{ width:100%; font-family:var(--mono); font-size:12px; padding:8px 10px; border:1px solid var(--line); border-radius:3px; background:var(--paper); color:var(--ink); }
   .set .hint{ font-size:11px; color:var(--ink-soft); margin-top:4px; }
   .btn{ font-family:var(--sans); font-size:13px; font-weight:500; cursor:pointer; background:var(--accent); color:#fff; border:none; padding:9px 16px; border-radius:3px; }
   .btn.ghost{ background:none; color:var(--ink); border:1px solid var(--line); }
@@ -122,7 +123,7 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
 <body>
 <div class="wrap" id="root" data-domain="movies">
   <header class="masthead">
-    <h1>내도감</h1><span class="sub">Naedogam · v11</span>
+    <h1>내도감</h1><span class="sub">Naedogam · v12</span>
     <span class="spacer"></span>
     <span class="src-chip" id="srcChip" style="display:none">데모</span>
     <button class="icon-btn" id="setBtn" type="button">⚙ 설정</button>
@@ -222,6 +223,14 @@ const MANIFESTS = {
      실제 시트 연결 준비되면 → source 를 { type:"appsscript", sheet:"book", map:{...}, derive(){...} } 로 교체만. */
   books:{ id:"books", title:"도서", icon:"📖", vol:"卷3", canAdd:true,
     source:{ type:"sheet", tab:"도서" },
+    fields:[ {k:"title",label:"제목",type:"text"},
+             {k:"author",label:"저자",type:"text"},
+             {k:"year",label:"출판연도",type:"number"},
+             {k:"status",label:"상태",type:"select",options:["","읽음","읽는중"]},
+             {k:"pick",label:"읽고싶다(찜)",type:"bool"},
+             {k:"rating",label:"평점",type:"number"},
+             {k:"genre",label:"장르(쉼표로 여러 개)",type:"tags"},
+             {k:"cover",label:"표지 주소",type:"text"} ],
     search:["title","author"],
     stats:[ {label:"전체",type:"count"},
             {label:"읽음",type:"countIf",field:"status",eq:"읽음"},
@@ -236,8 +245,13 @@ const MANIFESTS = {
                       r.pick?{t:"찜",cls:"on"}:0 ] } },
 
   /* 100대 명산: 오른 곳을 체크하는 목록. */
-  mountains:{ id:"mountains", title:"100대 명산", icon:"⛰", vol:"卷4",
+  mountains:{ id:"mountains", title:"100대 명산", icon:"⛰", vol:"卷4", canAdd:true,
     source:{ type:"sheet", tab:"명산" },
+    fields:[ {k:"title",label:"산 이름",type:"text"},
+             {k:"height",label:"높이(m)",type:"number"},
+             {k:"region",label:"지역",type:"text"},
+             {k:"climbed",label:"완등",type:"bool"},
+             {k:"tags",label:"태그(쉼표로 여러 개)",type:"tags"} ],
     search:["title","region"],
     stats:[ {label:"전체",type:"count"},
             {label:"오른 곳",type:"countIf",field:"climbed",eq:true} ],
@@ -247,8 +261,12 @@ const MANIFESTS = {
            flags:r=>[ r.climbed?{t:"완등",cls:"on"}:0 ] } },
 
   /* 러닝: 날짜·거리·시간 기록, 페이스는 자동 계산. */
-  running:{ id:"running", title:"러닝", icon:"🏃", vol:"卷5",
+  running:{ id:"running", title:"러닝", icon:"🏃", vol:"卷5", canAdd:true,
     source:{ type:"sheet", tab:"러닝" },
+    fields:[ {k:"date",label:"날짜(예: 2026-07-07)",type:"text"},
+             {k:"dist",label:"거리(km)",type:"number"},
+             {k:"time",label:"시간(분)",type:"number"},
+             {k:"memo",label:"메모",type:"text"} ],
     search:["memo"],
     computed:{ pace:{ deps:["dist","time"], calc:"pacePerKm" } },
     stats:[ {label:"총 거리",type:"sum",field:"dist",unit:"km"},
@@ -402,6 +420,14 @@ class SheetDataSource {
     const m=MANIFESTS[id];
     return this._post({action:"append", tab:m.source.tab, header:["_id",...fieldKeys(m)], row:this._flatten(m,row)});
   }
+  async update(id,rowId,row){   // _id로 찾아 수정
+    const m=MANIFESTS[id];
+    return this._post({action:"update", tab:m.source.tab, id:rowId, row:this._flatten(m,row)});
+  }
+  async remove(id,rowId){       // _id로 찾아 삭제
+    const m=MANIFESTS[id];
+    return this._post({action:"delete", tab:m.source.tab, id:rowId});
+  }
 }
 const fieldKeys = m => (SAMPLE[m.id]?.[0] ? Object.keys(SAMPLE[m.id][0]).filter(k=>k!=="_id") : m.search);
 const coerce = v => v==="TRUE"?true : v==="FALSE"?false : (v!=="" && !isNaN(v) && v!==null)? +v : (typeof v==="string"&&v.includes("|")?v.split("|"):v);
@@ -513,8 +539,64 @@ function renderCard(m, r, no){ const c=m.card;
     <span class="body"><h3 style="font-size:15px">${c.title(r)}</h3><div class="kv">${kv}</div>${r.memo?`<div class="meta" style="margin-top:5px">${r.memo}</div>`:""}</span></button>`; }
 function openDetail(m, r){ const rows=Object.entries(r).filter(([k])=>k!=="_id").map(([k,v])=>
     `<div class="drow"><span class="k">${k}</span><span>${Array.isArray(v)?v.join(", "):v===null?"—":v===true?"예":v===false?"아니오":v}</span></div>`).join("");
-  const d=$("#detail"); d.innerHTML=`<div class="dhead"><h3>${m.card.kind==="specimen"?r.title:r.date+" · "+r.type}</h3></div><div class="dbody">${rows}</div>
-    <button class="dclose" onclick="this.closest('dialog').close()">닫기</button>`; d.showModal(); }
+  const editable = m.source?.type==="sheet";
+  const foot = editable
+    ? `<div style="display:flex;gap:8px;padding:6px 18px 18px"><button class="btn" id="detEdit">수정</button>
+       <button class="btn ghost" id="detDel">삭제</button>
+       <button class="btn ghost" style="margin-left:auto" onclick="this.closest('dialog').close()">닫기</button></div>`
+    : `<button class="dclose" onclick="this.closest('dialog').close()">닫기</button>`;
+  const d=$("#detail"); d.innerHTML=`<div class="dhead"><h3>${m.card.kind==="specimen"?r.title:r.date+" · "+r.type}</h3></div><div class="dbody">${rows}</div>${foot}`;
+  d.showModal();
+  if(editable){
+    $("#detEdit").onclick=()=>{ d.close(); openRecordForm(m, r); };
+    $("#detDel").onclick=()=>deleteRecord(m, r);
+  }
+}
+
+/* ── 공통: 추가·수정 폼 (모든 시트 분야가 같이 씀) ── */
+function refreshDomain(){ delete CACHE[state.domain]; loadAndRender(); }   // 시트에서 다시 읽어 최신 반영
+function openRecordForm(m, existing){
+  const d=$("#add"); const isEdit=!!existing; const fields=m.fields||[];
+  const body=fields.map(f=>{
+    const val = existing ? existing[f.k] : (f.type==="bool"?false:"");
+    if(f.type==="bool")
+      return `<label>${f.label}</label><button type="button" class="btn ghost rf-bool ${val?'on':''}" data-k="${f.k}">${val?'예':'아니오'}</button>`;
+    if(f.type==="select")
+      return `<label>${f.label}</label><select class="rf" data-k="${f.k}" data-type="select">${(f.options||[]).map(o=>`<option value="${o}" ${String(val||'')===o?'selected':''}>${o||'(없음)'}</option>`).join("")}</select>`;
+    const v = (f.type==="tags" && Array.isArray(val)) ? val.join(", ") : (val==null?"":val);
+    return `<label>${f.label}</label><input class="rf" data-k="${f.k}" data-type="${f.type}" value="${String(v).replace(/"/g,'&quot;')}" autocomplete="off" />`;
+  }).join("");
+  d.innerHTML=`<div class="dhead"><h3>${m.title} ${isEdit?'수정':'추가'}</h3></div><div class="dbody set">${body}
+    <div style="display:flex;gap:8px;margin-top:18px">
+      <button class="btn" id="rfSave">저장</button>
+      <button class="btn ghost" id="rfClose">닫기</button>
+    </div></div>`;
+  d.showModal();
+  d.querySelectorAll(".rf-bool").forEach(b=>b.onclick=()=>{ const on=!b.classList.contains("on"); b.classList.toggle("on",on); b.textContent=on?'예':'아니오'; });
+  $("#rfClose").onclick=()=>d.close();
+  $("#rfSave").onclick=async()=>{
+    d.querySelectorAll("input.rf").forEach(i=>i.blur());   // 한글 마지막 글자 잘림 방지
+    const row = existing ? {...existing} : { _id: crypto.randomUUID() };
+    fields.forEach(f=>{
+      if(f.type==="bool"){ row[f.k]=d.querySelector(`.rf-bool[data-k="${f.k}"]`).classList.contains("on"); return; }
+      const el=d.querySelector(`.rf[data-k="${f.k}"]`); let v=el.value;
+      if(f.type==="number") v = (v===""?null:Number(v));
+      if(f.type==="tags")   v = v.split(",").map(s=>s.trim()).filter(Boolean);
+      row[f.k]=v;
+    });
+    const btn=$("#rfSave"); btn.textContent="저장 중…"; btn.disabled=true;
+    try{
+      if(isEdit) await sheetSrc().update(state.domain, row._id, row);
+      else       await sheetSrc().upsert(state.domain, row);
+      d.close(); refreshDomain();
+    }catch(e){ btn.textContent="저장"; btn.disabled=false; alert("저장 실패: "+e.message); }
+  };
+}
+async function deleteRecord(m, r){
+  if(!confirm(`'${r.title||r.date||r._id}' 삭제할까요? 되돌릴 수 없어요.`)) return;
+  try{ await sheetSrc().remove(state.domain, r._id); $("#detail").close(); refreshDomain(); }
+  catch(e){ alert("삭제 실패: "+e.message); }
+}
 
 const CACHE = {};   // 분야별로 한 번 불러온 데이터를 기억 → 탭 전환·검색 때 다시 안 받음
 async function loadAndRender(){
@@ -625,11 +707,10 @@ function addBook(b){
     cover:b.cover, genre:b.genre||[], rating:null,
     status: addStatus==="읽고싶다" ? "" : addStatus,
     pick: addStatus==="읽고싶다" };
-  (CACHE.books || (CACHE.books=[])).push(row);
   $("#add").close();
-  loadAndRender();
   sheetSrc().upsert("books", row)          // 시트 '도서' 탭에 실제 저장(영구)
-    .catch(e=>alert("시트 저장 실패(화면엔 남아있음): "+e.message));
+    .then(()=>refreshDomain())
+    .catch(e=>alert("시트 저장 실패: "+e.message));
 }
 
 async function boot(){
@@ -640,7 +721,8 @@ $("#backBtn").addEventListener("click",goHome);
 $("#tabs").addEventListener("click",e=>{ const t=e.target.closest(".tab"); if(t) openDomain(t.dataset.id); });
 $("#search").addEventListener("input",e=>{ state.query=e.target.value; loadAndRender(); });
 $("#setBtn").addEventListener("click",openSettings);
-$("#addBtn").addEventListener("click",()=>{ if(MANIFESTS[state.domain]?.canAdd) openAddBook(); });
+$("#addBtn").addEventListener("click",()=>{ const m=MANIFESTS[state.domain]; if(!m?.canAdd) return;
+  if(state.domain==="books") openAddBook(); else openRecordForm(m, null); });
 
 /* ── 샘플 데이터(데모 전용; 실사용 시 구글 시트에서 옴) ── */
 const SAMPLE = {
