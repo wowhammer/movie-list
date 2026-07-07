@@ -282,9 +282,12 @@ class GoogleSheetDataSource {
     const res=await fetch(url,{...opt,headers:{Authorization:"Bearer "+this.token,"Content-Type":"application/json",...(opt.headers||{})}});
     const t=await res.text(); let b; try{b=JSON.parse(t);}catch{b=t;}
     if(!res.ok){ let h=res.status===403?" (구글 클라우드에서 Sheets·Drive 사용설정 확인)":res.status===401?" (다시 연결 필요)":"";
-      throw new Error(`HTTP ${res.status}${h}`); }
+      const msg=(b&&b.error&&b.error.message) ? b.error.message : (typeof b==="string"?b.slice(0,200):JSON.stringify(b).slice(0,200));
+      throw new Error(`HTTP ${res.status}${h} — ${msg}`); }
     return b;
   }
+  _cell(v){ return Array.isArray(v)?v.join("|") : v===true?"TRUE" : v===false?"FALSE" : (v==null?"":String(v)); }
+  _range(sheet, a1){ return encodeURIComponent(`'${sheet}'!${a1}`); }   // 한글 탭 이름은 따옴표로 감싼다
   async _ensureSpreadsheet(){   // 파일이 없을 때만 새로 만든다
     if(this.ssId) return;
     const d=await this._api("https://sheets.googleapis.com/v4/spreadsheets",{method:"POST",
@@ -295,32 +298,40 @@ class GoogleSheetDataSource {
     const d=await this._api(`https://sheets.googleapis.com/v4/spreadsheets/${this.ssId}?fields=sheets.properties.title`);
     return (d.sheets||[]).map(s=>s.properties.title);
   }
-  async _ensureTabs(){   // 없는 카테고리 탭만 만든다(+헤더·샘플). 있으면 그냥 통과.
+  async _isEmpty(sheet){   // 탭이 비어 있는지(헤더도 없는지) 확인
+    const d=await this._api(`https://sheets.googleapis.com/v4/spreadsheets/${this.ssId}/values/${this._range(sheet,"A1")}`);
+    return !(d.values && d.values.length);
+  }
+  async _ensureTabs(){   // 없는 탭만 만들고, '비어 있을 때만' 헤더·샘플을 채운다. 기존 데이터는 절대 안 덮음.
     const have=await this._tabTitles();
     for(const m of Object.values(MANIFESTS)){
-      if(m.source?.type!=="mysheet" || have.includes(m.sheet)) continue;   // ★ 있으면 손 안 댐
-      await this._api(`https://sheets.googleapis.com/v4/spreadsheets/${this.ssId}:batchUpdate`,{method:"POST",
-        body:JSON.stringify({requests:[{addSheet:{properties:{title:m.sheet}}}]})});
-      const keys=["_id",...fieldKeys(m)];
-      const seed=(SAMPLE[m.id]||[]).map(r=>keys.map(k=>Array.isArray(r[k])?r[k].join("|"):(r[k]??"")));
-      await this._write(m.sheet, `${m.sheet}!A1`, [keys, ...seed]);   // 헤더 + 샘플은 최초 1번만
+      if(m.source?.type!=="mysheet") continue;
+      if(!have.includes(m.sheet)){                                   // 없으면 탭 생성
+        await this._api(`https://sheets.googleapis.com/v4/spreadsheets/${this.ssId}:batchUpdate`,{method:"POST",
+          body:JSON.stringify({requests:[{addSheet:{properties:{title:m.sheet}}}]})});
+      }
+      if(await this._isEmpty(m.sheet)){                              // ★ 비어 있을 때만 채움(부분실패 복구 포함)
+        const keys=["_id",...fieldKeys(m)];
+        const seed=(SAMPLE[m.id]||[]).map(r=>keys.map(k=>this._cell(r[k])));
+        await this._write(m.sheet, [keys, ...seed]);
+      }
     }
   }
-  async _write(sheet,range,values){
-    return this._api(`https://sheets.googleapis.com/v4/spreadsheets/${this.ssId}/values/${encodeURIComponent(range)}?valueInputOption=RAW`,
+  async _write(sheet,values){
+    return this._api(`https://sheets.googleapis.com/v4/spreadsheets/${this.ssId}/values/${this._range(sheet,"A1")}?valueInputOption=RAW`,
       {method:"PUT",body:JSON.stringify({values})});
   }
   async list(id){
     const m=MANIFESTS[id];
-    const d=await this._api(`https://sheets.googleapis.com/v4/spreadsheets/${this.ssId}/values/${encodeURIComponent(m.sheet+"!A1:Z10000")}`);
+    const d=await this._api(`https://sheets.googleapis.com/v4/spreadsheets/${this.ssId}/values/${this._range(m.sheet,"A1:Z10000")}`);
     const vals=d.values||[]; if(vals.length<2) return [];
     const [head,...rows]=vals;
     return rows.map(r=>Object.fromEntries(head.map((k,i)=>[k, coerce(r[i])])));
   }
   async upsert(id,row){   // 맨 아래에 한 줄만 추가(append). 기존 줄은 절대 안 건드림.
     const m=MANIFESTS[id]; const keys=["_id",...fieldKeys(m)];
-    const line=keys.map(k=>Array.isArray(row[k])?row[k].join("|"):(row[k]??""));
-    return this._api(`https://sheets.googleapis.com/v4/spreadsheets/${this.ssId}/values/${encodeURIComponent(m.sheet+"!A1")}:append?valueInputOption=RAW`,
+    const line=keys.map(k=>this._cell(row[k]));
+    return this._api(`https://sheets.googleapis.com/v4/spreadsheets/${this.ssId}/values/${this._range(m.sheet,"A1")}:append?valueInputOption=RAW`,
       {method:"POST",body:JSON.stringify({values:[line]})});
   }
 }
