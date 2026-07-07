@@ -120,7 +120,7 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
 <body>
 <div class="wrap" id="root" data-domain="movies">
   <header class="masthead">
-    <h1>내도감</h1><span class="sub">Naedogam · v8</span>
+    <h1>내도감</h1><span class="sub">Naedogam · v9</span>
     <span class="spacer"></span>
     <span class="src-chip" id="srcChip" style="display:none">데모</span>
     <button class="icon-btn" id="setBtn" type="button">⚙ 설정</button>
@@ -288,10 +288,11 @@ class GoogleSheetDataSource {
   }
   _cell(v){ return Array.isArray(v)?v.join("|") : v===true?"TRUE" : v===false?"FALSE" : (v==null?"":String(v)); }
   _range(sheet, a1){ return encodeURIComponent(`'${sheet}'!${a1}`); }   // 한글 탭 이름은 따옴표로 감싼다
-  async _ensureSpreadsheet(){   // 파일이 없을 때만 새로 만든다
+  async _ensureSpreadsheet(){   // 파일이 없을 때만, 저장용 탭(도서·명산·러닝)만 딱 만든다(빈 기본시트 안 생기게)
     if(this.ssId) return;
+    const tabs=Object.values(MANIFESTS).filter(m=>m.source?.type==="mysheet").map(m=>({properties:{title:m.source.sheet}}));
     const d=await this._api("https://sheets.googleapis.com/v4/spreadsheets",{method:"POST",
-      body:JSON.stringify({properties:{title:"내도감 Data"}})});
+      body:JSON.stringify({properties:{title:"내도감 Data"}, sheets:tabs})});
     this.ssId=d.spreadsheetId; store.setItem("nd.ssId",this.ssId);
   }
   async _tabTitles(){
