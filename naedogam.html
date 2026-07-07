@@ -123,7 +123,7 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
 <body>
 <div class="wrap" id="root" data-domain="movies">
   <header class="masthead">
-    <h1>내도감</h1><span class="sub">Naedogam · v12</span>
+    <h1>내도감</h1><span class="sub">Naedogam · v14</span>
     <span class="spacer"></span>
     <span class="src-chip" id="srcChip" style="display:none">데모</span>
     <button class="icon-btn" id="setBtn" type="button">⚙ 설정</button>
@@ -528,7 +528,9 @@ function renderPicker(m){
   p.querySelectorAll(".chip").forEach(b=>b.onclick=()=>{ state.pick=b.dataset.v; loadAndRender(); });
 }
 function renderCard(m, r, no){ const c=m.card;
-  if(c.kind==="specimen"){ const meta=c.meta(r); const tags=(r[c.tags]||[]).map(t=>`<span class="tag">${t}</span>`).join("");
+  if(c.kind==="specimen"){ const meta=c.meta(r);
+    const traw=r[c.tags]; const tarr=Array.isArray(traw)?traw:(traw==null||traw===""?[]:[traw]);   // 하나만 있어도 안전
+    const tags=tarr.map(t=>`<span class="tag">${t}</span>`).join("");
     const flags=(typeof c.flags==="function"?c.flags(r):[]).filter(Boolean)
       .map(f=>`<span class="flag ${f.cls||""}">${f.t}</span>`).join("");
     return `<button class="card" data-id="${r._id}"><span class="cat-no">#${String(no).padStart(3,"0")}</span><span class="thumb">${r.cover?`<img src="${r.cover}" alt="">`:c.thumb}</span>
@@ -621,7 +623,7 @@ async function loadAndRender(){
   renderStats(m, base);
   const rows=filterRows(m, base, state.query);
   $("#count").textContent=`총 ${rows.length}건 · 출처: ${src.current.label}`;
-  $("#list").innerHTML=rows.map((r,i)=>renderCard(m,r,i+1)).join("") || `<div class="count">결과가 없습니다.</div>`;
+  $("#list").innerHTML=rows.map((r,i)=>{ try{ return renderCard(m,r,i+1); }catch(e){ console.error("card",e); return ""; } }).join("") || `<div class="count">결과가 없습니다.</div>`;
   document.querySelectorAll(".card").forEach(b=>b.onclick=()=>openDetail(m, state.rows.find(x=>x._id===b.dataset.id)));
 }
 
