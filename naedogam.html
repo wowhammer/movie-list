@@ -120,7 +120,7 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
 <body>
 <div class="wrap" id="root" data-domain="movies">
   <header class="masthead">
-    <h1>내도감</h1><span class="sub">Naedogam · v9</span>
+    <h1>내도감</h1><span class="sub">Naedogam · v10</span>
     <span class="spacer"></span>
     <span class="src-chip" id="srcChip" style="display:none">데모</span>
     <button class="icon-btn" id="setBtn" type="button">⚙ 설정</button>
@@ -219,7 +219,7 @@ const MANIFESTS = {
   /* 도서: '설정 한 장'으로 추가된 새 분야. 지금은 샘플로 화면 확인.
      실제 시트 연결 준비되면 → source 를 { type:"appsscript", sheet:"book", map:{...}, derive(){...} } 로 교체만. */
   books:{ id:"books", title:"도서", icon:"📖", vol:"卷3", canAdd:true,
-    source:{ type:"mysheet", sheet:"도서" },
+    source:{ type:"sheet", tab:"도서" },
     search:["title","author"],
     stats:[ {label:"전체",type:"count"},
             {label:"읽음",type:"countIf",field:"status",eq:"읽음"},
@@ -235,7 +235,7 @@ const MANIFESTS = {
 
   /* 100대 명산: 오른 곳을 체크하는 목록. */
   mountains:{ id:"mountains", title:"100대 명산", icon:"⛰", vol:"卷4",
-    source:{ type:"mysheet", sheet:"명산" },
+    source:{ type:"sheet", tab:"명산" },
     search:["title","region"],
     stats:[ {label:"전체",type:"count"},
             {label:"오른 곳",type:"countIf",field:"climbed",eq:true} ],
@@ -246,7 +246,7 @@ const MANIFESTS = {
 
   /* 러닝: 날짜·거리·시간 기록, 페이스는 자동 계산. */
   running:{ id:"running", title:"러닝", icon:"🏃", vol:"卷5",
-    source:{ type:"mysheet", sheet:"러닝" },
+    source:{ type:"sheet", tab:"러닝" },
     search:["memo"],
     computed:{ pace:{ deps:["dist","time"], calc:"pacePerKm" } },
     stats:[ {label:"총 거리",type:"sum",field:"dist",unit:"km"},
@@ -365,6 +365,42 @@ class AppsScriptDataSource {
   }
   async upsert(){ throw new Error("이 단계는 보기 전용입니다(추가·수정은 다음 단계)"); }
 }
+
+/* SheetDataSource: 기존 시트에 '탭'을 만들고 읽고 쓰는 통로 (방금 뚫은 nd 문 사용).
+   도서·명산·러닝처럼 우리가 관리하는 탭에 씀. 영화·차계부는 위 AppsScriptDataSource(기존 방식) 유지. */
+function sheetCell(v){ return Array.isArray(v)?v.join("|") : v===true?"TRUE" : v===false?"FALSE" : (v==null?"":String(v)); }
+class SheetDataSource {
+  constructor(url){ this.url=url; this.isLive=true; this.label="구글시트"; this._ensured=new Set(); }
+  async ensureReady(){ if(!this.url) throw new Error("APPS_SCRIPT_URL이 비어 있습니다"); return true; }
+  _flatten(m, r){ const header=["_id",...fieldKeys(m)]; const o={}; header.forEach(h=>o[h]=sheetCell(r[h])); return o; }
+  async _post(payload){   // 탭 만들기·한 줄 추가 같은 '쓰기'. text/plain로 보내야 브라우저가 안 막음.
+    const res=await fetch(this.url,{method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},
+      body:JSON.stringify(Object.assign({nd:1},payload))});
+    const t=await res.text(); let j; try{ j=JSON.parse(t); }catch(e){ j={}; }
+    if(j && j.error) throw new Error(j.error);
+    return j;
+  }
+  async ensure(m){        // 탭이 없으면 만들고(+샘플), 있으면 그대로. 한 세션에 한 번만.
+    if(this._ensured.has(m.id)) return;
+    const header=["_id",...fieldKeys(m)];
+    const rows=(SAMPLE[m.id]||[]).map(r=>this._flatten(m,r));
+    await this._post({action:"ensureTab", tab:m.source.tab, header, rows});
+    this._ensured.add(m.id);
+  }
+  async list(id){
+    const m=MANIFESTS[id];
+    await this.ensure(m);
+    const res=await fetch(this.url+"?nd=1&action=read&tab="+encodeURIComponent(m.source.tab));
+    if(!res.ok) throw new Error("HTTP "+res.status);
+    const raw=await res.json();
+    if(raw && raw.error) throw new Error(raw.error);
+    return (Array.isArray(raw)?raw:[]).map(row=>{ const o={}; for(const k in row) o[k]=coerce(row[k]); return o; });
+  }
+  async upsert(id,row){   // 탭 맨 아래에 한 줄 추가(저장)
+    const m=MANIFESTS[id];
+    return this._post({action:"append", tab:m.source.tab, header:["_id",...fieldKeys(m)], row:this._flatten(m,row)});
+  }
+}
 const fieldKeys = m => (SAMPLE[m.id]?.[0] ? Object.keys(SAMPLE[m.id][0]).filter(k=>k!=="_id") : m.search);
 const coerce = v => v==="TRUE"?true : v==="FALSE"?false : (v!=="" && !isNaN(v) && v!==null)? +v : (typeof v==="string"&&v.includes("|")?v.split("|"):v);
 
@@ -399,8 +435,11 @@ function filterRows(m, rows, q){ q=(q||"").trim().toLowerCase(); if(!q) return r
 const state = { view:"home", domain:null, query:"", pick:"", rows:[] };
 const src = { current:null };
 const $ = s=>document.querySelector(s);
-let _mock=null, _apps=null, _gsheet=null;
-function isGConnected(){ return !!(_gsheet && _gsheet.token); }
+let _mock=null, _apps=null, _sheet=null;
+function sheetSrc(){ return _sheet||(_sheet=new SheetDataSource(CONFIG.APPS_SCRIPT_URL)); }
+/* 설정에서 카테고리를 켜면, 그 분야가 기존 시트에 탭으로 생기게 한다(없을 때만 생성). */
+async function ensureCategoryTab(id){ const m=MANIFESTS[id]; if(m.source?.type!=="sheet") return;
+  try{ await sheetSrc().ensure(m); }catch(e){ /* 실패해도 나중에 열 때 다시 시도 */ } }
 
 /* 켜둔 카테고리 목록(브라우저에 기억). 처음엔 빈 상태 → 설정에서 추가. */
 function getActive(){ try{ return JSON.parse(store.getItem("nd.active")||"[]"); }catch(e){ return []; } }
@@ -434,19 +473,13 @@ function renderHome(){
   home.querySelectorAll(".cat-card").forEach(b=>b.onclick=()=>openDomain(b.dataset.id));
 }
 /* 분야가 선언한 source.type 에 따라 출처를 고른다.
-   appsscript → 기존 시트(영화·차계부) / mysheet → 내 구글시트(연결됐을 때) / 그 외·미연결 → 샘플 */
+   appsscript → 영화·차계부(기존 방식) / sheet → 도서·명산·러닝(기존 시트에 탭으로) */
 function sourceFor(m){
   if(m.source?.type==="appsscript" && CONFIG.APPS_SCRIPT_URL) return _apps||(_apps=new AppsScriptDataSource(CONFIG.APPS_SCRIPT_URL));
-  if(m.source?.type==="mysheet" && isGConnected()) return _gsheet;
-  return _mock||(_mock=new MockDataSource());   // 미연결 → 샘플로 보여줌
+  if(m.source?.type==="sheet" && CONFIG.APPS_SCRIPT_URL) return sheetSrc();
+  return _mock||(_mock=new MockDataSource());
 }
-function clearCache(){ Object.keys(CACHE).forEach(k=>delete CACHE[k]); }
-async function connectGoogle(clientId){
-  const gs=new GoogleSheetDataSource(clientId);
-  await gs.ensureReady();               // 로그인 → '내도감 Data' 확인/생성 → 없는 탭만 생성(+샘플)
-  _gsheet=gs; store.setItem("nd.clientId",clientId);
-  clearCache();                          // 샘플 캐시 비우고 실제 시트에서 다시 읽게
-}
+/* (참고) 구글 로그인 방식(GoogleSheetDataSource)은 '배포 단계'용으로 코드만 남겨둠 — 지금은 미사용. */
 
 /* 탭: 홈에서 켜둔 카테고리만 표시(안 켠 건 안 나옴 → 길어지지 않음) */
 function renderTabs(){ $("#tabs").innerHTML=getActive().map(id=>{ const m=MANIFESTS[id]; if(!m) return "";
@@ -518,16 +551,10 @@ function openSettings(){
    </div>`).join("");
   d.innerHTML=`<div class="dhead"><h3>설정</h3></div><div class="dbody set">
     <h4>카테고리 관리</h4>
-    <div class="hint">켜면 홈에 카드가 생기고, 끄면 사라집니다. (기록한 데이터는 지워지지 않아요)</div>
+    <div class="hint">켜면 홈에 카드가 생기고(그 분야 탭도 시트에 자동 생성), 끄면 홈에서 사라집니다. (시트의 데이터는 지워지지 않아요)</div>
     ${rows}
-    <h4>구글 계정 연결</h4>
-    <div class="hint">연결하면 도서·명산·러닝을 <b>내 구글드라이브의 '내도감 Data' 시트</b>에 저장합니다.
-      규칙은 <b>없으면 만들고, 있으면 그대로 씀</b> — 기존 데이터는 안전합니다. (영화·차계부는 기존 시트를 그대로 씁니다.)</div>
-    <input id="cidInput" value="${store.getItem('nd.clientId')||''}" placeholder="구글에서 받은 열쇠(...apps.googleusercontent.com)" />
-    <div style="display:flex;gap:8px;align-items:center;margin-top:10px">
-      <button class="btn" id="gConnect" type="button">${isGConnected()?'다시 연결':'구글 연결'}</button>
-      <span class="mv" id="gStatus">${isGConnected()?'연결됨 ✓':'미연결 — 지금은 샘플로 표시 중'}</span>
-    </div>
+    <h4>구글 계정 · 개인 설정</h4>
+    <div class="hint">모든 데이터는 내 구글시트 하나에 탭으로 모입니다. 남에게 배포할 때 쓰는 '구글 로그인'은 다음 단계에서 붙입니다.</div>
     <button class="btn ghost" id="closeSet" style="margin-top:22px">닫기</button>
   </div>`;
   d.showModal();
@@ -535,20 +562,9 @@ function openSettings(){
     const id=sw.dataset.id, on=!sw.classList.contains("on");
     sw.classList.toggle("on",on); sw.setAttribute("aria-checked",on);
     toggleActive(id,on);
+    if(on) ensureCategoryTab(id);          // 켜면 시트에 그 탭 생성(없을 때만)
     if(state.view==="home") renderHome();
   });
-  $("#gConnect").onclick=async()=>{
-    const inp=$("#cidInput"); inp.blur();
-    const cid=inp.value.trim(); if(!cid){ alert("구글에서 받은 열쇠(Client ID)를 붙여넣으세요."); return; }
-    const st=$("#gStatus"); st.textContent="연결 중…";
-    try{ await connectGoogle(cid);
-      const w=(_gsheet.warnings||[]);
-      st.textContent = w.length ? "연결됨 ✓ (일부 탭 확인 필요)" : "연결됨 ✓  ('내도감 Data' 준비 완료)";
-      $("#gConnect").textContent="다시 연결";
-      if(w.length) alert("연결은 됐지만, 아래 탭에서 문제가 있었어요:\n\n"+w.join("\n")+"\n\n이 메시지를 그대로 알려주시면 그 부분만 고칠게요.");
-      if(state.view==="home") renderHome(); else loadAndRender();
-    }catch(e){ st.textContent="연결 실패"; alert("연결 실패:\n"+e.message); }
-  };
   $("#closeSet").onclick=()=>d.close();
 }
 
@@ -605,9 +621,8 @@ function addBook(b){
   (CACHE.books || (CACHE.books=[])).push(row);
   $("#add").close();
   loadAndRender();
-  if(isGConnected()){                     // 연결돼 있으면 내 구글시트에 실제 저장
-    _gsheet.upsert("books", row).catch(e=>alert("구글 저장 실패(화면엔 남아있음): "+e.message));
-  }
+  sheetSrc().upsert("books", row)          // 시트 '도서' 탭에 실제 저장(영구)
+    .catch(e=>alert("시트 저장 실패(화면엔 남아있음): "+e.message));
 }
 
 async function boot(){
