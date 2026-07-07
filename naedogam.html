@@ -14,7 +14,10 @@ const CONFIG = {
   APPS_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbyfEqz3U7qircviRqSKx2KrBYSYfjsxjznP9UWN00Z19Y0sUF6uaJXy06OmHaSBpK4/exec',
   APP_NAME: '내도감',
   // 책 검색이 자꾸 막히면(429) 여기에 '구글 북스 키'를 넣으세요. 비워두면 키 없이 동작.
-  GOOGLE_BOOKS_KEY: 'AIzaSyDlhk8ALyDYozjN3Snq6dnmj2KWz7gPezI'
+  GOOGLE_BOOKS_KEY: 'AIzaSyDlhk8ALyDYozjN3Snq6dnmj2KWz7gPezI',
+  // 영화 검색(TMDB) — 기존 영화앱과 같은 값
+  TMDB_KEY: '0b9515d29e91abc6465d342963c92482',
+  TMDB_BASE: 'https://api.themoviedb.org/3'
 };
 try { document.title = CONFIG.APP_NAME; } catch(e){}
 </script>
@@ -123,7 +126,7 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
 <body>
 <div class="wrap" id="root" data-domain="movies">
   <header class="masthead">
-    <h1>내도감</h1><span class="sub">Naedogam · v15</span>
+    <h1>내도감</h1><span class="sub">Naedogam · v18</span>
     <span class="spacer"></span>
     <span class="src-chip" id="srcChip" style="display:none">데모</span>
     <button class="icon-btn" id="setBtn" type="button">⚙ 설정</button>
@@ -169,7 +172,7 @@ const store = (() => {
 const MANIFESTS = {
   /* 영화: 실제 구글시트(Apps Script)에서 라이브로 불러옴.
      source.map = 시트 한글 헤더 → 엔진 항목 이름.  source.derive = 특수 처리(코드·수식·숫자). */
-  movies:{ id:"movies", title:"영화", icon:"🎬", vol:"卷1",
+  movies:{ id:"movies", title:"영화", icon:"🎬", vol:"卷1", canAdd:true,
     source:{ type:"appsscript", sheet:"",   // 영화는 기본 시트(파라미터 없음)
       map:{ director:"감독", actors:"배우", country:"국적", recommend:"추천", review:"리뷰" },
       derive(o, row, re){
@@ -185,6 +188,14 @@ const MANIFESTS = {
         o._id = (o.orig||o.title||'') + '_' + (o.year||'');
       } },
     search:["title","orig","director","actors"],
+    fields:[ {k:"title",sheet:"한국 개봉명",label:"한국 개봉명",type:"text"},
+             {k:"year",sheet:"개봉연도",label:"개봉연도",type:"number"},
+             {k:"director",sheet:"감독",label:"감독",type:"text"},
+             {k:"actors",sheet:"배우",label:"배우",type:"text"},
+             {k:"country",sheet:"국적",label:"국적",type:"text"},
+             {k:"streaming",sheet:"스트리밍",label:"스트리밍(쉼표로 여러 개)",type:"tags"},
+             {k:"recommend",sheet:"추천",label:"추천",type:"text"},
+             {k:"review",sheet:"리뷰",label:"리뷰",type:"text"} ],
     stats:[ {label:"전체",type:"count"},
             {label:"시청완료",type:"countIf",field:"watched",eq:"O"},
             {label:"다시볼것",type:"countIf",field:"rewatch",eq:true},
@@ -200,7 +211,7 @@ const MANIFESTS = {
   /* 차계부: 백엔드는 이미 있지만 이번 단계는 데모(샘플) 유지.
      실제 연결은 movies처럼 source.type:"appsscript", sheet:"carlog" + map/derive 한 벌만 추가하면 됨. */
   /* 차계부: 실제 구글시트(정비·지출 기록)에서 라이브로 불러옴. */
-  carlog:{ id:"carlog", title:"차계부", icon:"🚗", vol:"卷2",
+  carlog:{ id:"carlog", title:"차계부", icon:"🚗", vol:"卷2", canAdd:true,
     source:{ type:"appsscript", sheet:"carlog",
       derive(o,row,re){
         o.date = re(row['날짜']);
@@ -212,6 +223,13 @@ const MANIFESTS = {
         o.odo  = parseInt(String(re(row['주행거리'])).replace(/[^\d]/g,''),10) || null;
         o._id  = re(row['ID']) || crypto.randomUUID();
       } },
+    fields:[ {k:"date",sheet:"날짜",label:"날짜(예: 26.07.07)",type:"text"},
+             {k:"car",sheet:"차량",label:"차량(싼타페/제네시스)",type:"text"},
+             {k:"work",sheet:"작업내용",label:"작업내용",type:"text"},
+             {k:"shop",sheet:"정비소",label:"정비소",type:"text"},
+             {k:"cost",sheet:"가격",label:"가격(원)",type:"number"},
+             {k:"odo",sheet:"주행거리",label:"주행거리(km)",type:"number"},
+             {k:"memo",sheet:"비고",label:"비고",type:"text"} ],
     filterBy:{ field:"car", allLabel:"전체" },
     search:["work","shop","car","memo"],
     stats:[ {label:"총 지출",type:"sum",field:"cost",unit:"원"},
@@ -383,6 +401,13 @@ class AppsScriptDataSource {
     const raw=await res.json();
     return (Array.isArray(raw)?raw:[]).map(row=>mapRow(m,row));
   }
+  async post(payload){   // 기존 영화·차계부 백엔드 액션 호출(예: 시청여부 업데이트)
+    const res=await fetch(this.url,{method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify(payload)});
+    const t=await res.text(); let j; try{ j=JSON.parse(t); }catch(e){ j={}; }
+    if(j && j.ok===false) throw new Error(j.error||"실패");
+    if(j && j.error) throw new Error(j.error);
+    return j;
+  }
   async upsert(){ throw new Error("이 단계는 보기 전용입니다(추가·수정은 다음 단계)"); }
 }
 
@@ -428,6 +453,10 @@ class SheetDataSource {
     const m=MANIFESTS[id];
     return this._post({action:"delete", tab:m.source.tab, id:rowId});
   }
+  // 임의 탭 대상(차계부처럼 한글 헤더·ID 기준). 헤더 순서는 백엔드가 실제 시트에서 맞춤.
+  async appendRaw(tab,row){ return this._post({action:"append", tab, header:Object.keys(row), row}); }
+  async updateRaw(tab,id,row,idKey){ return this._post({action:"update", tab, id, row, idKey}); }
+  async deleteRaw(tab,id,idKey){ return this._post({action:"delete", tab, id, idKey}); }
 }
 const fieldKeys = m => (SAMPLE[m.id]?.[0] ? Object.keys(SAMPLE[m.id][0]).filter(k=>k!=="_id") : m.search);
 const coerce = v => v==="TRUE"?true : v==="FALSE"?false : (v!=="" && !isNaN(v) && v!==null)? +v : (typeof v==="string"&&v.includes("|")?v.split("|"):v);
@@ -464,6 +493,7 @@ const state = { view:"home", domain:null, query:"", pick:"", rows:[] };
 const src = { current:null };
 const $ = s=>document.querySelector(s);
 let _mock=null, _apps=null, _sheet=null;
+function appsSrc(){ return _apps||(_apps=new AppsScriptDataSource(CONFIG.APPS_SCRIPT_URL)); }
 function sheetSrc(){ return _sheet||(_sheet=new SheetDataSource(CONFIG.APPS_SCRIPT_URL)); }
 /* 설정에서 카테고리를 켜면, 그 분야가 기존 시트에 탭으로 생기게 한다(없을 때만 생성). */
 async function ensureCategoryTab(id){ const m=MANIFESTS[id]; if(m.source?.type!=="sheet") return;
@@ -539,20 +569,52 @@ function renderCard(m, r, no){ const c=m.card;
     return `<span>${col.k} <b>${s}</b></span>`; }).filter(Boolean).join("");
   return `<button class="card" data-id="${r._id}" style="grid-template-columns:auto 1fr;"><span class="thumb">🧾</span>
     <span class="body"><h3 style="font-size:15px">${c.title(r)}</h3><div class="kv">${kv}</div>${r.memo?`<div class="meta" style="margin-top:5px">${r.memo}</div>`:""}</span></button>`; }
-function openDetail(m, r){ const rows=Object.entries(r).filter(([k])=>k!=="_id").map(([k,v])=>
+function openDetail(m, r){ const rows=Object.entries(r).filter(([k])=>k!=="_id"&&k!=="orig").map(([k,v])=>
     `<div class="drow"><span class="k">${k}</span><span>${Array.isArray(v)?v.join(", "):v===null?"—":v===true?"예":v===false?"아니오":v}</span></div>`).join("");
-  const editable = m.source?.type==="sheet";
-  const foot = editable
-    ? `<div style="display:flex;gap:8px;padding:6px 18px 18px"><button class="btn" id="detEdit">수정</button>
+  const editable = m.source?.type==="sheet" || m.id==="carlog";
+  const isMovie = m.id==="movies";
+  let foot;
+  if(isMovie){
+    foot=`<div style="display:flex;gap:8px;padding:6px 18px 18px;flex-wrap:wrap">
+      <button class="btn ${r.watched==='O'?'':'ghost'}" id="mW">${r.watched==='O'?'✓ 봤음':'봤음'}</button>
+      <button class="btn ${r.rewatch?'':'ghost'}" id="mR">다시볼것</button>
+      <button class="btn ${r.pick?'':'ghost'}" id="mP">찜</button>
+      <button class="btn ghost" id="mEdit">정보 수정</button>
+      <button class="btn ghost" style="margin-left:auto" onclick="this.closest('dialog').close()">닫기</button></div>`;
+  } else if(editable){
+    foot=`<div style="display:flex;gap:8px;padding:6px 18px 18px"><button class="btn" id="detEdit">수정</button>
        <button class="btn ghost" id="detDel">삭제</button>
-       <button class="btn ghost" style="margin-left:auto" onclick="this.closest('dialog').close()">닫기</button></div>`
-    : `<button class="dclose" onclick="this.closest('dialog').close()">닫기</button>`;
-  const d=$("#detail"); d.innerHTML=`<div class="dhead"><h3>${m.card.kind==="specimen"?r.title:r.date+" · "+r.type}</h3></div><div class="dbody">${rows}</div>${foot}`;
+       <button class="btn ghost" style="margin-left:auto" onclick="this.closest('dialog').close()">닫기</button></div>`;
+  } else {
+    foot=`<button class="dclose" onclick="this.closest('dialog').close()">닫기</button>`;
+  }
+  const d=$("#detail"); d.innerHTML=`<div class="dhead"><h3>${m.card.kind==="specimen"?r.title:(r.date+(r.car?" · "+r.car:""))}</h3></div><div class="dbody">${rows}</div>${foot}`;
   d.showModal();
-  if(editable){
+  if(isMovie){
+    $("#mW").onclick=()=>toggleMovie(r,'W'); $("#mR").onclick=()=>toggleMovie(r,'R'); $("#mP").onclick=()=>toggleMovie(r,'P');
+    $("#mEdit").onclick=()=>{ d.close(); openRecordForm(m, r); };
+  } else if(editable){
     $("#detEdit").onclick=()=>{ d.close(); openRecordForm(m, r); };
     $("#detDel").onclick=()=>deleteRecord(m, r);
   }
+}
+/* 영화 시청상태 토글 → 기존 앱의 '시청여부' 저장통로 재사용. 2자리 코드: (W/X)+(O/R/P) */
+async function toggleMovie(r, kind){
+  let watched = r.watched==='O';
+  let intent  = r.rewatch?'R':(r.pick?'P':'O');
+  if(kind==='W') watched=!watched;
+  else if(kind==='R') intent=(intent==='R')?'O':'R';
+  else if(kind==='P') intent=(intent==='P')?'O':'P';
+  const code=(watched?'W':'X')+intent;
+  try{ await appsSrc().post({action:'updateStatus', orig:r.orig, status:code}); }
+  catch(e){ alert("상태 저장 실패: "+e.message); return; }
+  r.watched=watched?'O':''; r.rewatch=intent==='R'; r.pick=intent==='P';
+  const raw=(CACHE.movies||[]).find(x=>reCell(x['원제'])===r.orig); if(raw) raw['시청여부']=code;   // 캐시도 갱신
+  const mW=$("#mW"),mR=$("#mR"),mP=$("#mP");                                                        // 모달 버튼 즉시 반영
+  if(mW){ mW.className="btn "+(r.watched==='O'?'':'ghost'); mW.textContent=r.watched==='O'?'✓ 봤음':'봤음'; }
+  if(mR) mR.className="btn "+(r.rewatch?'':'ghost');
+  if(mP) mP.className="btn "+(r.pick?'':'ghost');
+  paintDomain(MANIFESTS.movies);                                                                    // 뒤 목록도 갱신
 }
 
 /* ── 공통: 추가·수정 폼 (모든 시트 분야가 같이 씀) ── */
@@ -591,16 +653,36 @@ function openRecordForm(m, existing){
     });
     const btn=$("#rfSave"); btn.textContent="저장 중…"; btn.disabled=true;
     try{
-      if(isEdit) await sheetSrc().update(state.domain, row._id, row);
-      else       await sheetSrc().upsert(state.domain, row);
+      await saveRecord(m, row, existing);
       d.close(); refreshDomain();
     }catch(e){ btn.textContent="저장"; btn.disabled=false; alert("저장 실패: "+e.message); }
   };
 }
+/* 저장을 분야에 맞는 통로로 보냄 (영화=기존 수정통로 / 차계부=nd문(ID) / 도서·명산·러닝=nd문(_id)) */
+async function saveRecord(m, row, existing){
+  if(m.id==="movies"){                       // 영화 정보수정: 기존 앱 수정통로 재사용(원제로 찾음)
+    const updates={};
+    (m.fields||[]).forEach(f=>{ updates[f.sheet] = f.type==="tags"
+      ? (Array.isArray(row[f.k])?row[f.k].join(", "):(row[f.k]||"")) : (row[f.k]==null?"":row[f.k]); });
+    return appsSrc().post({action:"updateMovie", orig:existing.orig, updates});
+  }
+  if(m.id==="carlog"){                        // 차계부: CARLOG 탭, ID 기준
+    const kor={};
+    (m.fields||[]).forEach(f=>{ kor[f.sheet] = (row[f.k]==null?"":row[f.k]); });
+    if(existing) return sheetSrc().updateRaw("CARLOG", existing._id, kor, "ID");
+    kor["ID"]=String(Date.now());
+    return sheetSrc().appendRaw("CARLOG", kor);
+  }
+  if(existing) return sheetSrc().update(state.domain, row._id, row);   // 도서·명산·러닝
+  return sheetSrc().upsert(state.domain, row);
+}
 async function deleteRecord(m, r){
   if(!confirm(`'${r.title||r.date||r._id}' 삭제할까요? 되돌릴 수 없어요.`)) return;
-  try{ await sheetSrc().remove(state.domain, r._id); $("#detail").close(); refreshDomain(); }
-  catch(e){ alert("삭제 실패: "+e.message); }
+  try{
+    if(m.id==="carlog") await sheetSrc().deleteRaw("CARLOG", r._id, "ID");
+    else await sheetSrc().remove(state.domain, r._id);
+    $("#detail").close(); refreshDomain();
+  }catch(e){ alert("삭제 실패: "+e.message); }
 }
 
 const CACHE = {};   // 분야별로 한 번 불러온 데이터를 기억 → 탭 전환·검색 때 다시 안 받음
@@ -620,6 +702,9 @@ async function loadAndRender(){
   }
   const raw = CACHE[state.domain];
   state.rows = applyComputed(m, raw.map(r=>({_id:r._id||crypto.randomUUID(),...r})));
+  paintDomain(m);
+}
+function paintDomain(m){   // state.rows를 화면에 그림 (데이터 다시 안 받고 재렌더 가능)
   renderPicker(m);
   let base = state.rows;
   if(m.filterBy && state.pick) base = base.filter(r=>String(r[m.filterBy.field]||"").trim()===state.pick);
@@ -718,6 +803,76 @@ function addBook(b){
     .catch(e=>alert("시트 저장 실패: "+e.message));
 }
 
+/* ── 영화 추가: TMDB에서 제목 검색 → 감독·배우·연도·포스터 자동 → 기존 addMovie 통로로 저장 ── */
+async function searchMovies(q){
+  if(!q || q.trim().length<2) return [];
+  const url=`${CONFIG.TMDB_BASE}/search/movie?api_key=${CONFIG.TMDB_KEY}&language=ko-KR&query=${encodeURIComponent(q.trim())}`;
+  const res=await fetch(url);
+  if(!res.ok) throw new Error("HTTP "+res.status);
+  const d=await res.json();
+  return (d.results||[]).slice(0,6).map(m=>({
+    id:m.id, orig:m.original_title||m.title||"", kor:m.title||m.original_title||"",
+    year:(m.release_date||"").slice(0,4), rating:m.vote_average?Math.round(m.vote_average*10)/10:"",
+    poster:m.poster_path?("https://image.tmdb.org/t/p/w185"+m.poster_path):"" }));
+}
+async function fetchMovieExtra(id){   // 감독·배우·국적 (두 번째 호출)
+  try{
+    const [det,cred]=await Promise.all([
+      fetch(`${CONFIG.TMDB_BASE}/movie/${id}?api_key=${CONFIG.TMDB_KEY}&language=ko-KR`).then(r=>r.json()),
+      fetch(`${CONFIG.TMDB_BASE}/movie/${id}/credits?api_key=${CONFIG.TMDB_KEY}&language=ko-KR`).then(r=>r.json())
+    ]);
+    return { director:(cred.crew||[]).filter(c=>c.job==="Director").map(c=>c.name).join(", "),
+             actors:(cred.cast||[]).slice(0,4).map(c=>c.name).join(", "),
+             country:(det.production_countries||[]).map(c=>c.name).join(", ") };
+  }catch(e){ return {director:"",actors:"",country:""}; }
+}
+let addMovieStatus="없음";
+function openAddMovie(){
+  const d=$("#add"); const statuses=["봤음","찜","없음"];
+  d.innerHTML=`<div class="dhead"><h3>영화 추가</h3></div><div class="dbody set">
+    <label style="margin-top:0">추가할 때 상태</label>
+    <div style="display:flex;gap:6px">${statuses.map(s=>`<button class="btn ghost st ${s===addMovieStatus?'on':''}" data-s="${s}">${s}</button>`).join("")}</div>
+    <label>제목으로 검색 (TMDB)</label>
+    <input id="mq" placeholder="영화 제목 입력…" autocomplete="off" />
+    <div id="mres" style="margin-top:12px;display:flex;flex-direction:column;gap:8px;max-height:340px;overflow:auto"></div>
+    <button class="btn ghost" id="addClose" style="margin-top:14px">닫기</button></div>`;
+  d.showModal();
+  d.querySelectorAll(".st").forEach(b=>b.onclick=()=>{ addMovieStatus=b.dataset.s;
+    d.querySelectorAll(".st").forEach(x=>x.classList.toggle("on",x.dataset.s===addMovieStatus)); });
+  $("#addClose").onclick=()=>d.close();
+  const mq=$("#mq"), mres=$("#mres"); let timer=null, results=[];
+  mq.addEventListener("input",()=>{ clearTimeout(timer); timer=setTimeout(async()=>{
+    if(mq.value.trim().length<2){ mres.innerHTML=""; return; }
+    mres.innerHTML=`<div class="count">검색 중…</div>`;
+    try{ results=await searchMovies(mq.value);
+      mres.innerHTML = results.length ? results.map((m,i)=>
+        `<button class="card" data-i="${i}" style="grid-template-columns:auto 1fr">
+          <span class="thumb">${m.poster?`<img src="${m.poster}" alt="">`:"🎞"}</span>
+          <span class="body"><h3 style="font-size:15px">${m.kor}</h3>
+          <div class="meta">${[m.year,m.orig].filter(Boolean).join(" · ")}</div></span></button>`).join("")
+        : `<div class="count">검색 결과가 없습니다.</div>`;
+      mres.querySelectorAll(".card").forEach(btn=>btn.onclick=()=>pickMovie(results[+btn.dataset.i]));
+    }catch(e){ mres.innerHTML=`<div class="banner warn">검색 실패: ${e.message}</div>`; }
+  },500); });
+  setTimeout(()=>mq.focus(),50);
+}
+async function pickMovie(m){
+  const code = addMovieStatus==="봤음" ? "WO" : addMovieStatus==="찜" ? "XP" : "XO";
+  if($("#mres")) $("#mres").innerHTML=`<div class="count">추가 중…</div>`;
+  const extra = await fetchMovieExtra(m.id);
+  const movie = { orig:m.orig, kor:m.kor, year:m.year, status:code,
+    director:extra.director, actors:extra.actors, country:extra.country,
+    rating:m.rating, stream:"", verified:"", rec:"" };
+  try{
+    await appsSrc().post({action:"addMovie", movie});
+    $("#add").close(); refreshDomain();
+  }catch(e){
+    const msg = /이미 목록/.test(e.message) ? "이미 목록에 있는 영화예요." : ("추가 실패: "+e.message);
+    alert(msg);
+    if($("#mres")) $("#mres").innerHTML="";
+  }
+}
+
 async function boot(){
   // 첫 화면은 홈(켜둔 카테고리 카드 격자). 처음엔 비어 있고, 설정에서 카테고리를 켜면 카드가 생김.
   showView("home"); renderHome();
@@ -727,7 +882,9 @@ $("#tabs").addEventListener("click",e=>{ const t=e.target.closest(".tab"); if(t)
 $("#search").addEventListener("input",e=>{ state.query=e.target.value; loadAndRender(); });
 $("#setBtn").addEventListener("click",openSettings);
 $("#addBtn").addEventListener("click",()=>{ const m=MANIFESTS[state.domain]; if(!m?.canAdd) return;
-  if(state.domain==="books") openAddBook(); else openRecordForm(m, null); });
+  if(state.domain==="movies") openAddMovie();
+  else if(state.domain==="books") openAddBook();
+  else openRecordForm(m, null); });
 
 /* ── 샘플 데이터(데모 전용; 실사용 시 구글 시트에서 옴) ── */
 const SAMPLE = {
