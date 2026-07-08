@@ -180,6 +180,9 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
   .wb-W{ background:#dcfce7; color:#16a34a; }
   .wb-R{ background:#fef9c3; color:#b45309; }
   .wb-P{ background:#ffedd5; color:#c2410c; }
+  .wb-O{ background:#e0e7ff; color:#4f46e5; }
+  .rf-imgprev{ max-width:130px; max-height:130px; border-radius:8px; display:block; margin:4px 0 6px; }
+  .rf-imgfile{ font-size:12px; }
 
   /* 차계부 표본 라벨 카드 (시안 v2) */
   .cl-card{ display:block; padding:15px 16px 14px; }
@@ -274,7 +277,7 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
 <div class="wrap" id="root" data-domain="movies">
   <header class="masthead">
     <div class="mh-row">
-      <h1 id="brandBtn" style="cursor:pointer">내도감</h1><span class="sub">Naedogam · v52</span>
+      <h1 id="brandBtn" style="cursor:pointer">내도감</h1><span class="sub">Naedogam · v53</span>
       <span class="spacer"></span>
       <span class="src-chip" id="srcChip" style="display:none">데모</span>
       <button class="icon-btn" id="searchToggle" type="button" style="display:none">🔍</button>
@@ -406,6 +409,7 @@ const MANIFESTS = {
              {k:"rating",sheet:"평점",label:"평점",type:"number"},
              {k:"pick",sheet:"찜",label:"읽고싶다(찜)",type:"bool"},
              {k:"reread",sheet:"다시",label:"다시읽을것",type:"bool"},
+             {k:"owned",sheet:"소장",label:"소장",type:"bool"},
              {k:"recommend",sheet:"추천",label:"추천(카탈로그 · /로 구분)",type:"text"},
              {k:"cover",sheet:"표지",label:"표지 주소",type:"text"},
              {k:"review",sheet:"감상평",label:"감상평",type:"text"} ],
@@ -431,6 +435,7 @@ const MANIFESTS = {
              {k:"climbed",sheet:"다녀옴",label:"다녀옴",type:"bool"},
              {k:"revisit",sheet:"또갈것",label:"또갈것",type:"bool"},
              {k:"pick",sheet:"찜",label:"찜",type:"bool"},
+             {k:"cover",sheet:"커버",label:"커버 사진",type:"image"},
              {k:"tags",sheet:"태그",label:"태그(쉼표로 여러 개)",type:"tags"} ],
     search:["title","region"],
     stats:[ {label:"전체",type:"count"},
@@ -794,26 +799,27 @@ function renderBookGenres(m){
   sc.querySelectorAll("[data-bg]").forEach(b=>b.onclick=()=>{ bookGenreFilter=b.dataset.bg; paintDomain(m); });
 }
 function bookCard(r){
+  const esc2=x=>String(x==null?"":x).replace(/"/g,"&quot;");
   const flags=(r.status==="읽음"?`<span class="wb wb-W">읽음</span>`:"")
     +(r.status==="읽는중"?`<span class="wb wb-R">읽는중</span>`:"")
     +(r.reread?`<span class="wb wb-R">다시읽을것</span>`:"")
+    +(r.owned?`<span class="wb wb-O">소장</span>`:"")
     +(r.pick?`<span class="wb wb-P">찜</span>`:"");
   const right=[r.year,(r.rating!=null&&r.rating!==""?("⭐"+r.rating):"")].filter(Boolean).join(" · ");
   const gArr=Array.isArray(r.genre)?r.genre:(r.genre==null||r.genre===""?[]:[r.genre]);
   const genre=gArr.map(t=>`<span class="gtag">${t}</span>`).join("");
   const rec=bookRecBadges(r,"rbadge");
   const cover=r.cover?`<img src="${r.cover}" alt="">`:"📖";
-  const coverAttr=r.cover?"":` data-bkcover data-bktitle="${String(r.title||"").replace(/"/g,"&quot;")}" data-bkauthor="${String(r.author||"").replace(/"/g,"&quot;")}"`;
-  const sub=[r.author,r.publisher].filter(Boolean).join(" · ");
+  const sub0=[r.author,r.publisher].filter(Boolean).join(" · ");
   const rv=String(r.review||"").trim();
   const review=rv?`<div class="bk-review">"${rv.slice(0,60)}${rv.length>60?"…":""}"</div>`:"";
-  return `<button class="card mvcard" data-id="${r._id}">
-    <span class="thumb"${coverAttr}>${cover}</span>
+  return `<button class="card mvcard" data-id="${r._id}" data-bkt="${esc2(r.title)}" data-bka="${esc2(r.author)}">
+    <span class="thumb">${cover}</span>
     <div class="mvinfo">
       <div class="mv-titlerow"><span class="mv-title">${r.title}${flags}</span><span class="mv-year">${right}</span></div>
-      ${sub?`<div class="mv-sub">${sub}</div>`:""}
+      <div class="mv-sub" data-sub data-pub="${esc2(r.publisher)}">${sub0}</div>
       ${review}
-      ${(genre||rec)?`<div class="mvbadges">${genre}${rec}</div>`:""}
+      ${genre?`<div class="mvbadges">${genre}</div>`:""}${rec?`<div class="mvbadges" style="margin-top:3px">${rec}</div>`:""}
     </div>
   </button>`;
 }
@@ -836,11 +842,14 @@ let mtnInfoCache={}, userGeo=null, geoAsked=false;
 function haversineKm(la1,lo1,la2,lo2){ const R=6371,dLa=(la2-la1)*Math.PI/180,dLo=(lo2-lo1)*Math.PI/180,
   x=Math.sin(dLa/2)**2+Math.cos(la1*Math.PI/180)*Math.cos(la2*Math.PI/180)*Math.sin(dLo/2)**2;
   return 2*R*Math.asin(Math.sqrt(x)); }
-async function fetchMtnInfo(name){   // 위키백과: 대표사진 + 좌표
+async function fetchMtnInfo(name){   // 위키백과 MediaWiki API: 대표사진 + 좌표(요약API엔 좌표가 없어서 교체)
   if(mtnInfoCache[name]!==undefined) return mtnInfoCache[name];
-  try{ const d=await fetch(`https://ko.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(name)}`).then(r=>r.json());
-    const c=d&&d.coordinates;
-    mtnInfoCache[name]={ cover:(d&&d.thumbnail&&d.thumbnail.source)||null, lat:c&&c.lat!=null?c.lat:null, lon:c&&c.lon!=null?c.lon:null };
+  try{
+    const u=`https://ko.wikipedia.org/w/api.php?action=query&prop=coordinates%7Cpageimages&piprop=thumbnail&pithumbsize=240&titles=${encodeURIComponent(name)}&format=json&origin=*`;
+    const d=await fetch(u).then(r=>r.json());
+    const pages=d&&d.query&&d.query.pages; let cover=null,lat=null,lon=null;
+    if(pages){ const pg=Object.values(pages)[0]||{}; if(pg.thumbnail) cover=pg.thumbnail.source; if(pg.coordinates&&pg.coordinates[0]){ lat=pg.coordinates[0].lat; lon=pg.coordinates[0].lon; } }
+    mtnInfoCache[name]={cover,lat,lon};
   }catch(e){ mtnInfoCache[name]=null; }
   return mtnInfoCache[name];
 }
@@ -857,19 +866,22 @@ async function loadMountainMeta(m){   // 커버 + (위치 허용 시) 거리 채
   }
   if(changed && state.domain===m.id) paintDomain(m);
 }
-function lazyBookCovers(){
+function lazyBookInfo(){
   const io=new IntersectionObserver((ents,obs)=>{ ents.forEach(async e=>{
-    if(!e.isIntersecting) return; const el=e.target; obs.unobserve(el);
-    const info=await fetchBookInfo(el.dataset.bktitle, el.dataset.bkauthor);
-    if(info && info.cover && el.dataset.bkcover!==undefined) el.innerHTML=`<img src="${info.cover}" alt="">`;
+    if(!e.isIntersecting) return; const card=e.target; obs.unobserve(card);
+    const info=await fetchBookInfo(card.dataset.bkt, card.dataset.bka); if(!info) return;
+    const th=card.querySelector(".thumb"); if(th && !th.querySelector("img") && info.cover) th.innerHTML=`<img src="${info.cover}" alt="">`;
+    const sub=card.querySelector("[data-sub]");
+    if(sub){ const parts=[card.dataset.bka, (sub.dataset.pub||info.publisher), info.pages?(info.pages+"쪽"):""].filter(Boolean); sub.textContent=parts.join(" · "); }
   }); },{rootMargin:"300px"});
-  document.querySelectorAll(".thumb[data-bkcover]").forEach(el=>io.observe(el));
+  document.querySelectorAll(".mvcard[data-bkt]").forEach(el=>io.observe(el));
 }
 const TOGGLE_DEFS={
   books:[
     {label:"읽음",   on:r=>r.status==="읽음",   ch:r=>({status:r.status==="읽음"?"":"읽음"})},
     {label:"읽는중", on:r=>r.status==="읽는중", ch:r=>({status:r.status==="읽는중"?"":"읽는중"})},
     {label:"다시읽을것", on:r=>!!r.reread, ch:r=>({reread:!r.reread})},
+    {label:"소장",   on:r=>!!r.owned,  ch:r=>({owned:!r.owned})},
     {label:"찜",     on:r=>!!r.pick,   ch:r=>({pick:!r.pick})},
   ],
   mountains:[
@@ -957,7 +969,8 @@ function openDetail(m, r){
   if(m.id==="movies"){ openMovieDetail(m, r); return; }
   if(m.id==="books"){ openBookDetail(m, r); return; }
   const LBL={pace:"페이스"}; (m.fields||[]).forEach(f=>{ LBL[f.k]=f.sheet||String(f.label||f.k).replace(/\s*\(.*$/,""); });
-  const rows=Object.entries(r).filter(([k])=>k!=="_id"&&k!=="orig"&&!(TOGGLE_HIDE[m.id]||[]).includes(k)).map(([k,v])=>
+  const _imgKeys=(m.fields||[]).filter(f=>f.type==="image").map(f=>f.k);
+  const rows=Object.entries(r).filter(([k])=>k!=="_id"&&k!=="orig"&&k!=="_cover"&&k!=="_dist"&&!_imgKeys.includes(k)&&!(TOGGLE_HIDE[m.id]||[]).includes(k)).map(([k,v])=>
     `<div class="drow"><span class="k">${LBL[k]||k}</span><span>${Array.isArray(v)?v.join(", "):v===null?"—":v===true?"예":v===false?"아니오":(typeof v==="number"&&k!=="year"&&!/연도/.test(LBL[k]||"")?v.toLocaleString():v)}</span></div>`).join("");
   const mapLinks = (m.id==="mountains") ? `<div class="mvlinks"><a class="btn ghost" target="_blank" rel="noopener" href="https://map.naver.com/p/search/${encodeURIComponent(r.title||"")}"><img class="lnkico" src="https://www.google.com/s2/favicons?domain=map.naver.com&sz=64" onerror="this.remove()">네이버지도</a><a class="btn ghost" target="_blank" rel="noopener" href="https://www.google.com/maps/search/${encodeURIComponent((r.title||"")+" "+(r.region||""))}"><img class="lnkico" src="https://www.google.com/s2/favicons?domain=google.com&sz=64" onerror="this.remove()">구글지도</a></div>` : "";
   const editable = m.source?.type==="sheet" || m.id==="carlog";
@@ -1133,6 +1146,7 @@ function openRecordForm(m, existing){
       return `<button type="button" class="btn ghost rf-bool ${val?'on':''}" data-k="${f.k}" style="margin-top:6px;margin-right:6px">${f.sheet||f.label}</button>`;
     if(f.type==="select")
       return `<label>${f.label}</label><select class="rf" data-k="${f.k}" data-type="select">${(f.options||[]).map(o=>`<option value="${o}" ${String(val||'')===o?'selected':''}>${o||'(없음)'}</option>`).join("")}</select>`;
+    if(f.type==="image"){ const cur=String(val||""); return `<label>${f.label}</label><div><img class="rf-imgprev" data-k="${f.k}" src="${cur.replace(/"/g,'&quot;')}" style="${cur?'':'display:none'}"><input type="hidden" class="rf-imgval" data-k="${f.k}" value="${cur.replace(/"/g,'&quot;')}"><input type="file" accept="image/*" class="rf-imgfile" data-k="${f.k}"></div>`; }
     const v = (f.type==="tags" && Array.isArray(val)) ? val.join(", ") : (val==null?"":val);
     return `<label>${f.label}</label><input class="rf" data-k="${f.k}" data-type="${f.type}" value="${String(v).replace(/"/g,'&quot;')}" autocomplete="off" />`;
   }).join("");
@@ -1143,6 +1157,17 @@ function openRecordForm(m, existing){
     </div></div>`;
   d.showModal();
   d.querySelectorAll(".rf-bool").forEach(b=>b.onclick=()=>{ b.classList.toggle("on"); });
+  d.querySelectorAll(".rf-imgfile").forEach(inp=>inp.onchange=ev=>{
+    const file=ev.target.files&&ev.target.files[0]; if(!file) return; const k=inp.dataset.k;
+    const rd=new FileReader(); rd.onload=()=>{ const img=new Image(); img.onload=()=>{
+      const mx=240, sc=Math.min(1,mx/Math.max(img.width,img.height));
+      const cv=document.createElement("canvas"); cv.width=Math.max(1,Math.round(img.width*sc)); cv.height=Math.max(1,Math.round(img.height*sc));
+      cv.getContext("2d").drawImage(img,0,0,cv.width,cv.height);
+      let url; try{ url=cv.toDataURL("image/jpeg",0.6); }catch(e){ url=rd.result; }
+      d.querySelector(`.rf-imgval[data-k="${k}"]`).value=url;
+      const pv=d.querySelector(`.rf-imgprev[data-k="${k}"]`); pv.src=url; pv.style.display="";
+    }; img.src=rd.result; }; rd.readAsDataURL(file);
+  });
   $("#rfClose").onclick=()=>d.close();
   $("#rfSave").onclick=async()=>{
     // 한글 마지막 글자 잘림 방지: 조합 확정(blur) → 아주 짧은 틈 뒤 값 읽기
@@ -1152,6 +1177,7 @@ function openRecordForm(m, existing){
     const row = existing ? {...existing} : { _id: crypto.randomUUID() };
     fields.forEach(f=>{
       if(f.type==="bool"){ row[f.k]=d.querySelector(`.rf-bool[data-k="${f.k}"]`).classList.contains("on"); return; }
+      if(f.type==="image"){ row[f.k]=d.querySelector(`.rf-imgval[data-k="${f.k}"]`).value; return; }
       const el=d.querySelector(`.rf[data-k="${f.k}"]`); let v=el.value;
       if(f.type==="number") v = (v===""?null:Number(v));
       if(f.type==="tags")   v = v.split(",").map(s=>s.trim()).filter(Boolean);
@@ -1274,7 +1300,7 @@ function paintDomain(m){   // state.rows를 화면에 그림 (데이터 다시 �
   $("#list").innerHTML=rows.map((r,i)=>{ try{ return renderCard(m,r,i+1); }catch(e){ console.error("card",e); return ""; } }).join("") || emptyG;
   document.querySelectorAll(".card").forEach(b=>b.onclick=()=>openDetail(m, state.rows.find(x=>x._id===b.dataset.id)));
   { const na=$("#nrAdd"); if(na) na.onclick=()=>{ if(m.id==="books"){ openAddBook(); const bq=$("#bq"); if(bq){ bq.value=state.query; bq.dispatchEvent(new Event("input")); } } else openRecordForm(m, null); }; }
-  if(m.id==="books") lazyBookCovers();
+  if(m.id==="books") lazyBookInfo();
   if(m.id==="mountains") loadMountainMeta(m);
 }
 
