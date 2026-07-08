@@ -267,7 +267,7 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
 <div class="wrap" id="root" data-domain="movies">
   <header class="masthead">
     <div class="mh-row">
-      <h1 id="brandBtn" style="cursor:pointer">내도감</h1><span class="sub">Naedogam · v44</span>
+      <h1 id="brandBtn" style="cursor:pointer">내도감</h1><span class="sub">Naedogam · v46</span>
       <span class="spacer"></span>
       <span class="src-chip" id="srcChip" style="display:none">데모</span>
       <button class="icon-btn" id="searchToggle" type="button" style="display:none">🔍</button>
@@ -390,14 +390,16 @@ const MANIFESTS = {
      실제 시트 연결 준비되면 → source 를 { type:"appsscript", sheet:"book", map:{...}, derive(){...} } 로 교체만. */
   books:{ id:"books", title:"도서", icon:"📖", vol:"卷3", canAdd:true,
     source:{ type:"sheet", tab:"도서" },
-    fields:[ {k:"title",label:"제목",type:"text"},
-             {k:"author",label:"저자",type:"text"},
-             {k:"year",label:"출판연도",type:"number"},
-             {k:"status",label:"상태",type:"select",options:["","읽음","읽는중"]},
-             {k:"pick",label:"읽고싶다(찜)",type:"bool"},
-             {k:"rating",label:"평점",type:"number"},
-             {k:"genre",label:"장르(쉼표로 여러 개)",type:"tags"},
-             {k:"cover",label:"표지 주소",type:"text"} ],
+    fields:[ {k:"title",sheet:"제목",label:"제목",type:"text"},
+             {k:"author",sheet:"저자",label:"저자",type:"text"},
+             {k:"publisher",sheet:"출판사",label:"출판사",type:"text"},
+             {k:"year",sheet:"출판연도",label:"출판연도",type:"number"},
+             {k:"genre",sheet:"장르",label:"장르(쉼표로 여러 개)",type:"tags"},
+             {k:"status",sheet:"상태",label:"상태",type:"select",options:["","읽음","읽는중"]},
+             {k:"rating",sheet:"평점",label:"평점",type:"number"},
+             {k:"pick",sheet:"찜",label:"읽고싶다(찜)",type:"bool"},
+             {k:"recommend",sheet:"추천",label:"추천(카탈로그 · /로 구분)",type:"text"},
+             {k:"cover",sheet:"표지",label:"표지 주소",type:"text"} ],
     search:["title","author"],
     stats:[ {label:"전체",type:"count"},
             {label:"읽음",type:"countIf",field:"status",eq:"읽음"},
@@ -414,11 +416,11 @@ const MANIFESTS = {
   /* 100대 명산: 오른 곳을 체크하는 목록. */
   mountains:{ id:"mountains", title:"100대 명산", icon:"⛰", vol:"卷4", canAdd:true,
     source:{ type:"sheet", tab:"명산" },
-    fields:[ {k:"title",label:"산 이름",type:"text"},
-             {k:"height",label:"높이(m)",type:"number"},
-             {k:"region",label:"지역",type:"text"},
-             {k:"climbed",label:"완등",type:"bool"},
-             {k:"tags",label:"태그(쉼표로 여러 개)",type:"tags"} ],
+    fields:[ {k:"title",sheet:"산 이름",label:"산 이름",type:"text"},
+             {k:"height",sheet:"높이",label:"높이(m)",type:"number"},
+             {k:"region",sheet:"지역",label:"지역",type:"text"},
+             {k:"climbed",sheet:"완등",label:"완등",type:"bool"},
+             {k:"tags",sheet:"태그",label:"태그(쉼표로 여러 개)",type:"tags"} ],
     search:["title","region"],
     stats:[ {label:"전체",type:"count"},
             {label:"오른 곳",type:"countIf",field:"climbed",eq:true} ],
@@ -430,10 +432,10 @@ const MANIFESTS = {
   /* 러닝: 날짜·거리·시간 기록, 페이스는 자동 계산. */
   running:{ id:"running", title:"러닝", icon:"🏃", vol:"卷5", canAdd:true,
     source:{ type:"sheet", tab:"러닝" },
-    fields:[ {k:"date",label:"날짜(예: 2026-07-07)",type:"text"},
-             {k:"dist",label:"거리(km)",type:"number"},
-             {k:"time",label:"시간(분)",type:"number"},
-             {k:"memo",label:"메모",type:"text"} ],
+    fields:[ {k:"date",sheet:"날짜",label:"날짜(예: 2026-07-07)",type:"text"},
+             {k:"dist",sheet:"거리",label:"거리(km)",type:"number"},
+             {k:"time",sheet:"시간",label:"시간(분)",type:"number"},
+             {k:"memo",sheet:"메모",label:"메모",type:"text"} ],
     search:["memo"],
     computed:{ pace:{ deps:["dist","time"], calc:"pacePerKm" } },
     stats:[ {label:"총 거리",type:"sum",field:"dist",unit:"km"},
@@ -566,7 +568,7 @@ function sheetCell(v){ return Array.isArray(v)?v.join("|") : v===true?"TRUE" : v
 class SheetDataSource {
   constructor(url){ this.url=url; this.isLive=true; this.label="구글시트"; this._ensured=new Set(); }
   async ensureReady(){ if(!this.url) throw new Error("APPS_SCRIPT_URL이 비어 있습니다"); return true; }
-  _flatten(m, r){ const header=["_id",...fieldKeys(m)]; const o={}; header.forEach(h=>o[h]=sheetCell(r[h])); return o; }
+  _flatten(m, r){ const o={_id:sheetCell(r._id)}; (m.fields||[]).forEach(f=>{ o[f.sheet||f.k]=sheetCell(r[f.k]); }); return o; }
   async _post(payload){   // 탭 만들기·한 줄 추가 같은 '쓰기'. text/plain로 보내야 브라우저가 안 막음.
     const res=await fetch(this.url,{method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},
       body:JSON.stringify(Object.assign({nd:1},payload))});
@@ -576,8 +578,8 @@ class SheetDataSource {
   }
   async ensure(m){        // 탭이 없으면 만들고(+샘플), 있으면 그대로. 한 세션에 한 번만.
     if(this._ensured.has(m.id)) return;
-    const header=["_id",...fieldKeys(m)];
-    await this._post({action:"ensureTab", tab:m.source.tab, header, rows:[]});   // 샘플 안 심음: 실데이터만
+    const header=ndHeaders(m);
+    await this._post({action:"ensureTab", tab:m.source.tab, header, rows:[]});   // 샘플 안 심음: 실데이터만(한글 헤더)
     this._ensured.add(m.id);
   }
   async list(id){
@@ -587,11 +589,12 @@ class SheetDataSource {
     if(!res.ok) throw new Error("HTTP "+res.status);
     const raw=await res.json();
     if(raw && raw.error) throw new Error(raw.error);
-    return (Array.isArray(raw)?raw:[]).map(row=>{ const o={}; for(const k in row) o[k]=coerce(row[k]); return o; });
+    const inv=ndInv(m);
+    return (Array.isArray(raw)?raw:[]).map(row=>{ const o={}; for(const kh in row){ const ek=inv[kh]||kh; o[ek]=coerce(row[kh]); } return o; });
   }
   async upsert(id,row){   // 탭 맨 아래에 한 줄 추가(저장)
     const m=MANIFESTS[id];
-    return this._post({action:"append", tab:m.source.tab, header:["_id",...fieldKeys(m)], row:this._flatten(m,row)});
+    return this._post({action:"append", tab:m.source.tab, header:ndHeaders(m), row:this._flatten(m,row)});
   }
   async update(id,rowId,row){   // _id로 찾아 수정
     const m=MANIFESTS[id];
@@ -607,6 +610,8 @@ class SheetDataSource {
   async deleteRaw(tab,id,idKey){ return this._post({action:"delete", tab, id, idKey}); }
 }
 const fieldKeys = m => (SAMPLE[m.id]?.[0] ? Object.keys(SAMPLE[m.id][0]).filter(k=>k!=="_id") : m.search);
+function ndHeaders(m){ return ["_id", ...((m.fields||[]).map(f=>f.sheet||f.k))]; }   // 시트에 쓸 한글 헤더
+function ndInv(m){ const inv={_id:"_id"}; (m.fields||[]).forEach(f=>{ inv[f.k]=f.k; if(f.sheet) inv[f.sheet]=f.k; }); return inv; }  // 한글·영문 헤더 → 엔진키(전환 중 둘 다 인식)
 const coerce = v => v==="TRUE"?true : v==="FALSE"?false : (v!=="" && !isNaN(v) && v!==null)? +v : (typeof v==="string"&&v.includes("|")?v.split("|"):v);
 
 /* ── 3. Engine: computed·통계·검색·렌더(데이터 출처 무관) ── */
@@ -811,7 +816,7 @@ async function openBookDetail(m, r){
     <div class="mvtop">
       <div class="mvposter" id="bkCover">${r.cover?`<img src="${r.cover}" alt="">`:"📖"}</div>
       <div class="mvinfo" style="min-width:0">
-        <div class="mvmeta">${[r.author,r.year,(r.rating!=null&&r.rating!==""?("⭐ "+r.rating):"")].filter(Boolean).join(" · ")}</div>
+        <div class="mvmeta">${[r.author,r.publisher,r.year,(r.rating!=null&&r.rating!==""?("⭐ "+r.rating):"")].filter(Boolean).join(" · ")}</div>
         ${r.status?`<div class="mvorig">${r.status}</div>`:""}
         <div class="mvmeta" id="bkExtra" style="margin-top:2px"></div>
         ${(genre||rec)?`<div class="tags">${genre}${rec}</div>`:""}
