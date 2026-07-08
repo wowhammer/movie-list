@@ -183,6 +183,14 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
   .wb-O{ background:#e0e7ff; color:#4f46e5; }
   .rf-imgprev{ max-width:130px; max-height:130px; border-radius:8px; display:block; margin:4px 0 6px; }
   .rf-imgfile{ font-size:12px; }
+  .dash-note{ font-size:12px; color:var(--ink-soft); margin-bottom:12px; }
+  .dash-dom{ padding:11px 0; border-top:1px solid var(--line); }
+  .dash-dom:first-of-type{ border-top:none; padding-top:2px; }
+  .dash-dt{ font-size:14px; font-weight:600; margin-bottom:7px; }
+  .dash-stats{ display:flex; flex-wrap:wrap; gap:6px; }
+  .dash-pill{ font-size:12px; background:var(--paper); border:1px solid var(--line); border-radius:12px; padding:3px 10px; color:var(--ink-soft); }
+  .dash-pill b{ color:var(--ink); font-weight:600; margin-left:1px; }
+  .dash-names{ font-size:12.5px; color:var(--ink); margin-top:2px; line-height:1.55; }
 
   /* 차계부 표본 라벨 카드 (시안 v2) */
   .cl-card{ display:block; padding:15px 16px 14px; }
@@ -277,10 +285,11 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
 <div class="wrap" id="root" data-domain="movies">
   <header class="masthead">
     <div class="mh-row">
-      <h1 id="brandBtn" style="cursor:pointer">내도감</h1><span class="sub">Naedogam · v53</span>
+      <h1 id="brandBtn" style="cursor:pointer">내도감</h1><span class="sub">Naedogam · v56</span>
       <span class="spacer"></span>
       <span class="src-chip" id="srcChip" style="display:none">데모</span>
       <button class="icon-btn" id="searchToggle" type="button" style="display:none">🔍</button>
+      <button class="icon-btn" id="dashBtn" type="button">📊 통계</button>
       <button class="icon-btn" id="setBtn" type="button">⚙ 설정</button>
     </div>
     <div class="mh-sub" id="mhSub" style="display:none"></div>
@@ -309,6 +318,7 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
 <dialog id="settings"></dialog>
 <dialog id="add"></dialog>
 <dialog id="rec"></dialog>
+<dialog id="dash"></dialog>
 
 <script>
 /* =====================================================================
@@ -390,6 +400,7 @@ const MANIFESTS = {
              {k:"memo",sheet:"비고",label:"비고",type:"text"} ],
     filterBy:{ field:"car", allLabel:"전체" },
     search:["work","shop","car","memo"],
+    activity:{ df:"date", when:r=>true, label:"정비", name:r=>[r.car,r.work].filter(Boolean).join(" ") },
     stats:[ {label:"기록 수",type:"count"},
             {label:"총 정비비",type:"sum",field:"cost",unit:"원"},
             {label:"최근 주행",type:"max",field:"odo",unit:"km"} ],
@@ -412,8 +423,10 @@ const MANIFESTS = {
              {k:"owned",sheet:"소장",label:"소장",type:"bool"},
              {k:"recommend",sheet:"추천",label:"추천(카탈로그 · /로 구분)",type:"text"},
              {k:"cover",sheet:"표지",label:"표지 주소",type:"text"},
-             {k:"review",sheet:"감상평",label:"감상평",type:"text"} ],
+             {k:"review",sheet:"감상평",label:"감상평",type:"text"},
+             {k:"readDate",sheet:"읽은날",label:"읽은날",type:"text"} ],
     search:["title","author"],
+    activity:{ df:"readDate", when:r=>r.status==="읽음", label:"읽음", name:r=>r.title },
     stats:[ {label:"전체",type:"count"},
             {label:"읽음",type:"countIf",field:"status",eq:"읽음"},
             {label:"읽는중",type:"countIf",field:"status",eq:"읽는중"},
@@ -436,8 +449,10 @@ const MANIFESTS = {
              {k:"revisit",sheet:"또갈것",label:"또갈것",type:"bool"},
              {k:"pick",sheet:"찜",label:"찜",type:"bool"},
              {k:"cover",sheet:"커버",label:"커버 사진",type:"image"},
+             {k:"climbDate",sheet:"다녀온날",label:"다녀온날",type:"text"},
              {k:"tags",sheet:"태그",label:"태그(쉼표로 여러 개)",type:"tags"} ],
     search:["title","region"],
+    activity:{ df:"climbDate", when:r=>!!r.climbed, label:"다녀옴", name:r=>r.title },
     stats:[ {label:"전체",type:"count"},
             {label:"다녀옴",type:"countIf",field:"climbed",eq:true},
             {label:"또갈것",type:"countIf",field:"revisit",eq:true},
@@ -456,6 +471,7 @@ const MANIFESTS = {
              {k:"time",sheet:"시간",label:"시간(분)",type:"number"},
              {k:"memo",sheet:"메모",label:"메모",type:"text"} ],
     search:["memo"],
+    activity:{ df:"date", when:r=>true, label:"러닝", name:r=>[r.date, r.dist?r.dist+"km":""].filter(Boolean).join(" ") },
     computed:{ pace:{ deps:["dist","time"], calc:"pacePerKm" } },
     stats:[ {label:"총 거리",type:"sum",field:"dist",unit:"km"},
             {label:"평균 페이스",type:"avgComputed",field:"pace",unit:"분/km"},
@@ -838,7 +854,7 @@ async function fetchBookInfo(title, author){
   }catch(e){ bookInfoCache[key]=null; }
   return bookInfoCache[key];
 }
-let mtnInfoCache={}, userGeo=null, geoAsked=false;
+let mtnInfoCache={}, userGeo=null, geoAsked=false, _mtnLoading=false;
 function haversineKm(la1,lo1,la2,lo2){ const R=6371,dLa=(la2-la1)*Math.PI/180,dLo=(lo2-lo1)*Math.PI/180,
   x=Math.sin(dLa/2)**2+Math.cos(la1*Math.PI/180)*Math.cos(la2*Math.PI/180)*Math.sin(dLo/2)**2;
   return 2*R*Math.asin(Math.sqrt(x)); }
@@ -856,15 +872,18 @@ async function fetchMtnInfo(name){   // 위키백과 MediaWiki API: 대표사진
 function ensureGeo(){ return new Promise(res=>{ if(userGeo||geoAsked) return res(userGeo); geoAsked=true;
   if(!navigator.geolocation) return res(null);
   navigator.geolocation.getCurrentPosition(p=>{ userGeo={lat:p.coords.latitude,lng:p.coords.longitude}; res(userGeo); }, ()=>res(null), {timeout:8000,maximumAge:600000}); }); }
-async function loadMountainMeta(m){   // 커버 + (위치 허용 시) 거리 채우고 한 번 다시 그림
-  await ensureGeo();
-  let changed=false;
-  for(const r of state.rows.slice(0,60)){
-    const info=await fetchMtnInfo(r.title); if(!info) continue;
-    if(info.cover && r._cover!==info.cover){ r._cover=info.cover; changed=true; }
-    if(userGeo && info.lat!=null){ const dkm=Math.round(haversineKm(userGeo.lat,userGeo.lng,info.lat,info.lon)); if(r._dist!==dkm){ r._dist=dkm; changed=true; } }
-  }
-  if(changed && state.domain===m.id) paintDomain(m);
+async function loadMountainMeta(m){   // 커버 + (위치 허용 시) 거리 — 병렬로 채우고 진행되며 다시 그림
+  if(_mtnLoading) return; _mtnLoading=true;
+  try{
+    await ensureGeo();
+    const rows=state.rows.slice(0,80), CH=8;
+    for(let i=0;i<rows.length;i+=CH){
+      await Promise.all(rows.slice(i,i+CH).map(async r=>{ const info=await fetchMtnInfo(r.title); if(!info) return;
+        if(info.cover) r._cover=info.cover;
+        if(userGeo && info.lat!=null) r._dist=Math.round(haversineKm(userGeo.lat,userGeo.lng,info.lat,info.lon)); }));
+      if(state.domain===m.id) paintDomain(m);
+    }
+  } finally { _mtnLoading=false; }
 }
 function lazyBookInfo(){
   const io=new IntersectionObserver((ents,obs)=>{ ents.forEach(async e=>{
@@ -904,6 +923,7 @@ async function applyStatus(m, r, i, dlg){
   const setLocal=(obj)=>{ Object.assign(r,obj);
     const arr=CACHE[m.id]; if(arr){ const it=arr.find(x=>String(x._id)===String(r._id)); if(it){ Object.assign(it,obj); savePersist(m.id,arr); } } };
   setLocal(changes);
+  const _act=m.activity; if(_act && _act.when(r) && !r[_act.df]){ const _o={}; _o[_act.df]=todayStr(); setLocal(_o); }   // 완료 날짜 기록
   const box=dlg.querySelector(".statusbtns"); if(box){ box.innerHTML=statusBtnsHTML(m,r); wireStatusBtns(m,r,dlg); }
   paintDomain(m);
   try{ await sheetSrc().update(m.id, r._id, r); }
@@ -1160,10 +1180,10 @@ function openRecordForm(m, existing){
   d.querySelectorAll(".rf-imgfile").forEach(inp=>inp.onchange=ev=>{
     const file=ev.target.files&&ev.target.files[0]; if(!file) return; const k=inp.dataset.k;
     const rd=new FileReader(); rd.onload=()=>{ const img=new Image(); img.onload=()=>{
-      const mx=240, sc=Math.min(1,mx/Math.max(img.width,img.height));
-      const cv=document.createElement("canvas"); cv.width=Math.max(1,Math.round(img.width*sc)); cv.height=Math.max(1,Math.round(img.height*sc));
-      cv.getContext("2d").drawImage(img,0,0,cv.width,cv.height);
-      let url; try{ url=cv.toDataURL("image/jpeg",0.6); }catch(e){ url=rd.result; }
+      let mx=200, q=0.55;
+      const enc=()=>{ const sc=Math.min(1,mx/Math.max(img.width,img.height)); const cv=document.createElement("canvas"); cv.width=Math.max(1,Math.round(img.width*sc)); cv.height=Math.max(1,Math.round(img.height*sc)); cv.getContext("2d").drawImage(img,0,0,cv.width,cv.height); try{ return cv.toDataURL("image/jpeg",q); }catch(e){ return rd.result; } };
+      let url=enc();
+      while(url.length>45000 && (mx>90 || q>0.35)){ if(q>0.4) q-=0.1; else mx-=30; url=enc(); }   // 구글시트 셀 한도 안으로
       d.querySelector(`.rf-imgval[data-k="${k}"]`).value=url;
       const pv=d.querySelector(`.rf-imgprev[data-k="${k}"]`); pv.src=url; pv.style.display="";
     }; img.src=rd.result; }; rd.readAsDataURL(file);
@@ -1293,7 +1313,7 @@ function paintDomain(m){   // state.rows를 화면에 그림 (데이터 다시 �
   if(m.sorts && m.sorts.length){ _cnt.classList.add("countrow");
     const _sb=m.sorts.map(so=>{ const on=state.sort===so.k; return `<button class="sort-btn ${on?'on':''}" data-gs="${so.k}">${so.label}${on?(state.sortAsc?"↑":"↓"):(so.asc?"↑":"↓")}</button>`; }).join("");
     _cnt.innerHTML=`<span class="cnt-lbl">총 ${rows.length}건</span><span class="sort-btns">${_sb}</span>`;
-    _cnt.querySelectorAll(".sort-btn").forEach(b=>b.onclick=()=>{ const k=b.dataset.gs, so=m.sorts.find(x=>x.k===k); if(k===state.sort) state.sortAsc=!state.sortAsc; else { state.sort=k; state.sortAsc=!!so.asc; } paintDomain(m); });
+    _cnt.querySelectorAll(".sort-btn").forEach(b=>b.onclick=()=>{ const k=b.dataset.gs, so=m.sorts.find(x=>x.k===k); if(k===state.sort) state.sortAsc=!state.sortAsc; else { state.sort=k; state.sortAsc=!!so.asc; } if(k==="_dist" && !userGeo){ geoAsked=false; loadMountainMeta(m); } paintDomain(m); });
   } else { _cnt.classList.remove("countrow"); _cnt.textContent=`총 ${rows.length}건`; }
   const _qg=(state.query||"").replace(/</g,"&lt;");
   const emptyG = _qg ? `<div class="noresult"><div class="nr-t">검색 결과 없음</div><div class="nr-s">"${_qg}"는 목록에 없어요</div><button class="btn nr-add" id="nrAdd">+ "${_qg}" 새로 추가</button></div>` : `<div class="count">결과가 없습니다.</div>`;
@@ -1529,6 +1549,47 @@ function paintCarlog(m){
 }
 
 /* ── 5. 설정: 카테고리 켜고 끄기 + 구글/개인 설정 자리 ── */
+function todayStr(){ const d=new Date(); return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0"); }
+function parseDate(x){ x=String(x==null?"":x).trim(); if(!x) return null; let m;
+  if(m=x.match(/^(\d{4})[-.\/](\d{1,2})[-.\/](\d{1,2})/)) return new Date(+m[1],+m[2]-1,+m[3]);
+  if(m=x.match(/^(\d{2})[-.\/](\d{1,2})[-.\/](\d{1,2})/)) return new Date(2000+ +m[1],+m[2]-1,+m[3]);
+  const d=new Date(x); return isNaN(d)?null:d; }
+function inPeriod(d, period){ if(period==="all") return true; if(!d) return false; const now=new Date();
+  if(period==="today") return d.toDateString()===now.toDateString();
+  if(period==="month") return d.getFullYear()===now.getFullYear()&&d.getMonth()===now.getMonth();
+  if(period==="week"){ const s=new Date(now); const off=(now.getDay()+6)%7; s.setDate(now.getDate()-off); s.setHours(0,0,0,0); return d>=s; }
+  return true; }
+let dashPeriod="week";
+async function openDashboard(){
+  const d=$("#dash");
+  d.innerHTML=`<div class="dhead" style="display:flex;align-items:center;gap:10px"><h3 style="margin:0">📊 통계</h3><button class="pclose" onclick="this.closest('dialog').close()">✕</button></div><div class="dbody" id="dashBody"><div class="count">불러오는 중…</div></div>`;
+  d.showModal();
+  const ids=getActive().filter(id=>MANIFESTS[id]);
+  const data={};
+  for(const id of ids){ const m=MANIFESTS[id]; let raw=CACHE[id];
+    if(!raw){ try{ raw=await sourceFor(m).list(id); CACHE[id]=raw; savePersist(id, raw); }catch(e){ raw=[]; } }
+    data[id]=applyComputed(m, (raw||[]).map(r=>({_id:r._id||crypto.randomUUID(),...r}))); }
+  renderDash(ids, data);
+}
+function renderDash(ids, data){
+  const b=$("#dashBody"); if(!b) return;
+  const per=[["today","오늘"],["week","이번주"],["month","이번달"],["all","전체"]];
+  const sel=`<div class="sort-btns" style="margin-bottom:14px">${per.map(([v,l])=>`<button class="sort-btn ${dashPeriod===v?'on':''}" data-dp="${v}">${l}</button>`).join("")}</div>`;
+  let html=sel;
+  ids.forEach(id=>{ const m=MANIFESTS[id], rows=data[id]||[];
+    if(m.activity){ const act=m.activity;
+      const done=rows.filter(r=>act.when(r) && inPeriod(parseDate(r[act.df]), dashPeriod));
+      const names=done.slice(0,10).map(r=>act.name(r)).filter(Boolean).join(", ");
+      html+=`<div class="dash-dom"><div class="dash-dt">${m.icon} ${m.title} · ${act.label} <b>${done.length}</b></div>`+
+        (done.length?`<div class="dash-names">${names}${done.length>10?" 외":""}</div>`:`<div class="dash-names" style="color:var(--ink-soft)">이 기간 기록 없음</div>`)+`</div>`;
+    } else {
+      const pills=(m.stats||[]).map(sd=>{ let n=calcStat(sd,rows); if(sd.type==="sum"||sd.type==="avgComputed"||sd.type==="max") n=fmt(n)+(sd.unit?` ${sd.unit}`:""); return `<span class="dash-pill">${sd.label} <b>${n}</b></span>`; }).join("");
+      html+=`<div class="dash-dom"><div class="dash-dt">${m.icon} ${m.title} <span style="font-size:11px;color:var(--ink-soft);font-weight:400">· 전체</span></div><div class="dash-stats">${pills}</div></div>`;
+    }
+  });
+  b.innerHTML=html;
+  b.querySelectorAll("[data-dp]").forEach(x=>x.onclick=()=>{ dashPeriod=x.dataset.dp; renderDash(ids,data); });
+}
 function openSettings(){
   const d=$("#settings");
   const rows=Object.values(MANIFESTS).map(m=>`<div class="cat-mrow">
@@ -1695,6 +1756,7 @@ $("#searchToggle").addEventListener("click",()=>{ state.searchOpen=!state.search
 $("#tabs").addEventListener("click",e=>{ const t=e.target.closest(".tab"); if(t) openDomain(t.dataset.id); });
 $("#search").addEventListener("input",e=>{ state.query=e.target.value; state.page=0; loadAndRender(); });
 $("#setBtn").addEventListener("click",openSettings);
+$("#dashBtn").addEventListener("click",openDashboard);
 $("#addBtn").addEventListener("click",()=>{ const m=MANIFESTS[state.domain]; if(!m?.canAdd) return;
   if(state.domain==="movies") openAddMovie();
   else if(state.domain==="books") openAddBook();
@@ -1732,7 +1794,7 @@ const SAMPLE = {
   ]
 };
 
-["detail","person","settings","add","rec"].forEach(id=>{ const dg=document.getElementById(id);
+["detail","person","settings","add","rec","dash"].forEach(id=>{ const dg=document.getElementById(id);
   if(dg) dg.addEventListener("click",e=>{ if(e.target===dg) dg.close(); }); });
 boot();
 </script>
