@@ -25,89 +25,143 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
 <script src="https://accounts.google.com/gsi/client" async defer></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&family=IBM+Plex+Sans+KR:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@500;600;700&family=Noto+Sans+KR:wght@400;500;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
   :root{
-    --paper:#EDEBE3; --card:#FCFBF8; --ink:#23241F; --ink-soft:#6E6C62;
-    --line:#D8D5CA; --line-soft:#E6E3D9;
-    --accent:#7A5C2E; --accent-wash:rgba(122,92,46,.10);
+    --paper:#E9E1D0; --card:#F5EFE2; --ink:#312E27; --ink-soft:#8A806E;
+    --line:#D6CDB8; --line-soft:#E1D9C7;
+    --accent:#3E5A48; --accent-wash:#E4EAE0;
+    --ochre:#A96B32; --ochre-wash:#F0E4D2;
     --ok:#3d7a4e; --warn:#b25b3a;
-    --serif:"Gowun Batang",serif; --sans:"IBM Plex Sans KR",system-ui,sans-serif; --mono:"IBM Plex Mono",ui-monospace,monospace;
+    --serif:"Noto Serif KR",serif; --sans:"Noto Sans KR",system-ui,sans-serif; --mono:"DM Mono",ui-monospace,monospace;
   }
-  [data-domain="movies"]{ --accent:#7A5C2E; --accent-wash:rgba(122,92,46,.10); }
-  [data-domain="carlog"]{ --accent:#37596A; --accent-wash:rgba(55,89,106,.10); }
-  *{ box-sizing:border-box; }
-  body{ margin:0; background:var(--paper); color:var(--ink); font-family:var(--sans); line-height:1.5; -webkit-font-smoothing:antialiased; }
-  .wrap{ max-width:860px; margin:0 auto; padding:24px 20px 80px; }
-  .masthead{ display:flex; align-items:baseline; gap:12px; border-bottom:2px solid var(--ink); padding-bottom:10px; }
-  .masthead h1{ font-family:var(--serif); font-weight:700; font-size:26px; margin:0; }
-  .masthead .sub{ font-family:var(--mono); font-size:11px; color:var(--ink-soft); text-transform:uppercase; letter-spacing:.18em; }
+  *{ box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+  body{ margin:0; color:var(--ink); font-family:var(--sans); line-height:1.5; -webkit-font-smoothing:antialiased;
+    background-color:var(--paper);
+    background-image:radial-gradient(circle, rgba(120,108,84,.18) 1px, transparent 1.5px);
+    background-size:17px 17px; background-position:8px 8px; }
+  .wrap{ max-width:600px; margin:0 auto; padding:0 16px 96px; }
+
+  /* 마스트헤드(압축·상단 고정) */
+  .masthead{ position:sticky; top:0; z-index:30; background:var(--paper); padding:12px 0 8px; border-bottom:1.5px solid var(--ink); }
+  .mh-row{ display:flex; align-items:center; gap:10px; }
+  .mh-sub{ font-family:var(--mono); font-size:12px; color:var(--ink-soft); margin-top:5px; letter-spacing:.01em; }
+  .mh-sub b{ color:var(--accent); font-weight:500; }
+  .masthead h1{ font-family:var(--serif); font-weight:700; font-size:22px; margin:0; letter-spacing:-.01em; }
+  .masthead .sub{ font-family:var(--mono); font-size:10px; color:var(--ink-soft); letter-spacing:.18em; text-transform:uppercase; }
   .masthead .spacer{ flex:1; }
-  .src-chip{ font-family:var(--mono); font-size:10.5px; padding:4px 8px; border-radius:2px; border:1px solid var(--line); color:var(--ink-soft); }
-  .src-chip.live{ color:var(--ok); border-color:var(--ok); }
-  .icon-btn{ font-family:var(--mono); font-size:11px; cursor:pointer; background:none; border:1px solid var(--line); color:var(--ink-soft); padding:5px 9px; border-radius:2px; }
+  .src-chip{ display:none; }
+  .icon-btn{ font-family:var(--mono); font-size:11px; cursor:pointer; background:var(--card); border:1px solid var(--line); color:var(--ink-soft); padding:7px 11px; border-radius:7px; }
   .icon-btn:hover{ border-color:var(--accent); color:var(--accent); }
-  .tabs{ display:flex; margin-top:16px; border-bottom:1px solid var(--line); }
-  .tab{ font-size:15px; font-weight:500; cursor:pointer; background:none; border:none; color:var(--ink-soft); padding:10px 16px 12px; border-bottom:2px solid transparent; margin-bottom:-1px; display:flex; align-items:center; gap:7px; }
-  .tab[aria-selected="true"]{ color:var(--ink); border-bottom-color:var(--accent); }
-  .tab .vol{ font-family:var(--mono); font-size:10px; color:var(--ink-soft); }
-  .stats{ display:flex; flex-wrap:wrap; gap:26px; padding:18px 2px 14px; }
-  .stat .n{ font-family:var(--mono); font-weight:600; font-size:22px; color:var(--accent); }
-  .stat .l{ font-size:11px; color:var(--ink-soft); }
-  .search{ width:100%; font-family:var(--sans); font-size:14px; padding:10px 12px; background:var(--card); border:1px solid var(--line); border-radius:3px; color:var(--ink); }
+  #backBtn{ margin:12px 0 0 !important; padding:5px 10px; }
+
+  /* 상단 카테고리 탭 → 하단 고정 탭바로 */
+  .tabs{ position:fixed; left:0; right:0; bottom:0; z-index:40; display:flex; height:64px; padding-bottom:6px; margin:0;
+    background:rgba(245,239,226,.95); backdrop-filter:blur(8px); -webkit-backdrop-filter:blur(8px); border-top:1.5px solid var(--ink); }
+  .tab{ position:relative; flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:2px;
+    cursor:pointer; background:none; border:none; color:var(--ink-soft); padding:8px 2px 0;
+    font-family:var(--mono); font-size:10px; letter-spacing:0; }
+  .tab span{ font-size:19px; opacity:.7; line-height:1; }
+  .tab .vol{ display:none; }
+  .tab[aria-selected="true"]{ color:var(--ink); }
+  .tab[aria-selected="true"] span{ opacity:1; }
+  .tab[aria-selected="true"]::after{ content:""; position:absolute; top:0; left:50%; transform:translateX(-50%); width:24px; height:2.5px; background:var(--ochre); border-radius:2px; }
+
+  /* 통계(압축 스트립) */
+  .stats{ display:flex; flex-wrap:wrap; gap:22px; padding:14px 2px 8px; }
+  .stat .n{ font-family:var(--mono); font-weight:500; font-size:21px; color:var(--accent); letter-spacing:-.01em; }
+  .stat .l{ font-size:11px; color:var(--ink-soft); margin-top:2px; }
+  .stat.st-click{ cursor:pointer; padding:3px 8px; margin:-3px -8px; border-radius:5px; }
+  .stat.st-click:hover{ background:var(--accent-wash); }
+  .stat.st-on{ background:var(--accent-wash); box-shadow:inset 0 0 0 1.5px var(--accent); }
+  .substrip{ font-family:var(--mono); font-size:12px; color:var(--ink-soft); padding:12px 2px 8px; letter-spacing:.01em; }
+  .substrip b{ color:var(--accent); font-weight:500; }
+  .sortsel{ flex-shrink:0; font-family:var(--mono); font-size:12px; padding:6px 9px; border:1px solid var(--line); border-radius:3px; background:var(--card); color:var(--ink); }
+
+  /* 칩(색인 탭) */
+  .picker,.scope{ display:flex; gap:6px; flex-wrap:nowrap; overflow-x:auto; padding-bottom:2px; }
+  .picker{ margin:14px 0 8px; }
+  .scope{ margin:0 0 10px; }
+  .picker::-webkit-scrollbar,.scope::-webkit-scrollbar,.cbar::-webkit-scrollbar{ display:none; }
+  .cbar{ display:flex; gap:6px; flex-wrap:nowrap; overflow-x:auto; }
+  .scope .chip{ font-size:12px; }
+  .chip{ font-family:var(--mono); font-size:12px; white-space:nowrap; padding:6px 12px; border-radius:3px; border:1px solid var(--line); background:var(--card); color:var(--ink-soft); cursor:pointer; }
+  .chip.on{ background:var(--accent); color:#F1EDE0; border-color:var(--accent); }
+  .tag.rec{ color:var(--ochre); border-color:#E4CFB0; }
+
+  /* 검색 */
+  .search{ width:100%; font-family:var(--sans); font-size:14px; padding:11px 13px; background:var(--card); border:1px solid var(--line); border-radius:8px; color:var(--ink); margin-top:2px; }
   .search:focus{ outline:none; border-color:var(--accent); box-shadow:0 0 0 3px var(--accent-wash); }
   .count{ font-family:var(--mono); font-size:11px; color:var(--ink-soft); margin:12px 2px 8px; }
-  .list{ display:flex; flex-direction:column; gap:10px; }
-  .card{ display:grid; grid-template-columns:auto 1fr auto; gap:14px; align-items:start; background:var(--card); border:1px solid var(--line-soft); border-radius:4px; padding:14px 16px; cursor:pointer; text-align:left; width:100%; font:inherit; color:inherit; }
+
+  /* 카드(표본 라벨) */
+  .list{ display:flex; flex-direction:column; gap:11px; }
+  .card{ position:relative; display:grid; grid-template-columns:auto 1fr auto; gap:13px; align-items:start; background:var(--card); border:1px solid var(--line); border-radius:5px; padding:14px 15px; cursor:pointer; text-align:left; width:100%; font:inherit; color:inherit; }
+  .card::after{ content:""; position:absolute; inset:4px; border:1px solid rgba(138,128,110,.22); border-radius:3px; pointer-events:none; }
   .card:hover{ border-color:var(--accent); }
   .card:focus-visible{ outline:2px solid var(--accent); outline-offset:2px; }
-  .cat-no{ font-family:var(--mono); font-size:11px; color:var(--ink-soft); padding-top:3px; min-width:44px; }
-  .thumb{ width:44px; height:62px; border-radius:3px; background:var(--accent-wash); display:flex; align-items:center; justify-content:center; font-size:20px; color:var(--accent); border:1px solid var(--line-soft); overflow:hidden; }
+  .cat-no{ font-family:var(--mono); font-size:11px; color:var(--ink-soft); padding-top:3px; min-width:40px; }
+  .thumb{ width:46px; height:64px; border-radius:3px; background:var(--accent-wash); display:flex; align-items:center; justify-content:center; font-size:20px; color:var(--accent); border:1px solid var(--line-soft); overflow:hidden; }
   .thumb img{ width:100%; height:100%; object-fit:cover; }
-  .body h3{ font-family:var(--serif); font-size:17px; font-weight:700; margin:0 0 3px; }
+  .body{ min-width:0; }
+  .body h3{ font-family:var(--serif); font-size:16px; font-weight:700; margin:0 0 3px; }
   .body .meta{ font-size:12.5px; color:var(--ink-soft); }
   .tags{ display:flex; flex-wrap:wrap; gap:5px; margin-top:8px; }
   .tag{ font-family:var(--mono); font-size:10px; color:var(--ink-soft); border:1px solid var(--line); border-radius:2px; padding:2px 6px; }
   .flags{ display:flex; flex-direction:column; align-items:flex-end; gap:4px; }
   .flag{ font-size:10.5px; font-family:var(--mono); padding:2px 7px; border-radius:2px; white-space:nowrap; }
   .flag.on{ background:var(--accent-wash); color:var(--accent); }
-  .flag.star{ color:var(--accent); font-weight:600; font-size:12px; }
-  .kv{ display:flex; gap:18px; flex-wrap:wrap; font-family:var(--mono); font-size:12.5px; margin-top:6px; }
-  .kv b{ color:var(--accent); font-weight:600; }
-  dialog{ border:1px solid var(--line); border-radius:6px; padding:0; max-width:460px; width:92%; background:var(--card); color:var(--ink); }
-  dialog::backdrop{ background:rgba(20,20,16,.45); }
-  .dhead{ padding:16px 18px; border-bottom:1px solid var(--line-soft); }
+  .flag.star{ color:var(--ochre); font-weight:500; font-size:12px; }
+  .kv{ display:flex; gap:7px 20px; flex-wrap:wrap; font-family:var(--mono); font-size:12.5px; margin-top:9px; }
+  .kv span b{ color:var(--ink); font-weight:500; }
+  .kv b{ color:var(--accent); font-weight:500; }
+
+  /* 다이얼로그 */
+  /* 차계부 표본 라벨 카드 (시안 v2) */
+  .cl-card{ display:block; padding:15px 16px 14px; }
+  .cl-no{ position:absolute; top:12px; right:14px; font-family:var(--mono); font-size:10px; color:var(--ink-soft); letter-spacing:.08em; }
+  .cl-head{ margin-right:58px; line-height:1.2; }
+  .cl-date{ font-family:var(--serif); font-weight:700; font-size:16px; }
+  .cl-veh{ font-family:var(--mono); font-size:10px; background:var(--ochre-wash); color:var(--ochre); padding:2px 8px; border-radius:2px; margin-left:8px; border:1px solid #E4CFB0; }
+  .cl-kvs{ display:flex; flex-wrap:wrap; gap:6px 22px; margin-top:11px; }
+  .cl-kv{ font-family:var(--mono); font-size:12.5px; color:var(--ink); }
+  .cl-kv b{ color:var(--ink-soft); font-weight:400; font-size:9.5px; letter-spacing:.06em; margin-right:6px; text-transform:uppercase; }
+  .cl-kv.big{ color:var(--green); }
+  .cl-memo{ margin-top:9px; font-size:12px; color:var(--ink-soft); font-style:italic; }
+  .sortsel{ flex-shrink:0; font-family:var(--mono); font-size:12px; padding:7px 10px; border:1px solid var(--line); border-radius:3px; background:var(--card); color:var(--ink); height:34px; }
+
+  dialog{ border:1px solid var(--ink); border-radius:8px; padding:0; max-width:460px; width:92%; background:var(--card); color:var(--ink); }
+  dialog::backdrop{ background:rgba(30,26,20,.5); }
+  .dhead{ padding:16px 18px; border-bottom:1px solid var(--line); }
   .dhead h3{ font-family:var(--serif); margin:0; font-size:20px; }
   .dbody{ padding:16px 18px; display:flex; flex-direction:column; gap:9px; }
   .drow{ display:grid; grid-template-columns:96px 1fr; gap:10px; font-size:13.5px; }
   .drow .k{ color:var(--ink-soft); font-family:var(--mono); font-size:11.5px; padding-top:2px; }
-  .dclose{ display:block; margin:6px 18px 18px auto; font-family:var(--mono); font-size:12px; cursor:pointer; background:var(--ink); color:var(--paper); border:none; padding:8px 16px; border-radius:3px; }
+  .dclose{ display:block; margin:6px 18px 18px auto; font-family:var(--mono); font-size:12px; cursor:pointer; background:var(--ink); color:var(--paper); border:none; padding:9px 17px; border-radius:6px; }
   .set label{ display:block; font-size:12px; color:var(--ink-soft); margin:12px 0 4px; }
-  .set input{ width:100%; font-family:var(--mono); font-size:12px; padding:8px 10px; border:1px solid var(--line); border-radius:3px; background:var(--paper); }
-  .set select{ width:100%; font-family:var(--mono); font-size:12px; padding:8px 10px; border:1px solid var(--line); border-radius:3px; background:var(--paper); color:var(--ink); }
+  .set input,.set select{ width:100%; font-family:var(--mono); font-size:12px; padding:9px 11px; border:1px solid var(--line); border-radius:6px; background:var(--paper); color:var(--ink); }
   .set .hint{ font-size:11px; color:var(--ink-soft); margin-top:4px; }
-  .btn{ font-family:var(--sans); font-size:13px; font-weight:500; cursor:pointer; background:var(--accent); color:#fff; border:none; padding:9px 16px; border-radius:3px; }
+  .btn{ font-family:var(--sans); font-size:13px; font-weight:500; cursor:pointer; background:var(--accent); color:#F1EDE0; border:none; padding:10px 16px; border-radius:7px; }
   .btn.ghost{ background:none; color:var(--ink); border:1px solid var(--line); }
-  .btn.ghost.on{ background:var(--accent); color:#fff; border-color:var(--accent); }
-  .banner{ font-size:12.5px; padding:9px 12px; border-radius:3px; margin:10px 0; }
-  .banner.warn{ background:rgba(178,91,58,.10); color:var(--warn); }
+  .btn.ghost.on{ background:var(--accent); color:#F1EDE0; border-color:var(--accent); }
+  .banner{ font-size:12.5px; padding:9px 12px; border-radius:6px; margin:10px 0; }
+  .banner.warn{ background:var(--ochre-wash); color:var(--warn); }
   .foot{ margin-top:24px; font-size:12px; color:var(--ink-soft); border-top:1px solid var(--line); padding-top:14px; }
+
   /* 홈: 카테고리 카드 격자 */
-  .home-grid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(150px,1fr)); gap:14px; margin-top:24px; }
-  .cat-card{ background:var(--card); border:1px solid var(--line); border-radius:6px; padding:18px 16px 16px; cursor:pointer; text-align:left; font:inherit; color:inherit; display:flex; flex-direction:column; gap:8px; min-height:118px; }
+  .home-grid{ display:grid; grid-template-columns:repeat(2,1fr); gap:12px; margin-top:20px; }
+  .cat-card{ position:relative; background:var(--card); border:1px solid var(--line); border-radius:6px; padding:18px 16px 15px; cursor:pointer; text-align:left; font:inherit; color:inherit; display:flex; flex-direction:column; gap:8px; min-height:120px; }
+  .cat-card::after{ content:""; position:absolute; inset:4px; border:1px solid rgba(138,128,110,.20); border-radius:3px; pointer-events:none; }
   .cat-card:hover{ border-color:var(--accent); }
   .cat-card .ci{ font-size:28px; line-height:1; }
   .cat-card .cn{ font-family:var(--serif); font-size:18px; font-weight:700; }
   .cat-card .cc{ font-family:var(--mono); font-size:11px; color:var(--ink-soft); margin-top:auto; }
-  .cat-card .cv{ font-family:var(--mono); font-size:9.5px; color:var(--ink-soft); text-transform:uppercase; letter-spacing:.14em; }
-  .home-empty{ text-align:center; padding:64px 20px 40px; }
+  .cat-card .cv{ font-family:var(--mono); font-size:9.5px; color:var(--ochre); text-transform:uppercase; letter-spacing:.14em; }
+  .home-empty{ text-align:center; padding:56px 20px 40px; }
   .home-empty .em{ font-size:40px; }
   .home-empty h2{ font-family:var(--serif); font-size:21px; color:var(--ink); margin:14px 0 8px; font-weight:700; }
   .home-empty p{ font-size:13.5px; color:var(--ink-soft); margin:0 0 22px; }
-  /* 차량 등 선택기 칩 */
-  .picker{ display:flex; gap:6px; flex-wrap:wrap; margin:2px 0 6px; }
-  .chip{ font-family:var(--mono); font-size:12px; padding:5px 12px; border-radius:14px; border:1px solid var(--line); background:var(--card); color:var(--ink-soft); cursor:pointer; }
-  .chip.on{ background:var(--accent); color:#fff; border-color:var(--accent); }
+
   /* 설정: 카테고리 관리 */
   .set h4{ font-family:var(--serif); font-size:15px; margin:20px 0 6px; padding-top:14px; border-top:1px solid var(--line-soft); }
   .set h4:first-of-type{ border-top:none; padding-top:0; margin-top:4px; }
@@ -119,17 +173,38 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
   .sw::after{ content:""; position:absolute; top:2px; left:2px; width:19px; height:19px; border-radius:50%; background:#fff; border:1px solid var(--line); transition:.15s; }
   .sw.on{ background:var(--accent); border-color:var(--accent); }
   .sw.on::after{ left:21px; border-color:var(--accent); }
+
+  /* 영화 상세(리치) */
+  .mvtop{ display:flex; gap:14px; padding:4px 18px 10px; }
+  .mvposter{ width:88px; height:126px; border-radius:5px; background:var(--accent-wash); display:flex; align-items:center; justify-content:center; font-size:28px; flex-shrink:0; overflow:hidden; border:1px solid var(--line-soft); }
+  .mvposter img{ width:100%; height:100%; object-fit:cover; }
+  .mvmeta{ font-family:var(--mono); font-size:12px; color:var(--ink-soft); margin-bottom:4px; }
+  .mvorig{ font-size:12px; color:var(--ink-soft); font-style:italic; margin-bottom:6px; }
+  .mvpeople{ font-size:13px; margin-bottom:8px; line-height:1.6; }
+  .plink{ color:var(--accent); cursor:pointer; text-decoration:underline dotted; }
+  .mvover{ font-size:13px; line-height:1.65; color:var(--ink); padding:0 18px 12px; max-height:150px; overflow-y:auto; }
+  .mvreview{ font-size:13px; line-height:1.6; background:var(--ochre-wash); border-radius:5px; padding:10px 12px; margin:0 18px 12px; }
+  .mvlinks{ display:flex; gap:8px; padding:0 18px 8px; }
+  .mvlinks .btn{ text-decoration:none; text-align:center; flex:1; }
+  .dfoot{ display:flex; gap:8px; padding:6px 18px 18px; flex-wrap:wrap; }
+  .pclose{ margin-left:auto; border:none; background:var(--line-soft); width:28px; height:28px; border-radius:50%; cursor:pointer; font-size:14px; color:var(--ink-soft); }
+
   @media (max-width:520px){ .card{ grid-template-columns:auto 1fr; } .flags{ grid-column:2; flex-direction:row; margin-top:6px; } }
+  @media (min-width:520px){ .home-grid{ grid-template-columns:repeat(3,1fr); } }
   @media (prefers-reduced-motion:no-preference){ .card{ transition:border-color .15s ease; } }
 </style>
 </head>
 <body>
 <div class="wrap" id="root" data-domain="movies">
   <header class="masthead">
-    <h1>내도감</h1><span class="sub">Naedogam · v18</span>
-    <span class="spacer"></span>
-    <span class="src-chip" id="srcChip" style="display:none">데모</span>
-    <button class="icon-btn" id="setBtn" type="button">⚙ 설정</button>
+    <div class="mh-row">
+      <h1 id="brandBtn" style="cursor:pointer">내도감</h1><span class="sub">Naedogam · v26</span>
+      <span class="spacer"></span>
+      <span class="src-chip" id="srcChip" style="display:none">데모</span>
+      <button class="icon-btn" id="searchToggle" type="button" style="display:none">🔍</button>
+      <button class="icon-btn" id="setBtn" type="button">⚙ 설정</button>
+    </div>
+    <div class="mh-sub" id="mhSub" style="display:none"></div>
   </header>
   <div id="banner"></div>
 
@@ -138,11 +213,12 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
 
   <!-- 분야 화면: 카드를 누르면 열림 -->
   <section id="domainView" style="display:none">
-    <button class="icon-btn" id="backBtn" type="button" style="margin:16px 0 2px">← 홈으로</button>
     <nav class="tabs" id="tabs" role="tablist" aria-label="카테고리"></nav>
     <div class="stats" id="stats"></div>
     <div class="picker" id="picker" style="display:none"></div>
-    <input class="search" id="search" type="search" />
+    <div class="scope" id="scope" style="display:none"></div>
+    <input class="search" id="search" type="search" style="display:none" />
+    <select class="search" id="mvselect" style="display:none"></select>
     <button class="icon-btn" id="addBtn" type="button" style="display:none;margin:10px 0 0">+ 추가</button>
     <div class="count" id="count"></div>
     <div class="list" id="list"></div>
@@ -150,6 +226,7 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
 </div>
 
 <dialog id="detail"></dialog>
+<dialog id="person"></dialog>
 <dialog id="settings"></dialog>
 <dialog id="add"></dialog>
 
@@ -185,6 +262,7 @@ const MANIFESTS = {
         o.watched = code.charAt(0)==='W' ? "O" : "";           // W_ = 시청완료
         o.rewatch = code.charAt(1)==='R';                       // _R = 다시볼것
         o.pick    = code.charAt(1)==='P';                       // _P = 찜
+        o.recommendList = re(row['추천']).split(/[\/,]+/).map(s=>s.trim()).filter(Boolean);  // BBC/뉴욕타임즈…
         o._id = (o.orig||o.title||'') + '_' + (o.year||'');
       } },
     search:["title","orig","director","actors"],
@@ -196,10 +274,10 @@ const MANIFESTS = {
              {k:"streaming",sheet:"스트리밍",label:"스트리밍(쉼표로 여러 개)",type:"tags"},
              {k:"recommend",sheet:"추천",label:"추천",type:"text"},
              {k:"review",sheet:"리뷰",label:"리뷰",type:"text"} ],
-    stats:[ {label:"전체",type:"count"},
-            {label:"시청완료",type:"countIf",field:"watched",eq:"O"},
-            {label:"다시볼것",type:"countIf",field:"rewatch",eq:true},
-            {label:"찜",type:"countIf",field:"pick",eq:true} ],
+    stats:[ {label:"전체",type:"count",sf:""},
+            {label:"시청완료",type:"countIf",field:"watched",eq:"O",sf:"watched"},
+            {label:"다시볼것",type:"countIf",field:"rewatch",eq:true,sf:"rewatch"},
+            {label:"찜",type:"countIf",field:"pick",eq:true,sf:"pick"} ],
     card:{ kind:"specimen", thumb:"🎞",
            meta:r=>[r.year, r.director, r.actors].filter(Boolean).join(" · "),
            tags:"streaming",
@@ -489,7 +567,22 @@ function filterRows(m, rows, q){ q=(q||"").trim().toLowerCase(); if(!q) return r
   return rows.filter(r=>m.search.some(f=>String(r[f]??"").toLowerCase().includes(q))); }
 
 /* ── 4. State + App ── */
-const state = { view:"home", domain:null, query:"", pick:"", rows:[] };
+const state = { view:"home", domain:null, query:"", pick:"", statFilter:"", sort:"default", sortAsc:false, searchScope:"title", selectQ:"", searchOpen:false, page:0, rows:[] };
+function setMhSub(html){ const el=$("#mhSub"); el.innerHTML=html||""; el.style.display=html?"block":"none"; }
+/* 검색창(🔍)·드롭다운 표시 제어 — 시안대로 평소엔 접힘 */
+function applySearchUI(m){
+  const inp=$("#search"), sel=$("#mvselect"), tog=$("#searchToggle");
+  const isMovie=m&&m.id==="movies";
+  const useSelect=isMovie && ["director","stream","rec"].includes(state.searchScope||"title");
+  if(useSelect){ sel.style.display=""; inp.style.display="none"; tog.style.display="none"; }
+  else {
+    sel.style.display="none";
+    tog.style.display="";
+    inp.style.display = state.searchOpen ? "" : "none";
+    inp.placeholder = (isMovie && state.searchScope==="actor") ? "🔍 배우 이름 검색…"
+      : isMovie ? "🔍 제목으로 검색…" : "🔍 작업·정비소·차량·메모 검색…";
+  }
+}
 const src = { current:null };
 const $ = s=>document.querySelector(s);
 let _mock=null, _apps=null, _sheet=null;
@@ -508,9 +601,10 @@ function toggleActive(id,on){ let a=getActive(); if(on){ if(!a.includes(id)) a.p
 /* 화면 전환: home(카드 격자) ↔ domain(분야 목록) */
 function showView(v){ state.view=v;
   $("#home").style.display = v==="home"?"block":"none";
-  $("#domainView").style.display = v==="domain"?"block":"none"; }
-function goHome(){ state.domain=null; state.query=""; state.pick=""; showView("home"); renderHome(); }
-function openDomain(id){ state.domain=id; state.query=""; state.pick=""; $("#search").value=""; showView("domain"); loadAndRender(); }
+  $("#domainView").style.display = v==="domain"?"block":"none";
+  if(v==="home") $("#searchToggle").style.display="none"; }
+function goHome(){ state.domain=null; state.query=""; state.pick=""; setMhSub(""); showView("home"); renderHome(); }
+function openDomain(id){ state.domain=id; state.query=""; state.pick=""; state.statFilter=""; state.sort="default"; state.sortAsc=false; state.searchScope="title"; state.selectQ=""; state.searchOpen=false; state.page=0; carWorkFilter=""; carSort="date"; carSortAsc=false; $("#search").value=""; $("#search").style.display="none"; $("#mvselect").style.display="none"; $("#scope").style.display="none"; showView("domain"); loadAndRender(); }
 
 /* 홈: 켜둔 카테고리를 카드로. 건수는 한 번 열어본 분야만 표시(홈을 빠르게 유지). */
 function renderHome(){
@@ -542,8 +636,19 @@ function sourceFor(m){
 /* 탭: 홈에서 켜둔 카테고리만 표시(안 켠 건 안 나옴 → 길어지지 않음) */
 function renderTabs(){ $("#tabs").innerHTML=getActive().map(id=>{ const m=MANIFESTS[id]; if(!m) return "";
   return `<button class="tab" role="tab" data-id="${id}" aria-selected="${id===state.domain}"><span>${m.icon}</span> ${m.title}</button>`; }).join(""); }
-function renderStats(m, rows){ $("#stats").innerHTML=m.stats.map(s=>{ let n=calcStat(s,rows);
-  if(s.type==="sum"||s.type==="avgComputed") n=fmt(n)+(s.unit?` ${s.unit}`:""); return `<div class="stat"><div class="n">${n}</div><div class="l">${s.label}</div></div>`; }).join(""); }
+function renderStats(m, rows){
+  const isMovie = m.id==="movies";
+  $("#stats").className="stats";
+  $("#stats").innerHTML=m.stats.map(s=>{ let n=calcStat(s,rows);
+    if(s.type==="sum"||s.type==="avgComputed") n=fmt(n)+(s.unit?` ${s.unit}`:"");
+    const click = isMovie && s.sf!==undefined;
+    const on = click && (state.statFilter||"")===s.sf;
+    return `<div class="stat ${click?'st-click':''} ${on?'st-on':''}" ${click?`data-sf="${s.sf}"`:''}><div class="n">${n}</div><div class="l">${s.label}</div></div>`;
+  }).join("");
+  if(isMovie) $("#stats").querySelectorAll(".st-click").forEach(el=>el.onclick=()=>{
+    const k=el.dataset.sf; state.statFilter=(state.statFilter===k)?"":k; state.page=0; paintDomain(m);
+  });
+}
 function renderSearch(m){ const L={title:"제목",director:"감독",actors:"배우",type:"구분",memo:"메모",work:"작업",shop:"정비소",car:"차량",region:"지역",author:"저자"};
   $("#search").placeholder="🔍 "+m.search.map(f=>L[f]||f).join(" · ")+" 검색…"; }
 /* 선택기(예: 차량 전체|싼타페|제네시스): 데이터에서 값 자동 추출, 2개 이상일 때만 표시 */
@@ -569,7 +674,9 @@ function renderCard(m, r, no){ const c=m.card;
     return `<span>${col.k} <b>${s}</b></span>`; }).filter(Boolean).join("");
   return `<button class="card" data-id="${r._id}" style="grid-template-columns:auto 1fr;"><span class="thumb">🧾</span>
     <span class="body"><h3 style="font-size:15px">${c.title(r)}</h3><div class="kv">${kv}</div>${r.memo?`<div class="meta" style="margin-top:5px">${r.memo}</div>`:""}</span></button>`; }
-function openDetail(m, r){ const rows=Object.entries(r).filter(([k])=>k!=="_id"&&k!=="orig").map(([k,v])=>
+function openDetail(m, r){
+  if(m.id==="movies"){ openMovieDetail(m, r); return; }
+  const rows=Object.entries(r).filter(([k])=>k!=="_id"&&k!=="orig").map(([k,v])=>
     `<div class="drow"><span class="k">${k}</span><span>${Array.isArray(v)?v.join(", "):v===null?"—":v===true?"예":v===false?"아니오":v}</span></div>`).join("");
   const editable = m.source?.type==="sheet" || m.id==="carlog";
   const isMovie = m.id==="movies";
@@ -615,6 +722,118 @@ async function toggleMovie(r, kind){
   if(mR) mR.className="btn "+(r.rewatch?'':'ghost');
   if(mP) mP.className="btn "+(r.pick?'':'ghost');
   paintDomain(MANIFESTS.movies);                                                                    // 뒤 목록도 갱신
+}
+
+/* ── 영화 리치 상세: 포스터·줄거리·평점·리뷰 + TMDB/왓챠/네이버 + 인물 클릭 ── */
+let movieInfoCache={}, personCache={};
+async function fetchMovieInfo(orig, kor, year){
+  const key=(orig||kor)+"|"+(year||"");
+  if(movieInfoCache[key]!==undefined) return movieInfoCache[key];
+  try{
+    const q=encodeURIComponent(orig||kor);
+    const u=`${CONFIG.TMDB_BASE}/search/movie?api_key=${CONFIG.TMDB_KEY}&language=ko-KR&query=${q}${year?`&year=${year}`:""}`;
+    const d=await fetch(u).then(r=>r.json()); const m=(d.results||[])[0];
+    movieInfoCache[key]= m
+      ? { poster:m.poster_path?("https://image.tmdb.org/t/p/w342"+m.poster_path):null, overview:m.overview||"줄거리 정보 없음", rating:m.vote_average?m.vote_average.toFixed(1):"-", tmdbId:m.id }
+      : { poster:null, overview:"정보 없음", rating:"-", tmdbId:null };
+  }catch(e){ movieInfoCache[key]={ poster:null, overview:"불러오기 실패", rating:"-", tmdbId:null }; }
+  return movieInfoCache[key];
+}
+function personSpan(str, role){    // "왕가위, 장만옥" → 각 이름 클릭 가능
+  if(!str) return "";
+  return String(str).split(/[,，]/).map(s=>s.trim()).filter(Boolean)
+    .map(n=>`<span class="plink" data-name="${n.replace(/"/g,'&quot;')}" data-role="${role}">${n}</span>`).join(", ");
+}
+async function openMovieDetail(m, r){
+  const d=$("#detail");
+  const people=[personSpan(r.director,"director"), personSpan(r.actors,"actor")].filter(Boolean).join(' <span style="color:var(--line)">/</span> ');
+  const stream=(r.streaming||[]).map(t=>`<span class="tag">${t}</span>`).join("");
+  const rec=(r.recommendList||[]).map(t=>`<span class="tag rec">${t}</span>`).join("");
+  d.innerHTML=`<div class="dhead"><h3>${r.title}</h3></div>
+    <div class="mvtop">
+      <div class="mvposter" id="mvPoster">🎬</div>
+      <div class="mvinfo" style="min-width:0">
+        <div class="mvmeta">${[r.year,r.country,(r.rating!=null?("⭐ "+r.rating):"")].filter(Boolean).join(" · ")}</div>
+        ${r.orig&&r.orig!==r.title?`<div class="mvorig">${r.orig}</div>`:""}
+        ${people?`<div class="mvpeople">${people}</div>`:""}
+        <div class="tags">${stream}${rec}</div>
+      </div>
+    </div>
+    <div class="mvover" id="mvOver">줄거리 불러오는 중…</div>
+    ${r.review?`<div class="mvreview"><b>📝 내 리뷰</b><br>${r.review}</div>`:""}
+    <div class="mvlinks">
+      <a class="btn ghost" id="lnkTMDB" target="_blank" rel="noopener">🎬 TMDB</a>
+      <a class="btn ghost" target="_blank" rel="noopener" href="https://pedia.watcha.com/ko/search?query=${encodeURIComponent(r.title||"")}">🍿 왓챠</a>
+      <a class="btn ghost" target="_blank" rel="noopener" href="https://search.naver.com/search.naver?query=${encodeURIComponent((r.title||"")+" 영화")}">🔍 네이버</a>
+    </div>
+    <div class="dfoot">
+      <button class="btn ${r.watched==='O'?'':'ghost'}" id="mW">${r.watched==='O'?'✓ 봤음':'봤음'}</button>
+      <button class="btn ${r.rewatch?'':'ghost'}" id="mR">다시볼것</button>
+      <button class="btn ${r.pick?'':'ghost'}" id="mP">찜</button>
+      <button class="btn ghost" id="mEdit">정보수정</button>
+      <button class="btn ghost" id="mClose" style="margin-left:auto">닫기</button>
+    </div>`;
+  d.showModal();
+  $("#mW").onclick=()=>toggleMovie(r,'W'); $("#mR").onclick=()=>toggleMovie(r,'R'); $("#mP").onclick=()=>toggleMovie(r,'P');
+  $("#mEdit").onclick=()=>{ d.close(); openRecordForm(m, r); };
+  $("#mClose").onclick=()=>d.close();
+  d.querySelectorAll(".plink").forEach(el=>el.onclick=e=>{ e.stopPropagation(); openPersonModal(el.dataset.name, el.dataset.role); });
+  const info=await fetchMovieInfo(r.orig, r.title, r.year);   // 포스터·줄거리 채우기
+  if($("#mvPoster")&&info.poster) $("#mvPoster").innerHTML=`<img src="${info.poster}" alt="">`;
+  if($("#mvOver")) $("#mvOver").textContent=info.overview;
+  const lnk=$("#lnkTMDB"); if(lnk) lnk.href= info.tmdbId?`https://www.themoviedb.org/movie/${info.tmdbId}`:`https://www.themoviedb.org/search?query=${encodeURIComponent(r.orig||r.title||"")}`;
+}
+async function fetchPerson(name){
+  if(personCache[name]) return personCache[name];
+  try{
+    let d=await fetch(`${CONFIG.TMDB_BASE}/search/person?api_key=${CONFIG.TMDB_KEY}&language=ko-KR&query=${encodeURIComponent(name)}`).then(r=>r.json());
+    if(!d.results||!d.results.length) d=await fetch(`${CONFIG.TMDB_BASE}/search/person?api_key=${CONFIG.TMDB_KEY}&query=${encodeURIComponent(name)}`).then(r=>r.json());
+    if(!d.results||!d.results.length) return personCache[name]={found:false};
+    const p=d.results[0];
+    const c=await fetch(`${CONFIG.TMDB_BASE}/person/${p.id}/movie_credits?api_key=${CONFIG.TMDB_KEY}&language=ko-KR`).then(r=>r.json());
+    const cast=(c.cast||[]).filter(x=>x.poster_path||x.release_date).sort((a,b)=>(b.popularity||0)-(a.popularity||0)).slice(0,12);
+    const crew=(c.crew||[]).filter(x=>x.job==="Director"&&(x.poster_path||x.release_date)).sort((a,b)=>(b.popularity||0)-(a.popularity||0)).slice(0,12);
+    return personCache[name]={ found:true, name:p.name, photo:p.profile_path?("https://image.tmdb.org/t/p/w185"+p.profile_path):null,
+      dept:p.known_for_department==="Directing"?"감독":p.known_for_department==="Acting"?"배우":"영화인", cast, crew };
+  }catch(e){ return personCache[name]={found:false}; }
+}
+function findInList(title, orig, year){
+  const t=(title||"").toLowerCase(), o=(orig||"").toLowerCase(), y=String(year||"");
+  return state.rows.find(r=>{ const rt=(r.title||"").toLowerCase(), ro=(r.orig||"").toLowerCase(), ry=String(r.year||"");
+    return (rt===t||ro===o||rt===o||ro===t) && (!y||ry===y); });
+}
+async function openPersonModal(name, role){
+  const d=$("#person");
+  d.innerHTML=`<div class="dhead" style="display:flex;align-items:center;gap:10px"><h3 style="margin:0">${name}</h3><button class="pclose" onclick="this.closest('dialog').close()">✕</button></div>
+    <div class="dbody" id="personBody"><div class="count">불러오는 중…</div></div>`;
+  d.showModal();
+  const p=await fetchPerson(name);
+  const body=$("#personBody"); if(!body) return;
+  if(!p.found){ body.innerHTML=`<div class="count">앱에서 인물 정보를 못 찾았어요.</div>
+    <a class="btn ghost" target="_blank" rel="noopener" href="https://www.themoviedb.org/search/person?query=${encodeURIComponent(name)}">TMDB에서 "${name}" 검색</a>`; return; }
+  const isDir=(role==="director")||(p.dept==="감독"&&p.crew.length>0);
+  const films=(isDir&&p.crew.length)?p.crew:p.cast;
+  const label=(isDir&&p.crew.length)?"감독 작품":"주요 출연작";
+  if(!films.length){ body.innerHTML=`<div class="count">작품 정보 없음</div>`; return; }
+  body.innerHTML=`<div class="count">${label}</div>`+films.map(f=>{
+    const title=f.title||f.original_title||"제목 없음", year=f.release_date?f.release_date.slice(0,4):"";
+    const inList=findInList(title, f.original_title, year);
+    return `<button class="card pfilm" data-id="${f.id}" data-title="${title.replace(/"/g,'&quot;')}" data-orig="${(f.original_title||'').replace(/"/g,'&quot;')}" data-year="${year}" style="grid-template-columns:auto 1fr;margin-bottom:8px">
+      <span class="thumb">${f.poster_path?`<img src="https://image.tmdb.org/t/p/w185${f.poster_path}" alt="">`:"🎬"}</span>
+      <span class="body" style="min-width:0"><h3 style="font-size:15px">${title}${inList?' <span class="tag rec">내 목록</span>':''}</h3>
+      <div class="meta">${[year, f.vote_average?("⭐ "+f.vote_average.toFixed(1)):""].filter(Boolean).join(" · ")}${(f.character&&!isDir)?` · ${f.character}`:""}</div></span></button>`;
+  }).join("");
+  body.querySelectorAll(".pfilm").forEach(el=>el.onclick=()=>{
+    const match=findInList(el.dataset.title, el.dataset.orig, el.dataset.year);
+    if(match){ d.close(); $("#detail").close(); goToMovie(match); }
+    else window.open(`https://www.themoviedb.org/movie/${el.dataset.id}`,"_blank");
+  });
+}
+function goToMovie(match){   // 필터 초기화 → 목록 다시 그림 → 그 영화 상세 열기
+  state.query=""; state.statFilter=""; state.sort="default"; state.page=0; state.searchScope="title"; $("#search").value="";
+  paintMovies(MANIFESTS.movies);
+  const r=state.rows.find(x=>x._id===match._id)||match;
+  setTimeout(()=>openMovieDetail(MANIFESTS.movies, r), 60);
 }
 
 /* ── 공통: 추가·수정 폼 (모든 시트 분야가 같이 씀) ── */
@@ -705,13 +924,187 @@ async function loadAndRender(){
   paintDomain(m);
 }
 function paintDomain(m){   // state.rows를 화면에 그림 (데이터 다시 안 받고 재렌더 가능)
+  const pk=$("#picker"); pk.style.alignItems=""; pk.style.overflow="";     // 공유 UI 초기화
+  $("#stats").className="stats"; $("#stats").style.display=""; $("#scope").style.flexDirection="";
+  if(m.id==="movies"){ paintMovies(m); return; }
+  if(m.id==="carlog"){ paintCarlog(m); return; }
+  $("#scope").style.display="none";
   renderPicker(m);
+  applySearchUI(m);
   let base = state.rows;
   if(m.filterBy && state.pick) base = base.filter(r=>String(r[m.filterBy.field]||"").trim()===state.pick);
   renderStats(m, base);
+  setMhSub(`${m.title} · ${filterRows(m, base, state.query).length}건`);
   const rows=filterRows(m, base, state.query);
   $("#count").textContent=`총 ${rows.length}건 · 출처: ${src.current.label}`;
   $("#list").innerHTML=rows.map((r,i)=>{ try{ return renderCard(m,r,i+1); }catch(e){ console.error("card",e); return ""; } }).join("") || `<div class="count">결과가 없습니다.</div>`;
+  document.querySelectorAll(".card").forEach(b=>b.onclick=()=>openDetail(m, state.rows.find(x=>x._id===b.dataset.id)));
+}
+
+/* ── 영화 목록: 통계 클릭 필터 + 정렬 + 추천/스트리밍 뱃지 + 포스터(보일 때만 로드) + 더보기 ── */
+let posterCache={}; const MOVIE_PER=40;
+function movieCard(r, no){
+  const stream=(r.streaming||[]).map(t=>`<span class="tag">${t}</span>`).join("");
+  const rec=(r.recommendList||[]).map(t=>`<span class="tag rec">${t}</span>`).join("");
+  const flags=[ r.rating!=null?`<span class="flag star">★ ${r.rating}</span>`:"",
+    r.watched==="O"?`<span class="flag on">시청</span>`:"",
+    r.rewatch?`<span class="flag on">다시볼것</span>`:"", r.pick?`<span class="flag on">찜</span>`:"" ].join("");
+  const meta=[r.year,r.country,r.director].filter(Boolean).join(" · ");
+  const q=(r.orig||r.title||"").replace(/"/g,'&quot;'); const kq=(r.title||"").replace(/"/g,'&quot;');
+  return `<button class="card" data-id="${r._id}"><span class="cat-no">#${String(no).padStart(3,"0")}</span>
+    <span class="thumb" data-poster data-title="${kq}" data-orig="${q}" data-year="${r.year||''}">🎞</span>
+    <span class="body"><h3>${r.title}</h3><div class="meta">${meta}${r.actors?`<br>${r.actors}`:""}</div>
+    <div class="tags">${stream}${rec}</div></span><span class="flags">${flags}</span></button>`;
+}
+function movieSelectValues(rows, scope){
+  const seen=new Set();
+  rows.forEach(r=>{
+    let arr = scope==="stream" ? (r.streaming||[])
+      : scope==="rec" ? (r.recommendList||[])
+      : String(r.director||"").split(/[,\/]+/);        // 감독
+    arr.forEach(v=>{ const t=String(v).trim(); if(t) seen.add(t); });
+  });
+  return [...seen].sort((a,b)=>a.localeCompare(b,"ko"));
+}
+function movieSearch(rows, scope, q, sel){
+  if(scope==="director") return sel ? rows.filter(r=>String(r.director||"").includes(sel)) : rows;
+  if(scope==="stream")   return sel ? rows.filter(r=>(r.streaming||[]).includes(sel)) : rows;
+  if(scope==="rec")      return sel ? rows.filter(r=>(r.recommendList||[]).includes(sel)) : rows;
+  const nq=(q||"").toLowerCase().replace(/\s+/g,""); if(!nq) return rows;
+  const norm=s=>String(s==null?"":s).toLowerCase().replace(/\s+/g,"");
+  if(scope==="actor") return rows.filter(r=>norm(r.actors).includes(nq));
+  return rows.filter(r=>norm(r.title).includes(nq)||norm(r.orig).includes(nq));   // 제목
+}
+function paintMovies(m){
+  renderStats(m, state.rows);                        // 통계는 항상 전체 기준(클릭해 필터)
+  setMhSub(`영화 · ${state.rows.length}편`);
+  const scope=state.searchScope||"title";
+  const sc=$("#scope"); sc.style.display="flex"; sc.style.flexDirection="row";     // 검색 범위 탭
+  const scopes=[["title","제목"],["director","감독"],["actor","배우"],["stream","스트리밍"],["rec","추천"]];
+  sc.innerHTML=scopes.map(([v,l])=>`<button class="chip ${scope===v?'on':''}" data-sc="${v}">${l}</button>`).join("");
+  sc.querySelectorAll(".chip").forEach(b=>b.onclick=()=>{ state.searchScope=b.dataset.sc; state.query=""; state.selectQ=""; $("#search").value=""; state.page=0; paintMovies(m); });
+
+  // 제목·배우 = 글자 입력(🔍 토글) / 감독·스트리밍·추천 = 드롭다운 (옛 앱과 동일)
+  const useSelect=["director","stream","rec"].includes(scope);
+  const selEl=$("#mvselect");
+  if(useSelect){
+    const vals=movieSelectValues(state.rows, scope);
+    selEl.innerHTML=`<option value="">전체</option>`+vals.map(v=>`<option value="${v.replace(/"/g,'&quot;')}">${v}</option>`).join("");
+    selEl.value=state.selectQ||"";
+    selEl.onchange=()=>{ state.selectQ=selEl.value; state.page=0; paintMovies(m); };
+  }
+  applySearchUI(m);
+
+  const p=$("#picker"); p.style.display="flex";      // 정렬 바
+  const sorts=[["default","기본"],["rating","평점"],["year","연도"],["rec","추천"]];
+  p.innerHTML=sorts.map(([v,l])=>{ const on=(state.sort||"default")===v;
+    const arrow=v==="default"?"":(on?(state.sortAsc?"↑":"↓"):"↓");
+    return `<button class="chip ${on?'on':''}" data-s="${v}">${l}${arrow}</button>`; }).join("");
+  p.querySelectorAll(".chip").forEach(b=>b.onclick=()=>{ const s=b.dataset.s;
+    if(s===(state.sort||"default")&&s!=="default") state.sortAsc=!state.sortAsc;
+    else { state.sort=s; state.sortAsc=false; }
+    state.page=0; paintMovies(m); });
+
+  let rows=movieSearch(state.rows, scope, state.query, state.selectQ);
+  if(state.statFilter) rows=rows.filter(r=> state.statFilter==="watched"?r.watched==="O":state.statFilter==="rewatch"?r.rewatch:state.statFilter==="pick"?r.pick:true);
+  const sort=state.sort||"default", asc=state.sortAsc;
+  if(sort==="rating") rows=[...rows].sort((a,b)=>{const d=(parseFloat(a.rating)||0)-(parseFloat(b.rating)||0); return asc?d:-d;});
+  else if(sort==="year") rows=[...rows].sort((a,b)=>{const d=(a.year||0)-(b.year||0); return asc?d:-d;});
+  else if(sort==="rec") rows=[...rows].sort((a,b)=>{const d=((a.recommendList||[]).length)-((b.recommendList||[]).length); return asc?d:-d;});
+
+  const total=rows.length, shown=rows.slice(0,(state.page+1)*MOVIE_PER);
+  $("#count").textContent=`총 ${total}건${state.statFilter?" · 필터":""}`;
+  $("#list").innerHTML = (shown.map((r,i)=>movieCard(r,i+1)).join("")||`<div class="count">결과가 없습니다.</div>`)
+    + (shown.length<total?`<button class="btn ghost" id="moreBtn" style="width:100%;margin-top:10px">더 보기 (${total-shown.length}편)</button>`:"");
+  document.querySelectorAll(".card").forEach(b=>b.onclick=()=>openDetail(m, state.rows.find(x=>x._id===b.dataset.id)));
+  const more=$("#moreBtn"); if(more) more.onclick=()=>{ state.page++; paintMovies(m); };
+  lazyPosters();
+}
+function lazyPosters(){   // 화면에 들어온 카드만 TMDB에서 포스터 로드(메모리 캐시)
+  if(!CONFIG.TMDB_KEY) return;
+  const io=new IntersectionObserver((ents,obs)=>{
+    ents.forEach(async e=>{ if(!e.isIntersecting) return; const el=e.target; obs.unobserve(el);
+      const q=el.dataset.title||el.dataset.orig; if(!q) return;
+      const key=q+"|"+(el.dataset.year||"");
+      if(posterCache[key]===undefined){
+        posterCache[key]=null;
+        try{ const u=`${CONFIG.TMDB_BASE}/search/movie?api_key=${CONFIG.TMDB_KEY}&language=ko-KR&query=${encodeURIComponent(q)}${el.dataset.year?`&year=${el.dataset.year}`:""}`;
+          const d=await fetch(u).then(r=>r.json()); const hit=(d.results||[])[0];
+          posterCache[key]=hit&&hit.poster_path?("https://image.tmdb.org/t/p/w185"+hit.poster_path):null;
+        }catch(_){ posterCache[key]=null; }
+      }
+      if(posterCache[key]) el.innerHTML=`<img src="${posterCache[key]}" alt="" style="width:100%;height:100%;object-fit:cover">`;
+    });
+  },{rootMargin:"300px"});
+  document.querySelectorAll(".thumb[data-poster]").forEach(el=>io.observe(el));
+}
+
+/* ── 차계부 목록: 차량 선택 + 정렬(날짜/주행/가격) + 작업내용 칩 + 검색 ── */
+let carWorkFilter="", carSort="date", carSortAsc=false;
+function carNum(v){ return parseInt(String(v==null?"":v).replace(/[^\d]/g,""),10)||0; }
+function carlogCard(r, no){
+  const kv=[["작업",r.work],["금액",r.cost?fmt(r.cost)+"원":""],["주행",r.odo?fmt(r.odo)+"km":""],["정비소",r.shop]]
+    .filter(([k,v])=>v!=null&&v!=="")
+    .map(([k,v])=>`<span class="cl-kv${k==="금액"?" big":""}"><b>${k}</b>${v}</span>`).join("");
+  return `<button class="card cl-card" data-id="${r._id}">
+    ${no?`<span class="cl-no">No. ${String(no).padStart(3,"0")}</span>`:""}
+    <div class="cl-head"><span class="cl-date">${r.date||"-"}</span>${r.car?`<span class="cl-veh">${r.car}</span>`:""}</div>
+    <div class="cl-kvs">${kv}</div>
+    ${r.memo?`<div class="cl-memo">${r.memo}</div>`:""}
+  </button>`;
+}
+function buildWorkChips(base){
+  const cnt={};
+  base.forEach(r=>String(r.work||"").split(",").forEach(w=>{ const t=w.trim(); if(t) cnt[t]=(cnt[t]||0)+1; }));
+  return Object.keys(cnt).filter(w=>cnt[w]>=2).sort((a,b)=>cnt[b]-cnt[a]);   // 2회 이상만, 빈도순
+}
+function paintCarlog(m){
+  let base = state.rows;
+  if(state.pick) base = base.filter(r=>String(r.car||"").trim()===state.pick);
+
+  // 통계 흡수: 마스트헤드 서브라인으로 (본문 통계줄 없앰 → 상단 압축)
+  const total=base.reduce((s,r)=>s+carNum(r.cost),0);
+  let sub=`차계부 · 총 <b>₩${total.toLocaleString()}</b> · ${base.length}건`;
+  if(state.pick){ const mx=base.reduce((x,r)=>Math.max(x,carNum(r.odo)),0); if(mx) sub+=` · 최근 ${mx.toLocaleString()}km`; }
+  setMhSub(sub);
+  $("#stats").style.display="none";
+
+  // 차량 선택 + 정렬(⇅ 한 개) — 한 줄
+  const cars=[...new Set(state.rows.map(r=>String(r.car||"").trim()).filter(Boolean))];
+  const p=$("#picker"); p.style.display="flex"; p.style.alignItems="center"; p.style.overflow="visible";
+  const carChips = cars.length>1
+    ? `<div class="cbar" style="flex:1">${[{v:"",l:"전체"},...cars.map(c=>({v:c,l:c}))].map(o=>`<button class="chip ${o.v===state.pick?'on':''}" data-v="${o.v}">${o.l}</button>`).join("")}</div>`
+    : `<div class="cbar" style="flex:1"></div>`;
+  const sortLabel={date:"날짜",odo:"주행",price:"가격"}[carSort];
+  p.innerHTML = carChips + `<select class="sortsel" id="carSortSel">
+      <option value="date"${carSort==='date'?' selected':''}>⇅ 날짜↓</option>
+      <option value="odo"${carSort==='odo'?' selected':''}>⇅ 주행거리↓</option>
+      <option value="price"${carSort==='price'?' selected':''}>⇅ 가격↓</option>
+    </select>`;
+  p.querySelectorAll("[data-v]").forEach(b=>b.onclick=()=>{ state.pick=b.dataset.v; carWorkFilter=""; paintCarlog(m); });
+  $("#carSortSel").onchange=e=>{ carSort=e.target.value; carSortAsc=false; paintCarlog(m); };
+
+  // 작업내용 칩 — 한 줄
+  const works=buildWorkChips(base);
+  const sc=$("#scope"); sc.style.flexDirection="row";
+  if(works.length){ sc.style.display="flex";
+    sc.innerHTML=`<button class="chip ${carWorkFilter===''?'on':''}" data-cw="">전체</button>${works.map(w=>`<button class="chip ${carWorkFilter===w?'on':''}" data-cw="${w.replace(/"/g,'&quot;')}">${w}</button>`).join("")}`;
+    sc.querySelectorAll("[data-cw]").forEach(b=>b.onclick=()=>{ carWorkFilter=b.dataset.cw; paintCarlog(m); });
+  } else { sc.style.display="none"; sc.innerHTML=""; }
+  applySearchUI(m);
+
+  // 목록 = 차량필터 + 작업필터 + 검색 + 정렬
+  let rows=base.slice();
+  if(carWorkFilter) rows=rows.filter(r=>String(r.work||"").split(",").map(s=>s.trim()).includes(carWorkFilter));
+  const q=(state.query||"").replace(/\s/g,"").toLowerCase();
+  if(q) rows=rows.filter(r=>((r.work||"")+(r.shop||"")+(r.memo||"")).replace(/\s/g,"").toLowerCase().includes(q));
+  rows.sort((a,b)=>{
+    if(carSort==="date"){ const av=String(a.date||""),bv=String(b.date||""); return carSortAsc?av.localeCompare(bv):bv.localeCompare(av); }
+    const av=carNum(carSort==="odo"?a.odo:a.cost), bv=carNum(carSort==="odo"?b.odo:b.cost);
+    return carSortAsc?av-bv:bv-av;
+  });
+  $("#count").textContent=`총 ${rows.length}건`;
+  $("#list").innerHTML=rows.map((r,i)=>{ try{ return carlogCard(r, rows.length-i); }catch(e){ console.error(e); return ""; } }).join("")||`<div class="count">기록이 없어요.</div>`;
   document.querySelectorAll(".card").forEach(b=>b.onclick=()=>openDetail(m, state.rows.find(x=>x._id===b.dataset.id)));
 }
 
@@ -877,9 +1270,10 @@ async function boot(){
   // 첫 화면은 홈(켜둔 카테고리 카드 격자). 처음엔 비어 있고, 설정에서 카테고리를 켜면 카드가 생김.
   showView("home"); renderHome();
 }
-$("#backBtn").addEventListener("click",goHome);
+$("#brandBtn").addEventListener("click",goHome);
+$("#searchToggle").addEventListener("click",()=>{ state.searchOpen=!state.searchOpen; applySearchUI(MANIFESTS[state.domain]); if(state.searchOpen) $("#search").focus(); });
 $("#tabs").addEventListener("click",e=>{ const t=e.target.closest(".tab"); if(t) openDomain(t.dataset.id); });
-$("#search").addEventListener("input",e=>{ state.query=e.target.value; loadAndRender(); });
+$("#search").addEventListener("input",e=>{ state.query=e.target.value; state.page=0; loadAndRender(); });
 $("#setBtn").addEventListener("click",openSettings);
 $("#addBtn").addEventListener("click",()=>{ const m=MANIFESTS[state.domain]; if(!m?.canAdd) return;
   if(state.domain==="movies") openAddMovie();
