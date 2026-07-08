@@ -166,6 +166,9 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
   .sbadge{ font-family:var(--sans); font-size:11px; padding:2px 8px; border-radius:10px; font-weight:500; }
   .rbadge{ font-family:var(--sans); font-size:10px; padding:2px 7px; border-radius:8px; background:#f0f0f0; color:#666; border:none; }
   .rbadge.clk{ cursor:pointer; } .rbadge.clk:active{ background:#e0e0e0; }
+  .gtag{ font-family:var(--sans); font-size:10px; color:#4f46e5; background:#eef2ff; border:none; border-radius:8px; padding:2px 8px; white-space:nowrap; }
+  .bk-review{ font-size:11.5px; color:#999; font-style:italic; margin-top:4px; line-height:1.4; }
+  .clx-sub{ font-size:11.5px; color:#999; margin-top:2px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
   .rec-sub{ font-family:var(--mono); font-size:12px; color:var(--ink-soft); margin-top:3px; }
   .rec-desc{ font-size:13.5px; line-height:1.7; color:var(--ink); margin:0; }
   .rec-link{ font-family:var(--mono); font-size:12px; color:var(--ink-soft); text-decoration:none; text-align:center; border-top:1px solid var(--line); padding-top:12px; margin-top:4px; }
@@ -186,11 +189,11 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
   .cl-kv.big{ color:var(--green); }
   .cl-memo{ margin-top:9px; font-size:12px; color:var(--ink-soft); font-style:italic; }
   /* 차계부 카드 — 기존 영화앱 스타일(흰 카드) */
-  .clx-card{ display:block; font-family:var(--sans); }
-  .clx-top{ display:flex; justify-content:space-between; align-items:baseline; gap:8px; margin-bottom:6px; }
+  .clx-card{ display:block; font-family:var(--sans); padding:10px 12px; }
+  .clx-top{ display:flex; justify-content:space-between; align-items:baseline; gap:8px; margin-bottom:2px; }
   .clx-date{ font-size:13px; font-weight:700; color:#1a1a1a; }
   .clx-odo{ font-size:12px; color:#888; white-space:nowrap; }
-  .clx-work{ font-size:15px; font-weight:600; color:#1a1a1a; margin-bottom:2px; }
+  .clx-work{ font-size:14px; font-weight:600; color:#1a1a1a; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
   .clx-meta{ display:flex; justify-content:space-between; align-items:baseline; gap:8px; }
   .clx-shop{ font-size:12px; color:#888; }
   .clx-price{ font-size:14px; font-weight:700; color:#ea580c; white-space:nowrap; }
@@ -267,7 +270,7 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
 <div class="wrap" id="root" data-domain="movies">
   <header class="masthead">
     <div class="mh-row">
-      <h1 id="brandBtn" style="cursor:pointer">내도감</h1><span class="sub">Naedogam · v49</span>
+      <h1 id="brandBtn" style="cursor:pointer">내도감</h1><span class="sub">Naedogam · v50</span>
       <span class="spacer"></span>
       <span class="src-chip" id="srcChip" style="display:none">데모</span>
       <button class="icon-btn" id="searchToggle" type="button" style="display:none">🔍</button>
@@ -400,7 +403,8 @@ const MANIFESTS = {
              {k:"pick",sheet:"찜",label:"읽고싶다(찜)",type:"bool"},
              {k:"reread",sheet:"다시",label:"다시읽을것",type:"bool"},
              {k:"recommend",sheet:"추천",label:"추천(카탈로그 · /로 구분)",type:"text"},
-             {k:"cover",sheet:"표지",label:"표지 주소",type:"text"} ],
+             {k:"cover",sheet:"표지",label:"표지 주소",type:"text"},
+             {k:"review",sheet:"감상평",label:"감상평",type:"text"} ],
     search:["title","author"],
     stats:[ {label:"전체",type:"count"},
             {label:"읽음",type:"countIf",field:"status",eq:"읽음"},
@@ -426,7 +430,9 @@ const MANIFESTS = {
              {k:"tags",sheet:"태그",label:"태그(쉼표로 여러 개)",type:"tags"} ],
     search:["title","region"],
     stats:[ {label:"전체",type:"count"},
-            {label:"다녀옴",type:"countIf",field:"climbed",eq:true} ],
+            {label:"다녀옴",type:"countIf",field:"climbed",eq:true},
+            {label:"또갈것",type:"countIf",field:"revisit",eq:true},
+            {label:"찜",type:"countIf",field:"pick",eq:true} ],
     card:{ kind:"specimen", thumb:"⛰",
            meta:r=>[r.height?r.height+"m":"", r.region].filter(Boolean).join(" · "),
            tags:"tags",
@@ -782,17 +788,20 @@ function bookCard(r){
     +(r.pick?`<span class="wb wb-P">찜</span>`:"");
   const right=[r.year,(r.rating!=null&&r.rating!==""?("⭐"+r.rating):"")].filter(Boolean).join(" · ");
   const gArr=Array.isArray(r.genre)?r.genre:(r.genre==null||r.genre===""?[]:[r.genre]);
-  const genre=gArr.map(t=>`<span class="tag">${t}</span>`).join("");
+  const genre=gArr.map(t=>`<span class="gtag">${t}</span>`).join("");
   const rec=bookRecBadges(r,"rbadge");
   const cover=r.cover?`<img src="${r.cover}" alt="">`:"📖";
   const coverAttr=r.cover?"":` data-bkcover data-bktitle="${String(r.title||"").replace(/"/g,"&quot;")}" data-bkauthor="${String(r.author||"").replace(/"/g,"&quot;")}"`;
+  const sub=[r.author,r.publisher].filter(Boolean).join(" · ");
+  const rv=String(r.review||"").trim();
+  const review=rv?`<div class="bk-review">"${rv.slice(0,60)}${rv.length>60?"…":""}"</div>`:"";
   return `<button class="card mvcard" data-id="${r._id}">
     <span class="thumb"${coverAttr}>${cover}</span>
     <div class="mvinfo">
       <div class="mv-titlerow"><span class="mv-title">${r.title}${flags}</span><span class="mv-year">${right}</span></div>
-      ${r.author?`<div class="mv-sub">${r.author}</div>`:""}
-      ${genre?`<div class="mvbadges">${genre}</div>`:""}
-      ${rec?`<div class="mvbadges">${rec}</div>`:""}
+      ${sub?`<div class="mv-sub">${sub}</div>`:""}
+      ${review}
+      ${(genre||rec)?`<div class="mvbadges">${genre}${rec}</div>`:""}
     </div>
   </button>`;
 }
@@ -810,6 +819,20 @@ async function fetchBookInfo(title, author){
     bookInfoCache[key]={ desc, cover:cover||null, pages:v.pageCount||null, publisher:v.publisher||"" };
   }catch(e){ bookInfoCache[key]=null; }
   return bookInfoCache[key];
+}
+let mtnCoverCache={};
+async function fetchMtnCover(name){
+  if(mtnCoverCache[name]!==undefined) return mtnCoverCache[name];
+  try{ const d=await fetch(`https://ko.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(name)}`).then(r=>r.json());
+    mtnCoverCache[name]=(d&&d.thumbnail&&d.thumbnail.source)||null;
+  }catch(e){ mtnCoverCache[name]=null; }
+  return mtnCoverCache[name];
+}
+function lazyMountainCovers(){
+  const io=new IntersectionObserver((ents,obs)=>{ ents.forEach(async e=>{ if(!e.isIntersecting) return; const el=e.target; obs.unobserve(el);
+    const src=await fetchMtnCover(el.dataset.mtnname); if(src) el.innerHTML=`<img src="${src}" alt="">`;
+  }); },{rootMargin:"300px"});
+  document.querySelectorAll(".thumb[data-mtncover]").forEach(el=>io.observe(el));
 }
 function lazyBookCovers(){
   const io=new IntersectionObserver((ents,obs)=>{ ents.forEach(async e=>{
@@ -869,6 +892,7 @@ async function openBookDetail(m, r){
       </div>
     </div>
     <div class="mvover" id="bkOver">책 소개 불러오는 중…</div>
+    ${String(r.review||"").trim()?`<div class="mvreview"><b>📝 내 감상</b><br>${r.review}</div>`:""}
     <div class="mvlinks">
       <a class="btn ghost" target="_blank" rel="noopener" href="https://search.kyobobook.co.kr/search?keyword=${q}"><img class="lnkico" src="https://www.google.com/s2/favicons?domain=kyobobook.co.kr&sz=64" onerror="this.remove()">교보문고</a>
       <a class="btn ghost" target="_blank" rel="noopener" href="https://www.yes24.com/product/search?query=${q}"><img class="lnkico" src="https://www.google.com/s2/favicons?domain=yes24.com&sz=64" onerror="this.remove()">YES24</a>
@@ -899,7 +923,8 @@ function renderCard(m, r, no){ if(m.id==="books") return bookCard(r); const c=m.
     const tags=tarr.map(t=>`<span class="tag">${t}</span>`).join("");
     const flags=(typeof c.flags==="function"?c.flags(r):[]).filter(Boolean)
       .map(f=>`<span class="flag ${f.cls||""}">${f.t}</span>`).join("");
-    return `<button class="card catcard" data-id="${r._id}"><span class="thumb">${r.cover?`<img src="${r.cover}" alt="">`:c.thumb}</span>
+    const mtnAttr=(m.id==="mountains"&&!r.cover)?` data-mtncover data-mtnname="${String(r.title||"").replace(/"/g,"&quot;")}"`:"";
+    return `<button class="card catcard" data-id="${r._id}"><span class="thumb"${mtnAttr}>${r.cover?`<img src="${r.cover}" alt="">`:c.thumb}</span>
       <span class="body"><h3>${r.title}</h3><div class="meta">${meta}</div>${(flags||tags)?`<div class="cbadges">${flags}${tags}</div>`:""}</span></button>`; }
   const kv=c.kv.map(col=>{ const v=r[col.f]; if(v==null) return ""; const s=(typeof v==="number"?fmt(v):v)+(col.u?` ${col.u}`:"");
     return `<span>${col.k} <b>${s}</b></span>`; }).filter(Boolean).join("");
@@ -911,6 +936,7 @@ function openDetail(m, r){
   const LBL={pace:"페이스"}; (m.fields||[]).forEach(f=>{ LBL[f.k]=f.sheet||String(f.label||f.k).replace(/\s*\(.*$/,""); });
   const rows=Object.entries(r).filter(([k])=>k!=="_id"&&k!=="orig"&&!(TOGGLE_HIDE[m.id]||[]).includes(k)).map(([k,v])=>
     `<div class="drow"><span class="k">${LBL[k]||k}</span><span>${Array.isArray(v)?v.join(", "):v===null?"—":v===true?"예":v===false?"아니오":(typeof v==="number"&&k!=="year"&&!/연도/.test(LBL[k]||"")?v.toLocaleString():v)}</span></div>`).join("");
+  const mapLinks = (m.id==="mountains") ? `<div class="mvlinks"><a class="btn ghost" target="_blank" rel="noopener" href="https://map.naver.com/p/search/${encodeURIComponent(r.title||"")}"><img class="lnkico" src="https://www.google.com/s2/favicons?domain=map.naver.com&sz=64" onerror="this.remove()">네이버지도</a><a class="btn ghost" target="_blank" rel="noopener" href="https://www.google.com/maps/search/${encodeURIComponent((r.title||"")+" "+(r.region||""))}"><img class="lnkico" src="https://www.google.com/s2/favicons?domain=google.com&sz=64" onerror="this.remove()">구글지도</a></div>` : "";
   const editable = m.source?.type==="sheet" || m.id==="carlog";
   const isMovie = m.id==="movies";
   let foot;
@@ -922,15 +948,15 @@ function openDetail(m, r){
       <button class="btn ghost" id="mEdit">정보 수정</button>
       <button class="btn ghost" style="margin-left:auto" onclick="this.closest('dialog').close()">닫기</button></div>`;
   } else if(editable){
-    foot=`<div class="dfoot" style="flex-wrap:wrap">
-       ${TOGGLE_DEFS[m.id]?`<div class="statusbtns" style="display:flex;gap:6px;flex-wrap:wrap;width:100%;margin-bottom:4px">${statusBtnsHTML(m,r)}</div>`:""}
-       <button class="btn" id="detEdit">수정</button>
+    foot=`<div class="dfoot" style="flex-wrap:wrap;gap:6px">
+       ${TOGGLE_DEFS[m.id]?`<span class="statusbtns" style="display:contents">${statusBtnsHTML(m,r)}</span>`:""}
+       <button class="btn ghost" id="detEdit" style="margin-left:auto">정보수정</button>
        <button class="btn ghost" id="detDel">삭제</button>
-       <button class="btn ghost" style="margin-left:auto" onclick="this.closest('dialog').close()">닫기</button></div>`;
+       <button class="btn ghost" onclick="this.closest('dialog').close()">닫기</button></div>`;
   } else {
     foot=`<button class="dclose" onclick="this.closest('dialog').close()">닫기</button>`;
   }
-  const d=$("#detail"); d.innerHTML=`<div class="dhead"><h3>${m.card.kind==="specimen"?r.title:(r.date+(r.car?" · "+r.car:""))}</h3></div><div class="dbody">${rows}</div>${foot}`;
+  const d=$("#detail"); d.innerHTML=`<div class="dhead"><h3>${m.card.kind==="specimen"?r.title:(r.date+(r.car?" · "+r.car:""))}</h3></div><div class="dbody">${rows}</div>${mapLinks}${foot}`;
   d.showModal();
   if(isMovie){
     $("#mW").onclick=()=>toggleMovie(r,'W'); $("#mR").onclick=()=>toggleMovie(r,'R'); $("#mP").onclick=()=>toggleMovie(r,'P');
@@ -1213,6 +1239,7 @@ function paintDomain(m){   // state.rows를 화면에 그림 (데이터 다시 �
   $("#list").innerHTML=rows.map((r,i)=>{ try{ return renderCard(m,r,i+1); }catch(e){ console.error("card",e); return ""; } }).join("") || `<div class="count">결과가 없습니다.</div>`;
   document.querySelectorAll(".card").forEach(b=>b.onclick=()=>openDetail(m, state.rows.find(x=>x._id===b.dataset.id)));
   if(m.id==="books") lazyBookCovers();
+  if(m.id==="mountains") lazyMountainCovers();
 }
 
 /* ── 영화 목록: 통계 클릭 필터 + 정렬 + 추천/스트리밍 뱃지 + 포스터(보일 때만 로드) + 더보기 ── */
@@ -1375,11 +1402,11 @@ function carlogCard(r, no){
   const car=(r.car||"").trim();
   const badge=(car&&CAR_ORDER.length>1)?`<span class="clx-badge" style="background:${carColor(car)}">${car}</span>`:"";
   const odo=carNum(r.odo), cost=carNum(r.cost);
+  const sub=[r.shop,r.memo].filter(Boolean).join(" · ");
   return `<button class="card clx-card" data-id="${r._id}">
     <div class="clx-top"><span class="clx-date">${badge}${r.date||"-"}</span><span class="clx-odo">${odo?fmt(odo)+"km":""}</span></div>
-    <div class="clx-work">${r.work||"-"}</div>
-    <div class="clx-meta"><span class="clx-shop">${r.shop||""}</span><span class="clx-price">${cost?"₩"+fmt(cost):""}</span></div>
-    ${r.memo?`<div class="clx-memo">${r.memo}</div>`:""}
+    <div class="clx-meta"><span class="clx-work">${r.work||"-"}</span><span class="clx-price">${cost?"₩"+fmt(cost):""}</span></div>
+    ${sub?`<div class="clx-sub">${sub}</div>`:""}
   </button>`;
 }
 function buildWorkChips(base){
