@@ -92,6 +92,17 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
   .scope.scopetabs{ border-bottom:1px solid var(--line); gap:2px; padding-bottom:0; margin:6px 0 12px; }
   .scope.scopetabs .chip{ border:none; background:none; border-radius:0; color:var(--ink-soft); padding:9px 12px; border-bottom:2px solid transparent; margin-bottom:-1px; font-family:var(--sans); font-size:13px; }
   .scope.scopetabs .chip.on{ color:var(--ink); border-bottom-color:var(--ochre); font-weight:500; }
+  .scope.scopetabs .chip{ flex:1; text-align:center; }
+  .count.countrow{ display:flex; align-items:center; justify-content:space-between; gap:8px; }
+  .cnt-lbl{ font-family:var(--mono); font-size:11px; color:var(--ink-soft); }
+  .sort-btns{ display:flex; gap:5px; }
+  .sort-btn{ font-family:var(--mono); font-size:11px; padding:4px 10px; border:1px solid var(--line); border-radius:14px; background:var(--card); color:var(--ink-soft); cursor:pointer; }
+  .sort-btn.on{ background:var(--ink); color:var(--paper); border-color:var(--ink); }
+  #addBtn{ position:fixed; right:18px; bottom:80px; z-index:45; width:54px; height:54px; padding:0; margin:0 !important;
+    border-radius:50%; background:var(--ochre); color:#fff; border:none; font-size:26px; line-height:1;
+    box-shadow:0 4px 14px rgba(101,64,32,.35); display:flex; align-items:center; justify-content:center; }
+  #addBtn:active{ transform:scale(.94); }
+  .mv-title{ font-family:var(--sans); }
   .picker::-webkit-scrollbar,.scope::-webkit-scrollbar,.cbar::-webkit-scrollbar{ display:none; }
   .cbar{ display:flex; gap:6px; flex-wrap:nowrap; overflow-x:auto; }
   .scope .chip{ font-size:12px; }
@@ -132,7 +143,7 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
   .mvcard .thumb{ width:52px; height:74px; }
   .mvinfo{ flex:1; min-width:0; }
   .mv-titlerow{ display:flex; justify-content:space-between; align-items:baseline; gap:8px; }
-  .mv-title{ font-family:var(--serif); font-size:16px; font-weight:700; line-height:1.35; }
+  .mv-title{ font-family:var(--sans); font-size:16px; font-weight:700; line-height:1.35; }
   .mv-year{ font-family:var(--mono); font-size:11px; color:var(--ink-soft); white-space:nowrap; flex-shrink:0; }
   .mv-orig{ font-size:11.5px; color:var(--ink-soft); font-style:italic; margin-top:2px; }
   .mv-sub{ font-size:12.5px; margin-top:5px; line-height:1.5; }
@@ -226,7 +237,7 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
 <div class="wrap" id="root" data-domain="movies">
   <header class="masthead">
     <div class="mh-row">
-      <h1 id="brandBtn" style="cursor:pointer">내도감</h1><span class="sub">Naedogam · v29</span>
+      <h1 id="brandBtn" style="cursor:pointer">내도감</h1><span class="sub">Naedogam · v31</span>
       <span class="spacer"></span>
       <span class="src-chip" id="srcChip" style="display:none">데모</span>
       <button class="icon-btn" id="searchToggle" type="button" style="display:none">🔍</button>
@@ -247,7 +258,7 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
     <div class="scope" id="scope" style="display:none"></div>
     <input class="search" id="search" type="search" style="display:none" />
     <select class="search" id="mvselect" style="display:none"></select>
-    <button class="icon-btn" id="addBtn" type="button" style="display:none;margin:10px 0 0">+ 추가</button>
+    <button class="icon-btn" id="addBtn" type="button" style="display:none">＋</button>
     <div class="count" id="count"></div>
     <div class="list" id="list"></div>
   </section>
@@ -940,7 +951,7 @@ async function loadAndRender(){
   const chip=$("#srcChip"); chip.textContent=src.current.label; chip.classList.toggle("live", !!src.current.isLive);
   renderTabs(); renderSearch(m);
   const addBtn=$("#addBtn");
-  if(m.canAdd){ addBtn.style.display="inline-block"; addBtn.textContent="+ "+m.title+" 추가"; }
+  if(m.canAdd){ addBtn.style.display="flex"; addBtn.textContent="＋"; addBtn.title=m.title+" 추가"; }
   else addBtn.style.display="none";
   $("#banner").innerHTML="";
   if(!CACHE[state.domain]){                       // 처음 여는 분야만 실제로 불러온다
@@ -954,7 +965,7 @@ async function loadAndRender(){
 }
 function paintDomain(m){   // state.rows를 화면에 그림 (데이터 다시 안 받고 재렌더 가능)
   const pk=$("#picker"); pk.style.alignItems=""; pk.style.overflow="";     // 공유 UI 초기화
-  $("#stats").className="stats"; $("#stats").style.display=""; $("#scope").style.flexDirection=""; $("#scope").classList.remove("scopetabs");
+  $("#stats").className="stats"; $("#stats").style.display=""; $("#scope").style.flexDirection=""; $("#scope").classList.remove("scopetabs"); $("#count").classList.remove("countrow");
   if(m.id==="movies"){ paintMovies(m); return; }
   if(m.id==="carlog"){ paintCarlog(m); return; }
   $("#scope").style.display="none";
@@ -1018,7 +1029,7 @@ function paintMovies(m){
   renderStats(m, state.rows);                        // 통계는 항상 전체 기준(클릭해 필터)
   setMhSub("");                                       // 영화 서브라인 표시 안 함
   const scope=state.searchScope||"title";
-  const sc=$("#scope"); sc.style.display="flex"; sc.style.flexDirection="row"; sc.classList.add("scopetabs");     // 검색 범위 탭(밑줄)
+  const sc=$("#scope"); sc.style.display="flex"; sc.style.flexDirection="row"; sc.classList.add("scopetabs");     // 검색 범위 탭(밑줄·균등)
   const scopes=[["title","제목"],["director","감독"],["actor","배우"],["stream","스트리밍"],["rec","추천"]];
   sc.innerHTML=scopes.map(([v,l])=>`<button class="chip ${scope===v?'on':''}" data-sc="${v}">${l}</button>`).join("");
   sc.querySelectorAll(".chip").forEach(b=>b.onclick=()=>{ state.searchScope=b.dataset.sc; state.query=""; state.selectQ=""; $("#search").value=""; state.page=0; paintMovies(m); });
@@ -1033,16 +1044,7 @@ function paintMovies(m){
     selEl.onchange=()=>{ state.selectQ=selEl.value; state.page=0; paintMovies(m); };
   }
   applySearchUI(m);
-
-  const p=$("#picker"); p.style.display="flex";      // 정렬 바
-  const sorts=[["default","기본"],["rating","평점"],["year","연도"],["rec","추천"]];
-  p.innerHTML=sorts.map(([v,l])=>{ const on=(state.sort||"default")===v;
-    const arrow=v==="default"?"":(on?(state.sortAsc?"↑":"↓"):"↓");
-    return `<button class="chip ${on?'on':''}" data-s="${v}">${l}${arrow}</button>`; }).join("");
-  p.querySelectorAll(".chip").forEach(b=>b.onclick=()=>{ const s=b.dataset.s;
-    if(s===(state.sort||"default")&&s!=="default") state.sortAsc=!state.sortAsc;
-    else { state.sort=s; state.sortAsc=false; }
-    state.page=0; paintMovies(m); });
+  $("#picker").style.display="none";   // 정렬은 아래 카운트 줄로 이동
 
   let rows=movieSearch(state.rows, scope, state.query, state.selectQ);
   if(state.statFilter) rows=rows.filter(r=> state.statFilter==="watched"?r.watched==="O":state.statFilter==="rewatch"?r.rewatch:state.statFilter==="pick"?r.pick:true);
@@ -1052,7 +1054,16 @@ function paintMovies(m){
   else if(sort==="rec") rows=[...rows].sort((a,b)=>{const d=((a.recommendList||[]).length)-((b.recommendList||[]).length); return asc?d:-d;});
 
   const total=rows.length, shown=rows.slice(0,(state.page+1)*MOVIE_PER);
-  $("#count").textContent=`총 ${total}건${state.statFilter?" · 필터":""}`;
+  const sorts=[["default","기본"],["rating","평점"],["year","연도"],["rec","추천"]];
+  const sortBtns=sorts.map(([v,l])=>{ const on=(state.sort||"default")===v;
+    const arrow=v==="default"?"":(on?(state.sortAsc?"↑":"↓"):"↓");
+    return `<button class="sort-btn ${on?'on':''}" data-s="${v}">${l}${arrow}</button>`; }).join("");
+  const cnt=$("#count"); cnt.classList.add("countrow");
+  cnt.innerHTML=`<span class="cnt-lbl">총 ${total}건${state.statFilter?" · 필터":""}</span><span class="sort-btns">${sortBtns}</span>`;
+  cnt.querySelectorAll(".sort-btn").forEach(b=>b.onclick=()=>{ const s=b.dataset.s;
+    if(s===(state.sort||"default")&&s!=="default") state.sortAsc=!state.sortAsc;
+    else { state.sort=s; state.sortAsc=false; }
+    state.page=0; paintMovies(m); });
   $("#list").innerHTML = (shown.map((r,i)=>movieCard(r,i+1)).join("")||`<div class="count">결과가 없습니다.</div>`)
     + (shown.length<total?`<button class="btn ghost" id="moreBtn" style="width:100%;margin-top:10px">더 보기 (${total-shown.length}편)</button>`:"");
   document.querySelectorAll(".card").forEach(b=>b.onclick=()=>openDetail(m, state.rows.find(x=>x._id===b.dataset.id)));
