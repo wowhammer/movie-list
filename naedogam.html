@@ -33,7 +33,7 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
     --accent:#3E5A48; --accent-wash:#E4EAE0; --green:#3E5A48;
     --ochre:#A96B32; --ochre-wash:#F0E4D2;
     --ok:#3d7a4e; --warn:#b25b3a;
-    --serif:"Noto Serif KR",serif; --sans:"Noto Sans KR",system-ui,sans-serif; --mono:"DM Mono",ui-monospace,monospace;
+    --serif:"Noto Serif KR",serif; --sans:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans KR",system-ui,sans-serif; --mono:"DM Mono",ui-monospace,monospace;
   }
   *{ box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
   body{ margin:0; color:var(--ink); font-family:var(--sans); line-height:1.5; -webkit-font-smoothing:antialiased;
@@ -78,7 +78,7 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
   .tab[aria-selected="true"] span{ opacity:1; }
 
   /* 통계(압축 스트립) */
-  .stats{ display:flex; gap:0; padding:16px 0 8px; }
+  .stats{ display:flex; justify-content:center; gap:0; padding:16px 0 10px; }
   .stat{ flex:1; text-align:center; padding:5px 4px; border-radius:6px; }
   .stat .n{ font-family:var(--sans); font-weight:700; font-size:23px; color:var(--ink); letter-spacing:-.01em; }
   .stat .l{ font-size:11px; color:var(--ink-soft); margin-top:2px; }
@@ -265,7 +265,7 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
 <div class="wrap" id="root" data-domain="movies">
   <header class="masthead">
     <div class="mh-row">
-      <h1 id="brandBtn" style="cursor:pointer">내도감</h1><span class="sub">Naedogam · v37</span>
+      <h1 id="brandBtn" style="cursor:pointer">내도감</h1><span class="sub">Naedogam · v38</span>
       <span class="spacer"></span>
       <span class="src-chip" id="srcChip" style="display:none">데모</span>
       <button class="icon-btn" id="searchToggle" type="button" style="display:none">🔍</button>
@@ -746,8 +746,9 @@ function renderCard(m, r, no){ const c=m.card;
     <span class="body"><h3 style="font-size:15px">${c.title(r)}</h3><div class="kv">${kv}</div>${r.memo?`<div class="meta" style="margin-top:5px">${r.memo}</div>`:""}</span></button>`; }
 function openDetail(m, r){
   if(m.id==="movies"){ openMovieDetail(m, r); return; }
+  const LBL={pace:"페이스"}; (m.fields||[]).forEach(f=>{ LBL[f.k]=f.sheet||String(f.label||f.k).replace(/\s*\(.*$/,""); });
   const rows=Object.entries(r).filter(([k])=>k!=="_id"&&k!=="orig").map(([k,v])=>
-    `<div class="drow"><span class="k">${k}</span><span>${Array.isArray(v)?v.join(", "):v===null?"—":v===true?"예":v===false?"아니오":v}</span></div>`).join("");
+    `<div class="drow"><span class="k">${LBL[k]||k}</span><span>${Array.isArray(v)?v.join(", "):v===null?"—":v===true?"예":v===false?"아니오":v}</span></div>`).join("");
   const editable = m.source?.type==="sheet" || m.id==="carlog";
   const isMovie = m.id==="movies";
   let foot;
@@ -975,6 +976,10 @@ async function deleteRecord(m, r){
 }
 
 const CACHE = {};   // 분야별로 한 번 불러온 데이터를 기억 → 탭 전환·검색 때 다시 안 받음
+function persistKey(id){ return "nd.cache."+id; }
+function savePersist(id, rows){ try{ store.setItem(persistKey(id), JSON.stringify(rows)); }catch(e){} }
+function loadPersist(id){ try{ const s=store.getItem(persistKey(id)); const a=s?JSON.parse(s):null; return (Array.isArray(a)&&a.length)?a:null; }catch(e){ return null; } }
+function rowsSig(rows){ try{ return rows.length+"|"+rows.slice(0,80).map(r=>Object.keys(r).filter(k=>k!=="_id").map(k=>r[k]).join("¦")).join("§"); }catch(e){ return Math.random()+""; } }
 async function loadAndRender(){
   const m=MANIFESTS[state.domain]; $("#root").dataset.domain=state.domain;
   src.current = sourceFor(m);
@@ -985,8 +990,21 @@ async function loadAndRender(){
   else addBtn.style.display="none";
   $("#banner").innerHTML="";
   if(!CACHE[state.domain]){                       // 처음 여는 분야만 실제로 불러온다
+    const cached = loadPersist(state.domain);     // 지난번 저장분 → 즉시 표시(첫 로딩 체감 빠르게)
+    if(cached){
+      CACHE[state.domain]=cached;
+      state.rows=applyComputed(m, cached.map(r=>({_id:r._id||crypto.randomUUID(),...r})));
+      paintDomain(m);
+      src.current.list(state.domain).then(fresh=>{     // 뒤에서 조용히 최신화
+        savePersist(state.domain, fresh); CACHE[state.domain]=fresh;
+        if(state.domain===m.id && rowsSig(fresh)!==rowsSig(cached)){
+          state.rows=applyComputed(m, fresh.map(r=>({_id:r._id||crypto.randomUUID(),...r}))); paintDomain(m);
+        }
+      }).catch(()=>{});
+      return;
+    }
     $("#count").textContent="불러오는 중…";
-    try{ CACHE[state.domain] = await src.current.list(state.domain); }
+    try{ CACHE[state.domain] = await src.current.list(state.domain); savePersist(state.domain, CACHE[state.domain]); }
     catch(e){ $("#banner").innerHTML=`<div class="banner warn">데이터를 불러오지 못했습니다: ${e.message}</div>`; CACHE[state.domain]=[]; }
   }
   const raw = CACHE[state.domain];
@@ -1447,6 +1465,8 @@ const SAMPLE = {
   ]
 };
 
+["detail","person","settings","add","rec"].forEach(id=>{ const dg=document.getElementById(id);
+  if(dg) dg.addEventListener("click",e=>{ if(e.target===dg) dg.close(); }); });
 boot();
 </script>
 </body>
