@@ -267,7 +267,7 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
 <div class="wrap" id="root" data-domain="movies">
   <header class="masthead">
     <div class="mh-row">
-      <h1 id="brandBtn" style="cursor:pointer">내도감</h1><span class="sub">Naedogam · v46</span>
+      <h1 id="brandBtn" style="cursor:pointer">내도감</h1><span class="sub">Naedogam · v47</span>
       <span class="spacer"></span>
       <span class="src-chip" id="srcChip" style="display:none">데모</span>
       <button class="icon-btn" id="searchToggle" type="button" style="display:none">🔍</button>
@@ -414,8 +414,8 @@ const MANIFESTS = {
                       r.pick?{t:"찜",cls:"on"}:0 ] } },
 
   /* 100대 명산: 오른 곳을 체크하는 목록. */
-  mountains:{ id:"mountains", title:"100대 명산", icon:"⛰", vol:"卷4", canAdd:true,
-    source:{ type:"sheet", tab:"명산" },
+  mountains:{ id:"mountains", title:"등산", icon:"⛰", vol:"卷4", canAdd:true,
+    source:{ type:"sheet", tab:"등산" },
     fields:[ {k:"title",sheet:"산 이름",label:"산 이름",type:"text"},
              {k:"height",sheet:"높이",label:"높이(m)",type:"number"},
              {k:"region",sheet:"지역",label:"지역",type:"text"},
@@ -682,7 +682,7 @@ function showView(v){ state.view=v;
   $("#domainView").style.display = v==="domain"?"block":"none";
   if(v==="home") $("#searchToggle").style.display="none"; }
 function goHome(){ state.domain=null; state.query=""; state.pick=""; setMhSub(""); showView("home"); renderHome(); }
-function openDomain(id){ state.domain=id; state.query=""; state.pick=""; state.statFilter=""; state.sort="default"; state.sortAsc=false; state.searchScope="title"; state.selectQ=""; state.searchOpen=false; state.page=0; carWorkFilter=""; carSort="date"; carSortAsc=false; $("#search").value=""; $("#search").style.display="none"; $("#mvselect").style.display="none"; $("#scope").style.display="none"; showView("domain"); loadAndRender(); }
+function openDomain(id){ state.domain=id; state.query=""; state.pick=""; state.statFilter=""; state.sort="default"; state.sortAsc=false; state.searchScope="title"; state.selectQ=""; state.searchOpen=false; state.page=0; carWorkFilter=""; carSort="date"; carSortAsc=false; bookGenreFilter=""; $("#search").value=""; $("#search").style.display="none"; $("#mvselect").style.display="none"; $("#scope").style.display="none"; showView("domain"); loadAndRender(); }
 
 /* 홈: 켜둔 카테고리를 카드로. 건수는 한 번 열어본 분야만 표시(홈을 빠르게 유지). */
 function renderHome(){
@@ -761,6 +761,15 @@ function bookRecBadges(r, cls){
   return bookRecList(r).map(t=>{ const key=Object.keys(BOOK_REC_INFO).find(k=>t.includes(k));
     return key ? `<span class="${cls} clk" onclick="event.stopPropagation();openRecModal('${key.replace(/'/g,"\\'")}')">${t}</span>`
                : `<span class="${cls}">${t}</span>`; }).join("");
+}
+function bookGenresOf(r){ return (Array.isArray(r.genre)?r.genre:(r.genre==null||r.genre===""?[]:[r.genre])).map(g=>String(g).trim()).filter(Boolean); }
+function renderBookGenres(m){
+  const genres=[...new Set(state.rows.flatMap(bookGenresOf))].sort((a,b)=>a.localeCompare(b,"ko"));
+  const sc=$("#scope");
+  if(!genres.length){ sc.style.display="none"; sc.innerHTML=""; return; }
+  sc.style.display="flex"; sc.style.flexDirection="row";
+  sc.innerHTML=`<button class="chip ${bookGenreFilter===''?'on':''}" data-bg="">전체</button>`+genres.map(g=>`<button class="chip ${bookGenreFilter===g?'on':''}" data-bg="${g.replace(/"/g,'&quot;')}">${g}</button>`).join("");
+  sc.querySelectorAll("[data-bg]").forEach(b=>b.onclick=()=>{ bookGenreFilter=b.dataset.bg; paintDomain(m); });
 }
 function bookCard(r){
   const flags=(r.status==="읽음"?`<span class="wb wb-W">읽음</span>`:"")
@@ -1153,8 +1162,10 @@ function paintDomain(m){   // state.rows를 화면에 그림 (데이터 다시 �
   if(m.filterBy && state.pick) base = base.filter(r=>String(r[m.filterBy.field]||"").trim()===state.pick);
   renderStats(m, base);
   setMhSub("");
-  const rows=filterRows(m, base, state.query);
-  $("#count").textContent=`총 ${rows.length}건 · 출처: ${src.current.label}`;
+  if(m.id==="books") renderBookGenres(m);
+  let listBase = (m.id==="books" && bookGenreFilter) ? base.filter(r=>bookGenresOf(r).includes(bookGenreFilter)) : base;
+  const rows=filterRows(m, listBase, state.query);
+  $("#count").textContent = (m.id==="books") ? `총 ${rows.length}건` : `총 ${rows.length}건 · 출처: ${src.current.label}`;
   $("#list").innerHTML=rows.map((r,i)=>{ try{ return renderCard(m,r,i+1); }catch(e){ console.error("card",e); return ""; } }).join("") || `<div class="count">결과가 없습니다.</div>`;
   document.querySelectorAll(".card").forEach(b=>b.onclick=()=>openDetail(m, state.rows.find(x=>x._id===b.dataset.id)));
   if(m.id==="books") lazyBookCovers();
@@ -1311,6 +1322,7 @@ function lazyPosters(){   // 화면에 들어온 카드만 TMDB에서 포스터 
 
 /* ── 차계부 목록: 차량 선택 + 정렬(날짜/주행/가격) + 작업내용 칩 + 검색 ── */
 let carWorkFilter="", carSort="date", carSortAsc=false;
+let bookGenreFilter="";
 function carNum(v){ return parseInt(String(v==null?"":v).replace(/[^\d]/g,""),10)||0; }
 const CAR_PALETTE=['#2563eb','#16a34a','#db2777','#d97706','#7c3aed'];
 let CAR_ORDER=[];
