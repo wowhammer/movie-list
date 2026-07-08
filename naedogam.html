@@ -266,7 +266,7 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
 <div class="wrap" id="root" data-domain="movies">
   <header class="masthead">
     <div class="mh-row">
-      <h1 id="brandBtn" style="cursor:pointer">내도감</h1><span class="sub">Naedogam · v42</span>
+      <h1 id="brandBtn" style="cursor:pointer">내도감</h1><span class="sub">Naedogam · v43</span>
       <span class="spacer"></span>
       <span class="src-chip" id="srcChip" style="display:none">데모</span>
       <button class="icon-btn" id="searchToggle" type="button" style="display:none">🔍</button>
@@ -743,6 +743,12 @@ const BOOK_REC_INFO={
   '책읽어드립니다':{icon:'📺',sub:'tvN 교양 프로그램',desc:'설민석·김상욱 등이 명저를 쉽게 풀어 소개한 tvN 프로그램에서 다룬 책들. 대중적 접근성이 높습니다.',tag:'방송 선정',url:'https://www.google.com/search?q=책읽어드립니다+선정도서'},
   '노벨문학상':{icon:'🏅',sub:'노벨 문학상 수상작가',desc:'노벨 문학상을 수상한 작가의 작품. 문학성과 인류 보편의 가치를 인정받은 작가들입니다.',tag:'수상 작가',url:'https://www.nobelprize.org/prizes/literature/'},
   '뉴욕타임스 베스트셀러':{icon:'📰',sub:'NYT Best Sellers',desc:'뉴욕타임스가 매주 집계하는 베스트셀러 목록에 오른 책. 대중적 화제성과 판매량의 지표입니다.',tag:'베스트셀러',url:'https://www.nytimes.com/books/best-sellers/'},
+  '이동진':{icon:'🎙️',sub:'평론가·빨간책방',desc:'영화평론가 이동진이 팟캐스트 빨간책방·방송·SNS에서 소개해 온 책들. 문학과 인문 전반을 폭넓게 다루며 신뢰도가 높습니다.',tag:'추천 도서',url:'https://www.google.com/search?q=이동진+추천+책'},
+  '김영하':{icon:'✍️',sub:'소설가 추천',desc:'소설가 김영하가 방송(알쓸신잡)·팟캐스트(책 읽는 시간)에서 추천한 책들. 문학적 안목으로 고른 작품이 많습니다.',tag:'추천 도서',url:'https://www.google.com/search?q=김영하+추천도서'},
+  '오프라 북클럽':{icon:'📗',sub:"Oprah's Book Club",desc:'오프라 윈프리가 선정하는 북클럽 도서. 미국에서 선정 즉시 베스트셀러가 될 만큼 대중적 영향력이 큽니다.',tag:'북클럽 선정',url:'https://www.oprahdaily.com/entertainment/books/'},
+  '부커상':{icon:'🏆',sub:'Booker Prize',desc:'영어권 최고 권위의 문학상. 그해 최고의 영어 소설에 수여하며, 인터내셔널 부문은 번역 문학을 대상으로 합니다.',tag:'수상작',url:'https://thebookerprizes.com'},
+  '퓰리처상':{icon:'🥇',sub:'Pulitzer Prize',desc:'미국에서 가장 권위 있는 상 중 하나. 소설·논픽션·역사·전기 등 부문별로 그해 최고의 저작을 선정합니다.',tag:'수상작',url:'https://www.pulitzer.org'},
+  '세종도서':{icon:'📚',sub:'문체부·한국출판문화산업진흥원',desc:'매년 우수 교양·학술 도서를 선정해 도서관 등에 보급하는 국가 지원 사업. 완성도 높은 국내서가 많습니다.',tag:'우수도서 선정',url:'https://www.google.com/search?q=세종도서+선정'},
 };
 function bookRecList(r){ return String(r.recommend||"").split(/[\/,]+/).map(s=>s.trim()).filter(Boolean); }
 function bookRecBadges(r, cls){
