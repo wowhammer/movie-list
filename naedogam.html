@@ -135,6 +135,8 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
   .cat-no{ font-family:var(--mono); font-size:11px; color:var(--ink-soft); padding-top:3px; min-width:40px; }
   .thumb{ width:46px; height:64px; border-radius:3px; background:var(--accent-wash); display:flex; align-items:center; justify-content:center; font-size:20px; color:var(--accent); border:1px solid var(--line-soft); overflow:hidden; }
   .thumb img{ width:100%; height:100%; object-fit:cover; }
+  .det-cover{ margin:2px 0 14px; border-radius:10px; overflow:hidden; }
+  .det-cover img{ width:100%; max-height:240px; object-fit:cover; display:block; }
   .body{ min-width:0; }
   .body h3{ font-family:var(--sans); font-size:15px; font-weight:600; color:#1a1a1a; margin:0 0 3px; }
   .body .meta{ font-family:var(--sans); font-size:12px; color:#888; }
@@ -297,7 +299,7 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
 <div class="wrap" id="root" data-domain="movies">
   <header class="masthead">
     <div class="mh-row">
-      <h1 id="brandBtn" style="cursor:pointer">내도감</h1><span class="sub">Naedogam · v61</span>
+      <h1 id="brandBtn" style="cursor:pointer">내도감</h1><span class="sub">Naedogam · v62</span>
       <span class="spacer"></span>
       <span class="src-chip" id="srcChip" style="display:none">데모</span>
       <button class="icon-btn" id="searchToggle" type="button" style="display:none">🔍</button>
@@ -483,15 +485,23 @@ const MANIFESTS = {
     fields:[ {k:"date",sheet:"날짜",label:"날짜(예: 2026-07-07)",type:"text"},
              {k:"dist",sheet:"거리",label:"거리(km)",type:"number"},
              {k:"time",sheet:"시간",label:"시간(분)",type:"number"},
-             {k:"memo",sheet:"메모",label:"메모",type:"text"} ],
-    search:["memo"],
+             {k:"pace",sheet:"페이스",label:"페이스(예: 5.44)",type:"text"},
+             {k:"hr",sheet:"심박수",label:"심박수(bpm)",type:"number"},
+             {k:"cadence",sheet:"케이던스",label:"케이던스(spm)",type:"number"},
+             {k:"shoes",sheet:"신발",label:"신발",type:"text"},
+             {k:"cumulative",sheet:"누적",label:"누적 거리(km)",type:"number"},
+             {k:"place",sheet:"장소",label:"장소",type:"text"},
+             {k:"memo",sheet:"메모",label:"메모",type:"text"},
+             {k:"cover",sheet:"커버",label:"사진",type:"image"} ],
+    search:["memo","place","shoes"],
     activity:{ df:"date", when:r=>true, label:"러닝", name:r=>[r.date, r.dist?r.dist+"km":""].filter(Boolean).join(" ") },
-    computed:{ pace:{ deps:["dist","time"], calc:"pacePerKm" } },
+    computed:{ cpace:{ deps:["dist","time"], calc:"pacePerKm" } },
     stats:[ {label:"총 거리",type:"sum",field:"dist",unit:"km"},
-            {label:"평균 페이스",type:"avgComputed",field:"pace",unit:"분/km"},
+            {label:"평균 페이스",type:"avgComputed",field:"cpace",unit:"분/km"},
             {label:"기록 수",type:"count"} ],
-    card:{ kind:"data", title:r=>`${r.date}`,
-           kv:[{k:"거리",f:"dist",u:"km"},{k:"시간",f:"time",u:"분"},{k:"페이스",f:"pace",u:"분/km"}] } }
+    card:{ kind:"data", thumb:"🏃",
+           title:r=>`${r.date}${r.place?" · "+r.place:""}`,
+           kv:[{k:"거리",f:"dist",u:"km"},{k:"시간",f:"time",u:"분"},{k:"페이스",f:"pace"},{k:"심박",f:"hr"}] } }
 };
 
 /* ── 2. DataSource 추상화 ──
@@ -999,14 +1009,15 @@ function renderCard(m, r, no){ if(m.id==="books") return bookCard(r); const c=m.
       <span class="body"><h3>${r.title}</h3><div class="meta">${meta}</div>${(flags||tags)?`<div class="cbadges">${flags}${tags}</div>`:""}</span></button>`; }
   const kv=c.kv.map(col=>{ const v=r[col.f]; if(v==null) return ""; const s=(typeof v==="number"?fmt(v):v)+(col.u?` ${col.u}`:"");
     return `<span>${col.k} <b>${s}</b></span>`; }).filter(Boolean).join("");
-  return `<button class="card catcard" data-id="${r._id}"><span class="thumb">🧾</span>
+  return `<button class="card catcard" data-id="${r._id}"><span class="thumb">${r.cover?`<img src="${r.cover}" alt="">`:(c.thumb||"🧾")}</span>
     <span class="body"><h3 style="font-size:15px">${c.title(r)}</h3><div class="kv">${kv}</div>${r.memo?`<div class="meta" style="margin-top:5px">${r.memo}</div>`:""}</span></button>`; }
 function openDetail(m, r){
   if(m.id==="movies"){ openMovieDetail(m, r); return; }
   if(m.id==="books"){ openBookDetail(m, r); return; }
   const LBL={pace:"페이스"}; (m.fields||[]).forEach(f=>{ LBL[f.k]=f.sheet||String(f.label||f.k).replace(/\s*\(.*$/,""); });
   const _imgKeys=(m.fields||[]).filter(f=>f.type==="image").map(f=>f.k);
-  const rows=Object.entries(r).filter(([k])=>k!=="_id"&&k!=="orig"&&k!=="_cover"&&k!=="_dist"&&!_imgKeys.includes(k)&&!(TOGGLE_HIDE[m.id]||[]).includes(k)).map(([k,v])=>
+  const _compKeys=Object.keys(m.computed||{});
+  const rows=Object.entries(r).filter(([k])=>k!=="_id"&&k!=="orig"&&k!=="_cover"&&k!=="_dist"&&!_imgKeys.includes(k)&&!_compKeys.includes(k)&&!(TOGGLE_HIDE[m.id]||[]).includes(k)).map(([k,v])=>
     `<div class="drow"><span class="k">${LBL[k]||k}</span><span>${Array.isArray(v)?v.join(", "):v===null?"—":v===true?"예":v===false?"아니오":(typeof v==="number"&&k!=="year"&&!/연도/.test(LBL[k]||"")?v.toLocaleString():v)}</span></div>`).join("");
   const mapLinks = (m.id==="mountains") ? `<div class="mvlinks"><a class="btn ghost" target="_blank" rel="noopener" href="https://map.naver.com/p/search/${encodeURIComponent(r.title||"")}"><img class="lnkico" src="https://www.google.com/s2/favicons?domain=map.naver.com&sz=64" onerror="this.remove()">네이버지도</a><a class="btn ghost" target="_blank" rel="noopener" href="https://www.google.com/maps/search/${encodeURIComponent((r.title||"")+" "+(r.region||""))}"><img class="lnkico" src="https://www.google.com/s2/favicons?domain=google.com&sz=64" onerror="this.remove()">구글지도</a></div>` : "";
   const editable = m.source?.type==="sheet" || m.id==="carlog";
@@ -1028,7 +1039,8 @@ function openDetail(m, r){
   } else {
     foot=`<button class="dclose" onclick="this.closest('dialog').close()">닫기</button>`;
   }
-  const d=$("#detail"); d.innerHTML=`<div class="dhead"><h3>${m.card.kind==="specimen"?r.title:(r.date+(r.car?" · "+r.car:""))}</h3></div><div class="dbody">${rows}</div>${mapLinks}${foot}`;
+  const _cf=(m.fields||[]).find(f=>f.type==="image"); const coverImg=(_cf&&r[_cf.k])?`<div class="det-cover"><img src="${String(r[_cf.k]).replace(/"/g,'&quot;')}" alt=""></div>`:"";
+  const d=$("#detail"); d.innerHTML=`<div class="dhead"><h3>${m.card.kind==="specimen"?r.title:(r.date+(r.car?" · "+r.car:""))}</h3></div><div class="dbody">${coverImg}${rows}</div>${mapLinks}${foot}`;
   d.showModal();
   if(isMovie){
     $("#mW").onclick=()=>toggleMovie(r,'W'); $("#mR").onclick=()=>toggleMovie(r,'R'); $("#mP").onclick=()=>toggleMovie(r,'P');
