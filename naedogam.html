@@ -191,6 +191,18 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
   .dash-pill{ font-size:12px; background:var(--paper); border:1px solid var(--line); border-radius:12px; padding:3px 10px; color:var(--ink-soft); }
   .dash-pill b{ color:var(--ink); font-weight:600; margin-left:1px; }
   .dash-names{ font-size:12.5px; color:var(--ink); margin-top:2px; line-height:1.55; }
+  .dash-legend{ display:flex; flex-wrap:wrap; gap:10px 12px; align-items:center; margin-top:11px; }
+  .dash-lg{ font-size:11.5px; color:var(--ink-soft); display:inline-flex; align-items:center; gap:4px; }
+  .dash-lg i{ width:9px; height:9px; border-radius:2px; display:inline-block; }
+  .dash-note{ font-size:12.5px; color:var(--ink-soft); margin:2px 0 4px; }
+  .cal-grid{ display:grid; grid-template-columns:repeat(7,1fr); gap:4px; margin-top:6px; }
+  .cal-h{ text-align:center; font-size:10px; color:var(--ink-soft); padding-bottom:2px; }
+  .cal-c{ aspect-ratio:1/1; display:flex; align-items:center; justify-content:center; font-size:11px; border-radius:5px; color:var(--ink-soft); background:var(--line-soft); }
+  .cal-c.cal-e{ background:transparent; }
+  .cal-c.lvl1{ background:#dcfce7; color:#166534; } .cal-c.lvl2{ background:#86efac; color:#166534; }
+  .cal-c.lvl3{ background:#4ade80; color:#fff; } .cal-c.lvl4{ background:#16a34a; color:#fff; }
+  .cal-key{ width:13px; height:13px; border-radius:3px; display:inline-block; }
+  .cal-key.lvl1{ background:#dcfce7; } .cal-key.lvl2{ background:#86efac; } .cal-key.lvl3{ background:#4ade80; } .cal-key.lvl4{ background:#16a34a; }
 
   /* 차계부 표본 라벨 카드 (시안 v2) */
   .cl-card{ display:block; padding:15px 16px 14px; }
@@ -285,7 +297,7 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
 <div class="wrap" id="root" data-domain="movies">
   <header class="masthead">
     <div class="mh-row">
-      <h1 id="brandBtn" style="cursor:pointer">내도감</h1><span class="sub">Naedogam · v60</span>
+      <h1 id="brandBtn" style="cursor:pointer">내도감</h1><span class="sub">Naedogam · v61</span>
       <span class="spacer"></span>
       <span class="src-chip" id="srcChip" style="display:none">데모</span>
       <button class="icon-btn" id="searchToggle" type="button" style="display:none">🔍</button>
@@ -1566,6 +1578,66 @@ function inPeriod(d, period){ if(period==="all") return true; if(!d) return fals
   if(period==="week"){ const s=new Date(now); const off=(now.getDay()+6)%7; s.setDate(now.getDate()-off); s.setHours(0,0,0,0); return d>=s; }
   return true; }
 let dashPeriod="week";
+let dashView="summary";
+const DASH_COLORS={ movies:"#16a34a", books:"#6366f1", mountains:"#b45309", running:"#0ea5e9", carlog:"#c2410c" };
+function domColor(id){ return DASH_COLORS[id] || "#16a34a"; }
+function dashEvents(ids, data){   // 분야별 '한 것'(activity) → {t:날짜, id} 목록
+  const ev=[];
+  ids.forEach(id=>{ const m=MANIFESTS[id]; if(!m || !m.activity) return; const act=m.activity;
+    (data[id]||[]).forEach(r=>{ if(!act.when(r)) return; const t=parseDate(r[act.df]); if(t) ev.push({t, id}); }); });
+  return ev;
+}
+function chartMonths(ids, ev){    // 최근 6개월 · 분야별 누적 막대
+  const now=new Date(), months=[];
+  for(let i=5;i>=0;i--){ const d=new Date(now.getFullYear(), now.getMonth()-i, 1); months.push({y:d.getFullYear(), m:d.getMonth()}); }
+  const actIds=ids.filter(id=>MANIFESTS[id] && MANIFESTS[id].activity);
+  const counts=months.map(()=>{ const o={}; actIds.forEach(id=>o[id]=0); return o; });
+  ev.forEach(e=>{ const mi=months.findIndex(mm=>mm.y===e.t.getFullYear()&&mm.m===e.t.getMonth()); if(mi>=0) counts[mi][e.id]++; });
+  const totals=counts.map(c=>actIds.reduce((s,id)=>s+c[id],0));
+  const max=Math.max(1,...totals), W=320,H=172,padB=26,padT=14,padL=6,padR=6;
+  const gw=(W-padL-padR)/months.length, bw=Math.min(30, gw*0.58);
+  let bars="";
+  months.forEach((mm,mi)=>{ const cx=padL+gw*mi+gw/2; let y=H-padB;
+    actIds.forEach(id=>{ const v=counts[mi][id]; if(!v) return; const h=(H-padB-padT)*(v/max); y-=h;
+      bars+=`<rect x="${(cx-bw/2).toFixed(1)}" y="${y.toFixed(1)}" width="${bw.toFixed(1)}" height="${h.toFixed(1)}" rx="2" fill="${domColor(id)}"><title>${MANIFESTS[id].title} ${v}</title></rect>`; });
+    bars+=`<text x="${cx.toFixed(1)}" y="${H-9}" text-anchor="middle" font-size="10" fill="#888">${mm.m+1}월</text>`;
+    if(totals[mi]){ const ty=(H-padB)-((H-padB-padT)*(totals[mi]/max))-4; bars+=`<text x="${cx.toFixed(1)}" y="${ty.toFixed(1)}" text-anchor="middle" font-size="9" fill="#888">${totals[mi]}</text>`; }
+  });
+  const legend=actIds.map(id=>`<span class="dash-lg"><i style="background:${domColor(id)}"></i>${MANIFESTS[id].icon} ${MANIFESTS[id].title}</span>`).join("");
+  const empty=totals.reduce((a,b)=>a+b,0)===0;
+  return `<div class="dash-note">최근 6개월 · 분야별 한 것</div><svg viewBox="0 0 ${W} ${H}" width="100%" style="display:block">${bars}</svg><div class="dash-legend">${legend}</div>`
+    + (empty?`<div class="dash-names" style="color:var(--ink-soft);text-align:center;margin-top:8px">아직 날짜가 기록된 활동이 없어요</div>`:"");
+}
+function chartCalendar(ids, ev){  // 이번달 · 날짜별 히트맵(전 분야 합산)
+  const now=new Date(), y=now.getFullYear(), mo=now.getMonth();
+  const days=new Date(y,mo+1,0).getDate(), offset=new Date(y,mo,1).getDay();
+  const perDay={}; ev.forEach(e=>{ if(e.t.getFullYear()===y&&e.t.getMonth()===mo){ const d=e.t.getDate(); perDay[d]=(perDay[d]||0)+1; } });
+  const vals=Object.values(perDay), max=Math.max(1,...vals);
+  const wd=["일","월","화","수","목","금","토"];
+  let cells=wd.map(d=>`<div class="cal-h">${d}</div>`).join("");
+  for(let i=0;i<offset;i++) cells+=`<div class="cal-c cal-e"></div>`;
+  for(let d=1;d<=days;d++){ const v=perDay[d]||0, lvl=v?Math.min(4,Math.ceil(4*v/max)):0;
+    cells+=`<div class="cal-c${lvl?' lvl'+lvl:''}" title="${y}-${mo+1}-${d} · ${v}건">${d}</div>`; }
+  const total=vals.reduce((a,b)=>a+b,0);
+  return `<div class="dash-note">${mo+1}월 · 총 ${total}건</div><div class="cal-grid">${cells}</div>`
+    + `<div class="dash-legend" style="justify-content:flex-end;gap:4px"><span style="font-size:11px;color:var(--ink-soft);margin-right:2px">적음</span><i class="cal-key lvl1"></i><i class="cal-key lvl2"></i><i class="cal-key lvl3"></i><i class="cal-key lvl4"></i><span style="font-size:11px;color:var(--ink-soft);margin-left:2px">많음</span></div>`;
+}
+function chartTrend(ids, ev){     // 최근 10주 · 주별 합산 추이
+  const now=new Date(), weeks=[], monday=new Date(now), off=(now.getDay()+6)%7;
+  monday.setDate(now.getDate()-off); monday.setHours(0,0,0,0);
+  for(let i=9;i>=0;i--){ const sd=new Date(monday); sd.setDate(monday.getDate()-7*i); weeks.push(sd); }
+  const counts=weeks.map(()=>0);
+  ev.forEach(e=>{ for(let i=weeks.length-1;i>=0;i--){ if(e.t>=weeks[i]){ counts[i]++; break; } } });
+  const max=Math.max(1,...counts), n=weeks.length, W=320,H=150,padB=22,padT=14,padL=10,padR=10;
+  const sx=(W-padL-padR)/(n-1);
+  const pts=counts.map((v,i)=>[padL+sx*i,(H-padB)-(H-padB-padT)*(v/max)]);
+  const line=pts.map((p,i)=>(i?"L":"M")+p[0].toFixed(1)+" "+p[1].toFixed(1)).join(" ");
+  const area=line+` L ${pts[n-1][0].toFixed(1)} ${H-padB} L ${pts[0][0].toFixed(1)} ${H-padB} Z`;
+  const dots=pts.map((p,i)=>`<circle cx="${p[0].toFixed(1)}" cy="${p[1].toFixed(1)}" r="2.6" fill="#16a34a"><title>${counts[i]}건</title></circle>`).join("");
+  let labs=""; weeks.forEach((sd,i)=>{ if(i%2===0) labs+=`<text x="${(padL+sx*i).toFixed(1)}" y="${H-7}" text-anchor="middle" font-size="9" fill="#888">${sd.getMonth()+1}/${sd.getDate()}</text>`; });
+  const total=counts.reduce((a,b)=>a+b,0);
+  return `<div class="dash-note">최근 10주 · 총 ${total}건</div><svg viewBox="0 0 ${W} ${H}" width="100%" style="display:block"><path d="${area}" fill="var(--accent-wash)" stroke="none"/><path d="${line}" fill="none" stroke="#16a34a" stroke-width="2"/>${dots}${labs}</svg>`;
+}
 async function openDashboard(){
   const d=$("#dash");
   d.innerHTML=`<div class="dhead" style="display:flex;align-items:center;gap:10px"><h3 style="margin:0">📊 통계</h3><button class="pclose" onclick="this.closest('dialog').close()">✕</button></div><div class="dbody" id="dashBody"><div class="count">불러오는 중…</div></div>`;
@@ -1588,9 +1660,17 @@ async function openDashboard(){
 }
 function renderDash(ids, data){
   const b=$("#dashBody"); if(!b) return;
+  const views=[["summary","요약"],["month","월별"],["calendar","캘린더"],["trend","추이"]];
+  const vsel=`<div class="sort-btns" style="margin-bottom:12px">${views.map(([v,l])=>`<button class="sort-btn ${dashView===v?'on':''}" data-dv="${v}">${l}</button>`).join("")}</div>`;
+  if(dashView!=="summary"){
+    const ev=dashEvents(ids,data);
+    b.innerHTML=vsel + (dashView==="month"?chartMonths(ids,ev):dashView==="calendar"?chartCalendar(ids,ev):chartTrend(ids,ev));
+    b.querySelectorAll("[data-dv]").forEach(x=>x.onclick=()=>{ dashView=x.dataset.dv; renderDash(ids,data); });
+    return;
+  }
   const per=[["today","오늘"],["week","이번주"],["month","이번달"],["all","전체"]];
   const sel=`<div class="sort-btns" style="margin-bottom:14px">${per.map(([v,l])=>`<button class="sort-btn ${dashPeriod===v?'on':''}" data-dp="${v}">${l}</button>`).join("")}</div>`;
-  let html=sel;
+  let html=vsel+sel;
   ids.forEach(id=>{ const m=MANIFESTS[id], rows=data[id]||[];
     if(m.activity){ const act=m.activity;
       const done=rows.filter(r=>act.when(r) && inPeriod(parseDate(r[act.df]), dashPeriod));
@@ -1605,6 +1685,7 @@ function renderDash(ids, data){
     }
   });
   b.innerHTML=html;
+  b.querySelectorAll("[data-dv]").forEach(x=>x.onclick=()=>{ dashView=x.dataset.dv; renderDash(ids,data); });
   b.querySelectorAll("[data-dp]").forEach(x=>x.onclick=()=>{ dashPeriod=x.dataset.dp; renderDash(ids,data); });
 }
 function openSettings(){
