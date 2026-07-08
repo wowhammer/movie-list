@@ -285,7 +285,7 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
 <div class="wrap" id="root" data-domain="movies">
   <header class="masthead">
     <div class="mh-row">
-      <h1 id="brandBtn" style="cursor:pointer">내도감</h1><span class="sub">Naedogam · v57</span>
+      <h1 id="brandBtn" style="cursor:pointer">내도감</h1><span class="sub">Naedogam · v58</span>
       <span class="spacer"></span>
       <span class="src-chip" id="srcChip" style="display:none">데모</span>
       <button class="icon-btn" id="searchToggle" type="button" style="display:none">🔍</button>
@@ -457,7 +457,7 @@ const MANIFESTS = {
             {label:"다녀옴",type:"countIf",field:"climbed",eq:true},
             {label:"또갈것",type:"countIf",field:"revisit",eq:true},
             {label:"찜",type:"countIf",field:"pick",eq:true} ],
-    sorts:[ {k:"height",label:"높이"}, {k:"_dist",label:"거리",asc:true} ],
+    sorts:[ {k:"height",label:"높이"} ],
     card:{ kind:"specimen", thumb:"⛰",
            meta:r=>[r.height?r.height+"m":"", r.region].filter(Boolean).join(" · "),
            tags:"tags",
@@ -625,7 +625,9 @@ class SheetDataSource {
     const raw=await res.json();
     if(raw && raw.error) throw new Error(raw.error);
     const inv=ndInv(m);
-    return (Array.isArray(raw)?raw:[]).map(row=>{ const o={}; for(const kh in row){ const ek=inv[ndNorm(kh)]||kh; o[ek]=coerce(row[kh]); } return o; });
+    return (Array.isArray(raw)?raw:[]).map(row=>{ const o={}; for(const kh in row){ const ek=inv[ndNorm(kh)]||kh; const val=coerce(row[kh]);
+      if(o[ek]===undefined || o[ek]===null || o[ek]==="") o[ek]=val;   // 중복 열이 있어도 빈 값이 실제 값을 안 덮게(첫 비어있지않은 값 우선)
+    } return o; });
   }
   async upsert(id,row){   // 탭 맨 아래에 한 줄 추가(저장)
     const m=MANIFESTS[id];
@@ -978,9 +980,9 @@ function renderCard(m, r, no){ if(m.id==="books") return bookCard(r); const c=m.
     const tags=tarr.map(t=>`<span class="tag">${t}</span>`).join("");
     const flags=(typeof c.flags==="function"?c.flags(r):[]).filter(Boolean)
       .map(f=>`<span class="flag ${f.cls||""}">${f.t}</span>`).join("");
-    const _cov=r.cover||r._cover; const _dt=(r._dist!=null)?` · 📍${r._dist}km`:"";
+    const _cov=r.cover;
     return `<button class="card catcard" data-id="${r._id}"><span class="thumb">${_cov?`<img src="${_cov}" alt="">`:c.thumb}</span>
-      <span class="body"><h3>${r.title}</h3><div class="meta">${meta}${_dt}</div>${(flags||tags)?`<div class="cbadges">${flags}${tags}</div>`:""}</span></button>`; }
+      <span class="body"><h3>${r.title}</h3><div class="meta">${meta}</div>${(flags||tags)?`<div class="cbadges">${flags}${tags}</div>`:""}</span></button>`; }
   const kv=c.kv.map(col=>{ const v=r[col.f]; if(v==null) return ""; const s=(typeof v==="number"?fmt(v):v)+(col.u?` ${col.u}`:"");
     return `<span>${col.k} <b>${s}</b></span>`; }).filter(Boolean).join("");
   return `<button class="card catcard" data-id="${r._id}"><span class="thumb">🧾</span>
@@ -1297,7 +1299,6 @@ function paintDomain(m){   // state.rows를 화면에 그림 (데이터 다시 �
   if(m.id==="carlog"){ paintCarlog(m); return; }
   $("#scope").style.display="none";
   renderPicker(m);
-  if(m.id==="mountains" && !userGeo){ const pk=$("#picker"); pk.style.display="flex"; pk.style.overflow="visible"; pk.innerHTML=`<button class="chip" id="geoBtn" style="border-color:var(--accent);color:var(--accent)">📍 내 위치에서 거리 보기</button>`; const gb=$("#geoBtn"); if(gb) gb.onclick=()=>{ geoAsked=false; loadMountainMeta(m); }; }
   applySearchUI(m);
   let base = state.rows;
   if(m.filterBy && state.pick) base = base.filter(r=>String(r[m.filterBy.field]||"").trim()===state.pick);
@@ -1323,7 +1324,6 @@ function paintDomain(m){   // state.rows를 화면에 그림 (데이터 다시 �
   document.querySelectorAll(".card").forEach(b=>b.onclick=()=>openDetail(m, state.rows.find(x=>x._id===b.dataset.id)));
   { const na=$("#nrAdd"); if(na) na.onclick=()=>{ if(m.id==="books"){ openAddBook(); const bq=$("#bq"); if(bq){ bq.value=state.query; bq.dispatchEvent(new Event("input")); } } else openRecordForm(m, null); }; }
   if(m.id==="books") lazyBookInfo();
-  if(m.id==="mountains") loadMountainMeta(m);
 }
 
 /* ── 영화 목록: 통계 클릭 필터 + 정렬 + 추천/스트리밍 뱃지 + 포스터(보일 때만 로드) + 더보기 ── */
