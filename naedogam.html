@@ -152,8 +152,8 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
 
   /* 다이얼로그 */
   /* 영화 카드 — 기존 앱 색·폰트 그대로 */
-  .mvcard{ display:flex; gap:12px; align-items:flex-start; }
-  .mvcard .thumb{ width:52px; height:74px; }
+  .mvcard{ display:flex; gap:12px; align-items:stretch; }
+  .mvcard .thumb{ width:80px; height:auto; align-self:stretch; min-height:112px; }
   .mvinfo{ flex:1; min-width:0; }
   .mv-titlerow{ display:flex; justify-content:space-between; align-items:baseline; gap:8px; }
   .mv-title{ font-family:var(--sans); font-size:15px; font-weight:600; color:#1a1a1a; line-height:1.35; }
@@ -265,7 +265,7 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
 <div class="wrap" id="root" data-domain="movies">
   <header class="masthead">
     <div class="mh-row">
-      <h1 id="brandBtn" style="cursor:pointer">내도감</h1><span class="sub">Naedogam · v38</span>
+      <h1 id="brandBtn" style="cursor:pointer">내도감</h1><span class="sub">Naedogam · v39</span>
       <span class="spacer"></span>
       <span class="src-chip" id="srcChip" style="display:none">데모</span>
       <button class="icon-btn" id="searchToggle" type="button" style="display:none">🔍</button>
@@ -648,8 +648,10 @@ function applySearchUI(m){
     sel.style.display="none";
     tog.style.display="";
     inp.style.display = state.searchOpen ? "" : "none";
+    const L={title:"제목",director:"감독",actors:"배우",author:"저자",type:"구분",memo:"메모",work:"작업",shop:"정비소",car:"차량",region:"지역",date:"날짜",dist:"거리",time:"시간",height:"높이"};
     inp.placeholder = (isMovie && state.searchScope==="actor") ? "🔍 배우 이름 검색…"
-      : isMovie ? "🔍 제목으로 검색…" : "🔍 작업·정비소·차량·메모 검색…";
+      : isMovie ? "🔍 제목으로 검색…"
+      : "🔍 "+(((m&&m.search)||[]).map(f=>L[f]||f).join("·")||"내용")+" 검색…";
   }
 }
 const src = { current:null };
@@ -748,7 +750,7 @@ function openDetail(m, r){
   if(m.id==="movies"){ openMovieDetail(m, r); return; }
   const LBL={pace:"페이스"}; (m.fields||[]).forEach(f=>{ LBL[f.k]=f.sheet||String(f.label||f.k).replace(/\s*\(.*$/,""); });
   const rows=Object.entries(r).filter(([k])=>k!=="_id"&&k!=="orig").map(([k,v])=>
-    `<div class="drow"><span class="k">${LBL[k]||k}</span><span>${Array.isArray(v)?v.join(", "):v===null?"—":v===true?"예":v===false?"아니오":v}</span></div>`).join("");
+    `<div class="drow"><span class="k">${LBL[k]||k}</span><span>${Array.isArray(v)?v.join(", "):v===null?"—":v===true?"예":v===false?"아니오":(typeof v==="number"&&k!=="year"&&!/연도/.test(LBL[k]||"")?v.toLocaleString():v)}</span></div>`).join("");
   const editable = m.source?.type==="sheet" || m.id==="carlog";
   const isMovie = m.id==="movies";
   let foot;
