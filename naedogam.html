@@ -30,7 +30,7 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
   :root{
     --paper:#E9E1D0; --card:#F5EFE2; --ink:#312E27; --ink-soft:#8A806E;
     --line:#D6CDB8; --line-soft:#E1D9C7;
-    --accent:#3E5A48; --accent-wash:#E4EAE0;
+    --accent:#3E5A48; --accent-wash:#E4EAE0; --green:#3E5A48;
     --ochre:#A96B32; --ochre-wash:#F0E4D2;
     --ok:#3d7a4e; --warn:#b25b3a;
     --serif:"Noto Serif KR",serif; --sans:"Noto Sans KR",system-ui,sans-serif; --mono:"DM Mono",ui-monospace,monospace;
@@ -68,12 +68,19 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
   .tab[aria-selected="true"]::after{ content:""; position:absolute; top:0; left:50%; transform:translateX(-50%); width:24px; height:2.5px; background:var(--ochre); border-radius:2px; }
 
   /* 통계(압축 스트립) */
-  .stats{ display:flex; flex-wrap:wrap; gap:22px; padding:14px 2px 8px; }
-  .stat .n{ font-family:var(--mono); font-weight:500; font-size:21px; color:var(--accent); letter-spacing:-.01em; }
+  .stats{ display:flex; gap:0; padding:16px 0 8px; }
+  .stat{ flex:1; text-align:center; padding:5px 4px; border-radius:6px; }
+  .stat .n{ font-family:var(--mono); font-weight:500; font-size:21px; color:var(--ink); letter-spacing:-.01em; }
   .stat .l{ font-size:11px; color:var(--ink-soft); margin-top:2px; }
-  .stat.st-click{ cursor:pointer; padding:3px 8px; margin:-3px -8px; border-radius:5px; }
-  .stat.st-click:hover{ background:var(--accent-wash); }
-  .stat.st-on{ background:var(--accent-wash); box-shadow:inset 0 0 0 1.5px var(--accent); }
+  .stat.sf-watched .n{ color:var(--green); }
+  .stat.sf-rewatch .n{ color:var(--ochre); }
+  .stat.sf-pick .n{ color:var(--warn); }
+  .stat.st-click{ cursor:pointer; }
+  .stat.st-click:active{ background:var(--accent-wash); }
+  .stat.st-on{ background:var(--accent-wash); box-shadow:inset 0 0 0 1.5px var(--line); }
+  .stat.sf-watched.st-on{ box-shadow:inset 0 0 0 1.5px var(--green); }
+  .stat.sf-rewatch.st-on{ box-shadow:inset 0 0 0 1.5px var(--ochre); }
+  .stat.sf-pick.st-on{ box-shadow:inset 0 0 0 1.5px var(--warn); }
   .substrip{ font-family:var(--mono); font-size:12px; color:var(--ink-soft); padding:12px 2px 8px; letter-spacing:.01em; }
   .substrip b{ color:var(--accent); font-weight:500; }
   .sortsel{ flex-shrink:0; font-family:var(--mono); font-size:12px; padding:6px 9px; border:1px solid var(--line); border-radius:3px; background:var(--card); color:var(--ink); }
@@ -82,6 +89,9 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
   .picker,.scope{ display:flex; gap:6px; flex-wrap:nowrap; overflow-x:auto; padding-bottom:2px; }
   .picker{ margin:14px 0 8px; }
   .scope{ margin:0 0 10px; }
+  .scope.scopetabs{ border-bottom:1px solid var(--line); gap:2px; padding-bottom:0; margin:6px 0 12px; }
+  .scope.scopetabs .chip{ border:none; background:none; border-radius:0; color:var(--ink-soft); padding:9px 12px; border-bottom:2px solid transparent; margin-bottom:-1px; font-family:var(--sans); font-size:13px; }
+  .scope.scopetabs .chip.on{ color:var(--ink); border-bottom-color:var(--ochre); font-weight:500; }
   .picker::-webkit-scrollbar,.scope::-webkit-scrollbar,.cbar::-webkit-scrollbar{ display:none; }
   .cbar{ display:flex; gap:6px; flex-wrap:nowrap; overflow-x:auto; }
   .scope .chip{ font-size:12px; }
@@ -117,6 +127,24 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
   .kv b{ color:var(--accent); font-weight:500; }
 
   /* 다이얼로그 */
+  /* 영화 카드 — 기존 앱 구조(포스터 좌·제목+뱃지·인물링크·뱃지) */
+  .mvcard{ display:flex; gap:12px; align-items:flex-start; }
+  .mvcard .thumb{ width:52px; height:74px; }
+  .mvinfo{ flex:1; min-width:0; }
+  .mv-titlerow{ display:flex; justify-content:space-between; align-items:baseline; gap:8px; }
+  .mv-title{ font-family:var(--serif); font-size:16px; font-weight:700; line-height:1.35; }
+  .mv-year{ font-family:var(--mono); font-size:11px; color:var(--ink-soft); white-space:nowrap; flex-shrink:0; }
+  .mv-orig{ font-size:11.5px; color:var(--ink-soft); font-style:italic; margin-top:2px; }
+  .mv-sub{ font-size:12.5px; margin-top:5px; line-height:1.5; }
+  .mv-sub .plink{ color:var(--accent); cursor:pointer; }
+  .mvbadges{ display:flex; flex-wrap:wrap; gap:5px; margin-top:7px; }
+  .rbadge{ font-family:var(--mono); font-size:10px; color:var(--ink-soft); border:1px solid var(--line); border-radius:2px; padding:2px 6px; }
+  .rbadge.rec{ color:var(--ochre); border-color:#E4CFB0; }
+  .wb{ font-family:var(--mono); font-size:10px; padding:1px 6px; border-radius:2px; margin-left:6px; vertical-align:middle; white-space:nowrap; }
+  .wb-W{ background:var(--accent-wash); color:var(--green); }
+  .wb-R{ background:var(--ochre-wash); color:var(--ochre); }
+  .wb-P{ background:#F3E0D8; color:var(--warn); }
+
   /* 차계부 표본 라벨 카드 (시안 v2) */
   .cl-card{ display:block; padding:15px 16px 14px; }
   .cl-no{ position:absolute; top:12px; right:14px; font-family:var(--mono); font-size:10px; color:var(--ink-soft); letter-spacing:.08em; }
@@ -198,7 +226,7 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
 <div class="wrap" id="root" data-domain="movies">
   <header class="masthead">
     <div class="mh-row">
-      <h1 id="brandBtn" style="cursor:pointer">내도감</h1><span class="sub">Naedogam · v26</span>
+      <h1 id="brandBtn" style="cursor:pointer">내도감</h1><span class="sub">Naedogam · v29</span>
       <span class="spacer"></span>
       <span class="src-chip" id="srcChip" style="display:none">데모</span>
       <button class="icon-btn" id="searchToggle" type="button" style="display:none">🔍</button>
@@ -643,7 +671,8 @@ function renderStats(m, rows){
     if(s.type==="sum"||s.type==="avgComputed") n=fmt(n)+(s.unit?` ${s.unit}`:"");
     const click = isMovie && s.sf!==undefined;
     const on = click && (state.statFilter||"")===s.sf;
-    return `<div class="stat ${click?'st-click':''} ${on?'st-on':''}" ${click?`data-sf="${s.sf}"`:''}><div class="n">${n}</div><div class="l">${s.label}</div></div>`;
+    const sfc = isMovie ? ` sf-${s.sf===""?"total":s.sf}` : "";
+    return `<div class="stat${sfc} ${click?'st-click':''} ${on?'st-on':''}" ${click?`data-sf="${s.sf}"`:''}><div class="n">${n}</div><div class="l">${s.label}</div></div>`;
   }).join("");
   if(isMovie) $("#stats").querySelectorAll(".st-click").forEach(el=>el.onclick=()=>{
     const k=el.dataset.sf; state.statFilter=(state.statFilter===k)?"":k; state.page=0; paintDomain(m);
@@ -925,7 +954,7 @@ async function loadAndRender(){
 }
 function paintDomain(m){   // state.rows를 화면에 그림 (데이터 다시 안 받고 재렌더 가능)
   const pk=$("#picker"); pk.style.alignItems=""; pk.style.overflow="";     // 공유 UI 초기화
-  $("#stats").className="stats"; $("#stats").style.display=""; $("#scope").style.flexDirection="";
+  $("#stats").className="stats"; $("#stats").style.display=""; $("#scope").style.flexDirection=""; $("#scope").classList.remove("scopetabs");
   if(m.id==="movies"){ paintMovies(m); return; }
   if(m.id==="carlog"){ paintCarlog(m); return; }
   $("#scope").style.display="none";
@@ -944,17 +973,27 @@ function paintDomain(m){   // state.rows를 화면에 그림 (데이터 다시 �
 /* ── 영화 목록: 통계 클릭 필터 + 정렬 + 추천/스트리밍 뱃지 + 포스터(보일 때만 로드) + 더보기 ── */
 let posterCache={}; const MOVIE_PER=40;
 function movieCard(r, no){
-  const stream=(r.streaming||[]).map(t=>`<span class="tag">${t}</span>`).join("");
-  const rec=(r.recommendList||[]).map(t=>`<span class="tag rec">${t}</span>`).join("");
-  const flags=[ r.rating!=null?`<span class="flag star">★ ${r.rating}</span>`:"",
-    r.watched==="O"?`<span class="flag on">시청</span>`:"",
-    r.rewatch?`<span class="flag on">다시볼것</span>`:"", r.pick?`<span class="flag on">찜</span>`:"" ].join("");
-  const meta=[r.year,r.country,r.director].filter(Boolean).join(" · ");
+  const wb = (r.watched==="O"?`<span class="wb wb-W">시청</span>`:"")
+    + (r.rewatch?`<span class="wb wb-R">다시볼것</span>`:"")
+    + (r.pick?`<span class="wb wb-P">찜</span>`:"");
+  const yc = [r.year, r.country, (r.rating!=null&&r.rating!==""?("⭐"+r.rating):"")].filter(Boolean).join(" · ");
+  const dir = personSpan(r.director,"director");
+  const actorFirst = (r.actors||"").split(/[,，]/)[0].trim();
+  const act = actorFirst ? personSpan(actorFirst,"actor") : "";
+  const sub = (dir||act) ? dir + (dir&&act?` <span style="color:var(--line)">/</span> `:"") + act : "";
+  const stream=(r.streaming||[]).map(t=>`<span class="rbadge">${t}</span>`).join("");
+  const rec=(r.recommendList||[]).map(t=>`<span class="rbadge rec">${t}</span>`).join("");
   const q=(r.orig||r.title||"").replace(/"/g,'&quot;'); const kq=(r.title||"").replace(/"/g,'&quot;');
-  return `<button class="card" data-id="${r._id}"><span class="cat-no">#${String(no).padStart(3,"0")}</span>
-    <span class="thumb" data-poster data-title="${kq}" data-orig="${q}" data-year="${r.year||''}">🎞</span>
-    <span class="body"><h3>${r.title}</h3><div class="meta">${meta}${r.actors?`<br>${r.actors}`:""}</div>
-    <div class="tags">${stream}${rec}</div></span><span class="flags">${flags}</span></button>`;
+  return `<div class="card mvcard" data-id="${r._id}">
+    <span class="thumb" data-poster data-title="${kq}" data-orig="${q}" data-year="${r.year||''}">🎬</span>
+    <div class="mvinfo">
+      <div class="mv-titlerow"><span class="mv-title">${r.title}${wb}</span><span class="mv-year">${yc}</span></div>
+      ${r.orig&&r.orig!==r.title?`<div class="mv-orig">${r.orig}</div>`:""}
+      ${sub?`<div class="mv-sub">${sub}</div>`:""}
+      ${stream?`<div class="mvbadges">${stream}</div>`:""}
+      ${rec?`<div class="mvbadges">${rec}</div>`:""}
+    </div>
+  </div>`;
 }
 function movieSelectValues(rows, scope){
   const seen=new Set();
@@ -977,9 +1016,9 @@ function movieSearch(rows, scope, q, sel){
 }
 function paintMovies(m){
   renderStats(m, state.rows);                        // 통계는 항상 전체 기준(클릭해 필터)
-  setMhSub(`영화 · ${state.rows.length}편`);
+  setMhSub("");                                       // 영화 서브라인 표시 안 함
   const scope=state.searchScope||"title";
-  const sc=$("#scope"); sc.style.display="flex"; sc.style.flexDirection="row";     // 검색 범위 탭
+  const sc=$("#scope"); sc.style.display="flex"; sc.style.flexDirection="row"; sc.classList.add("scopetabs");     // 검색 범위 탭(밑줄)
   const scopes=[["title","제목"],["director","감독"],["actor","배우"],["stream","스트리밍"],["rec","추천"]];
   sc.innerHTML=scopes.map(([v,l])=>`<button class="chip ${scope===v?'on':''}" data-sc="${v}">${l}</button>`).join("");
   sc.querySelectorAll(".chip").forEach(b=>b.onclick=()=>{ state.searchScope=b.dataset.sc; state.query=""; state.selectQ=""; $("#search").value=""; state.page=0; paintMovies(m); });
@@ -1017,6 +1056,7 @@ function paintMovies(m){
   $("#list").innerHTML = (shown.map((r,i)=>movieCard(r,i+1)).join("")||`<div class="count">결과가 없습니다.</div>`)
     + (shown.length<total?`<button class="btn ghost" id="moreBtn" style="width:100%;margin-top:10px">더 보기 (${total-shown.length}편)</button>`:"");
   document.querySelectorAll(".card").forEach(b=>b.onclick=()=>openDetail(m, state.rows.find(x=>x._id===b.dataset.id)));
+  document.querySelectorAll(".mvcard .plink").forEach(el=>el.onclick=e=>{ e.stopPropagation(); openPersonModal(el.dataset.name, el.dataset.role); });
   const more=$("#moreBtn"); if(more) more.onclick=()=>{ state.page++; paintMovies(m); };
   lazyPosters();
 }
