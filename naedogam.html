@@ -48,6 +48,16 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
   .mh-row{ display:flex; align-items:center; gap:10px; }
   .mh-sub{ font-family:var(--mono); font-size:12px; color:var(--ink-soft); margin-top:5px; letter-spacing:.01em; }
   .mh-sub b{ color:var(--accent); font-weight:500; }
+  .mh-sub .mhttl{ color:var(--ink); font-weight:500; margin-right:4px; }
+  .mh-sub .mhstat b{ color:var(--ink); font-weight:600; }
+  .mh-sub .mhsep{ color:var(--line); }
+  .sf-pill{ font-family:var(--mono); font-size:11.5px; line-height:1.5; border:1px solid var(--line); background:var(--card); color:var(--ink-soft); border-radius:11px; padding:1px 9px; margin:2px 3px 0 0; cursor:pointer; vertical-align:middle; }
+  .sf-pill b{ color:var(--ink); font-weight:600; margin-left:1px; }
+  .sf-pill:active{ background:var(--accent-wash); }
+  .sf-pill.on{ background:var(--accent-wash); border-color:var(--accent); color:var(--ink); }
+  .sf-pill.sf-watched.on{ border-color:var(--green); } .sf-pill.sf-watched.on b{ color:var(--green); }
+  .sf-pill.sf-rewatch.on{ border-color:var(--ochre); } .sf-pill.sf-rewatch.on b{ color:var(--ochre); }
+  .sf-pill.sf-pick.on{ border-color:var(--warn); } .sf-pill.sf-pick.on b{ color:var(--warn); }
   .masthead h1{ font-family:var(--serif); font-weight:700; font-size:22px; margin:0; letter-spacing:-.01em; }
   .masthead .sub{ font-family:var(--mono); font-size:10px; color:var(--ink-soft); letter-spacing:.18em; text-transform:uppercase; }
   .masthead .spacer{ flex:1; }
@@ -172,8 +182,7 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
   .cl-kv.big{ color:var(--green); }
   .cl-memo{ margin-top:9px; font-size:12px; color:var(--ink-soft); font-style:italic; }
   /* 차계부 카드 — 기존 영화앱 스타일(흰 카드) */
-  .clx-card{ display:block; width:100%; text-align:left; font-family:var(--sans); color:inherit; background:#fff; border:none; border-radius:12px; margin-bottom:8px; box-shadow:0 1px 3px rgba(0,0,0,.07); padding:12px 14px; cursor:pointer; }
-  .clx-card:active{ background:#fafafa; }
+  .clx-card{ display:block; font-family:var(--sans); }
   .clx-top{ display:flex; justify-content:space-between; align-items:baseline; gap:8px; margin-bottom:6px; }
   .clx-date{ font-size:13px; font-weight:700; color:#1a1a1a; }
   .clx-odo{ font-size:12px; color:#888; white-space:nowrap; }
@@ -253,7 +262,7 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
 <div class="wrap" id="root" data-domain="movies">
   <header class="masthead">
     <div class="mh-row">
-      <h1 id="brandBtn" style="cursor:pointer">내도감</h1><span class="sub">Naedogam · v35</span>
+      <h1 id="brandBtn" style="cursor:pointer">내도감</h1><span class="sub">Naedogam · v36</span>
       <span class="spacer"></span>
       <span class="src-chip" id="srcChip" style="display:none">데모</span>
       <button class="icon-btn" id="searchToggle" type="button" style="display:none">🔍</button>
@@ -980,9 +989,23 @@ async function loadAndRender(){
   state.rows = applyComputed(m, raw.map(r=>({_id:r._id||crypto.randomUUID(),...r})));
   paintDomain(m);
 }
+function statSubline(m, rows){   // 통계를 상단 서브라인으로 통일. 영화(sf)는 클릭 필터 pill.
+  const hasSf = m.stats.some(x=>x.sf!==undefined);
+  const parts = m.stats.map(x=>{
+    let n=calcStat(x,rows);
+    n=(x.type==="sum"||x.type==="avgComputed") ? fmt(n)+(x.unit?` ${x.unit}`:"") : fmt(n);
+    if(hasSf && x.sf!==undefined){
+      const on=(state.statFilter||"")===x.sf, sfc=x.sf===""?"total":x.sf;
+      return `<button class="sf-pill sf-${sfc}${on?' on':''}" data-sf="${x.sf}">${x.label} <b>${n}</b></button>`;
+    }
+    return `<span class="mhstat">${x.label} <b>${n}</b></span>`;
+  });
+  const body = hasSf ? parts.join(" ") : parts.join(`<span class="mhsep"> · </span>`);
+  return `<span class="mhttl">${m.title}</span> ${body}`;
+}
 function paintDomain(m){   // state.rows를 화면에 그림 (데이터 다시 안 받고 재렌더 가능)
   const pk=$("#picker"); pk.style.alignItems=""; pk.style.overflow="";     // 공유 UI 초기화
-  $("#stats").className="stats"; $("#stats").style.display=""; $("#scope").style.flexDirection=""; $("#scope").classList.remove("scopetabs"); $("#count").classList.remove("countrow");
+  $("#stats").style.display="none"; $("#scope").style.flexDirection=""; $("#scope").classList.remove("scopetabs"); $("#count").classList.remove("countrow");
   if(m.id==="movies"){ paintMovies(m); return; }
   if(m.id==="carlog"){ paintCarlog(m); return; }
   $("#scope").style.display="none";
@@ -990,8 +1013,7 @@ function paintDomain(m){   // state.rows를 화면에 그림 (데이터 다시 �
   applySearchUI(m);
   let base = state.rows;
   if(m.filterBy && state.pick) base = base.filter(r=>String(r[m.filterBy.field]||"").trim()===state.pick);
-  renderStats(m, base);
-  setMhSub(`${m.title} · ${filterRows(m, base, state.query).length}건`);
+  setMhSub(statSubline(m, base));
   const rows=filterRows(m, base, state.query);
   $("#count").textContent=`총 ${rows.length}건 · 출처: ${src.current.label}`;
   $("#list").innerHTML=rows.map((r,i)=>{ try{ return renderCard(m,r,i+1); }catch(e){ console.error("card",e); return ""; } }).join("") || `<div class="count">결과가 없습니다.</div>`;
@@ -1083,8 +1105,9 @@ function movieSearch(rows, scope, q, sel){
   return rows.filter(r=>norm(r.title).includes(nq)||norm(r.orig).includes(nq));   // 제목
 }
 function paintMovies(m){
-  renderStats(m, state.rows);                        // 통계는 항상 전체 기준(클릭해 필터)
-  setMhSub("");                                       // 영화 서브라인 표시 안 함
+  setMhSub(statSubline(m, state.rows));               // 통계 = 상단 서브라인(클릭 필터 pill)
+  $("#mhSub").querySelectorAll(".sf-pill").forEach(el=>el.onclick=()=>{
+    const k=el.dataset.sf; state.statFilter=(state.statFilter===k)?"":k; state.page=0; paintMovies(m); });
   const scope=state.searchScope||"title";
   const sc=$("#scope"); sc.style.display="flex"; sc.style.flexDirection="row"; sc.classList.add("scopetabs");     // 검색 범위 탭(밑줄·균등)
   const scopes=[["title","제목"],["director","감독"],["actor","배우"],["stream","스트리밍"],["rec","추천"]];
@@ -1157,7 +1180,7 @@ function carlogCard(r, no){
   const car=(r.car||"").trim();
   const badge=(car&&CAR_ORDER.length>1)?`<span class="clx-badge" style="background:${carColor(car)}">${car}</span>`:"";
   const odo=carNum(r.odo), cost=carNum(r.cost);
-  return `<button class="clx-card" data-id="${r._id}">
+  return `<button class="card clx-card" data-id="${r._id}">
     <div class="clx-top"><span class="clx-date">${badge}${r.date||"-"}</span><span class="clx-odo">${odo?fmt(odo)+"km":""}</span></div>
     <div class="clx-work">${r.work||"-"}</div>
     <div class="clx-meta"><span class="clx-shop">${r.shop||""}</span><span class="clx-price">${cost?"₩"+fmt(cost):""}</span></div>
