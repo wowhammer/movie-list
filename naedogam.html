@@ -285,7 +285,7 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
 <div class="wrap" id="root" data-domain="movies">
   <header class="masthead">
     <div class="mh-row">
-      <h1 id="brandBtn" style="cursor:pointer">내도감</h1><span class="sub">Naedogam · v56</span>
+      <h1 id="brandBtn" style="cursor:pointer">내도감</h1><span class="sub">Naedogam · v57</span>
       <span class="spacer"></span>
       <span class="src-chip" id="srcChip" style="display:none">데모</span>
       <button class="icon-btn" id="searchToggle" type="button" style="display:none">🔍</button>
@@ -861,7 +861,7 @@ function haversineKm(la1,lo1,la2,lo2){ const R=6371,dLa=(la2-la1)*Math.PI/180,dL
 async function fetchMtnInfo(name){   // 위키백과 MediaWiki API: 대표사진 + 좌표(요약API엔 좌표가 없어서 교체)
   if(mtnInfoCache[name]!==undefined) return mtnInfoCache[name];
   try{
-    const u=`https://ko.wikipedia.org/w/api.php?action=query&prop=coordinates%7Cpageimages&piprop=thumbnail&pithumbsize=240&titles=${encodeURIComponent(name)}&format=json&origin=*`;
+    const u=`https://ko.wikipedia.org/w/api.php?action=query&prop=coordinates%7Cpageimages&piprop=thumbnail&pithumbsize=240&redirects=1&titles=${encodeURIComponent(name)}&format=json&origin=*`;
     const d=await fetch(u).then(r=>r.json());
     const pages=d&&d.query&&d.query.pages; let cover=null,lat=null,lon=null;
     if(pages){ const pg=Object.values(pages)[0]||{}; if(pg.thumbnail) cover=pg.thumbnail.source; if(pg.coordinates&&pg.coordinates[0]){ lat=pg.coordinates[0].lat; lon=pg.coordinates[0].lon; } }
@@ -1203,6 +1203,7 @@ function openRecordForm(m, existing){
       if(f.type==="tags")   v = v.split(",").map(s=>s.trim()).filter(Boolean);
       row[f.k]=v;
     });
+    if(m.activity && m.activity.when(row) && !row[m.activity.df]) row[m.activity.df]=todayStr();   // 완료 날짜 기록(폼 경로)
     const btn=$("#rfSave"); btn.textContent="저장 중…"; btn.disabled=true;
     try{
       await saveRecord(m, row, existing);
@@ -1296,6 +1297,7 @@ function paintDomain(m){   // state.rows를 화면에 그림 (데이터 다시 �
   if(m.id==="carlog"){ paintCarlog(m); return; }
   $("#scope").style.display="none";
   renderPicker(m);
+  if(m.id==="mountains" && !userGeo){ const pk=$("#picker"); pk.style.display="flex"; pk.style.overflow="visible"; pk.innerHTML=`<button class="chip" id="geoBtn" style="border-color:var(--accent);color:var(--accent)">📍 내 위치에서 거리 보기</button>`; const gb=$("#geoBtn"); if(gb) gb.onclick=()=>{ geoAsked=false; loadMountainMeta(m); }; }
   applySearchUI(m);
   let base = state.rows;
   if(m.filterBy && state.pick) base = base.filter(r=>String(r[m.filterBy.field]||"").trim()===state.pick);
@@ -1580,8 +1582,10 @@ function renderDash(ids, data){
     if(m.activity){ const act=m.activity;
       const done=rows.filter(r=>act.when(r) && inPeriod(parseDate(r[act.df]), dashPeriod));
       const names=done.slice(0,10).map(r=>act.name(r)).filter(Boolean).join(", ");
+      const apills=(m.stats||[]).map(sd=>{ let n=calcStat(sd,rows); if(sd.type==="sum"||sd.type==="avgComputed"||sd.type==="max") n=fmt(n)+(sd.unit?` ${sd.unit}`:""); return `<span class="dash-pill">${sd.label} <b>${n}</b></span>`; }).join("");
       html+=`<div class="dash-dom"><div class="dash-dt">${m.icon} ${m.title} · ${act.label} <b>${done.length}</b></div>`+
-        (done.length?`<div class="dash-names">${names}${done.length>10?" 외":""}</div>`:`<div class="dash-names" style="color:var(--ink-soft)">이 기간 기록 없음</div>`)+`</div>`;
+        (done.length?`<div class="dash-names">${names}${done.length>10?" 외":""}</div>`:`<div class="dash-names" style="color:var(--ink-soft)">이 기간 기록 없음</div>`)+
+        `<div class="dash-stats" style="margin-top:6px">${apills}</div></div>`;
     } else {
       const pills=(m.stats||[]).map(sd=>{ let n=calcStat(sd,rows); if(sd.type==="sum"||sd.type==="avgComputed"||sd.type==="max") n=fmt(n)+(sd.unit?` ${sd.unit}`:""); return `<span class="dash-pill">${sd.label} <b>${n}</b></span>`; }).join("");
       html+=`<div class="dash-dom"><div class="dash-dt">${m.icon} ${m.title} <span style="font-size:11px;color:var(--ink-soft);font-weight:400">· 전체</span></div><div class="dash-stats">${pills}</div></div>`;
