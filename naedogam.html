@@ -285,7 +285,7 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
 <div class="wrap" id="root" data-domain="movies">
   <header class="masthead">
     <div class="mh-row">
-      <h1 id="brandBtn" style="cursor:pointer">내도감</h1><span class="sub">Naedogam · v59</span>
+      <h1 id="brandBtn" style="cursor:pointer">내도감</h1><span class="sub">Naedogam · v60</span>
       <span class="spacer"></span>
       <span class="src-chip" id="srcChip" style="display:none">데모</span>
       <button class="icon-btn" id="searchToggle" type="button" style="display:none">🔍</button>
@@ -1572,10 +1572,19 @@ async function openDashboard(){
   d.showModal();
   const ids=getActive().filter(id=>MANIFESTS[id]);
   const data={};
-  for(const id of ids){ const m=MANIFESTS[id]; let raw=CACHE[id];
-    if(!raw){ try{ raw=await sourceFor(m).list(id); CACHE[id]=raw; savePersist(id, raw); }catch(e){ raw=[]; } }
-    data[id]=applyComputed(m, (raw||[]).map(r=>({_id:r._id||crypto.randomUUID(),...r}))); }
+  const build=(id,raw)=>{ const m=MANIFESTS[id]; data[id]=applyComputed(m,(raw||[]).map(r=>({_id:r._id||crypto.randomUUID(),...r}))); };
+  const hadMem={};
+  // 1) 즉시 표시: 메모리 캐시 or 지난번 저장분(localStorage) → 기다림 없음
+  ids.forEach(id=>{ hadMem[id]=!!CACHE[id]; let raw=CACHE[id]||loadPersist(id); if(raw&&!CACHE[id]) CACHE[id]=raw; build(id, raw||[]); });
   renderDash(ids, data);
+  // 2) 아직 안 받아둔 분야만 병렬로 최신화(직렬 대기 제거) → 바뀌면 다시 그림
+  const toRefresh=ids.filter(id=>!hadMem[id]);
+  if(toRefresh.length){
+    await Promise.all(toRefresh.map(async id=>{ const m=MANIFESTS[id];
+      try{ const fresh=await sourceFor(m).list(id); CACHE[id]=fresh; savePersist(id, fresh); build(id, fresh); }catch(e){}
+    }));
+    if(d.open) renderDash(ids, data);
+  }
 }
 function renderDash(ids, data){
   const b=$("#dashBody"); if(!b) return;
