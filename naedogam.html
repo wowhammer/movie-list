@@ -110,6 +110,10 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
     border-radius:50%; background:var(--ochre); color:#fff; border:none; font-size:26px; line-height:1;
     box-shadow:0 4px 14px rgba(101,64,32,.35); display:flex; align-items:center; justify-content:center; }
   #addBtn:active{ transform:scale(.94); }
+  .totop{ position:fixed; left:18px; bottom:22px; z-index:45; width:46px; height:46px; border-radius:50%; border:1px solid var(--line); background:var(--card); color:var(--ink); font-size:19px; display:flex; align-items:center; justify-content:center; cursor:pointer; box-shadow:0 3px 12px rgba(0,0,0,.10); opacity:0; transform:translateY(10px) scale(.9); pointer-events:none; transition:opacity .22s ease, transform .22s ease; }
+  .totop.show{ opacity:1; transform:translateY(0) scale(1); pointer-events:auto; }
+  .totop:hover{ border-color:var(--accent); color:var(--accent); }
+  .totop:active{ transform:scale(.9); }
   .mv-title{ font-family:var(--sans); }
   .picker::-webkit-scrollbar,.scope::-webkit-scrollbar,.cbar::-webkit-scrollbar{ display:none; }
   .cbar{ display:flex; gap:6px; flex-wrap:nowrap; overflow-x:auto; }
@@ -173,7 +177,7 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
   .nr-t{ font-size:15px; color:#999; font-weight:600; }
   .nr-s{ font-size:13px; color:#bbb; margin-top:6px; }
   .nr-add{ margin-top:16px; }
-  .bk-review{ font-size:11.5px; color:#999; font-style:italic; margin-top:4px; line-height:1.4; }
+  .bk-review{ font-size:12px; color:#777; font-style:normal; margin-top:4px; line-height:1.45; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
   .clx-sub{ font-size:11.5px; color:#999; margin-top:2px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
   .rec-sub{ font-family:var(--mono); font-size:12px; color:var(--ink-soft); margin-top:3px; }
   .rec-desc{ font-size:13.5px; line-height:1.7; color:var(--ink); margin:0; }
@@ -299,7 +303,7 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
 <div class="wrap" id="root" data-domain="movies">
   <header class="masthead">
     <div class="mh-row">
-      <h1 id="brandBtn" style="cursor:pointer">내도감</h1><span class="sub">Naedogam · v65</span>
+      <h1 id="brandBtn" style="cursor:pointer">내도감</h1><span class="sub">Naedogam · v66</span>
       <span class="spacer"></span>
       <span class="src-chip" id="srcChip" style="display:none">데모</span>
       <button class="icon-btn" id="searchToggle" type="button" style="display:none">🔍</button>
@@ -322,6 +326,7 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
     <input class="search" id="search" type="search" style="display:none" />
     <select class="search" id="mvselect" style="display:none"></select>
     <button class="icon-btn" id="addBtn" type="button" style="display:none">＋</button>
+    <button class="totop" id="toTop" type="button" aria-label="맨 위로">↑</button>
     <div class="count" id="count"></div>
     <div class="list" id="list"></div>
   </section>
@@ -887,7 +892,7 @@ function bookCard(r){
   const cover=r.cover?`<img src="${r.cover}" alt="">`:"📖";
   const sub0=[r.author,r.publisher].filter(Boolean).join(" · ");
   const rv=String(r.review||"").trim();
-  const review=rv?`<div class="bk-review">"${rv.slice(0,60)}${rv.length>60?"…":""}"</div>`:"";
+  const review=rv?`<div class="bk-review">${rv.replace(/</g,"&lt;")}</div>`:"";
   return `<button class="card mvcard" data-id="${r._id}" data-bkt="${esc2(r.title)}" data-bka="${esc2(r.author)}">
     <span class="thumb">${cover}</span>
     <div class="mvinfo">
@@ -1400,7 +1405,7 @@ function paintDomain(m){   // state.rows를 화면에 그림 (데이터 다시 �
   const PER=40, total=rows.length, shown=rows.slice(0,(state.page+1)*PER);
   $("#list").innerHTML=(total? shown.map((r,i)=>{ try{ return renderCard(m,r,i+1); }catch(e){ console.error("card",e); return ""; } }).join("") : emptyG)
     + (shown.length<total?`<button class="btn ghost" id="moreBtn" style="width:100%;margin-top:10px">더 보기 (${total-shown.length}개)</button>`:"");
-  document.querySelectorAll(".card").forEach(b=>b.onclick=()=>openDetail(m, state.rows.find(x=>x._id===b.dataset.id)));
+  $("#list").querySelectorAll(".card").forEach((b,i)=>{ const r=shown[i]; if(r) b.onclick=()=>openDetail(m, r); });
   { const more=$("#moreBtn"); if(more) more.onclick=()=>{ state.page++; paintDomain(m); }; }
   { const na=$("#nrAdd"); if(na) na.onclick=()=>{ if(m.id==="books"){ openAddBook(); const bq=$("#bq"); if(bq){ bq.value=state.query; bq.dispatchEvent(new Event("input")); } } else openRecordForm(m, null); }; }
   if(m.id==="books") lazyBookInfo();
@@ -1535,7 +1540,7 @@ function paintMovies(m){
     : `<div class="count">결과가 없습니다.</div>`;
   $("#list").innerHTML = (shown.map((r,i)=>movieCard(r,i+1)).join("")||emptyM)
     + (shown.length<total?`<button class="btn ghost" id="moreBtn" style="width:100%;margin-top:10px">더 보기 (${total-shown.length}편)</button>`:"");
-  document.querySelectorAll(".card").forEach(b=>b.onclick=()=>openDetail(m, state.rows.find(x=>x._id===b.dataset.id)));
+  $("#list").querySelectorAll(".card").forEach((b,i)=>{ const r=shown[i]; if(r) b.onclick=()=>openDetail(m, r); });
   { const na=$("#nrAdd"); if(na) na.onclick=()=>{ openAddMovie(); const mq=$("#mq"); if(mq){ mq.value=state.query; mq.dispatchEvent(new Event("input")); } }; }
   document.querySelectorAll(".mvcard .plink").forEach(el=>el.onclick=e=>{ e.stopPropagation(); openPersonModal(el.dataset.name, el.dataset.role); });
   const more=$("#moreBtn"); if(more) more.onclick=()=>{ state.page++; paintMovies(m); };
@@ -1910,6 +1915,10 @@ async function pickMovie(m){
 async function boot(){
   // 첫 화면은 홈(켜둔 카테고리 카드 격자). 처음엔 비어 있고, 설정에서 카테고리를 켜면 카드가 생김.
   showView("home"); renderHome();
+  const _tt=$("#toTop");
+  if(_tt){ _tt.onclick=()=>window.scrollTo({top:0,behavior:"smooth"});
+    const _upd=()=>_tt.classList.toggle("show", (window.scrollY||document.documentElement.scrollTop||0)>360);
+    window.addEventListener("scroll", _upd, {passive:true}); _upd(); }
 }
 $("#brandBtn").addEventListener("click",goHome);
 $("#searchToggle").addEventListener("click",()=>{ state.searchOpen=!state.searchOpen; applySearchUI(MANIFESTS[state.domain]); if(state.searchOpen) $("#search").focus(); });
