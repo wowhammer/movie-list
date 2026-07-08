@@ -299,7 +299,7 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
 <div class="wrap" id="root" data-domain="movies">
   <header class="masthead">
     <div class="mh-row">
-      <h1 id="brandBtn" style="cursor:pointer">내도감</h1><span class="sub">Naedogam · v63</span>
+      <h1 id="brandBtn" style="cursor:pointer">내도감</h1><span class="sub">Naedogam · v64</span>
       <span class="spacer"></span>
       <span class="src-chip" id="srcChip" style="display:none">데모</span>
       <button class="icon-btn" id="searchToggle" type="button" style="display:none">🔍</button>
@@ -500,7 +500,25 @@ const MANIFESTS = {
             {label:"기록 수",type:"count"} ],
     card:{ kind:"data", thumb:"🏃",
            title:r=>`${r.date}${r.place?" · "+r.place:""}`,
-           kv:[{k:"거리",f:"dist",u:"km"},{k:"시간",f:"time",u:"분"},{k:"페이스",f:"pace"},{k:"심박",f:"hr"}] } }
+           kv:[{k:"거리",f:"dist",u:"km"},{k:"시간",f:"time",u:"분"},{k:"페이스",f:"pace"},{k:"심박",f:"hr"}] } },
+
+  /* 일기: 하루 기록. 날짜·제목·내용·기분·날씨·장소·태그·사진. */
+  diary:{ id:"diary", title:"일기", icon:"📔", vol:"卷6", canAdd:true,
+    source:{ type:"sheet", tab:"일기" },
+    fields:[ {k:"date",sheet:"날짜",label:"날짜(예: 2026-07-08)",type:"text"},
+             {k:"title",sheet:"제목",label:"제목",type:"text"},
+             {k:"content",sheet:"내용",label:"내용",type:"textarea"},
+             {k:"mood",sheet:"기분",label:"기분",type:"select",options:["","😊 좋음","😐 보통","😔 힘듦","😡 화남","😢 슬픔","🥰 설렘"]},
+             {k:"weather",sheet:"날씨",label:"날씨",type:"select",options:["","☀️ 맑음","⛅ 구름","🌧️ 비","❄️ 눈","🌫️ 흐림"]},
+             {k:"place",sheet:"장소",label:"장소",type:"text"},
+             {k:"tags",sheet:"태그",label:"태그(쉼표로 여러 개)",type:"tags"},
+             {k:"cover",sheet:"사진",label:"사진",type:"image"} ],
+    search:["title","content","tags","place"],
+    activity:{ df:"date", when:r=>true, label:"일기", name:r=>r.title||r.date },
+    stats:[ {label:"기록 수",type:"count"} ],
+    card:{ kind:"data", thumb:"📔",
+           title:r=>`${r.date}${r.title?" · "+r.title:""}`,
+           kv:[{k:"기분",f:"mood"},{k:"날씨",f:"weather"}] } }
 };
 
 /* ── 2. DataSource 추상화 ──
@@ -1013,10 +1031,10 @@ function renderCard(m, r, no){ if(m.id==="books") return bookCard(r); const c=m.
     const _cov=r.cover;
     return `<button class="card catcard" data-id="${r._id}"><span class="thumb">${_cov?`<img src="${_cov}" alt="">`:c.thumb}</span>
       <span class="body"><h3>${r.title}</h3><div class="meta">${meta}</div>${(flags||tags)?`<div class="cbadges">${flags}${tags}</div>`:""}</span></button>`; }
-  const kv=c.kv.map(col=>{ const v=r[col.f]; if(v==null) return ""; const s=(typeof v==="number"?fmt(v):v)+(col.u?` ${col.u}`:"");
+  const kv=c.kv.map(col=>{ const v=r[col.f]; if(v==null||v==="") return ""; const s=(typeof v==="number"?fmt(v):v)+(col.u?` ${col.u}`:"");
     return `<span>${col.k} <b>${s}</b></span>`; }).filter(Boolean).join("");
   return `<button class="card catcard" data-id="${r._id}"><span class="thumb">${r.cover?`<img src="${r.cover}" alt="">`:(c.thumb||"🧾")}</span>
-    <span class="body"><h3 style="font-size:15px">${c.title(r)}</h3><div class="kv">${kv}</div>${r.memo?`<div class="meta" style="margin-top:5px">${r.memo}</div>`:""}</span></button>`; }
+    <span class="body"><h3 style="font-size:15px">${c.title(r)}</h3><div class="kv">${kv}</div>${(r.memo||r.content)?`<div class="meta" style="margin-top:5px">${(t=>t.slice(0,70).replace(/</g,"&lt;")+(t.length>70?"…":""))(String(r.memo||r.content))}</div>`:""}</span></button>`; }
 function openDetail(m, r){
   if(m.id==="movies"){ openMovieDetail(m, r); return; }
   if(m.id==="books"){ openBookDetail(m, r); return; }
@@ -1203,6 +1221,7 @@ function openRecordForm(m, existing){
     if(f.type==="select")
       return `<label>${f.label}</label><select class="rf" data-k="${f.k}" data-type="select">${(f.options||[]).map(o=>`<option value="${o}" ${String(val||'')===o?'selected':''}>${o||'(없음)'}</option>`).join("")}</select>`;
     if(f.type==="image"){ const cur=String(val||""); return `<label>${f.label}</label><div><img class="rf-imgprev" data-k="${f.k}" src="${cur.replace(/"/g,'&quot;')}" style="${cur?'':'display:none'}"><input type="hidden" class="rf-imgval" data-k="${f.k}" value="${cur.replace(/"/g,'&quot;')}"><input type="file" accept="image/*" class="rf-imgfile" data-k="${f.k}"></div>`; }
+    if(f.type==="textarea"){ const tv=(val==null?"":String(val)).replace(/&/g,'&amp;').replace(/</g,'&lt;'); return `<label>${f.label}</label><textarea class="rf" data-k="${f.k}" data-type="text" rows="5" style="width:100%;font-family:inherit;font-size:15px;padding:9px 11px;border:1px solid var(--line);border-radius:9px;box-sizing:border-box;resize:vertical" autocomplete="off">${tv}</textarea>`; }
     const v = (f.type==="tags" && Array.isArray(val)) ? val.join(", ") : (val==null?"":val);
     return `<label>${f.label}</label><input class="rf" data-k="${f.k}" data-type="${f.type}" value="${String(v).replace(/"/g,'&quot;')}" autocomplete="off" />`;
   }).join("");
@@ -1228,7 +1247,7 @@ function openRecordForm(m, existing){
   $("#rfSave").onclick=async()=>{
     // 한글 마지막 글자 잘림 방지: 조합 확정(blur) → 아주 짧은 틈 뒤 값 읽기
     if(document.activeElement && document.activeElement.blur) document.activeElement.blur();
-    d.querySelectorAll("input.rf").forEach(i=>i.blur());
+    d.querySelectorAll("input.rf, textarea.rf").forEach(i=>i.blur());
     await new Promise(r=>setTimeout(r,60));
     const row = existing ? {...existing} : { _id: crypto.randomUUID() };
     fields.forEach(f=>{
@@ -1353,7 +1372,7 @@ function paintDomain(m){   // state.rows를 화면에 그림 (데이터 다시 �
     const _sb=m.sorts.map(so=>{ const on=state.sort===so.k; return `<button class="sort-btn ${on?'on':''}" data-gs="${so.k}">${so.label}${on?(state.sortAsc?"↑":"↓"):(so.asc?"↑":"↓")}</button>`; }).join("");
     _cnt.innerHTML=`<span class="cnt-lbl">총 ${rows.length}건</span><span class="sort-btns">${_sb}</span>`;
     _cnt.querySelectorAll(".sort-btn").forEach(b=>b.onclick=()=>{ const k=b.dataset.gs, so=m.sorts.find(x=>x.k===k); if(k===state.sort) state.sortAsc=!state.sortAsc; else { state.sort=k; state.sortAsc=!!so.asc; } if(k==="_dist" && !userGeo){ geoAsked=false; loadMountainMeta(m); } paintDomain(m); });
-  } else { _cnt.classList.remove("countrow"); _cnt.textContent=`총 ${rows.length}건`; }
+  } else { _cnt.classList.remove("countrow"); _cnt.innerHTML=""; _cnt.style.display="none"; }   // 총 N건 줄 숨김(자리만 차지)
   const _qg=(state.query||"").replace(/</g,"&lt;");
   const emptyG = _qg ? `<div class="noresult"><div class="nr-t">검색 결과 없음</div><div class="nr-s">"${_qg}"는 목록에 없어요</div><button class="btn nr-add" id="nrAdd">+ "${_qg}" 새로 추가</button></div>` : `<div class="count">결과가 없습니다.</div>`;
   const PER=40, total=rows.length, shown=rows.slice(0,(state.page+1)*PER);
@@ -1599,7 +1618,7 @@ function inPeriod(d, period){ if(period==="all") return true; if(!d) return fals
   return true; }
 let dashPeriod="week";
 let dashView="summary";
-const DASH_COLORS={ movies:"#16a34a", books:"#6366f1", mountains:"#b45309", running:"#0ea5e9", carlog:"#c2410c" };
+const DASH_COLORS={ movies:"#16a34a", books:"#6366f1", mountains:"#b45309", running:"#0ea5e9", carlog:"#c2410c", diary:"#9333ea" };
 function domColor(id){ return DASH_COLORS[id] || "#16a34a"; }
 function dashEvents(ids, data){   // 분야별 '한 것'(activity) → {t:날짜, id} 목록
   const ev=[];
