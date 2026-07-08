@@ -285,7 +285,7 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
 <div class="wrap" id="root" data-domain="movies">
   <header class="masthead">
     <div class="mh-row">
-      <h1 id="brandBtn" style="cursor:pointer">내도감</h1><span class="sub">Naedogam · v58</span>
+      <h1 id="brandBtn" style="cursor:pointer">내도감</h1><span class="sub">Naedogam · v59</span>
       <span class="spacer"></span>
       <span class="src-chip" id="srcChip" style="display:none">데모</span>
       <button class="icon-btn" id="searchToggle" type="button" style="display:none">🔍</button>
@@ -353,9 +353,11 @@ const MANIFESTS = {
         o.rewatch = code.charAt(1)==='R';                       // _R = 다시볼것
         o.pick    = (function(){ const pc=re(row['찜']); return pc?(pc==='TRUE'||pc==='true'||pc==='O'||pc==='1'||pc==='찜'):(code.charAt(1)==='P'); })();  // 찜=별도 열(없으면 옛 P코드 호환)
         o.recommendList = re(row['추천']).split(/[\/,]+/).map(s=>s.trim()).filter(Boolean);  // BBC/뉴욕타임즈…
+        o.watchDate = re(row['본날']);                          // 본날: 봤음 켠 날짜(대시보드 일별 집계용)
         o._id = (o.orig||o.title||'') + '_' + (o.year||'');
       } },
     search:["title","orig","director","actors"],
+    activity:{ df:"watchDate", when:r=>r.watched==="O", label:"시청", name:r=>r.title },
     fields:[ {k:"title",sheet:"한국 개봉명",label:"한국 개봉명",type:"text"},
              {k:"year",sheet:"개봉연도",label:"개봉연도",type:"number"},
              {k:"director",sheet:"감독",label:"감독",type:"text"},
@@ -1035,10 +1037,12 @@ async function toggleMovie(r, kind){
   else if(kind==='P') pick=!pick;            // 독립
   const codeRaw=(watched?'W':'X')+(rewatch?'R':'O');
   const code = codeRaw==='XO' ? '' : codeRaw;   // 찜은 코드에서 뺌(별도 열)
-  try{ await appsSrc().post({action:'updateStatus', orig:r.orig, status:code, pick:pick}); }
+  let watchDate = r.watchDate || '';
+  if(watched && !watchDate) watchDate = todayStr();   // 처음 '봤음' 켤 때만 본날 기록
+  try{ await appsSrc().post({action:'updateStatus', orig:r.orig, status:code, pick:pick, watchDate:watchDate}); }
   catch(e){ alert("상태 저장 실패: "+e.message); return; }
-  r.watched=watched?'O':''; r.rewatch=rewatch; r.pick=pick;
-  const raw=(CACHE.movies||[]).find(x=>reCell(x['원제'])===r.orig); if(raw){ raw['시청여부']=code; raw['찜']=pick?'TRUE':''; }   // 캐시도 갱신
+  r.watched=watched?'O':''; r.rewatch=rewatch; r.pick=pick; r.watchDate=watchDate;
+  const raw=(CACHE.movies||[]).find(x=>reCell(x['원제'])===r.orig); if(raw){ raw['시청여부']=code; raw['찜']=pick?'TRUE':''; if(watchDate) raw['본날']=watchDate; }   // 캐시도 갱신
   const mW=$("#mW"),mR=$("#mR"),mP=$("#mP");                                                        // 모달 버튼 즉시 반영
   if(mW){ mW.className="btn "+(r.watched==='O'?'':'ghost'); mW.textContent=r.watched==='O'?'✓ 봤음':'봤음'; }
   if(mR) mR.className="btn "+(r.rewatch?'':'ghost');
