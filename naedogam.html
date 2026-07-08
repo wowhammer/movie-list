@@ -80,7 +80,7 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
   /* 통계(압축 스트립) */
   .stats{ display:flex; gap:0; padding:16px 0 8px; }
   .stat{ flex:1; text-align:center; padding:5px 4px; border-radius:6px; }
-  .stat .n{ font-family:var(--mono); font-weight:500; font-size:21px; color:var(--ink); letter-spacing:-.01em; }
+  .stat .n{ font-family:var(--sans); font-weight:700; font-size:23px; color:var(--ink); letter-spacing:-.01em; }
   .stat .l{ font-size:11px; color:var(--ink-soft); margin-top:2px; }
   .stat.sf-watched .n{ color:var(--green); }
   .stat.sf-rewatch .n{ color:var(--ochre); }
@@ -135,15 +135,18 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
   .thumb{ width:46px; height:64px; border-radius:3px; background:var(--accent-wash); display:flex; align-items:center; justify-content:center; font-size:20px; color:var(--accent); border:1px solid var(--line-soft); overflow:hidden; }
   .thumb img{ width:100%; height:100%; object-fit:cover; }
   .body{ min-width:0; }
-  .body h3{ font-family:var(--serif); font-size:16px; font-weight:700; margin:0 0 3px; }
-  .body .meta{ font-size:12.5px; color:var(--ink-soft); }
+  .body h3{ font-family:var(--sans); font-size:15px; font-weight:600; color:#1a1a1a; margin:0 0 3px; }
+  .body .meta{ font-family:var(--sans); font-size:12px; color:#888; }
   .tags{ display:flex; flex-wrap:wrap; gap:5px; margin-top:8px; }
-  .tag{ font-family:var(--mono); font-size:10px; color:var(--ink-soft); border:1px solid var(--line); border-radius:2px; padding:2px 6px; }
+  .tag{ font-family:var(--sans); font-size:10px; color:#666; background:#f0f0f0; border:none; border-radius:8px; padding:2px 8px; }
+  .catcard{ display:flex; gap:12px; align-items:flex-start; }
+  .catcard .thumb{ width:52px; height:74px; }
+  .cbadges{ display:flex; flex-wrap:wrap; gap:5px; margin-top:7px; align-items:center; }
   .flags{ display:flex; flex-direction:column; align-items:flex-end; gap:4px; }
-  .flag{ font-size:10.5px; font-family:var(--mono); padding:2px 7px; border-radius:2px; white-space:nowrap; }
+  .flag{ font-family:var(--sans); font-size:10px; padding:2px 8px; border-radius:10px; white-space:nowrap; }
   .flag.on{ background:var(--accent-wash); color:var(--accent); }
   .flag.star{ color:var(--ochre); font-weight:500; font-size:12px; }
-  .kv{ display:flex; gap:7px 20px; flex-wrap:wrap; font-family:var(--mono); font-size:12.5px; margin-top:9px; }
+  .kv{ display:flex; gap:7px 20px; flex-wrap:wrap; font-family:var(--sans); font-size:12.5px; margin-top:9px; }
   .kv span b{ color:var(--ink); font-weight:500; }
   .kv b{ color:var(--accent); font-weight:500; }
 
@@ -262,7 +265,7 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
 <div class="wrap" id="root" data-domain="movies">
   <header class="masthead">
     <div class="mh-row">
-      <h1 id="brandBtn" style="cursor:pointer">내도감</h1><span class="sub">Naedogam · v36</span>
+      <h1 id="brandBtn" style="cursor:pointer">내도감</h1><span class="sub">Naedogam · v37</span>
       <span class="spacer"></span>
       <span class="src-chip" id="srcChip" style="display:none">데모</span>
       <button class="icon-btn" id="searchToggle" type="button" style="display:none">🔍</button>
@@ -375,8 +378,9 @@ const MANIFESTS = {
              {k:"memo",sheet:"비고",label:"비고",type:"text"} ],
     filterBy:{ field:"car", allLabel:"전체" },
     search:["work","shop","car","memo"],
-    stats:[ {label:"총 지출",type:"sum",field:"cost",unit:"원"},
-            {label:"기록 수",type:"count"} ],
+    stats:[ {label:"기록 수",type:"count"},
+            {label:"총 정비비",type:"sum",field:"cost",unit:"원"},
+            {label:"최근 주행",type:"max",field:"odo",unit:"km"} ],
     card:{ kind:"data", title:r=>`${r.date}${r.car?" · "+r.car:""}`,
            kv:[{k:"작업",f:"work"},{k:"금액",f:"cost",u:"원"},{k:"주행",f:"odo",u:"km"},{k:"정비소",f:"shop"}] } },
 
@@ -571,8 +575,7 @@ class SheetDataSource {
   async ensure(m){        // 탭이 없으면 만들고(+샘플), 있으면 그대로. 한 세션에 한 번만.
     if(this._ensured.has(m.id)) return;
     const header=["_id",...fieldKeys(m)];
-    const rows=(SAMPLE[m.id]||[]).map(r=>this._flatten(m,r));
-    await this._post({action:"ensureTab", tab:m.source.tab, header, rows});
+    await this._post({action:"ensureTab", tab:m.source.tab, header, rows:[]});   // 샘플 안 심음: 실데이터만
     this._ensured.add(m.id);
   }
   async list(id){
@@ -624,6 +627,7 @@ function calcStat(s, rows){
     if(s.type==="count") return rows.length;
     if(s.type==="countIf") return rows.filter(r=>r[s.field]===s.eq).length;
     if(s.type==="sum") return rows.filter(r=>!s.where||Object.entries(s.where).every(([k,v])=>r[k]===v)).reduce((a,r)=>a+(+r[s.field]||0),0);
+    if(s.type==="max") return rows.reduce((mx,r)=>Math.max(mx,(+r[s.field]||0)),0);
     if(s.type==="avgComputed"){ const v=rows.map(r=>r[s.field]).filter(x=>x!=null); return v.length?+(v.reduce((a,b)=>a+b,0)/v.length).toFixed(1):0; }
   }catch(e){ console.error("stat",e); return "—"; } return "—";
 }
@@ -705,7 +709,7 @@ function renderStats(m, rows){
   const isMovie = m.id==="movies";
   $("#stats").className="stats";
   $("#stats").innerHTML=m.stats.map(s=>{ let n=calcStat(s,rows);
-    if(s.type==="sum"||s.type==="avgComputed") n=fmt(n)+(s.unit?` ${s.unit}`:"");
+    if(s.type==="sum"||s.type==="avgComputed"||s.type==="max") n=fmt(n)+(s.unit?` ${s.unit}`:"");
     const click = isMovie && s.sf!==undefined;
     const on = click && (state.statFilter||"")===s.sf;
     const sfc = isMovie ? ` sf-${s.sf===""?"total":s.sf}` : "";
@@ -734,11 +738,11 @@ function renderCard(m, r, no){ const c=m.card;
     const tags=tarr.map(t=>`<span class="tag">${t}</span>`).join("");
     const flags=(typeof c.flags==="function"?c.flags(r):[]).filter(Boolean)
       .map(f=>`<span class="flag ${f.cls||""}">${f.t}</span>`).join("");
-    return `<button class="card" data-id="${r._id}"><span class="cat-no">#${String(no).padStart(3,"0")}</span><span class="thumb">${r.cover?`<img src="${r.cover}" alt="">`:c.thumb}</span>
-      <span class="body"><h3>${r.title}</h3><div class="meta">${meta}</div><div class="tags">${tags}</div></span><span class="flags">${flags}</span></button>`; }
+    return `<button class="card catcard" data-id="${r._id}"><span class="thumb">${r.cover?`<img src="${r.cover}" alt="">`:c.thumb}</span>
+      <span class="body"><h3>${r.title}</h3><div class="meta">${meta}</div>${(flags||tags)?`<div class="cbadges">${flags}${tags}</div>`:""}</span></button>`; }
   const kv=c.kv.map(col=>{ const v=r[col.f]; if(v==null) return ""; const s=(typeof v==="number"?fmt(v):v)+(col.u?` ${col.u}`:"");
     return `<span>${col.k} <b>${s}</b></span>`; }).filter(Boolean).join("");
-  return `<button class="card" data-id="${r._id}" style="grid-template-columns:auto 1fr;"><span class="thumb">🧾</span>
+  return `<button class="card catcard" data-id="${r._id}"><span class="thumb">🧾</span>
     <span class="body"><h3 style="font-size:15px">${c.title(r)}</h3><div class="kv">${kv}</div>${r.memo?`<div class="meta" style="margin-top:5px">${r.memo}</div>`:""}</span></button>`; }
 function openDetail(m, r){
   if(m.id==="movies"){ openMovieDetail(m, r); return; }
@@ -1005,7 +1009,7 @@ function statSubline(m, rows){   // 통계를 상단 서브라인으로 통일. 
 }
 function paintDomain(m){   // state.rows를 화면에 그림 (데이터 다시 안 받고 재렌더 가능)
   const pk=$("#picker"); pk.style.alignItems=""; pk.style.overflow="";     // 공유 UI 초기화
-  $("#stats").style.display="none"; $("#scope").style.flexDirection=""; $("#scope").classList.remove("scopetabs"); $("#count").classList.remove("countrow");
+  $("#stats").className="stats"; $("#stats").style.display=""; $("#scope").style.flexDirection=""; $("#scope").classList.remove("scopetabs"); $("#count").classList.remove("countrow");
   if(m.id==="movies"){ paintMovies(m); return; }
   if(m.id==="carlog"){ paintCarlog(m); return; }
   $("#scope").style.display="none";
@@ -1013,7 +1017,8 @@ function paintDomain(m){   // state.rows를 화면에 그림 (데이터 다시 �
   applySearchUI(m);
   let base = state.rows;
   if(m.filterBy && state.pick) base = base.filter(r=>String(r[m.filterBy.field]||"").trim()===state.pick);
-  setMhSub(statSubline(m, base));
+  renderStats(m, base);
+  setMhSub("");
   const rows=filterRows(m, base, state.query);
   $("#count").textContent=`총 ${rows.length}건 · 출처: ${src.current.label}`;
   $("#list").innerHTML=rows.map((r,i)=>{ try{ return renderCard(m,r,i+1); }catch(e){ console.error("card",e); return ""; } }).join("") || `<div class="count">결과가 없습니다.</div>`;
@@ -1105,9 +1110,8 @@ function movieSearch(rows, scope, q, sel){
   return rows.filter(r=>norm(r.title).includes(nq)||norm(r.orig).includes(nq));   // 제목
 }
 function paintMovies(m){
-  setMhSub(statSubline(m, state.rows));               // 통계 = 상단 서브라인(클릭 필터 pill)
-  $("#mhSub").querySelectorAll(".sf-pill").forEach(el=>el.onclick=()=>{
-    const k=el.dataset.sf; state.statFilter=(state.statFilter===k)?"":k; state.page=0; paintMovies(m); });
+  renderStats(m, state.rows);
+  setMhSub("");
   const scope=state.searchScope||"title";
   const sc=$("#scope"); sc.style.display="flex"; sc.style.flexDirection="row"; sc.classList.add("scopetabs");     // 검색 범위 탭(밑줄·균등)
   const scopes=[["title","제목"],["director","감독"],["actor","배우"],["stream","스트리밍"],["rec","추천"]];
@@ -1196,12 +1200,8 @@ function paintCarlog(m){
   let base = state.rows;
   if(state.pick) base = base.filter(r=>String(r.car||"").trim()===state.pick);
 
-  // 통계 흡수: 마스트헤드 서브라인으로 (본문 통계줄 없앰 → 상단 압축)
-  const total=base.reduce((s,r)=>s+carNum(r.cost),0);
-  let sub=`차계부 · 총 <b>₩${total.toLocaleString()}</b> · ${base.length}건`;
-  if(state.pick){ const mx=base.reduce((x,r)=>Math.max(x,carNum(r.odo)),0); if(mx) sub+=` · 최근 ${mx.toLocaleString()}km`; }
-  setMhSub(sub);
-  $("#stats").style.display="none";
+  renderStats(m, base);
+  setMhSub("");
 
   // 차량 선택 + 정렬(⇅ 한 개) — 한 줄
   const cars=[...new Set(state.rows.map(r=>String(r.car||"").trim()).filter(Boolean))];
