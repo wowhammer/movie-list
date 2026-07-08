@@ -114,7 +114,7 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
   .picker::-webkit-scrollbar,.scope::-webkit-scrollbar,.cbar::-webkit-scrollbar{ display:none; }
   .cbar{ display:flex; gap:6px; flex-wrap:nowrap; overflow-x:auto; }
   .scope .chip{ font-size:12px; }
-  .chip{ font-family:var(--mono); font-size:12px; white-space:nowrap; padding:6px 12px; border-radius:3px; border:1px solid var(--line); background:var(--card); color:var(--ink-soft); cursor:pointer; }
+  .chip{ font-family:var(--sans); font-size:12.5px; white-space:nowrap; padding:6px 12px; border-radius:3px; border:1px solid var(--line); background:var(--card); color:var(--ink-soft); cursor:pointer; }
   .chip.on{ background:var(--accent); color:#fff; border-color:var(--accent); }
   .vehseg{ display:flex; gap:6px; width:100%; }
   .vseg{ flex:1; font-family:var(--sans); font-size:13px; font-weight:600; padding:8px 4px; border-radius:9px; border:1.5px solid var(--line); background:#fff; color:var(--ink-soft); cursor:pointer; white-space:nowrap; }
@@ -167,6 +167,10 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
   .rbadge{ font-family:var(--sans); font-size:10px; padding:2px 7px; border-radius:8px; background:#f0f0f0; color:#666; border:none; }
   .rbadge.clk{ cursor:pointer; } .rbadge.clk:active{ background:#e0e0e0; }
   .gtag{ font-family:var(--sans); font-size:10px; color:#4f46e5; background:#eef2ff; border:none; border-radius:8px; padding:2px 8px; white-space:nowrap; }
+  .noresult{ text-align:center; padding:40px 16px; }
+  .nr-t{ font-size:15px; color:#999; font-weight:600; }
+  .nr-s{ font-size:13px; color:#bbb; margin-top:6px; }
+  .nr-add{ margin-top:16px; }
   .bk-review{ font-size:11.5px; color:#999; font-style:italic; margin-top:4px; line-height:1.4; }
   .clx-sub{ font-size:11.5px; color:#999; margin-top:2px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
   .rec-sub{ font-family:var(--mono); font-size:12px; color:var(--ink-soft); margin-top:3px; }
@@ -270,7 +274,7 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
 <div class="wrap" id="root" data-domain="movies">
   <header class="masthead">
     <div class="mh-row">
-      <h1 id="brandBtn" style="cursor:pointer">내도감</h1><span class="sub">Naedogam · v50</span>
+      <h1 id="brandBtn" style="cursor:pointer">내도감</h1><span class="sub">Naedogam · v52</span>
       <span class="spacer"></span>
       <span class="src-chip" id="srcChip" style="display:none">데모</span>
       <button class="icon-btn" id="searchToggle" type="button" style="display:none">🔍</button>
@@ -433,6 +437,7 @@ const MANIFESTS = {
             {label:"다녀옴",type:"countIf",field:"climbed",eq:true},
             {label:"또갈것",type:"countIf",field:"revisit",eq:true},
             {label:"찜",type:"countIf",field:"pick",eq:true} ],
+    sorts:[ {k:"height",label:"높이"}, {k:"_dist",label:"거리",asc:true} ],
     card:{ kind:"specimen", thumb:"⛰",
            meta:r=>[r.height?r.height+"m":"", r.region].filter(Boolean).join(" · "),
            tags:"tags",
@@ -692,7 +697,7 @@ function showView(v){ state.view=v;
   $("#domainView").style.display = v==="domain"?"block":"none";
   if(v==="home") $("#searchToggle").style.display="none"; }
 function goHome(){ state.domain=null; state.query=""; state.pick=""; setMhSub(""); showView("home"); renderHome(); }
-function openDomain(id){ state.domain=id; state.query=""; state.pick=""; state.statFilter=""; state.sort="default"; state.sortAsc=false; state.searchScope="title"; state.selectQ=""; state.searchOpen=false; state.page=0; carWorkFilter=""; carSort="date"; carSortAsc=false; bookGenreFilter=""; $("#search").value=""; $("#search").style.display="none"; $("#mvselect").style.display="none"; $("#scope").style.display="none"; showView("domain"); loadAndRender(); }
+function openDomain(id){ state.domain=id; state.query=""; state.pick=""; state.statFilter=null; state.sort="default"; state.sortAsc=false; state.searchScope="title"; state.selectQ=""; state.searchOpen=false; state.page=0; carWorkFilter=""; carSort="date"; carSortAsc=false; bookGenreFilter=""; $("#search").value=""; $("#search").style.display="none"; $("#mvselect").style.display="none"; $("#scope").style.display="none"; showView("domain"); loadAndRender(); }
 
 /* 홈: 켜둔 카테고리를 카드로. 건수는 한 번 열어본 분야만 표시(홈을 빠르게 유지). */
 function renderHome(){
@@ -727,16 +732,23 @@ function renderTabs(){ $("#tabs").innerHTML=getActive().map(id=>{ const m=MANIFE
 function renderStats(m, rows){
   const isMovie = m.id==="movies";
   $("#stats").className="stats";
-  $("#stats").innerHTML=m.stats.map(s=>{ let n=calcStat(s,rows);
+  $("#stats").innerHTML=m.stats.map((s,idx)=>{ let n=calcStat(s,rows);
     if(s.type==="sum"||s.type==="avgComputed"||s.type==="max") n=fmt(n)+(s.unit?` ${s.unit}`:"");
-    const click = isMovie && s.sf!==undefined;
-    const on = click && (state.statFilter||"")===s.sf;
-    const sfc = isMovie ? ` sf-${s.sf===""?"total":s.sf}` : "";
-    return `<div class="stat${sfc} ${click?'st-click':''} ${on?'st-on':''}" ${click?`data-sf="${s.sf}"`:''}><div class="n">${n}</div><div class="l">${s.label}</div></div>`;
+    const clickable = (s.type==="count"||s.type==="countIf");
+    const on = (s.type==="countIf") && state.statFilter===idx;
+    const sfc = (isMovie && s.sf!==undefined) ? ` sf-${s.sf===""?"total":s.sf}` : "";
+    return `<div class="stat${sfc} ${clickable?'st-click':''} ${on?'st-on':''}" ${clickable?`data-idx="${idx}"`:''}><div class="n">${n}</div><div class="l">${s.label}</div></div>`;
   }).join("");
-  if(isMovie) $("#stats").querySelectorAll(".st-click").forEach(el=>el.onclick=()=>{
-    const k=el.dataset.sf; state.statFilter=(state.statFilter===k)?"":k; state.page=0; paintDomain(m);
+  $("#stats").querySelectorAll(".st-click").forEach(el=>el.onclick=()=>{
+    const idx=+el.dataset.idx, s=m.stats[idx];
+    state.statFilter = (s.type==="count") ? null : (state.statFilter===idx?null:idx);
+    state.page=0; paintDomain(m);
   });
+}
+function applyStatFilter(m, rows){
+  if(state.statFilter==null) return rows;
+  const s=m.stats[state.statFilter]; if(!s||s.type!=="countIf") return rows;
+  return rows.filter(r=>r[s.field]===s.eq);
 }
 function renderSearch(m){ const L={title:"제목",director:"감독",actors:"배우",type:"구분",memo:"메모",work:"작업",shop:"정비소",car:"차량",region:"지역",author:"저자"};
   $("#search").placeholder="🔍 "+m.search.map(f=>L[f]||f).join(" · ")+" 검색…"; }
@@ -820,19 +832,30 @@ async function fetchBookInfo(title, author){
   }catch(e){ bookInfoCache[key]=null; }
   return bookInfoCache[key];
 }
-let mtnCoverCache={};
-async function fetchMtnCover(name){
-  if(mtnCoverCache[name]!==undefined) return mtnCoverCache[name];
+let mtnInfoCache={}, userGeo=null, geoAsked=false;
+function haversineKm(la1,lo1,la2,lo2){ const R=6371,dLa=(la2-la1)*Math.PI/180,dLo=(lo2-lo1)*Math.PI/180,
+  x=Math.sin(dLa/2)**2+Math.cos(la1*Math.PI/180)*Math.cos(la2*Math.PI/180)*Math.sin(dLo/2)**2;
+  return 2*R*Math.asin(Math.sqrt(x)); }
+async function fetchMtnInfo(name){   // 위키백과: 대표사진 + 좌표
+  if(mtnInfoCache[name]!==undefined) return mtnInfoCache[name];
   try{ const d=await fetch(`https://ko.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(name)}`).then(r=>r.json());
-    mtnCoverCache[name]=(d&&d.thumbnail&&d.thumbnail.source)||null;
-  }catch(e){ mtnCoverCache[name]=null; }
-  return mtnCoverCache[name];
+    const c=d&&d.coordinates;
+    mtnInfoCache[name]={ cover:(d&&d.thumbnail&&d.thumbnail.source)||null, lat:c&&c.lat!=null?c.lat:null, lon:c&&c.lon!=null?c.lon:null };
+  }catch(e){ mtnInfoCache[name]=null; }
+  return mtnInfoCache[name];
 }
-function lazyMountainCovers(){
-  const io=new IntersectionObserver((ents,obs)=>{ ents.forEach(async e=>{ if(!e.isIntersecting) return; const el=e.target; obs.unobserve(el);
-    const src=await fetchMtnCover(el.dataset.mtnname); if(src) el.innerHTML=`<img src="${src}" alt="">`;
-  }); },{rootMargin:"300px"});
-  document.querySelectorAll(".thumb[data-mtncover]").forEach(el=>io.observe(el));
+function ensureGeo(){ return new Promise(res=>{ if(userGeo||geoAsked) return res(userGeo); geoAsked=true;
+  if(!navigator.geolocation) return res(null);
+  navigator.geolocation.getCurrentPosition(p=>{ userGeo={lat:p.coords.latitude,lng:p.coords.longitude}; res(userGeo); }, ()=>res(null), {timeout:8000,maximumAge:600000}); }); }
+async function loadMountainMeta(m){   // 커버 + (위치 허용 시) 거리 채우고 한 번 다시 그림
+  await ensureGeo();
+  let changed=false;
+  for(const r of state.rows.slice(0,60)){
+    const info=await fetchMtnInfo(r.title); if(!info) continue;
+    if(info.cover && r._cover!==info.cover){ r._cover=info.cover; changed=true; }
+    if(userGeo && info.lat!=null){ const dkm=Math.round(haversineKm(userGeo.lat,userGeo.lng,info.lat,info.lon)); if(r._dist!==dkm){ r._dist=dkm; changed=true; } }
+  }
+  if(changed && state.domain===m.id) paintDomain(m);
 }
 function lazyBookCovers(){
   const io=new IntersectionObserver((ents,obs)=>{ ents.forEach(async e=>{
@@ -923,9 +946,9 @@ function renderCard(m, r, no){ if(m.id==="books") return bookCard(r); const c=m.
     const tags=tarr.map(t=>`<span class="tag">${t}</span>`).join("");
     const flags=(typeof c.flags==="function"?c.flags(r):[]).filter(Boolean)
       .map(f=>`<span class="flag ${f.cls||""}">${f.t}</span>`).join("");
-    const mtnAttr=(m.id==="mountains"&&!r.cover)?` data-mtncover data-mtnname="${String(r.title||"").replace(/"/g,"&quot;")}"`:"";
-    return `<button class="card catcard" data-id="${r._id}"><span class="thumb"${mtnAttr}>${r.cover?`<img src="${r.cover}" alt="">`:c.thumb}</span>
-      <span class="body"><h3>${r.title}</h3><div class="meta">${meta}</div>${(flags||tags)?`<div class="cbadges">${flags}${tags}</div>`:""}</span></button>`; }
+    const _cov=r.cover||r._cover; const _dt=(r._dist!=null)?` · 📍${r._dist}km`:"";
+    return `<button class="card catcard" data-id="${r._id}"><span class="thumb">${_cov?`<img src="${_cov}" alt="">`:c.thumb}</span>
+      <span class="body"><h3>${r.title}</h3><div class="meta">${meta}${_dt}</div>${(flags||tags)?`<div class="cbadges">${flags}${tags}</div>`:""}</span></button>`; }
   const kv=c.kv.map(col=>{ const v=r[col.f]; if(v==null) return ""; const s=(typeof v==="number"?fmt(v):v)+(col.u?` ${col.u}`:"");
     return `<span>${col.k} <b>${s}</b></span>`; }).filter(Boolean).join("");
   return `<button class="card catcard" data-id="${r._id}"><span class="thumb">🧾</span>
@@ -1094,7 +1117,7 @@ async function openPersonModal(name, role){
   });
 }
 function goToMovie(match){   // 필터 초기화 → 목록 다시 그림 → 그 영화 상세 열기
-  state.query=""; state.statFilter=""; state.sort="default"; state.page=0; state.searchScope="title"; $("#search").value="";
+  state.query=""; state.statFilter=null; state.sort="default"; state.page=0; state.searchScope="title"; $("#search").value="";
   paintMovies(MANIFESTS.movies);
   const r=state.rows.find(x=>x._id===match._id)||match;
   setTimeout(()=>openMovieDetail(MANIFESTS.movies, r), 60);
@@ -1107,7 +1130,7 @@ function openRecordForm(m, existing){
   const body=fields.map(f=>{
     const val = existing ? existing[f.k] : (f.type==="bool"?false:"");
     if(f.type==="bool")
-      return `<label>${f.label}</label><button type="button" class="btn ghost rf-bool ${val?'on':''}" data-k="${f.k}">${val?'예':'아니오'}</button>`;
+      return `<button type="button" class="btn ghost rf-bool ${val?'on':''}" data-k="${f.k}" style="margin-top:6px;margin-right:6px">${f.sheet||f.label}</button>`;
     if(f.type==="select")
       return `<label>${f.label}</label><select class="rf" data-k="${f.k}" data-type="select">${(f.options||[]).map(o=>`<option value="${o}" ${String(val||'')===o?'selected':''}>${o||'(없음)'}</option>`).join("")}</select>`;
     const v = (f.type==="tags" && Array.isArray(val)) ? val.join(", ") : (val==null?"":val);
@@ -1119,7 +1142,7 @@ function openRecordForm(m, existing){
       <button class="btn ghost" id="rfClose">닫기</button>
     </div></div>`;
   d.showModal();
-  d.querySelectorAll(".rf-bool").forEach(b=>b.onclick=()=>{ const on=!b.classList.contains("on"); b.classList.toggle("on",on); b.textContent=on?'예':'아니오'; });
+  d.querySelectorAll(".rf-bool").forEach(b=>b.onclick=()=>{ b.classList.toggle("on"); });
   $("#rfClose").onclick=()=>d.close();
   $("#rfSave").onclick=async()=>{
     // 한글 마지막 글자 잘림 방지: 조합 확정(blur) → 아주 짧은 틈 뒤 값 읽기
@@ -1233,13 +1256,26 @@ function paintDomain(m){   // state.rows를 화면에 그림 (데이터 다시 �
   renderStats(m, base);
   setMhSub("");
   if(m.id==="books") renderBookGenres(m);
-  let listBase = (m.id==="books" && bookGenreFilter) ? base.filter(r=>bookGenresOf(r).includes(bookGenreFilter)) : base;
-  const rows=filterRows(m, listBase, state.query);
-  $("#count").textContent = `총 ${rows.length}건`;
-  $("#list").innerHTML=rows.map((r,i)=>{ try{ return renderCard(m,r,i+1); }catch(e){ console.error("card",e); return ""; } }).join("") || `<div class="count">결과가 없습니다.</div>`;
+  let listBase = applyStatFilter(m, base);
+  if(m.id==="books" && bookGenreFilter) listBase = listBase.filter(r=>bookGenresOf(r).includes(bookGenreFilter));
+  let rows=filterRows(m, listBase, state.query);
+  if(m.sorts && state.sort && state.sort!=="default"){
+    const asc=state.sortAsc;
+    rows=[...rows].sort((a,b)=>{ const av=(a[state.sort]==null?(asc?Infinity:-Infinity):(+a[state.sort]||0)), bv=(b[state.sort]==null?(asc?Infinity:-Infinity):(+b[state.sort]||0)); return asc?av-bv:bv-av; });
+  }
+  const _cnt=$("#count");
+  if(m.sorts && m.sorts.length){ _cnt.classList.add("countrow");
+    const _sb=m.sorts.map(so=>{ const on=state.sort===so.k; return `<button class="sort-btn ${on?'on':''}" data-gs="${so.k}">${so.label}${on?(state.sortAsc?"↑":"↓"):(so.asc?"↑":"↓")}</button>`; }).join("");
+    _cnt.innerHTML=`<span class="cnt-lbl">총 ${rows.length}건</span><span class="sort-btns">${_sb}</span>`;
+    _cnt.querySelectorAll(".sort-btn").forEach(b=>b.onclick=()=>{ const k=b.dataset.gs, so=m.sorts.find(x=>x.k===k); if(k===state.sort) state.sortAsc=!state.sortAsc; else { state.sort=k; state.sortAsc=!!so.asc; } paintDomain(m); });
+  } else { _cnt.classList.remove("countrow"); _cnt.textContent=`총 ${rows.length}건`; }
+  const _qg=(state.query||"").replace(/</g,"&lt;");
+  const emptyG = _qg ? `<div class="noresult"><div class="nr-t">검색 결과 없음</div><div class="nr-s">"${_qg}"는 목록에 없어요</div><button class="btn nr-add" id="nrAdd">+ "${_qg}" 새로 추가</button></div>` : `<div class="count">결과가 없습니다.</div>`;
+  $("#list").innerHTML=rows.map((r,i)=>{ try{ return renderCard(m,r,i+1); }catch(e){ console.error("card",e); return ""; } }).join("") || emptyG;
   document.querySelectorAll(".card").forEach(b=>b.onclick=()=>openDetail(m, state.rows.find(x=>x._id===b.dataset.id)));
+  { const na=$("#nrAdd"); if(na) na.onclick=()=>{ if(m.id==="books"){ openAddBook(); const bq=$("#bq"); if(bq){ bq.value=state.query; bq.dispatchEvent(new Event("input")); } } else openRecordForm(m, null); }; }
   if(m.id==="books") lazyBookCovers();
-  if(m.id==="mountains") lazyMountainCovers();
+  if(m.id==="mountains") loadMountainMeta(m);
 }
 
 /* ── 영화 목록: 통계 클릭 필터 + 정렬 + 추천/스트리밍 뱃지 + 포스터(보일 때만 로드) + 더보기 ── */
@@ -1348,7 +1384,7 @@ function paintMovies(m){
   $("#picker").style.display="none";   // 정렬은 아래 카운트 줄로 이동
 
   let rows=movieSearch(state.rows, scope, state.query, state.selectQ);
-  if(state.statFilter) rows=rows.filter(r=> state.statFilter==="watched"?r.watched==="O":state.statFilter==="rewatch"?r.rewatch:state.statFilter==="pick"?r.pick:true);
+  rows=applyStatFilter(m, rows);
   const sort=state.sort||"default", asc=state.sortAsc;
   if(sort==="rating") rows=[...rows].sort((a,b)=>{const d=(parseFloat(a.rating)||0)-(parseFloat(b.rating)||0); return asc?d:-d;});
   else if(sort==="year") rows=[...rows].sort((a,b)=>{const d=(a.year||0)-(b.year||0); return asc?d:-d;});
@@ -1360,14 +1396,19 @@ function paintMovies(m){
     const arrow=v==="default"?"":(on?(state.sortAsc?"↑":"↓"):"↓");
     return `<button class="sort-btn ${on?'on':''}" data-s="${v}">${l}${arrow}</button>`; }).join("");
   const cnt=$("#count"); cnt.classList.add("countrow");
-  cnt.innerHTML=`<span class="cnt-lbl">총 ${total}건${state.statFilter?" · 필터":""}</span><span class="sort-btns">${sortBtns}</span>`;
+  cnt.innerHTML=`<span class="cnt-lbl">총 ${total}건${state.statFilter!=null?" · 필터":""}</span><span class="sort-btns">${sortBtns}</span>`;
   cnt.querySelectorAll(".sort-btn").forEach(b=>b.onclick=()=>{ const s=b.dataset.s;
     if(s===(state.sort||"default")&&s!=="default") state.sortAsc=!state.sortAsc;
     else { state.sort=s; state.sortAsc=false; }
     state.page=0; paintMovies(m); });
-  $("#list").innerHTML = (shown.map((r,i)=>movieCard(r,i+1)).join("")||`<div class="count">결과가 없습니다.</div>`)
+  const _q=(state.query||"").replace(/</g,"&lt;");
+  const emptyM = (_q && (state.searchScope||"title")==="title")
+    ? `<div class="noresult"><div class="nr-t">검색 결과 없음</div><div class="nr-s">"${_q}"는 목록에 없어요</div><button class="btn nr-add" id="nrAdd">+ "${_q}" 새로 추가</button></div>`
+    : `<div class="count">결과가 없습니다.</div>`;
+  $("#list").innerHTML = (shown.map((r,i)=>movieCard(r,i+1)).join("")||emptyM)
     + (shown.length<total?`<button class="btn ghost" id="moreBtn" style="width:100%;margin-top:10px">더 보기 (${total-shown.length}편)</button>`:"");
   document.querySelectorAll(".card").forEach(b=>b.onclick=()=>openDetail(m, state.rows.find(x=>x._id===b.dataset.id)));
+  { const na=$("#nrAdd"); if(na) na.onclick=()=>{ openAddMovie(); const mq=$("#mq"); if(mq){ mq.value=state.query; mq.dispatchEvent(new Event("input")); } }; }
   document.querySelectorAll(".mvcard .plink").forEach(el=>el.onclick=e=>{ e.stopPropagation(); openPersonModal(el.dataset.name, el.dataset.role); });
   const more=$("#moreBtn"); if(more) more.onclick=()=>{ state.page++; paintMovies(m); };
   lazyPosters();
@@ -1419,6 +1460,8 @@ function paintCarlog(m){
   if(state.pick) base = base.filter(r=>String(r.car||"").trim()===state.pick);
 
   renderStats(m, base);
+  const _ncar=new Set(state.rows.map(r=>String(r.car||"").trim()).filter(Boolean)).size;
+  if(!state.pick && _ncar>1){ const ns=$("#stats").querySelectorAll(".stat .n"); if(ns[2]) ns[2].textContent="-"; }   // 최근주행: 전체는 차량별이 아니라 "-"
   setMhSub("");
 
   // 차량 선택 + 정렬(⇅ 한 개) — 한 줄
