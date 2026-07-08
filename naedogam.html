@@ -171,6 +171,18 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
   .cl-kv b{ color:var(--ink-soft); font-weight:400; font-size:9.5px; letter-spacing:.06em; margin-right:6px; text-transform:uppercase; }
   .cl-kv.big{ color:var(--green); }
   .cl-memo{ margin-top:9px; font-size:12px; color:var(--ink-soft); font-style:italic; }
+  /* 차계부 카드 — 기존 영화앱 스타일(흰 카드) */
+  .clx-card{ display:block; width:100%; text-align:left; font-family:var(--sans); color:inherit; background:#fff; border:none; border-radius:12px; margin-bottom:8px; box-shadow:0 1px 3px rgba(0,0,0,.07); padding:12px 14px; cursor:pointer; }
+  .clx-card:active{ background:#fafafa; }
+  .clx-top{ display:flex; justify-content:space-between; align-items:baseline; gap:8px; margin-bottom:6px; }
+  .clx-date{ font-size:13px; font-weight:700; color:#1a1a1a; }
+  .clx-odo{ font-size:12px; color:#888; white-space:nowrap; }
+  .clx-work{ font-size:15px; font-weight:600; color:#1a1a1a; margin-bottom:2px; }
+  .clx-meta{ display:flex; justify-content:space-between; align-items:baseline; gap:8px; }
+  .clx-shop{ font-size:12px; color:#888; }
+  .clx-price{ font-size:14px; font-weight:700; color:#ea580c; white-space:nowrap; }
+  .clx-memo{ font-size:12px; color:#aaa; margin-top:4px; }
+  .clx-badge{ display:inline-block; font-size:10px; font-weight:700; color:#fff; padding:1px 7px; border-radius:9px; vertical-align:middle; margin-right:4px; }
   .sortsel{ flex-shrink:0; font-family:var(--mono); font-size:12px; padding:7px 10px; border:1px solid var(--line); border-radius:3px; background:var(--card); color:var(--ink); height:34px; }
 
   dialog{ border:1px solid var(--ink); border-radius:8px; padding:0; max-width:460px; width:92%; background:var(--card); color:var(--ink); }
@@ -241,7 +253,7 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
 <div class="wrap" id="root" data-domain="movies">
   <header class="masthead">
     <div class="mh-row">
-      <h1 id="brandBtn" style="cursor:pointer">내도감</h1><span class="sub">Naedogam · v34</span>
+      <h1 id="brandBtn" style="cursor:pointer">내도감</h1><span class="sub">Naedogam · v35</span>
       <span class="spacer"></span>
       <span class="src-chip" id="srcChip" style="display:none">데모</span>
       <button class="icon-btn" id="searchToggle" type="button" style="display:none">🔍</button>
@@ -1138,15 +1150,18 @@ function lazyPosters(){   // 화면에 들어온 카드만 TMDB에서 포스터 
 /* ── 차계부 목록: 차량 선택 + 정렬(날짜/주행/가격) + 작업내용 칩 + 검색 ── */
 let carWorkFilter="", carSort="date", carSortAsc=false;
 function carNum(v){ return parseInt(String(v==null?"":v).replace(/[^\d]/g,""),10)||0; }
+const CAR_PALETTE=['#2563eb','#16a34a','#db2777','#d97706','#7c3aed'];
+let CAR_ORDER=[];
+function carColor(name){ const i=CAR_ORDER.indexOf(name); return CAR_PALETTE[(i<0?0:i)%CAR_PALETTE.length]; }
 function carlogCard(r, no){
-  const kv=[["작업",r.work],["금액",r.cost?fmt(r.cost)+"원":""],["주행",r.odo?fmt(r.odo)+"km":""],["정비소",r.shop]]
-    .filter(([k,v])=>v!=null&&v!=="")
-    .map(([k,v])=>`<span class="cl-kv${k==="금액"?" big":""}"><b>${k}</b>${v}</span>`).join("");
-  return `<button class="card cl-card" data-id="${r._id}">
-    ${no?`<span class="cl-no">No. ${String(no).padStart(3,"0")}</span>`:""}
-    <div class="cl-head"><span class="cl-date">${r.date||"-"}</span>${r.car?`<span class="cl-veh">${r.car}</span>`:""}</div>
-    <div class="cl-kvs">${kv}</div>
-    ${r.memo?`<div class="cl-memo">${r.memo}</div>`:""}
+  const car=(r.car||"").trim();
+  const badge=(car&&CAR_ORDER.length>1)?`<span class="clx-badge" style="background:${carColor(car)}">${car}</span>`:"";
+  const odo=carNum(r.odo), cost=carNum(r.cost);
+  return `<button class="clx-card" data-id="${r._id}">
+    <div class="clx-top"><span class="clx-date">${badge}${r.date||"-"}</span><span class="clx-odo">${odo?fmt(odo)+"km":""}</span></div>
+    <div class="clx-work">${r.work||"-"}</div>
+    <div class="clx-meta"><span class="clx-shop">${r.shop||""}</span><span class="clx-price">${cost?"₩"+fmt(cost):""}</span></div>
+    ${r.memo?`<div class="clx-memo">${r.memo}</div>`:""}
   </button>`;
 }
 function buildWorkChips(base){
@@ -1167,6 +1182,7 @@ function paintCarlog(m){
 
   // 차량 선택 + 정렬(⇅ 한 개) — 한 줄
   const cars=[...new Set(state.rows.map(r=>String(r.car||"").trim()).filter(Boolean))];
+  CAR_ORDER=cars;
   const p=$("#picker"); p.style.display="flex"; p.style.alignItems="center"; p.style.overflow="visible";
   const carChips = cars.length>1
     ? `<div class="cbar" style="flex:1">${[{v:"",l:"전체"},...cars.map(c=>({v:c,l:c}))].map(o=>`<button class="chip ${o.v===state.pick?'on':''}" data-v="${o.v}">${o.l}</button>`).join("")}</div>`
@@ -1201,7 +1217,7 @@ function paintCarlog(m){
   });
   $("#count").textContent=`총 ${rows.length}건`;
   $("#list").innerHTML=rows.map((r,i)=>{ try{ return carlogCard(r, rows.length-i); }catch(e){ console.error(e); return ""; } }).join("")||`<div class="count">기록이 없어요.</div>`;
-  document.querySelectorAll(".card").forEach(b=>b.onclick=()=>openDetail(m, state.rows.find(x=>x._id===b.dataset.id)));
+  document.querySelectorAll(".clx-card").forEach(b=>b.onclick=()=>openDetail(m, state.rows.find(x=>x._id===b.dataset.id)));
 }
 
 /* ── 5. 설정: 카테고리 켜고 끄기 + 구글/개인 설정 자리 ── */
