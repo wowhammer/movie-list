@@ -266,7 +266,7 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
 <div class="wrap" id="root" data-domain="movies">
   <header class="masthead">
     <div class="mh-row">
-      <h1 id="brandBtn" style="cursor:pointer">내도감</h1><span class="sub">Naedogam · v41</span>
+      <h1 id="brandBtn" style="cursor:pointer">내도감</h1><span class="sub">Naedogam · v42</span>
       <span class="spacer"></span>
       <span class="src-chip" id="srcChip" style="display:none">데모</span>
       <button class="icon-btn" id="searchToggle" type="button" style="display:none">🔍</button>
@@ -735,7 +735,93 @@ function renderPicker(m){
   p.innerHTML=opts.map(o=>`<button class="chip ${o.v===state.pick?'on':''}" data-v="${o.v}">${o.label}</button>`).join("");
   p.querySelectorAll(".chip").forEach(b=>b.onclick=()=>{ state.pick=b.dataset.v; loadAndRender(); });
 }
-function renderCard(m, r, no){ const c=m.card;
+
+/* ── 도서: 영화급(영화식 카드 + 리치 상세 + 교보/YES24/네이버 + 추천 팝업) ── */
+const BOOK_REC_INFO={
+  '유시민':{icon:'🎙️',sub:'작가·방송인 추천',desc:'작가 유시민이 방송·강연·저서에서 꾸준히 추천해 온 책들. 역사·정치·과학 교양을 쉽게 풀어 소개하는 것으로 유명해 입문서로 신뢰가 높습니다.',tag:'추천 도서',url:'https://www.google.com/search?q=유시민+추천도서'},
+  '빌 게이츠':{icon:'💻',sub:'GatesNotes 올해의 책',desc:'빌 게이츠가 블로그 GatesNotes에서 매년 공개하는 추천 도서. 과학·기술·사회를 관통하는 통찰 있는 책을 고르는 것으로 알려져 있습니다.',tag:'올해의 책',url:'https://www.gatesnotes.com/Books'},
+  '책읽어드립니다':{icon:'📺',sub:'tvN 교양 프로그램',desc:'설민석·김상욱 등이 명저를 쉽게 풀어 소개한 tvN 프로그램에서 다룬 책들. 대중적 접근성이 높습니다.',tag:'방송 선정',url:'https://www.google.com/search?q=책읽어드립니다+선정도서'},
+  '노벨문학상':{icon:'🏅',sub:'노벨 문학상 수상작가',desc:'노벨 문학상을 수상한 작가의 작품. 문학성과 인류 보편의 가치를 인정받은 작가들입니다.',tag:'수상 작가',url:'https://www.nobelprize.org/prizes/literature/'},
+  '뉴욕타임스 베스트셀러':{icon:'📰',sub:'NYT Best Sellers',desc:'뉴욕타임스가 매주 집계하는 베스트셀러 목록에 오른 책. 대중적 화제성과 판매량의 지표입니다.',tag:'베스트셀러',url:'https://www.nytimes.com/books/best-sellers/'},
+};
+function bookRecList(r){ return String(r.recommend||"").split(/[\/,]+/).map(s=>s.trim()).filter(Boolean); }
+function bookRecBadges(r, cls){
+  return bookRecList(r).map(t=>{ const key=Object.keys(BOOK_REC_INFO).find(k=>t.includes(k));
+    return key ? `<span class="${cls} clk" onclick="event.stopPropagation();openRecModal('${key.replace(/'/g,"\\'")}')">${t}</span>`
+               : `<span class="${cls}">${t}</span>`; }).join("");
+}
+function bookCard(r){
+  const flags=(r.status==="읽음"?`<span class="wb wb-W">읽음</span>`:"")
+    +(r.status==="읽는중"?`<span class="wb wb-R">읽는중</span>`:"")
+    +(r.pick?`<span class="wb wb-P">찜</span>`:"");
+  const right=[r.year,(r.rating!=null&&r.rating!==""?("⭐"+r.rating):"")].filter(Boolean).join(" · ");
+  const gArr=Array.isArray(r.genre)?r.genre:(r.genre==null||r.genre===""?[]:[r.genre]);
+  const genre=gArr.map(t=>`<span class="tag">${t}</span>`).join("");
+  const rec=bookRecBadges(r,"rbadge");
+  const cover=r.cover?`<img src="${r.cover}" alt="">`:"📖";
+  return `<button class="card mvcard" data-id="${r._id}">
+    <span class="thumb">${cover}</span>
+    <div class="mvinfo">
+      <div class="mv-titlerow"><span class="mv-title">${r.title}${flags}</span><span class="mv-year">${right}</span></div>
+      ${r.author?`<div class="mv-sub">${r.author}</div>`:""}
+      ${genre?`<div class="mvbadges">${genre}</div>`:""}
+      ${rec?`<div class="mvbadges">${rec}</div>`:""}
+    </div>
+  </button>`;
+}
+let bookInfoCache={};
+async function fetchBookInfo(title, author){
+  const key=(title||"")+"|"+(author||"");
+  if(bookInfoCache[key]!==undefined) return bookInfoCache[key];
+  try{
+    const kk=CONFIG.GOOGLE_BOOKS_KEY?("&key="+CONFIG.GOOGLE_BOOKS_KEY):"";
+    const q=encodeURIComponent((title||"")+(author?(" "+author):""));
+    const d=await fetch(`https://www.googleapis.com/books/v1/volumes?maxResults=1&country=KR&q=${q}${kk}`).then(r=>r.json());
+    const v=((d.items||[])[0]||{}).volumeInfo||{};
+    const desc=String(v.description||"").replace(/<[^>]+>/g,"").trim();
+    const cover=String((v.imageLinks&&v.imageLinks.thumbnail)||"").replace(/^http:/,"https:");
+    bookInfoCache[key]={ desc, cover:cover||null, pages:v.pageCount||null, publisher:v.publisher||"" };
+  }catch(e){ bookInfoCache[key]=null; }
+  return bookInfoCache[key];
+}
+async function openBookDetail(m, r){
+  const d=$("#detail");
+  const gArr=Array.isArray(r.genre)?r.genre:(r.genre==null||r.genre===""?[]:[r.genre]);
+  const genre=gArr.map(t=>`<span class="tag">${t}</span>`).join("");
+  const rec=bookRecBadges(r,"tag rec");
+  const q=encodeURIComponent(r.title||"");
+  const qa=encodeURIComponent(((r.title||"")+" "+(r.author||"")).trim());
+  d.innerHTML=`<div class="dhead"><h3>${r.title}</h3></div>
+    <div class="mvtop">
+      <div class="mvposter" id="bkCover">${r.cover?`<img src="${r.cover}" alt="">`:"📖"}</div>
+      <div class="mvinfo" style="min-width:0">
+        <div class="mvmeta">${[r.author,r.year,(r.rating!=null&&r.rating!==""?("⭐ "+r.rating):"")].filter(Boolean).join(" · ")}</div>
+        ${r.status?`<div class="mvorig">${r.status}</div>`:""}
+        ${(genre||rec)?`<div class="tags">${genre}${rec}</div>`:""}
+      </div>
+    </div>
+    <div class="mvover" id="bkOver">책 소개 불러오는 중…</div>
+    <div class="mvlinks">
+      <a class="btn ghost" target="_blank" rel="noopener" href="https://search.kyobobook.co.kr/search?keyword=${q}">📗 교보문고</a>
+      <a class="btn ghost" target="_blank" rel="noopener" href="https://www.yes24.com/product/search?query=${q}">📕 YES24</a>
+      <a class="btn ghost" target="_blank" rel="noopener" href="https://search.naver.com/search.naver?query=${qa}%20책">🔍 네이버</a>
+    </div>
+    <div class="dfoot">
+      <button class="btn ghost" id="bkEdit">정보수정</button>
+      <button class="btn ghost" id="bkDel">삭제</button>
+      <button class="btn ghost" id="bkClose" style="margin-left:auto">닫기</button>
+    </div>`;
+  d.showModal();
+  $("#bkEdit").onclick=()=>{ d.close(); openRecordForm(m, r); };
+  $("#bkDel").onclick=()=>deleteRecord(m, r);
+  $("#bkClose").onclick=()=>d.close();
+  const info=await fetchBookInfo(r.title, r.author);
+  if(info){
+    if(!r.cover && info.cover && $("#bkCover")) $("#bkCover").innerHTML=`<img src="${info.cover}" alt="">`;
+    if($("#bkOver")) $("#bkOver").textContent = info.desc || "책 소개 정보가 없어요.";
+  } else if($("#bkOver")) $("#bkOver").textContent="책 소개를 불러오지 못했어요.";
+}
+function renderCard(m, r, no){ if(m.id==="books") return bookCard(r); const c=m.card;
   if(c.kind==="specimen"){ const meta=c.meta(r);
     const traw=r[c.tags]; const tarr=Array.isArray(traw)?traw:(traw==null||traw===""?[]:[traw]);   // 하나만 있어도 안전
     const tags=tarr.map(t=>`<span class="tag">${t}</span>`).join("");
@@ -749,6 +835,7 @@ function renderCard(m, r, no){ const c=m.card;
     <span class="body"><h3 style="font-size:15px">${c.title(r)}</h3><div class="kv">${kv}</div>${r.memo?`<div class="meta" style="margin-top:5px">${r.memo}</div>`:""}</span></button>`; }
 function openDetail(m, r){
   if(m.id==="movies"){ openMovieDetail(m, r); return; }
+  if(m.id==="books"){ openBookDetail(m, r); return; }
   const LBL={pace:"페이스"}; (m.fields||[]).forEach(f=>{ LBL[f.k]=f.sheet||String(f.label||f.k).replace(/\s*\(.*$/,""); });
   const rows=Object.entries(r).filter(([k])=>k!=="_id"&&k!=="orig").map(([k,v])=>
     `<div class="drow"><span class="k">${LBL[k]||k}</span><span>${Array.isArray(v)?v.join(", "):v===null?"—":v===true?"예":v===false?"아니오":(typeof v==="number"&&k!=="year"&&!/연도/.test(LBL[k]||"")?v.toLocaleString():v)}</span></div>`).join("");
@@ -1072,7 +1159,7 @@ const REC_INFO={
   '영화평론가협회상':{icon:'✍️',sub:'한국영화평론가협회 · 1997년 창설',desc:'한국영화평론가협회가 수여하는 시상식으로 1997년 시작됐습니다. 홍상수·이창동 등 작가주의 감독의 작품이 자주 선정되며, 상업성보다 예술성과 비평적 가치를 중시하는 것으로 유명합니다. 영화 마니아들 사이에서 신뢰도가 높습니다.',tag:'최우수 작품상',url:'https://www.koreafilmcritics.org'},
 };
 function openRecModal(key){
-  const info=REC_INFO[key]; if(!info) return;
+  const info=REC_INFO[key]||BOOK_REC_INFO[key]; if(!info) return;
   const d=$("#rec");
   d.innerHTML=`<div class="dhead" style="display:flex;align-items:center;gap:12px">
       <span style="font-size:30px;flex-shrink:0">${info.icon}</span>
