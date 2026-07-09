@@ -86,8 +86,8 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
   .tab[aria-selected="true"] span{ opacity:1; }
 
   /* 통계(압축 스트립) */
-  .stats{ display:flex; justify-content:center; align-items:flex-start; gap:14px; padding:16px 0 10px; flex-wrap:wrap; }
-  .stat{ flex:0 0 auto; text-align:center; padding:5px 12px; border-radius:6px; }
+  .stats{ display:flex; justify-content:center; gap:0; padding:16px 0 10px; }
+  .stat{ flex:1; text-align:center; padding:5px 4px; border-radius:6px; }
   .stat .n{ font-family:var(--sans); font-weight:700; font-size:23px; color:var(--ink); letter-spacing:-.01em; }
   .stat .l{ font-size:11px; color:var(--ink-soft); margin-top:2px; }
   .stat.sf-watched .n{ color:var(--green); }
@@ -107,8 +107,8 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
   .picker,.scope{ display:flex; gap:6px; flex-wrap:nowrap; overflow-x:auto; padding-bottom:2px; }
   .picker{ margin:14px 0 8px; }
   .scope{ margin:0 0 10px; }
-  .scope.scopetabs{ border-bottom:1px solid var(--line); gap:2px; padding-bottom:0; margin:6px 0 12px; }
-  .scope.scopetabs .chip{ border:none; background:none; border-radius:0; color:var(--ink-soft); padding:9px 12px; border-bottom:2px solid transparent; margin-bottom:-1px; font-family:var(--sans); font-size:13px; }
+  .scope.scopetabs{ border-bottom:1px solid var(--line); gap:2px; padding-bottom:0; margin:0 0 10px; }
+  .scope.scopetabs .chip{ border:none; background:none; border-radius:0; color:var(--ink-soft); padding:6px 12px; border-bottom:2px solid transparent; margin-bottom:-1px; font-family:var(--sans); font-size:13px; }
   .scope.scopetabs .chip.on{ color:var(--ink); border-bottom-color:var(--ochre); font-weight:500; }
   .scope.scopetabs .chip{ flex:1; text-align:center; }
   .count.countrow{ display:flex; align-items:center; justify-content:space-between; gap:8px; }
@@ -313,11 +313,11 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
 <div class="wrap" id="root" data-domain="movies">
   <header class="masthead">
     <div class="mh-row">
-      <button id="brandBtn" type="button" class="brandbtn" aria-label="홈"><!-- Naedogam v70 -->
+      <button id="brandBtn" type="button" class="brandbtn" aria-label="홈"><!-- Naedogam v71 -->
         <svg class="brandmark" width="34" height="30" viewBox="26 28 62 54" aria-hidden="true"><rect x="28" y="40" width="12" height="38" rx="5" fill="#F7F5F0"/><rect x="44" y="30" width="12" height="48" rx="5" fill="#F7F5F0"/><rect x="60" y="32" width="12" height="46" rx="5" fill="#E0483F" transform="rotate(16 66 78)"/></svg>
         <span class="brandwm"><span class="bwm-ko">내도감</span><span class="bwm-en">NAEDOGAM</span></span>
       </button>
-      <span class="mhver">v70</span>
+      <span class="mhver">v71</span>
       <span class="spacer"></span>
       <span class="src-chip" id="srcChip" style="display:none">데모</span>
       <button class="icon-btn" id="searchToggle" type="button" style="display:none">🔍</button>
@@ -486,8 +486,9 @@ const MANIFESTS = {
              {k:"pick",sheet:"찜",label:"찜",type:"bool"},
              {k:"cover",sheet:"커버",label:"커버 사진",type:"image"},
              {k:"climbDate",sheet:"다녀온날",label:"다녀온날",type:"date"},
+             {k:"memo",sheet:"메모",label:"메모",type:"text"},
              {k:"tags",sheet:"태그",label:"태그(쉼표로 여러 개)",type:"tags"} ],
-    search:["title","region"],
+    search:["title","region","tags","memo"],
     activity:{ df:"climbDate", when:r=>!!r.climbed, label:"다녀옴", name:r=>r.title },
     stats:[ {label:"전체",type:"count"},
             {label:"다녀옴",type:"countIf",field:"climbed",eq:true},
