@@ -41,9 +41,16 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
   .wrap{ max-width:600px; margin:0 auto; padding:0 16px 96px; }
 
   /* 마스트헤드(압축·상단 고정) */
-  .masthead{ background:#fff; padding:12px 0 8px; border-bottom:1px solid var(--line); }
+  .masthead{ background:#fff; padding:0 0 8px; border-bottom:1px solid var(--line); }
   .wrap{ max-width:600px; margin:0 auto; padding:0 16px 40px; }
-  .mh-row{ display:flex; align-items:center; gap:10px; }
+  .mh-row{ display:flex; align-items:center; gap:10px; background:#18181B; margin:0 -16px; padding:12px 16px; }
+  .brandbtn{ display:flex; align-items:center; gap:9px; background:none; border:none; padding:0; cursor:pointer; }
+  .brandmark{ display:block; flex-shrink:0; }
+  .brandwm{ display:flex; flex-direction:column; align-items:flex-start; line-height:1; }
+  .bwm-ko{ font-family:var(--sans); font-weight:800; font-size:20px; letter-spacing:.5px; color:#F7F5F0; }
+  .bwm-en{ font-family:var(--mono); font-size:8.5px; letter-spacing:.32em; color:#6f6a62; margin-top:3px; }
+  .mh-row .icon-btn{ background:transparent; border-color:#3a3a3d; color:#cfcbc3; }
+  .mh-row .icon-btn:hover{ border-color:#F7F5F0; color:#F7F5F0; }
   .mh-sub{ font-family:var(--mono); font-size:12px; color:var(--ink-soft); margin-top:5px; letter-spacing:.01em; }
   .mh-sub b{ color:var(--accent); font-weight:500; }
   .mh-sub .mhttl{ color:var(--ink); font-weight:500; margin-right:4px; }
@@ -303,7 +310,10 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
 <div class="wrap" id="root" data-domain="movies">
   <header class="masthead">
     <div class="mh-row">
-      <h1 id="brandBtn" style="cursor:pointer">내도감</h1><span class="sub">Naedogam · v66</span>
+      <button id="brandBtn" type="button" class="brandbtn" aria-label="홈"><!-- Naedogam v67 -->
+        <svg class="brandmark" width="26" height="26" viewBox="0 0 100 100" aria-hidden="true"><rect x="28" y="40" width="12" height="38" rx="5" fill="#F7F5F0"/><rect x="44" y="30" width="12" height="48" rx="5" fill="#F7F5F0"/><rect x="60" y="32" width="12" height="46" rx="5" fill="#E0483F" transform="rotate(16 66 78)"/></svg>
+        <span class="brandwm"><span class="bwm-ko">내도감</span><span class="bwm-en">NAEDOGAM</span></span>
+      </button>
       <span class="spacer"></span>
       <span class="src-chip" id="srcChip" style="display:none">데모</span>
       <button class="icon-btn" id="searchToggle" type="button" style="display:none">🔍</button>
