@@ -74,7 +74,7 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
   .brandwm{ display:flex; flex-direction:column; align-items:flex-start; line-height:1; }
   .bwm-ko{ font-family:var(--sans); font-weight:800; font-size:20px; letter-spacing:.5px; color:#F7F5F0; }
   .bwm-en{ font-family:var(--mono); font-size:8.5px; letter-spacing:.32em; color:#6f6a62; margin-top:3px; }
-  .mhver{ font-family:var(--mono); font-size:10px; color:#7c776e; align-self:flex-end; margin:0 0 4px 3px; letter-spacing:.04em; }
+  .mhver{ font-family:var(--mono); font-size:15px; font-weight:800; color:#E0483F; align-self:flex-end; margin:0 0 3px 5px; letter-spacing:.02em; background:rgba(224,72,63,.10); padding:1px 6px; border-radius:6px; }   /* 배포전: 적용여부 확인용으로 크게 (출시 때 축소) */
   .mh-row .icon-btn{ background:transparent; border-color:#3a3a3d; color:#cfcbc3; flex-shrink:0; }
   .brandbtn{ flex-shrink:0; }
   .mh-row .icon-btn:hover{ border-color:#F7F5F0; color:#F7F5F0; }
@@ -373,11 +373,11 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
 <div class="wrap" id="root" data-domain="movies">
   <header class="masthead">
     <div class="mh-row">
-      <button id="brandBtn" type="button" class="brandbtn" aria-label="홈"><!-- Naedogam v86 -->
+      <button id="brandBtn" type="button" class="brandbtn" aria-label="홈"><!-- Naedogam v87 -->
         <svg class="brandmark" width="34" height="30" viewBox="26 28 62 54" aria-hidden="true"><rect x="28" y="40" width="12" height="38" rx="5" fill="#F7F5F0"/><rect x="44" y="30" width="12" height="48" rx="5" fill="#F7F5F0"/><rect x="60" y="32" width="12" height="46" rx="5" fill="#E0483F" transform="rotate(16 66 78)"/></svg>
         <span class="brandwm"><span class="bwm-ko">내도감</span><span class="bwm-en">NAEDOGAM</span></span>
       </button>
-      <span class="mhver">v86</span>
+      <span class="mhver">v87</span>
       <span class="spacer"></span>
       <span class="src-chip" id="srcChip" style="display:none">데모</span>
       <button class="icon-btn" id="searchToggle" type="button" style="display:none">🔍</button>
@@ -485,6 +485,7 @@ const MANIFESTS = {
         o.odo  = (o.odo==null||o.odo==="") ? null : (parseInt(String(o.odo).replace(/[^\d]/g,''),10) || null);
         if(!o.date && !o.car && !o.work && !o.cost && o.odo==null) return null;   // 시트의 완전 빈 줄은 버림(카드로 안 그림)
         if(o._id==null || o._id==="") o._id = "nd_"+[o.date,o.car,o.odo,o.work].join("|");   // ID 없는 옛 기록: 내용 기반 안정 id(표시·필터·클릭 되게)
+        o._id = String(o._id);   // 숫자 ID가 문자 data-id와 안 맞아 상세가 안 열리던 문제 방지
         return o;
       } },
     fields:[ {k:"date",sheet:"날짜",label:"날짜",type:"date",today:true},
@@ -1869,13 +1870,14 @@ function paintCarlog(m){
   const q=(state.query||"").replace(/\s/g,"").toLowerCase();
   if(q) rows=rows.filter(r=>((r.work||"")+(r.shop||"")+(r.memo||"")).replace(/\s/g,"").toLowerCase().includes(q));
   rows.sort((a,b)=>{
-    if(carSort==="date"){ const av=String(a.date||""),bv=String(b.date||""); return carSortAsc?av.localeCompare(bv):bv.localeCompare(av); }
+    if(carSort==="date"){ const ad=parseDate(a.date), bd=parseDate(b.date);   // 형식 섞여도(2026-07-09 vs 26.6.29) 실제 날짜로 정렬
+      const av=ad?ad.getTime():-Infinity, bv=bd?bd.getTime():-Infinity; return carSortAsc?av-bv:bv-av; }
     const av=carNum(carSort==="odo"?a.odo:a.cost), bv=carNum(carSort==="odo"?b.odo:b.cost);
     return carSortAsc?av-bv:bv-av;
   });
   const cnt=$("#count"); cnt.classList.remove("countrow"); cnt.innerHTML=""; cnt.style.display="none";   // 차계부: 총건수/정렬 줄 숨김(기본 날짜 정렬 유지)
   $("#list").innerHTML=rows.map((r,i)=>{ try{ return carlogCard(r, rows.length-i); }catch(e){ console.error(e); return ""; } }).join("")||`<div class="count">기록이 없어요.</div>`;
-  document.querySelectorAll(".clx-card").forEach(b=>b.onclick=()=>openDetail(m, state.rows.find(x=>x._id===b.dataset.id)));
+  document.querySelectorAll(".clx-card").forEach(b=>b.onclick=()=>{ const r=state.rows.find(x=>String(x._id)===String(b.dataset.id)); if(r) openDetail(m, r); });   // _id 숫자/문자 섞여도 매칭
   loadCovers(m,"car");
 }
 
