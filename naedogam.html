@@ -307,7 +307,8 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
   .mvpeople{ font-size:13px; margin-bottom:8px; line-height:1.6; }
   .plink{ color:var(--accent); cursor:pointer; text-decoration:underline dotted; }
   .mvover{ font-size:13px; line-height:1.65; color:var(--ink); padding:0 18px 12px; max-height:150px; overflow-y:auto; }
-  .mvreview{ font-size:13.5px; line-height:1.65; background:var(--ochre-wash); border-radius:6px; padding:13px 15px; margin:0 18px 14px; min-height:46px; }
+  .mvreview{ font-size:14px; line-height:1.7; background:var(--ochre-wash); border-radius:6px; padding:15px 16px; margin:0 18px 14px; min-height:62px; }
+  .statusbtns .btn{ font-size:12px; padding:6px 11px; font-weight:500; }
   .stars{ position:relative; display:inline-block; font-size:17px; line-height:1; letter-spacing:1px; }
   .stars-bg{ color:#e2e2e2; }
   .stars-fg{ position:absolute; top:0; left:0; overflow:hidden; white-space:nowrap; color:#f5b301; }
@@ -329,11 +330,11 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
 <div class="wrap" id="root" data-domain="movies">
   <header class="masthead">
     <div class="mh-row">
-      <button id="brandBtn" type="button" class="brandbtn" aria-label="홈"><!-- Naedogam v75 -->
+      <button id="brandBtn" type="button" class="brandbtn" aria-label="홈"><!-- Naedogam v76 -->
         <svg class="brandmark" width="34" height="30" viewBox="26 28 62 54" aria-hidden="true"><rect x="28" y="40" width="12" height="38" rx="5" fill="#F7F5F0"/><rect x="44" y="30" width="12" height="48" rx="5" fill="#F7F5F0"/><rect x="60" y="32" width="12" height="46" rx="5" fill="#E0483F" transform="rotate(16 66 78)"/></svg>
         <span class="brandwm"><span class="bwm-ko">내도감</span><span class="bwm-en">NAEDOGAM</span></span>
       </button>
-      <span class="mhver">v75</span>
+      <span class="mhver">v76</span>
       <span class="spacer"></span>
       <span class="src-chip" id="srcChip" style="display:none">데모</span>
       <button class="icon-btn" id="searchToggle" type="button" style="display:none">🔍</button>
@@ -817,13 +818,14 @@ function renderHome(){
   }
   const _ics=d=>`<svg class="ci-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="${d}"/></svg>`;
   home.innerHTML=`<div class="home-grid">`+active.map(m=>{
-    const cnt = CACHE[m.id] ? `${fmt(CACHE[m.id].length)}건` : "";
+    const _arr = CACHE[m.id] || loadPersist(m.id); const cnt = _arr ? `${fmt(_arr.length)}건` : "";
     const ic = ND_ICONS[m.id] ? _ics(ND_ICONS[m.id]) : `<span style="font-size:24px">${m.icon}</span>`;
-    return `<button class="cat-card" data-id="${m.id}"><span class="ci">${ic}</span><span class="cn">${m.title}</span><span class="cc">${cnt}</span></button>`;
+    return `<button class="cat-card" data-id="${m.id}"><span class="ci">${ic}</span><span class="cn">${m.title}</span><span class="cc" data-cnt="${m.id}">${cnt}</span></button>`;
   }).join("")+`</div>`
   +`<div class="home-soon-h">준비중 · 앞으로 추가할 것들</div>`
   +`<div class="home-grid">`+HOME_SOON.map(x=>`<button class="cat-card soon" type="button"><span class="ci">${_ics(x.d)}</span><span class="cn">${x.t}</span><span class="cc">준비중</span></button>`).join("")+`</div>`;
   home.querySelectorAll(".cat-card[data-id]").forEach(b=>b.onclick=()=>openDomain(b.dataset.id));
+  active.forEach(m=>{ if(CACHE[m.id]||loadPersist(m.id)) return; try{ sourceFor(m).list(m.id).then(rows=>{ CACHE[m.id]=rows; savePersist(m.id,rows); const el=home.querySelector(`.cc[data-cnt="${m.id}"]`); if(el) el.textContent=`${fmt(rows.length)}건`; }).catch(()=>{}); }catch(e){} });
 }
 /* 분야가 선언한 source.type 에 따라 출처를 고른다.
    appsscript → 영화·차계부(기존 방식) / sheet → 도서·명산·러닝(기존 시트에 탭으로) */
@@ -851,7 +853,10 @@ const HOME_SOON=[
   {t:"정기구독", d:'M20 11a8 8 0 0 0 -14 -5l-2 2 M4 13a8 8 0 0 0 14 5l2 -2 M4 4v4h4 M20 20v-4h-4'},
   {t:"음식레시피", d:'M7 21h10 M8 21v-3a5 5 0 0 1 -1.5 -9.5a4 4 0 0 1 7.8 -1a4 4 0 0 1 2.7 10.5v3'},
   {t:"보험",     d:'M12 3l7 3v5c0 4.5 -3.5 7.5 -7 8.5c-3.5 -1 -7 -4 -7 -8.5V6z M9 12l2 2l4 -4'},
-  {t:"운동",     d:'M4 8v8 M8 6v12 M16 6v12 M20 8v8 M8 12h8'},
+  {t:"운동/건강", d:'M2 12h4l2 5l4 -12l2 7h6'},
+  {t:"버킷리스트", d:'M9 6h11 M9 12h11 M9 18h11 M4 6l1 1l2 -2 M4 12l1 1l2 -2 M4 18l1 1l2 -2'},
+  {t:"꿀팁",     d:'M9 18h6 M10 21h4 M12 3a6 6 0 0 0 -4 10.5c.6 .6 1 1.5 1 2.5h6c0 -1 .4 -1.9 1 -2.5A6 6 0 0 0 12 3z'},
+  {t:"명언",     d:'M7 8h4v4l-2 3H6l1 -3z M15 8h4v4l-2 3h-3l1 -3z'},
   {t:"가계부",   d:'M17 8V6a2 2 0 0 0 -2 -2H5a2 2 0 0 0 -2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2 -2v-2 M21 12h-4a2 2 0 0 0 0 4h4z'},
   {t:"위시리스트", d:'M12 20l-1.5 -1.4C5.5 14 3 11.5 3 8.5A4.5 4.5 0 0 1 12 6a4.5 4.5 0 0 1 9 2.5c0 3 -2.5 5.5 -7.5 10.1z'},
   {t:"공부",     d:'M12 4L2 9l10 5l8 -4v6 M6 11.5V16c0 1.5 3 3 6 3s6 -1.5 6 -3v-4.5'},
