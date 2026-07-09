@@ -262,7 +262,11 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
   .cl-kv.big{ color:var(--green); }
   .cl-memo{ margin-top:9px; font-size:12px; color:var(--ink-soft); font-style:italic; }
   /* 차계부 카드 — 기존 영화앱 스타일(흰 카드) */
-  .clx-card{ display:block; font-family:var(--sans); padding:10px 12px; }
+  .clx-card{ display:flex; gap:10px; align-items:center; font-family:var(--sans); padding:9px 12px; }
+  .clx-thumb{ width:54px; height:42px; border-radius:6px; overflow:hidden; flex-shrink:0; display:flex; align-items:center; justify-content:center; background:var(--line-soft); }
+  .clx-thumb img{ width:100%; height:100%; object-fit:cover; }
+  .clx-thumb-e{ font-size:20px; }
+  .clx-body{ flex:1; min-width:0; }
   .clx-top{ display:flex; justify-content:space-between; align-items:baseline; gap:8px; margin-bottom:2px; }
   .clx-date{ font-size:13px; font-weight:700; color:#1a1a1a; }
   .clx-odo{ font-size:12px; color:#888; white-space:nowrap; }
@@ -356,11 +360,11 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
 <div class="wrap" id="root" data-domain="movies">
   <header class="masthead">
     <div class="mh-row">
-      <button id="brandBtn" type="button" class="brandbtn" aria-label="홈"><!-- Naedogam v80 -->
+      <button id="brandBtn" type="button" class="brandbtn" aria-label="홈"><!-- Naedogam v81 -->
         <svg class="brandmark" width="34" height="30" viewBox="26 28 62 54" aria-hidden="true"><rect x="28" y="40" width="12" height="38" rx="5" fill="#F7F5F0"/><rect x="44" y="30" width="12" height="48" rx="5" fill="#F7F5F0"/><rect x="60" y="32" width="12" height="46" rx="5" fill="#E0483F" transform="rotate(16 66 78)"/></svg>
         <span class="brandwm"><span class="bwm-ko">내도감</span><span class="bwm-en">NAEDOGAM</span></span>
       </button>
-      <span class="mhver">v80</span>
+      <span class="mhver">v81</span>
       <span class="spacer"></span>
       <span class="src-chip" id="srcChip" style="display:none">데모</span>
       <button class="icon-btn" id="searchToggle" type="button" style="display:none">🔍</button>
@@ -1731,11 +1735,13 @@ function carlogCard(r, no){
   const badge=(car&&CAR_ORDER.length>1)?`<span class="clx-badge" style="background:${carColor(car)}">${car}</span>`:"";
   const odo=carNum(r.odo), cost=carNum(r.cost);
   const sub=[r.shop,r.memo].filter(Boolean).join(" · ");
-  return `<button class="card clx-card" data-id="${r._id}">
+  const cov=r.cover||r._cover;
+  const thumb=`<span class="clx-thumb${cov?"":" clx-thumb-e"}">${cov?`<img src="${cov}" alt="">`:"🚗"}</span>`;
+  return `<button class="card clx-card" data-id="${r._id}">${thumb}<span class="clx-body">
     <div class="clx-top"><span class="clx-date">${badge}${r.date||"-"}</span><span class="clx-odo">${odo?fmt(odo)+"km":""}</span></div>
     <div class="clx-meta"><span class="clx-work">${r.work||"-"}</span><span class="clx-price">${cost?"₩"+fmt(cost):""}</span></div>
     ${sub?`<div class="clx-sub">${sub}</div>`:""}
-  </button>`;
+  </span></button>`;
 }
 function buildWorkChips(base){
   const cnt={};
@@ -1783,6 +1789,7 @@ function paintCarlog(m){
   const cnt=$("#count"); cnt.classList.remove("countrow"); cnt.innerHTML=""; cnt.style.display="none";   // 차계부: 총건수/정렬 줄 숨김(기본 날짜 정렬 유지)
   $("#list").innerHTML=rows.map((r,i)=>{ try{ return carlogCard(r, rows.length-i); }catch(e){ console.error(e); return ""; } }).join("")||`<div class="count">기록이 없어요.</div>`;
   document.querySelectorAll(".clx-card").forEach(b=>b.onclick=()=>openDetail(m, state.rows.find(x=>x._id===b.dataset.id)));
+  loadCovers(m,"car");
 }
 
 /* ── 5. 설정: 카테고리 켜고 끄기 + 구글/개인 설정 자리 ── */
