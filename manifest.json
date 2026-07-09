@@ -1,0 +1,14 @@
+{
+  "name": "내도감",
+  "short_name": "내도감",
+  "description": "내 삶을 수집하는 개인 도감 — 영화·책·산·러닝을 한 곳에.",
+  "start_url": "./naedogam.html",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#18181B",
+  "theme_color": "#18181B",
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ]
+}

@@ -19,6 +19,16 @@
 <meta name="twitter:description" content="내 삶을 수집하는 개인 도감 — 영화·책·산·러닝을 한 곳에, 내 데이터로 영원히." />
 <meta name="twitter:image" content="https://wowhammer.github.io/movie-list/og-image.png" />
 
+<!-- 파비콘 · 스마트폰 홈화면 아이콘(PWA) -->
+<link rel="icon" type="image/png" href="favicon.png" />
+<link rel="apple-touch-icon" href="apple-touch-icon.png" />
+<link rel="manifest" href="manifest.json" />
+<meta name="theme-color" content="#18181B" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black" />
+<meta name="apple-mobile-web-app-title" content="내도감" />
+
 <!-- ══════════════════════════════════════════════════════════════
      ⚙️ 설정(CONFIG) — 이 파일에서 고칠 곳은 여기뿐. 값만 본인 것으로.
      ══════════════════════════════════════════════════════════════ -->
@@ -346,11 +356,11 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
 <div class="wrap" id="root" data-domain="movies">
   <header class="masthead">
     <div class="mh-row">
-      <button id="brandBtn" type="button" class="brandbtn" aria-label="홈"><!-- Naedogam v78 -->
+      <button id="brandBtn" type="button" class="brandbtn" aria-label="홈"><!-- Naedogam v79 -->
         <svg class="brandmark" width="34" height="30" viewBox="26 28 62 54" aria-hidden="true"><rect x="28" y="40" width="12" height="38" rx="5" fill="#F7F5F0"/><rect x="44" y="30" width="12" height="48" rx="5" fill="#F7F5F0"/><rect x="60" y="32" width="12" height="46" rx="5" fill="#E0483F" transform="rotate(16 66 78)"/></svg>
         <span class="brandwm"><span class="bwm-ko">내도감</span><span class="bwm-en">NAEDOGAM</span></span>
       </button>
-      <span class="mhver">v78</span>
+      <span class="mhver">v79</span>
       <span class="spacer"></span>
       <span class="src-chip" id="srcChip" style="display:none">데모</span>
       <button class="icon-btn" id="searchToggle" type="button" style="display:none">🔍</button>
