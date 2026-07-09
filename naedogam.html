@@ -351,6 +351,11 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
   .stars-fg{ position:absolute; top:0; left:0; overflow:hidden; white-space:nowrap; color:#f5b301; }
   .bkstars{ display:flex; align-items:center; gap:7px; margin-top:6px; }
   .bkstars-n{ font-size:13px; color:var(--ink-soft); font-weight:600; }
+  .bkstars-lbl{ font-size:12px; color:var(--ink-soft); font-weight:700; margin-right:1px; }
+  .mvpubrate{ display:flex; align-items:center; gap:7px; margin-top:6px; min-height:1px; }
+  .rf-stars-static{ font-size:19px; }
+  .mvpubrate .pubnum{ font-size:12.5px; color:var(--ink-soft); font-weight:600; }
+  .bkrate-hint{ font-size:12.5px; color:var(--ink-soft); margin-top:7px; line-height:1.4; }
   .bkmeta2{ font-size:12.5px; color:var(--ink-soft); margin:0 18px 4px; }
   .mvlinks{ display:flex; gap:8px; padding:0 18px 8px; }
   .lnkico{ width:15px; height:15px; vertical-align:-3px; margin-right:5px; border-radius:3px; }
@@ -368,11 +373,11 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
 <div class="wrap" id="root" data-domain="movies">
   <header class="masthead">
     <div class="mh-row">
-      <button id="brandBtn" type="button" class="brandbtn" aria-label="홈"><!-- Naedogam v83 -->
+      <button id="brandBtn" type="button" class="brandbtn" aria-label="홈"><!-- Naedogam v84 -->
         <svg class="brandmark" width="34" height="30" viewBox="26 28 62 54" aria-hidden="true"><rect x="28" y="40" width="12" height="38" rx="5" fill="#F7F5F0"/><rect x="44" y="30" width="12" height="48" rx="5" fill="#F7F5F0"/><rect x="60" y="32" width="12" height="46" rx="5" fill="#E0483F" transform="rotate(16 66 78)"/></svg>
         <span class="brandwm"><span class="bwm-ko">내도감</span><span class="bwm-en">NAEDOGAM</span></span>
       </button>
-      <span class="mhver">v83</span>
+      <span class="mhver">v84</span>
       <span class="spacer"></span>
       <span class="src-chip" id="srcChip" style="display:none">데모</span>
       <button class="icon-btn" id="searchToggle" type="button" style="display:none">🔍</button>
@@ -504,17 +509,17 @@ const MANIFESTS = {
     source:{ type:"sheet", tab:"도서" },
     fields:[ {k:"title",sheet:"제목",label:"제목",type:"text"},
              {k:"author",sheet:"저자",label:"저자",type:"text"},
-             {k:"publisher",sheet:"출판사",label:"출판사",type:"text"},
-             {k:"year",sheet:"출판연도",label:"출판연도",type:"number"},
-             {k:"genre",sheet:"장르",label:"장르(쉼표로 여러 개)",type:"tags"},
              {k:"status",sheet:"상태",label:"상태",type:"select",options:["","읽음","읽는중"]},
-             {k:"rating",sheet:"평점",label:"평점",type:"rating"},
+             {k:"rating",sheet:"평점",label:"내 평점(읽은 책만)",type:"rating"},
+             {k:"review",sheet:"감상평",label:"감상평",type:"textarea"},
              {k:"pick",sheet:"찜",label:"읽고싶다(찜)",type:"bool"},
              {k:"reread",sheet:"다시",label:"다시읽을것",type:"bool"},
              {k:"owned",sheet:"소장",label:"소장",type:"bool"},
              {k:"recommend",sheet:"추천",label:"추천(카탈로그 · /로 구분)",type:"text"},
+             {k:"publisher",sheet:"출판사",label:"출판사",type:"text"},
+             {k:"year",sheet:"출판연도",label:"출판연도",type:"number"},
+             {k:"genre",sheet:"장르",label:"장르(쉼표로 여러 개)",type:"tags"},
              {k:"cover",sheet:"표지",label:"표지 주소",type:"text"},
-             {k:"review",sheet:"감상평",label:"감상평",type:"text"},
              {k:"readDate",sheet:"읽은날",label:"읽은날",type:"date"} ],
     search:["title","author"],
     activity:{ df:"readDate", when:r=>r.status==="읽음", label:"읽음", name:r=>r.title },
@@ -598,7 +603,30 @@ const MANIFESTS = {
             {label:"화남",type:"countIf",field:"mood",eq:"😡 화남",c:"#dc2626"} ],
     card:{ kind:"data", thumb:"📔",
            title:r=>`${r.date}${r.title?" · "+r.title:""}`,
-           kv:[{k:"기분",f:"mood"},{k:"날씨",f:"weather"}] } }
+           kv:[{k:"기분",f:"mood"},{k:"날씨",f:"weather"}] } },
+
+  /* 정기구독: 매달·매년 빠져나가는 구독을 한눈에. 월/연 환산 합계까지. */
+  subs:{ id:"subs", title:"정기구독", icon:"🔄", vol:"卷7", canAdd:true,
+    source:{ type:"sheet", tab:"정기구독" },
+    fields:[ {k:"name",sheet:"서비스",label:"서비스명",type:"text"},
+             {k:"cost",sheet:"요금",label:"요금(원)",type:"number"},
+             {k:"cycle",sheet:"주기",label:"결제주기",type:"select",options:["월","연"]},
+             {k:"payday",sheet:"결제일",label:"결제일(예: 매월 15일)",type:"text"},
+             {k:"category",sheet:"분류",label:"분류(쉼표로 여러 개 · OTT/음악/생산성)",type:"tags"},
+             {k:"status",sheet:"상태",label:"상태",type:"select",options:["구독중","해지"]},
+             {k:"method",sheet:"결제수단",label:"결제수단",type:"text"},
+             {k:"startDate",sheet:"시작일",label:"시작일",type:"date"},
+             {k:"memo",sheet:"메모",label:"메모",type:"text"} ],
+    search:["name","category","method","memo"],
+    filterBy:{ field:"status", allLabel:"전체" },
+    activity:{ df:"startDate", when:r=>r.status==="구독중", label:"구독", name:r=>r.name },
+    computed:{ _monthly:{calc:"subMonthly"}, _yearly:{calc:"subYearly"} },
+    stats:[ {label:"구독중",type:"countIf",field:"status",eq:"구독중",c:"#16a34a"},
+            {label:"월 합계",type:"sum",field:"_monthly",unit:"원",where:{status:"구독중"},c:"#c2410c"},
+            {label:"연 환산",type:"sum",field:"_yearly",unit:"원",where:{status:"구독중"},c:"#0891b2"} ],
+    card:{ kind:"data", thumb:"🔄",
+           title:r=>`${r.name||""}${r.cost?" · "+Number(r.cost).toLocaleString()+"원/"+(r.cycle||"월"):""}`,
+           kv:[{k:"주기",f:"cycle"},{k:"결제일",f:"payday"},{k:"수단",f:"method"},{k:"상태",f:"status"}] } }
 };
 
 /* ── 2. DataSource 추상화 ──
@@ -778,7 +806,9 @@ const CALCS = { // 확장점: 새 계산식은 여기 등록
   deltaOdoPerLiter(rows, field){ let prev=null; return rows.map(r=>{ let v=null;
     if(r.type==="주유"&&r.liters){ if(prev!=null) v=+((r.odo-prev)/r.liters).toFixed(1); prev=r.odo; }
     return {...r,[field]:v}; }); },
-  pacePerKm(rows, field){ return rows.map(r=>({ ...r, [field]: (r.dist? +(r.time/r.dist).toFixed(1): null) })); }
+  pacePerKm(rows, field){ return rows.map(r=>({ ...r, [field]: (r.dist? +(r.time/r.dist).toFixed(1): null) })); },
+  subMonthly(rows, field){ return rows.map(r=>{ const c=+r.cost||0; return {...r,[field]: r.cycle==="연"?Math.round(c/12):c }; }); },   // 연구독은 12로 나눠 월 환산
+  subYearly(rows, field){ return rows.map(r=>{ const c=+r.cost||0; return {...r,[field]: r.cycle==="연"?c:c*12 }; }); }              // 월구독은 12배 연 환산
 };
 function applyComputed(m, rows){
   if(!m.computed) return rows;
@@ -881,14 +911,14 @@ const ND_ICONS={
   mountains:'M3 20l5 -9l3 4l3 -6l7 11z',
   running:'M14 4m-1.4 0a1.4 1.4 0 1 0 2.8 0a1.4 1.4 0 1 0 -2.8 0 M4 17l4 1l1 -2 M14 21v-5l-3 -2l1 -5l3 3l3 1',
   carlog:'M7 17m-1.6 0a1.6 1.6 0 1 0 3.2 0a1.6 1.6 0 1 0 -3.2 0 M17 17m-1.6 0a1.6 1.6 0 1 0 3.2 0a1.6 1.6 0 1 0 -3.2 0 M5 17H3v-5l2 -4h9l3 4h2a1 1 0 0 1 1 1v4h-2 M8.6 17h4.8',
-  diary:'M6 4h10a2 2 0 0 1 2 2v12a2 2 0 0 1 -2 2H6a1 1 0 0 1 -1 -1V5a1 1 0 0 1 1 -1z M9 4v16 M12.5 9h3 M12.5 13h3'
+  diary:'M6 4h10a2 2 0 0 1 2 2v12a2 2 0 0 1 -2 2H6a1 1 0 0 1 -1 -1V5a1 1 0 0 1 1 -1z M9 4v16 M12.5 9h3 M12.5 13h3',
+  subs:'M20 11a8 8 0 0 0 -14 -5l-2 2 M4 13a8 8 0 0 0 14 5l2 -2 M4 4v4h4 M20 20v-4h-4'
 };
 const HOME_SOON=[
   {t:"여행",     d:'M22 2L11 13 M22 2l-7 20l-4 -9l-9 -4z'},
   {t:"맛집",     d:'M5 3v6a2 2 0 0 0 4 0V3 M7 9v12 M16 3c-1.5 1 -2.5 3 -2.5 6c0 2 1 3 2.5 3v9'},
   {t:"펫일기",   d:'M5 11a1.4 1.4 0 1 0 .01 0 M9 7a1.4 1.4 0 1 0 .01 0 M15 7a1.4 1.4 0 1 0 .01 0 M19 11a1.4 1.4 0 1 0 .01 0 M12 15c-2 0 -3.5 1 -3.5 2.7c0 1.6 1.5 2.8 3.5 2.8s3.5 -1.2 3.5 -2.8c0 -1.7 -1.5 -2.7 -3.5 -2.7z'},
   {t:"장보기",   d:'M6 19m-1.3 0a1.3 1.3 0 1 0 2.6 0a1.3 1.3 0 1 0 -2.6 0 M17 19m-1.3 0a1.3 1.3 0 1 0 2.6 0a1.3 1.3 0 1 0 -2.6 0 M3 4h2l2.2 11h9.6l1.7 -8H6'},
-  {t:"정기구독", d:'M20 11a8 8 0 0 0 -14 -5l-2 2 M4 13a8 8 0 0 0 14 5l2 -2 M4 4v4h4 M20 20v-4h-4'},
   {t:"음식레시피", d:'M7 21h10 M8 21v-3a5 5 0 0 1 -1.5 -9.5a4 4 0 0 1 7.8 -1a4 4 0 0 1 2.7 10.5v3'},
   {t:"보험",     d:'M12 3l7 3v5c0 4.5 -3.5 7.5 -7 8.5c-3.5 -1 -7 -4 -7 -8.5V6z M9 12l2 2l4 -4'},
   {t:"운동/건강", d:'M2 12h4l2 5l4 -12l2 7h6'},
@@ -1002,7 +1032,7 @@ function bookCard(r){
     +(r.reread?`<span class="wb wb-R">다시읽을것</span>`:"")
     +(r.owned?`<span class="wb wb-O">소장</span>`:"")
     +(r.pick?`<span class="wb wb-P">찜</span>`:"");
-  const right=[r.year,(r.rating!=null&&r.rating!==""?("⭐"+r.rating):"")].filter(Boolean).join(" · ");
+  const right=[r.year,(r.status==="읽음"&&r.rating!=null&&r.rating!==""?("⭐"+r.rating):"")].filter(Boolean).join(" · ");
   const gArr=Array.isArray(r.genre)?r.genre:(r.genre==null||r.genre===""?[]:[r.genre]);
   const genre=gArr.map(t=>`<span class="gtag">${t}</span>`).join("");
   const rec=bookRecBadges(r,"rbadge");
@@ -1035,8 +1065,8 @@ async function fetchBookInfo(title, author){
       if(qt && t && (t.includes(qt) || qt.includes(t))){ v=vi; break; } }
     if(v){ const desc=String(v.description||"").replace(/<[^>]+>/g,"").trim();
       const cover=String((v.imageLinks&&v.imageLinks.thumbnail)||"").replace(/^http:/,"https:");
-      bookInfoCache[key]={ desc, cover:cover||null, pages:v.pageCount||null, publisher:v.publisher||"" };
-    } else { bookInfoCache[key]={ desc:"", cover:null, pages:null, publisher:"" }; }   // 못 맞추면 표지 안 씀
+      bookInfoCache[key]={ desc, cover:cover||null, pages:v.pageCount||null, publisher:v.publisher||"", rating:(v.averageRating!=null?+v.averageRating:null), ratingsCount:(v.ratingsCount||0) };
+    } else { bookInfoCache[key]={ desc:"", cover:null, pages:null, publisher:"", rating:null, ratingsCount:0 }; }   // 못 맞추면 표지 안 씀
   }catch(e){ bookInfoCache[key]=null; }
   return bookInfoCache[key];
 }
@@ -1144,7 +1174,10 @@ async function openBookDetail(m, r){
       <div class="mvinfo" style="min-width:0">
         <div class="mvmeta">${r.author||""}</div>
         ${r.status?`<div class="mvorig">${r.status}</div>`:""}
-        <div class="bkstars rf-starbox" id="bkStars">${starBarHTML(_rt||0)}<span class="rf-star-num" id="bkStarsNum"></span></div>
+        <div class="mvpubrate" id="bkPubRate"></div>
+        ${r.status==="읽음"
+          ? `<div class="bkstars rf-starbox" id="bkStars"><span class="bkstars-lbl">내 평점</span>${starBarHTML(_rt||0)}<span class="rf-star-num" id="bkStarsNum"></span></div>`
+          : `<div class="bkrate-hint">읽고 나서 아래 ‘읽음’으로 표시하면 내 평점을 매길 수 있어요</div>`}
       </div>
     </div>
     ${String(r.review||"").trim()?`<div class="mvreview"><b>📝 내 감상</b><br>${r.review}</div>`:""}
@@ -1165,7 +1198,7 @@ async function openBookDetail(m, r){
     </div>`;
   d.showModal();
   wireStatusBtns(m, r, d);
-  { const _sb=$("#bkStars"); if(_sb) wireStarWidget(_sb, (r.rating||0), $("#bkStarsNum"), async v=>{
+  { const _sb=$("#bkStars"); if(_sb && _sb.querySelector(".rf-stars-fg")) wireStarWidget(_sb, (r.rating||0), $("#bkStarsNum"), async v=>{
       const old=r.rating; r.rating=v;
       try{ await sheetSrc().update("books", r._id, r); const arr=CACHE.books; if(arr){ const it=arr.find(x=>String(x._id)===String(r._id)); if(it) it.rating=v; savePersist("books",arr); } if(state.domain==="books") paintDomain(MANIFESTS.books); }
       catch(e){ r.rating=old; alert("평점 저장 실패: "+e.message); } }); }
@@ -1175,6 +1208,8 @@ async function openBookDetail(m, r){
   const info=await fetchBookInfo(r.title, r.author);
   if(info){
     if(!r.cover && info.cover && $("#bkCover")) $("#bkCover").innerHTML=`<img src="${info.cover}" alt="">`;
+    if(info.rating!=null && $("#bkPubRate")){ const w=(Math.min(5,info.rating)/5*100).toFixed(1);
+      $("#bkPubRate").innerHTML=`<span class="rf-stars-bar rf-stars-static"><span class="rf-stars-bg">★★★★★</span><span class="rf-stars-fg" style="width:${w}%">★★★★★</span></span><span class="pubnum">책 평점 ${info.rating.toFixed(1)}${info.ratingsCount?` · ${info.ratingsCount.toLocaleString()}명`:""}</span>`; }
     if($("#bkOver")) $("#bkOver").textContent = info.desc || "책 소개 정보가 없어요.";
     const ex=info.pages?(" · "+info.pages+"쪽"):"";
     if(ex && $("#bkExtra")) $("#bkExtra").textContent=ex;
@@ -1397,7 +1432,7 @@ async function syncNow(){   // 구글시트에서 현재 분야를 강제로 새
 function afterSave(m,row){   // 저장 성공 후: 시트 재조회 없이 로컬 캐시에 바로 반영(빠름)
   const id=m.id; let arr=(CACHE[id]||loadPersist(id)||[]).slice();
   const i=arr.findIndex(x=>String(x._id)===String(row._id));
-  if(i>=0) arr[i]={...arr[i],...row}; else arr.push({...row});
+  if(i>=0) arr[i]={...arr[i],...row}; else { arr.push({...row}); markPending(id, row._id); }   // 새 줄이면 재조회 지연 보호
   CACHE[id]=arr; savePersist(id,arr);
   if(state.domain===id){ state.rows=applyComputed(m, arr.map(r=>({_id:r._id||crypto.randomUUID(),...r}))); paintDomain(m); }
 }
@@ -1415,7 +1450,7 @@ function openRecordForm(m, existing){
       else if(f.today && !isEdit) dv=todayStr();
       return `<label>${f.label}</label><input type="date" class="rf" data-k="${f.k}" data-type="date" value="${dv}">`; }
     if(f.type==="textarea"){ const tv=(val==null?"":String(val)).replace(/&/g,'&amp;').replace(/</g,'&lt;'); return `<label>${f.label}</label><textarea class="rf" data-k="${f.k}" data-type="text" rows="5" style="width:100%;font-family:inherit;font-size:15px;padding:9px 11px;border:1px solid var(--line);border-radius:9px;box-sizing:border-box;resize:vertical" autocomplete="off">${tv}</textarea>`; }
-    if(f.type==="rating"){ const rv=(val==null||val==='')?'':val; return `<label>${f.label}</label><div class="rf-starbox" data-k="${f.k}"><input type="hidden" class="rf" data-k="${f.k}" data-type="number" value="${rv}">${starBarHTML(rv===''?0:parseFloat(rv))}<span class="rf-star-num"></span><button type="button" class="rf-star-clr">✕</button></div>`; }
+    if(f.type==="rating"){ const rv=(val==null||val==='')?'':val; return `<div class="rf-ratewrap" data-k="${f.k}"><label>${f.label}</label><div class="rf-starbox" data-k="${f.k}"><input type="hidden" class="rf" data-k="${f.k}" data-type="number" value="${rv}">${starBarHTML(rv===''?0:parseFloat(rv))}<span class="rf-star-num"></span><button type="button" class="rf-star-clr">✕</button></div><div class="rf-ratehint" style="display:none;font-size:12.5px;color:var(--sub);margin-top:5px">‘읽음’ 상태로 표시하면 내 평점을 매길 수 있어요</div></div>`; }
     const v = (f.type==="tags" && Array.isArray(val)) ? val.join(", ") : (val==null?"":val);
     return `<label>${f.label}</label><input class="rf" data-k="${f.k}" data-type="${f.type}" value="${String(v).replace(/"/g,'&quot;')}" autocomplete="off" />`;
   }).join("");
@@ -1429,6 +1464,12 @@ function openRecordForm(m, existing){
   d.querySelectorAll(".rf-starbox").forEach(box=>{ const inp=box.querySelector("input.rf"), numEl=box.querySelector(".rf-star-num");
     const w=wireStarWidget(box, inp.value, numEl, v=>{ inp.value=v; });
     const clr=box.querySelector(".rf-star-clr"); if(clr) clr.onclick=()=>{ inp.value=""; w.set(0); }; });
+  if(m.id==="books"){   // 내 평점은 '읽음' 상태에서만 노출(앞뒤 맞는 스토리)
+    const statusSel=d.querySelector('.rf[data-k="status"]'), rateWrap=d.querySelector('.rf-ratewrap');
+    if(statusSel && rateWrap){ const rbox=rateWrap.querySelector('.rf-starbox'), rhint=rateWrap.querySelector('.rf-ratehint');
+      const gate=()=>{ const read=statusSel.value==="읽음"; rbox.style.display=read?"":"none"; rhint.style.display=read?"none":""; };
+      statusSel.addEventListener("change", gate); gate(); }
+  }
   d.querySelectorAll(".rf-imgfile").forEach(inp=>inp.onchange=ev=>{
     const file=ev.target.files&&ev.target.files[0]; if(!file) return; const k=inp.dataset.k;
     const rd=new FileReader(); rd.onload=()=>{ const img=new Image(); img.onload=()=>{
@@ -1486,11 +1527,25 @@ async function deleteRecord(m, r){
   try{
     if(m.id==="carlog") await sheetSrc().deleteRaw("CARLOG", r._id, "ID");
     else await sheetSrc().remove(state.domain, r._id);
+    unmarkPending(m.id, r._id);   // 삭제한 줄은 보호 해제(되살아나지 않게)
+    const _c=CACHE[m.id]; if(_c){ const _n=_c.filter(x=>String(x._id)!==String(r._id)); CACHE[m.id]=_n; savePersist(m.id,_n); }
     $("#detail").close(); refreshDomain();
   }catch(e){ alert("삭제 실패: "+e.message); }
 }
 
 const CACHE = {};   // 분야별로 한 번 불러온 데이터를 기억 → 탭 전환·검색 때 다시 안 받음
+/* 방금 추가한 레코드가 서버 재조회 지연(백엔드 캐시 등)으로 잠깐 사라지지 않게 보호.
+   이번 세션에서 새로 추가한 _id만 대상 → 서버가 그 줄을 돌려주면 자동 해제(삭제한 줄이 되살아나지 않음). */
+const PENDING_ADD = {};
+function markPending(id, rowId){ (PENDING_ADD[id]||(PENDING_ADD[id]=new Set())).add(String(rowId)); }
+function unmarkPending(id, rowId){ if(PENDING_ADD[id]) PENDING_ADD[id].delete(String(rowId)); }
+function mergePending(id, fresh){
+  const s=PENDING_ADD[id]; if(!s||!s.size) return fresh;
+  const have=new Set((fresh||[]).map(r=>String(r._id)));
+  const cache=CACHE[id]||loadPersist(id)||[]; const extras=[];
+  s.forEach(pid=>{ if(have.has(pid)){ s.delete(pid); } else { const it=cache.find(x=>String(x._id)===pid); if(it) extras.push(it); } });
+  return extras.length ? [...extras, ...fresh] : fresh;
+}
 function persistKey(id){ return "nd.cache2."+id; }
 function savePersist(id, rows){ try{ store.setItem(persistKey(id), JSON.stringify(rows)); }catch(e){} }
 function loadPersist(id){ try{ const s=store.getItem(persistKey(id)); const a=s?JSON.parse(s):null; return (Array.isArray(a)&&a.length)?a:null; }catch(e){ return null; } }
@@ -1512,6 +1567,7 @@ async function loadAndRender(){
       state.rows=applyComputed(m, cached.map(r=>({_id:r._id||crypto.randomUUID(),...r})));
       paintDomain(m);
       src.current.list(did).then(fresh=>{           // 뒤에서 조용히 최신화(반드시 담당분야 did에만 저장)
+        fresh=mergePending(did, fresh);              // 방금 추가한 줄이 서버 지연으로 사라지지 않게
         savePersist(did, fresh); CACHE[did]=fresh;
         if(state.domain===did && rowsSig(fresh)!==rowsSig(cached)){
           state.rows=applyComputed(m, fresh.map(r=>({_id:r._id||crypto.randomUUID(),...r}))); paintDomain(m);
@@ -1520,7 +1576,7 @@ async function loadAndRender(){
       return;
     }
     $("#count").textContent="불러오는 중…";
-    try{ const fresh=await src.current.list(did); CACHE[did]=fresh; savePersist(did, fresh); }
+    try{ let fresh=await src.current.list(did); fresh=mergePending(did, fresh); CACHE[did]=fresh; savePersist(did, fresh); }
     catch(e){ if(state.domain===did) $("#banner").innerHTML=`<div class="banner warn">데이터를 불러오지 못했습니다: ${e.message}</div>`; CACHE[did]=[]; }
   }
   if(state.domain!==did) return;                    // 기다리는 동안 다른 탭으로 갔으면 중단(그 탭이 그림)
@@ -1776,6 +1832,8 @@ function buildWorkChips(base){
 }
 function paintCarlog(m){
   let base = state.rows;
+  // 선택했던 차량이 더 이상 없으면(동기화 후 등) 전체로 되돌림 → 새 차량이 필터에 가려지지 않게
+  if(state.pick && !state.rows.some(r=>String(r.car||"").trim()===state.pick)) state.pick="";
   if(state.pick) base = base.filter(r=>String(r.car||"").trim()===state.pick);
 
   renderStats(m, base);
