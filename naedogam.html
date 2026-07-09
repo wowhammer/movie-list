@@ -33,7 +33,7 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
     --accent:#16a34a; --accent-wash:#f0fdf4; --green:#16a34a;
     --ochre:#b45309; --ochre-wash:#fef9c3;
     --ok:#16a34a; --warn:#c2410c;
-    --serif:"Noto Serif KR",serif; --sans:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans KR",system-ui,sans-serif; --mono:"DM Mono",ui-monospace,monospace;
+    --serif:"Noto Serif KR",serif; --sans:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans KR",system-ui,sans-serif; --mono:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans KR",system-ui,sans-serif;
   }
   *{ box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
   body{ margin:0; color:var(--ink); font-family:var(--sans); line-height:1.5; -webkit-font-smoothing:antialiased;
@@ -41,9 +41,9 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
   .wrap{ max-width:600px; margin:0 auto; padding:0 16px 96px; }
 
   /* 마스트헤드(압축·상단 고정) */
-  .masthead{ background:#fff; padding:0 0 8px; border-bottom:1px solid var(--line); }
+  .masthead{ background:transparent; padding:0 0 6px; border-bottom:none; }
   .wrap{ max-width:600px; margin:0 auto; padding:0 16px 40px; }
-  .mh-row{ display:flex; align-items:center; gap:10px; background:#18181B; margin:0 -16px; padding:12px 16px; }
+  .mh-row{ display:flex; align-items:center; gap:9px; background:#18181B; border-radius:14px; margin:9px 0 0; padding:12px 15px; }
   .brandbtn{ display:flex; align-items:center; gap:9px; background:none; border:none; padding:0; cursor:pointer; }
   .brandmark{ display:block; flex-shrink:0; }
   .brandwm{ display:flex; flex-direction:column; align-items:flex-start; line-height:1; }
@@ -51,6 +51,8 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
   .bwm-en{ font-family:var(--mono); font-size:8.5px; letter-spacing:.32em; color:#6f6a62; margin-top:3px; }
   .mh-row .icon-btn{ background:transparent; border-color:#3a3a3d; color:#cfcbc3; }
   .mh-row .icon-btn:hover{ border-color:#F7F5F0; color:#F7F5F0; }
+  .icon-btn.spin{ animation:ndspin .8s linear infinite; pointer-events:none; }
+  @keyframes ndspin{ to{ transform:rotate(360deg); } }
   .mh-sub{ font-family:var(--mono); font-size:12px; color:var(--ink-soft); margin-top:5px; letter-spacing:.01em; }
   .mh-sub b{ color:var(--accent); font-weight:500; }
   .mh-sub .mhttl{ color:var(--ink); font-weight:500; margin-right:4px; }
@@ -83,8 +85,8 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
   .tab[aria-selected="true"] span{ opacity:1; }
 
   /* 통계(압축 스트립) */
-  .stats{ display:flex; justify-content:center; gap:0; padding:16px 0 10px; }
-  .stat{ flex:1; text-align:center; padding:5px 4px; border-radius:6px; }
+  .stats{ display:flex; justify-content:flex-start; gap:0; padding:16px 0 10px; }
+  .stat{ flex:0 0 25%; text-align:center; padding:5px 4px; border-radius:6px; }
   .stat .n{ font-family:var(--sans); font-weight:700; font-size:23px; color:var(--ink); letter-spacing:-.01em; }
   .stat .l{ font-size:11px; color:var(--ink-soft); margin-top:2px; }
   .stat.sf-watched .n{ color:var(--green); }
@@ -310,13 +312,14 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
 <div class="wrap" id="root" data-domain="movies">
   <header class="masthead">
     <div class="mh-row">
-      <button id="brandBtn" type="button" class="brandbtn" aria-label="홈"><!-- Naedogam v67 -->
-        <svg class="brandmark" width="26" height="26" viewBox="0 0 100 100" aria-hidden="true"><rect x="28" y="40" width="12" height="38" rx="5" fill="#F7F5F0"/><rect x="44" y="30" width="12" height="48" rx="5" fill="#F7F5F0"/><rect x="60" y="32" width="12" height="46" rx="5" fill="#E0483F" transform="rotate(16 66 78)"/></svg>
+      <button id="brandBtn" type="button" class="brandbtn" aria-label="홈"><!-- Naedogam v68 -->
+        <svg class="brandmark" width="27" height="29" viewBox="26 28 50 54" aria-hidden="true"><rect x="28" y="40" width="12" height="38" rx="5" fill="#F7F5F0"/><rect x="44" y="30" width="12" height="48" rx="5" fill="#F7F5F0"/><rect x="60" y="32" width="12" height="46" rx="5" fill="#E0483F" transform="rotate(16 66 78)"/></svg>
         <span class="brandwm"><span class="bwm-ko">내도감</span><span class="bwm-en">NAEDOGAM</span></span>
       </button>
       <span class="spacer"></span>
       <span class="src-chip" id="srcChip" style="display:none">데모</span>
       <button class="icon-btn" id="searchToggle" type="button" style="display:none">🔍</button>
+      <button class="icon-btn" id="syncBtn" type="button" title="동기화" aria-label="동기화">↻</button>
       <button class="icon-btn" id="dashBtn" type="button">📊 통계</button>
       <button class="icon-btn" id="setBtn" type="button">⚙ 설정</button>
     </div>
@@ -749,10 +752,10 @@ function applySearchUI(m){
     sel.style.display="none";
     tog.style.display="none";
     inp.style.display = "";
-    const L={title:"제목",director:"감독",actors:"배우",author:"저자",type:"구분",memo:"메모",work:"작업",shop:"정비소",car:"차량",region:"지역",date:"날짜",dist:"거리",time:"시간",height:"높이"};
+    const _lbl=((m&&m.search)||[]).map(k=>{ const f=(m.fields||[]).find(x=>x.k===k); return f?(f.sheet||f.label||k):k; }).join("·");
     inp.placeholder = (isMovie && state.searchScope==="actor") ? "🔍 배우 이름 검색…"
       : isMovie ? "🔍 제목으로 검색…"
-      : "🔍 "+(((m&&m.search)||[]).map(f=>L[f]||f).join("·")||"내용")+" 검색…";
+      : "🔍 "+(_lbl||"내용")+" 검색…";
   }
 }
 const src = { current:null };
@@ -1236,6 +1239,17 @@ function goToMovie(match){   // 필터 초기화 → 목록 다시 그림 → �
 
 /* ── 공통: 추가·수정 폼 (모든 시트 분야가 같이 씀) ── */
 function refreshDomain(){ delete CACHE[state.domain]; loadAndRender(); }   // 시트에서 다시 읽어 최신 반영
+async function syncNow(){   // 구글시트에서 현재 분야를 강제로 새로 읽어옴(모바일에서 만든 자료 반영)
+  const m=MANIFESTS[state.domain]; if(!m) return;
+  const btn=$("#syncBtn"); if(btn){ btn.classList.add("spin"); }
+  try{
+    const fresh=await sourceFor(m).list(state.domain);
+    CACHE[state.domain]=fresh; savePersist(state.domain, fresh);
+    state.rows=applyComputed(m, fresh.map(r=>({_id:r._id||crypto.randomUUID(),...r})));
+    paintDomain(m);
+  }catch(e){ alert("동기화 실패: "+e.message); }
+  finally{ if(btn){ btn.classList.remove("spin"); } }
+}
 function afterSave(m,row){   // 저장 성공 후: 시트 재조회 없이 로컬 캐시에 바로 반영(빠름)
   const id=m.id; let arr=(CACHE[id]||loadPersist(id)||[]).slice();
   const i=arr.findIndex(x=>String(x._id)===String(row._id));
@@ -1935,6 +1949,7 @@ $("#searchToggle").addEventListener("click",()=>{ state.searchOpen=!state.search
 $("#tabs").addEventListener("click",e=>{ const t=e.target.closest(".tab"); if(t) openDomain(t.dataset.id); });
 $("#search").addEventListener("input",e=>{ state.query=e.target.value; state.page=0; loadAndRender(); });
 $("#setBtn").addEventListener("click",openSettings);
+$("#syncBtn").addEventListener("click",syncNow);
 $("#dashBtn").addEventListener("click",openDashboard);
 $("#addBtn").addEventListener("click",()=>{ const m=MANIFESTS[state.domain]; if(!m?.canAdd) return;
   if(state.domain==="movies") openAddMovie();
