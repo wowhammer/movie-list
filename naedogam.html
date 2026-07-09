@@ -373,11 +373,11 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
 <div class="wrap" id="root" data-domain="movies">
   <header class="masthead">
     <div class="mh-row">
-      <button id="brandBtn" type="button" class="brandbtn" aria-label="홈"><!-- Naedogam v84 -->
+      <button id="brandBtn" type="button" class="brandbtn" aria-label="홈"><!-- Naedogam v85 -->
         <svg class="brandmark" width="34" height="30" viewBox="26 28 62 54" aria-hidden="true"><rect x="28" y="40" width="12" height="38" rx="5" fill="#F7F5F0"/><rect x="44" y="30" width="12" height="48" rx="5" fill="#F7F5F0"/><rect x="60" y="32" width="12" height="46" rx="5" fill="#E0483F" transform="rotate(16 66 78)"/></svg>
         <span class="brandwm"><span class="bwm-ko">내도감</span><span class="bwm-en">NAEDOGAM</span></span>
       </button>
-      <span class="mhver">v84</span>
+      <span class="mhver">v85</span>
       <span class="spacer"></span>
       <span class="src-chip" id="srcChip" style="display:none">데모</span>
       <button class="icon-btn" id="searchToggle" type="button" style="display:none">🔍</button>
@@ -476,16 +476,14 @@ const MANIFESTS = {
      실제 연결은 movies처럼 source.type:"appsscript", sheet:"carlog" + map/derive 한 벌만 추가하면 됨. */
   /* 차계부: 실제 구글시트(정비·지출 기록)에서 라이브로 불러옴. */
   carlog:{ id:"carlog", title:"차계부", icon:"🚗", vol:"卷2", canAdd:true,
-    source:{ type:"appsscript", sheet:"carlog",
-      derive(o,row,re){
-        o.date = re(row['날짜']);
-        o.car  = re(row['차량']);
-        o.work = re(row['작업내용']);
-        o.shop = re(row['정비소']);
-        o.memo = re(row['비고']);
-        o.cost = parseInt(String(re(row['가격'])).replace(/[^\d]/g,''),10) || 0;   // 비숫자는 0
-        o.odo  = parseInt(String(re(row['주행거리'])).replace(/[^\d]/g,''),10) || null;
-        o._id  = re(row['ID']) || crypto.randomUUID();
+    /* nd 공통 방식으로 통일(정식 출시 대비): 읽기도 nd 게이트 사용. 쓰기(추가·수정·삭제)는 기존 CARLOG 탭 그대로.
+       기존 시트가 식별자로 'ID' 열을 써서 idCol:"ID"로 _id에 매핑. skipEnsure: 이미 있는 탭이라 건드리지 않음.
+       clean: 가격/주행거리의 쉼표 등 비숫자 정리(예전 derive가 하던 일). */
+    source:{ type:"sheet", tab:"CARLOG", idCol:"ID", skipEnsure:true,
+      clean(o){
+        o.cost = parseInt(String(o.cost==null?"":o.cost).replace(/[^\d]/g,''),10) || 0;
+        o.odo  = (o.odo==null||o.odo==="") ? null : (parseInt(String(o.odo).replace(/[^\d]/g,''),10) || null);
+        return o;
       } },
     fields:[ {k:"date",sheet:"날짜",label:"날짜",type:"date",today:true},
              {k:"car",sheet:"차량",label:"차량(싼타페/제네시스)",type:"text"},
@@ -761,6 +759,7 @@ class SheetDataSource {
     return j;
   }
   async ensure(m){        // 탭이 없으면 만들고(+샘플), 있으면 그대로. 한 세션에 한 번만.
+    if(m.source && m.source.skipEnsure) return;   // 이미 있는 기존 탭(차계부 등)은 건드리지 않음
     if(this._ensured.has(m.id)) return;
     const header=ndHeaders(m);
     await this._post({action:"ensureTab", tab:m.source.tab, header, rows:[]});   // 샘플 안 심음: 실데이터만(한글 헤더)
@@ -774,9 +773,10 @@ class SheetDataSource {
     const raw=await res.json();
     if(raw && raw.error) throw new Error(raw.error);
     const inv=ndInv(m);
+    const clean=m.source&&m.source.clean;
     return (Array.isArray(raw)?raw:[]).map(row=>{ const o={}; for(const kh in row){ const ek=inv[ndNorm(kh)]||kh; const val=coerce(row[kh]);
       if(o[ek]===undefined || o[ek]===null || o[ek]==="") o[ek]=val;   // 중복 열이 있어도 빈 값이 실제 값을 안 덮게(첫 비어있지않은 값 우선)
-    } return o; });
+    } return clean?clean(o):o; });
   }
   async upsert(id,row){   // 탭 맨 아래에 한 줄 추가(저장)
     const m=MANIFESTS[id];
@@ -798,7 +798,8 @@ class SheetDataSource {
 const fieldKeys = m => (SAMPLE[m.id]?.[0] ? Object.keys(SAMPLE[m.id][0]).filter(k=>k!=="_id") : m.search);
 function ndHeaders(m){ return ["_id", ...((m.fields||[]).map(f=>f.sheet||f.k))]; }   // 시트에 쓸 한글 헤더
 function ndNorm(x){ return String(x==null?"":x).replace(/\s+/g,"").trim(); }
-function ndInv(m){ const inv={}; inv[ndNorm("_id")]="_id"; (m.fields||[]).forEach(f=>{ inv[ndNorm(f.k)]=f.k; if(f.sheet) inv[ndNorm(f.sheet)]=f.k; }); return inv; }  // 헤더(공백 무시)→엔진키
+function ndInv(m){ const inv={}; inv[ndNorm("_id")]="_id"; if(m.source&&m.source.idCol) inv[ndNorm(m.source.idCol)]="_id";   // 기존 탭이 'ID' 등 다른 식별자 열을 쓰면 _id로 매핑
+  (m.fields||[]).forEach(f=>{ inv[ndNorm(f.k)]=f.k; if(f.sheet) inv[ndNorm(f.sheet)]=f.k; }); return inv; }  // 헤더(공백 무시)→엔진키
 const coerce = v => v==="TRUE"?true : v==="FALSE"?false : (v!=="" && !isNaN(v) && v!==null)? +v : (typeof v==="string"&&v.includes("|")?v.split("|"):v);
 
 /* ── 3. Engine: computed·통계·검색·렌더(데이터 출처 무관) ── */
