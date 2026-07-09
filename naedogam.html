@@ -49,6 +49,7 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
   .brandwm{ display:flex; flex-direction:column; align-items:flex-start; line-height:1; }
   .bwm-ko{ font-family:var(--sans); font-weight:800; font-size:20px; letter-spacing:.5px; color:#F7F5F0; }
   .bwm-en{ font-family:var(--mono); font-size:8.5px; letter-spacing:.32em; color:#6f6a62; margin-top:3px; }
+  .mhver{ font-family:var(--mono); font-size:10px; color:#7c776e; align-self:flex-end; margin:0 0 4px 3px; letter-spacing:.04em; }
   .mh-row .icon-btn{ background:transparent; border-color:#3a3a3d; color:#cfcbc3; }
   .mh-row .icon-btn:hover{ border-color:#F7F5F0; color:#F7F5F0; }
   .icon-btn.spin{ animation:ndspin .8s linear infinite; pointer-events:none; }
@@ -85,8 +86,8 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
   .tab[aria-selected="true"] span{ opacity:1; }
 
   /* 통계(압축 스트립) */
-  .stats{ display:flex; justify-content:center; gap:0; padding:16px 0 10px; }
-  .stat{ flex:1; text-align:center; padding:5px 4px; border-radius:6px; }
+  .stats{ display:flex; justify-content:center; align-items:flex-start; gap:14px; padding:16px 0 10px; flex-wrap:wrap; }
+  .stat{ flex:0 0 auto; text-align:center; padding:5px 12px; border-radius:6px; }
   .stat .n{ font-family:var(--sans); font-weight:700; font-size:23px; color:var(--ink); letter-spacing:-.01em; }
   .stat .l{ font-size:11px; color:var(--ink-soft); margin-top:2px; }
   .stat.sf-watched .n{ color:var(--green); }
@@ -148,8 +149,6 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
   .cat-no{ font-family:var(--mono); font-size:11px; color:var(--ink-soft); padding-top:3px; min-width:40px; }
   .thumb{ width:46px; height:64px; border-radius:3px; background:var(--accent-wash); display:flex; align-items:center; justify-content:center; font-size:20px; color:var(--accent); border:1px solid var(--line-soft); overflow:hidden; }
   .thumb img{ width:100%; height:100%; object-fit:cover; }
-  .thumb.photo{ background:var(--line-soft); }
-  .thumb.photo img{ object-fit:contain; }
   .det-cover{ margin:2px 0 14px; border-radius:10px; overflow:hidden; background:var(--line-soft); }
   .det-cover img{ display:block; width:100%; height:auto; max-height:66vh; object-fit:contain; }
   .body{ min-width:0; }
@@ -314,10 +313,11 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
 <div class="wrap" id="root" data-domain="movies">
   <header class="masthead">
     <div class="mh-row">
-      <button id="brandBtn" type="button" class="brandbtn" aria-label="홈"><!-- Naedogam v69 -->
-        <svg class="brandmark" width="29" height="31" viewBox="22 22 58 62" aria-hidden="true"><rect x="28" y="40" width="12" height="38" rx="5" fill="#F7F5F0"/><rect x="44" y="30" width="12" height="48" rx="5" fill="#F7F5F0"/><rect x="60" y="32" width="12" height="46" rx="5" fill="#E0483F" transform="rotate(16 66 78)"/></svg>
+      <button id="brandBtn" type="button" class="brandbtn" aria-label="홈"><!-- Naedogam v70 -->
+        <svg class="brandmark" width="34" height="30" viewBox="26 28 62 54" aria-hidden="true"><rect x="28" y="40" width="12" height="38" rx="5" fill="#F7F5F0"/><rect x="44" y="30" width="12" height="48" rx="5" fill="#F7F5F0"/><rect x="60" y="32" width="12" height="46" rx="5" fill="#E0483F" transform="rotate(16 66 78)"/></svg>
         <span class="brandwm"><span class="bwm-ko">내도감</span><span class="bwm-en">NAEDOGAM</span></span>
       </button>
+      <span class="mhver">v70</span>
       <span class="spacer"></span>
       <span class="src-chip" id="srcChip" style="display:none">데모</span>
       <button class="icon-btn" id="searchToggle" type="button" style="display:none">🔍</button>
@@ -1074,7 +1074,7 @@ function renderCard(m, r, no){ if(m.id==="books") return bookCard(r); const c=m.
       <span class="body"><h3>${r.title}</h3><div class="meta">${meta}</div>${(flags||tags)?`<div class="cbadges">${flags}${tags}</div>`:""}</span></button>`; }
   const kv=c.kv.map(col=>{ const v=r[col.f]; if(v==null||v==="") return ""; const s=(typeof v==="number"?fmt(v):v)+(col.u?` ${col.u}`:"");
     return `<span>${col.k} <b>${s}</b></span>`; }).filter(Boolean).join("");
-  return `<button class="card catcard" data-id="${r._id}"><span class="thumb${r.cover?' photo':''}">${r.cover?`<img src="${r.cover}" alt="">`:(c.thumb||"🧾")}</span>
+  return `<button class="card catcard" data-id="${r._id}"><span class="thumb">${r.cover?`<img src="${r.cover}" alt="">`:(c.thumb||"🧾")}</span>
     <span class="body"><h3 style="font-size:15px">${c.title(r)}</h3><div class="kv">${kv}</div>${(r.memo||r.content)?`<div class="meta" style="margin-top:5px">${(t=>t.slice(0,70).replace(/</g,"&lt;")+(t.length>70?"…":""))(String(r.memo||r.content))}</div>`:""}</span></button>`; }
 function openDetail(m, r){
   if(m.id==="movies"){ openMovieDetail(m, r); return; }
