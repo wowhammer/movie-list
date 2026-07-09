@@ -107,7 +107,8 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
   .sortsel{ flex-shrink:0; font-family:var(--mono); font-size:12px; padding:6px 9px; border:1px solid var(--line); border-radius:3px; background:var(--card); color:var(--ink); }
 
   /* 칩(색인 탭) */
-  .picker,.scope{ display:flex; gap:6px; flex-wrap:nowrap; overflow-x:auto; padding-bottom:2px; }
+  .picker,.scope{ display:flex; gap:6px; flex-wrap:nowrap; overflow-x:auto; padding-bottom:2px; cursor:grab; }
+  .picker.nd-drag,.scope.nd-drag,.sort-btns.nd-drag{ cursor:grabbing; user-select:none; }
   .picker{ margin:14px 0 8px; }
   .scope{ margin:0 0 10px; }
   .scope.scopetabs{ border-bottom:1px solid var(--line); gap:2px; padding-bottom:0; margin:0 0 10px; }
@@ -268,13 +269,18 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
 
   /* 홈: 카테고리 카드 격자 */
   .home-grid{ display:grid; grid-template-columns:repeat(2,1fr); gap:12px; margin-top:20px; }
-  .cat-card{ position:relative; background:var(--card); border:none; border-radius:12px; box-shadow:0 1px 3px rgba(0,0,0,.07); padding:18px 16px 15px; cursor:pointer; text-align:left; font:inherit; color:inherit; display:flex; flex-direction:column; gap:8px; min-height:120px; }
-  .cat-card::after{ content:none; }
-  .cat-card:hover{ box-shadow:0 2px 7px rgba(0,0,0,.1); }
-  .cat-card .ci{ font-size:28px; line-height:1; }
-  .cat-card .cn{ font-family:var(--sans); font-size:17px; font-weight:600; }
+  .cat-card{ position:relative; background:var(--card); border:1px solid var(--line); border-radius:12px; box-shadow:none; padding:13px 14px 11px; cursor:pointer; text-align:left; font:inherit; color:inherit; display:flex; flex-direction:column; gap:6px; min-height:88px; transition:border-color .15s ease, background .15s ease; }
+  .cat-card:hover{ border-color:var(--accent); }
+  .cat-card .ci{ color:var(--ink); line-height:1; height:24px; }
+  .cat-card .ci-svg{ width:24px; height:24px; }
+  .cat-card .cn{ font-family:var(--sans); font-size:15px; font-weight:600; }
   .cat-card .cc{ font-family:var(--mono); font-size:11px; color:var(--ink-soft); margin-top:auto; }
-  .cat-card .cv{ font-family:var(--mono); font-size:9.5px; color:var(--ochre); text-transform:uppercase; letter-spacing:.14em; }
+  .cat-card.soon{ background:transparent; border-style:dashed; }
+  .cat-card.soon .ci, .cat-card.soon .cn{ color:var(--ink-soft); }
+  .cat-card.soon .cc{ color:#c4c4c4; }
+  .cat-card.soon:hover{ border-color:var(--ink-soft); border-style:solid; background:var(--card); }
+  .cat-card.soon:hover .ci, .cat-card.soon:hover .cn{ color:var(--ink); }
+  .home-soon-h{ font-family:var(--mono); font-size:11px; color:var(--ink-soft); letter-spacing:.04em; margin:26px 2px 11px; }
   .home-empty{ text-align:center; padding:56px 20px 40px; }
   .home-empty .em{ font-size:40px; }
   .home-empty h2{ font-family:var(--serif); font-size:21px; color:var(--ink); margin:14px 0 8px; font-weight:700; }
@@ -323,11 +329,11 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
 <div class="wrap" id="root" data-domain="movies">
   <header class="masthead">
     <div class="mh-row">
-      <button id="brandBtn" type="button" class="brandbtn" aria-label="홈"><!-- Naedogam v74 -->
+      <button id="brandBtn" type="button" class="brandbtn" aria-label="홈"><!-- Naedogam v75 -->
         <svg class="brandmark" width="34" height="30" viewBox="26 28 62 54" aria-hidden="true"><rect x="28" y="40" width="12" height="38" rx="5" fill="#F7F5F0"/><rect x="44" y="30" width="12" height="48" rx="5" fill="#F7F5F0"/><rect x="60" y="32" width="12" height="46" rx="5" fill="#E0483F" transform="rotate(16 66 78)"/></svg>
         <span class="brandwm"><span class="bwm-ko">내도감</span><span class="bwm-en">NAEDOGAM</span></span>
       </button>
-      <span class="mhver">v74</span>
+      <span class="mhver">v75</span>
       <span class="spacer"></span>
       <span class="src-chip" id="srcChip" style="display:none">데모</span>
       <button class="icon-btn" id="searchToggle" type="button" style="display:none">🔍</button>
@@ -809,12 +815,15 @@ function renderHome(){
       <button class="btn" id="emptyAdd">카테고리 추가하기</button></div>`;
     $("#emptyAdd").onclick=openSettings; return;
   }
+  const _ics=d=>`<svg class="ci-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="${d}"/></svg>`;
   home.innerHTML=`<div class="home-grid">`+active.map(m=>{
     const cnt = CACHE[m.id] ? `${fmt(CACHE[m.id].length)}건` : "";
-    return `<button class="cat-card" data-id="${m.id}"><span class="cv">${m.vol}</span>
-      <span class="ci">${m.icon}</span><span class="cn">${m.title}</span><span class="cc">${cnt}</span></button>`;
-  }).join("")+`</div>`;
-  home.querySelectorAll(".cat-card").forEach(b=>b.onclick=()=>openDomain(b.dataset.id));
+    const ic = ND_ICONS[m.id] ? _ics(ND_ICONS[m.id]) : `<span style="font-size:24px">${m.icon}</span>`;
+    return `<button class="cat-card" data-id="${m.id}"><span class="ci">${ic}</span><span class="cn">${m.title}</span><span class="cc">${cnt}</span></button>`;
+  }).join("")+`</div>`
+  +`<div class="home-soon-h">준비중 · 앞으로 추가할 것들</div>`
+  +`<div class="home-grid">`+HOME_SOON.map(x=>`<button class="cat-card soon" type="button"><span class="ci">${_ics(x.d)}</span><span class="cn">${x.t}</span><span class="cc">준비중</span></button>`).join("")+`</div>`;
+  home.querySelectorAll(".cat-card[data-id]").forEach(b=>b.onclick=()=>openDomain(b.dataset.id));
 }
 /* 분야가 선언한 source.type 에 따라 출처를 고른다.
    appsscript → 영화·차계부(기존 방식) / sheet → 도서·명산·러닝(기존 시트에 탭으로) */
@@ -834,6 +843,20 @@ const ND_ICONS={
   carlog:'M7 17m-1.6 0a1.6 1.6 0 1 0 3.2 0a1.6 1.6 0 1 0 -3.2 0 M17 17m-1.6 0a1.6 1.6 0 1 0 3.2 0a1.6 1.6 0 1 0 -3.2 0 M5 17H3v-5l2 -4h9l3 4h2a1 1 0 0 1 1 1v4h-2 M8.6 17h4.8',
   diary:'M6 4h10a2 2 0 0 1 2 2v12a2 2 0 0 1 -2 2H6a1 1 0 0 1 -1 -1V5a1 1 0 0 1 1 -1z M9 4v16 M12.5 9h3 M12.5 13h3'
 };
+const HOME_SOON=[
+  {t:"여행",     d:'M22 2L11 13 M22 2l-7 20l-4 -9l-9 -4z'},
+  {t:"맛집",     d:'M5 3v6a2 2 0 0 0 4 0V3 M7 9v12 M16 3c-1.5 1 -2.5 3 -2.5 6c0 2 1 3 2.5 3v9'},
+  {t:"펫일기",   d:'M5 11a1.4 1.4 0 1 0 .01 0 M9 7a1.4 1.4 0 1 0 .01 0 M15 7a1.4 1.4 0 1 0 .01 0 M19 11a1.4 1.4 0 1 0 .01 0 M12 15c-2 0 -3.5 1 -3.5 2.7c0 1.6 1.5 2.8 3.5 2.8s3.5 -1.2 3.5 -2.8c0 -1.7 -1.5 -2.7 -3.5 -2.7z'},
+  {t:"장보기",   d:'M6 19m-1.3 0a1.3 1.3 0 1 0 2.6 0a1.3 1.3 0 1 0 -2.6 0 M17 19m-1.3 0a1.3 1.3 0 1 0 2.6 0a1.3 1.3 0 1 0 -2.6 0 M3 4h2l2.2 11h9.6l1.7 -8H6'},
+  {t:"정기구독", d:'M20 11a8 8 0 0 0 -14 -5l-2 2 M4 13a8 8 0 0 0 14 5l2 -2 M4 4v4h4 M20 20v-4h-4'},
+  {t:"음식레시피", d:'M7 21h10 M8 21v-3a5 5 0 0 1 -1.5 -9.5a4 4 0 0 1 7.8 -1a4 4 0 0 1 2.7 10.5v3'},
+  {t:"보험",     d:'M12 3l7 3v5c0 4.5 -3.5 7.5 -7 8.5c-3.5 -1 -7 -4 -7 -8.5V6z M9 12l2 2l4 -4'},
+  {t:"운동",     d:'M4 8v8 M8 6v12 M16 6v12 M20 8v8 M8 12h8'},
+  {t:"가계부",   d:'M17 8V6a2 2 0 0 0 -2 -2H5a2 2 0 0 0 -2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2 -2v-2 M21 12h-4a2 2 0 0 0 0 4h4z'},
+  {t:"위시리스트", d:'M12 20l-1.5 -1.4C5.5 14 3 11.5 3 8.5A4.5 4.5 0 0 1 12 6a4.5 4.5 0 0 1 9 2.5c0 3 -2.5 5.5 -7.5 10.1z'},
+  {t:"공부",     d:'M12 4L2 9l10 5l8 -4v6 M6 11.5V16c0 1.5 3 3 6 3s6 -1.5 6 -3v-4.5'},
+  {t:"음악",     d:'M9 18a3 3 0 1 0 .01 0 M9 18V6l10 -2v10 M19 14a3 3 0 1 0 .01 0'}
+];
 function tabIco(id, m){ const ic=ND_ICONS[id];
   return ic ? `<svg class="tabico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="${ic}"/></svg>`
             : `<span class="tabemo">${m.icon}</span>`; }
@@ -961,11 +984,16 @@ async function fetchBookInfo(title, author){
   try{
     const kk=CONFIG.GOOGLE_BOOKS_KEY?("&key="+CONFIG.GOOGLE_BOOKS_KEY):"";
     const q=encodeURIComponent((title||"")+(author?(" "+author):""));
-    const d=await fetch(`https://www.googleapis.com/books/v1/volumes?maxResults=1&country=KR&q=${q}${kk}`).then(r=>r.json());
-    const v=((d.items||[])[0]||{}).volumeInfo||{};
-    const desc=String(v.description||"").replace(/<[^>]+>/g,"").trim();
-    const cover=String((v.imageLinks&&v.imageLinks.thumbnail)||"").replace(/^http:/,"https:");
-    bookInfoCache[key]={ desc, cover:cover||null, pages:v.pageCount||null, publisher:v.publisher||"" };
+    const d=await fetch(`https://www.googleapis.com/books/v1/volumes?maxResults=5&country=KR&q=${q}${kk}`).then(r=>r.json());
+    const norm=x=>String(x||"").toLowerCase().replace(/[\s·:,\-–—()\[\]'"!?、。]/g,"");
+    const qt=norm(title);
+    let v=null;                                        // 제목이 실제로 맞는 결과만 채택(엉뚱한 표지 방지)
+    for(const it of (d.items||[])){ const vi=it.volumeInfo||{}; const t=norm((vi.title||"")+(vi.subtitle||""));
+      if(qt && t && (t.includes(qt) || qt.includes(t))){ v=vi; break; } }
+    if(v){ const desc=String(v.description||"").replace(/<[^>]+>/g,"").trim();
+      const cover=String((v.imageLinks&&v.imageLinks.thumbnail)||"").replace(/^http:/,"https:");
+      bookInfoCache[key]={ desc, cover:cover||null, pages:v.pageCount||null, publisher:v.publisher||"" };
+    } else { bookInfoCache[key]={ desc:"", cover:null, pages:null, publisher:"" }; }   // 못 맞추면 표지 안 씀
   }catch(e){ bookInfoCache[key]=null; }
   return bookInfoCache[key];
 }
@@ -1993,6 +2021,11 @@ async function boot(){
     const _upd=()=>_tt.classList.toggle("show", (window.scrollY||document.documentElement.scrollTop||0)>360);
     window.addEventListener("scroll", _upd, {passive:true}); _upd(); }
   document.addEventListener("wheel", e=>{ const row=e.target.closest&&e.target.closest(".scope,.picker,.tabs,.sort-btns"); if(row && row.scrollWidth>row.clientWidth+2 && e.deltaY){ row.scrollLeft+=e.deltaY; e.preventDefault(); } }, {passive:false});
+  (function(){ let el=null,sx=0,sl=0,moved=false; const SEL=".scope,.picker,.sort-btns";
+    document.addEventListener("mousedown",e=>{ const row=e.target.closest&&e.target.closest(SEL); if(row&&row.scrollWidth>row.clientWidth+2){ el=row; sx=e.pageX; sl=row.scrollLeft; moved=false; el.classList.add("nd-drag"); } });
+    document.addEventListener("mousemove",e=>{ if(!el) return; const dx=e.pageX-sx; if(Math.abs(dx)>4) moved=true; el.scrollLeft=sl-dx; });
+    document.addEventListener("mouseup",()=>{ if(!el) return; const wm=moved; el.classList.remove("nd-drag"); el=null; if(wm){ const kill=ev=>{ ev.stopPropagation(); ev.preventDefault(); document.removeEventListener("click",kill,true); }; document.addEventListener("click",kill,true); setTimeout(()=>document.removeEventListener("click",kill,true),50); } });
+  })();
 }
 $("#brandBtn").addEventListener("click",goHome);
 $("#searchToggle").addEventListener("click",()=>{ state.searchOpen=!state.searchOpen; applySearchUI(MANIFESTS[state.domain]); if(state.searchOpen) $("#search").focus(); });
