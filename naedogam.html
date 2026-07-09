@@ -81,10 +81,12 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
   .tabs::-webkit-scrollbar{ display:none; }
   .tab{ position:relative; flex:0 0 auto; display:flex; align-items:center; gap:6px; cursor:pointer; background:none; border:none;
     color:var(--ink-soft); padding:11px 15px; font-family:var(--sans); font-size:14px; border-bottom:2.5px solid transparent; margin-bottom:-1.5px; white-space:nowrap; }
-  .tab span{ font-size:16px; opacity:.8; line-height:1; }
+  .tab .tabemo{ font-size:16px; opacity:.8; line-height:1; }
+  .tabico{ width:18px; height:18px; vertical-align:-3.5px; opacity:.65; flex-shrink:0; }
+  .tab[aria-selected="true"] .tabico{ opacity:1; }
   .tab .vol{ display:none; }
   .tab[aria-selected="true"]{ color:var(--ink); font-weight:600; border-bottom-color:var(--ink); }
-  .tab[aria-selected="true"] span{ opacity:1; }
+  .tab[aria-selected="true"] .tabemo{ opacity:1; }
 
   /* 통계(압축 스트립) */
   .stats{ display:flex; justify-content:center; gap:0; padding:16px 0 10px; }
@@ -321,11 +323,11 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
 <div class="wrap" id="root" data-domain="movies">
   <header class="masthead">
     <div class="mh-row">
-      <button id="brandBtn" type="button" class="brandbtn" aria-label="홈"><!-- Naedogam v73 -->
+      <button id="brandBtn" type="button" class="brandbtn" aria-label="홈"><!-- Naedogam v74 -->
         <svg class="brandmark" width="34" height="30" viewBox="26 28 62 54" aria-hidden="true"><rect x="28" y="40" width="12" height="38" rx="5" fill="#F7F5F0"/><rect x="44" y="30" width="12" height="48" rx="5" fill="#F7F5F0"/><rect x="60" y="32" width="12" height="46" rx="5" fill="#E0483F" transform="rotate(16 66 78)"/></svg>
         <span class="brandwm"><span class="bwm-ko">내도감</span><span class="bwm-en">NAEDOGAM</span></span>
       </button>
-      <span class="mhver">v73</span>
+      <span class="mhver">v74</span>
       <span class="spacer"></span>
       <span class="src-chip" id="srcChip" style="display:none">데모</span>
       <button class="icon-btn" id="searchToggle" type="button" style="display:none">🔍</button>
@@ -824,8 +826,19 @@ function sourceFor(m){
 /* (참고) 구글 로그인 방식(GoogleSheetDataSource)은 '배포 단계'용으로 코드만 남겨둠 — 지금은 미사용. */
 
 /* 탭: 홈에서 켜둔 카테고리만 표시(안 켠 건 안 나옴 → 길어지지 않음) */
+const ND_ICONS={
+  movies:'M4 6a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v12a2 2 0 0 1 -2 2h-12a2 2 0 0 1 -2 -2z M8 4v16 M16 4v16 M4 8h4 M4 16h4 M16 8h4 M16 16h4 M4 12h16',
+  books:'M3 19a9 9 0 0 1 9 0a9 9 0 0 1 9 0 M3 6a9 9 0 0 1 9 0a9 9 0 0 1 9 0 M3 6v13 M12 6v13 M21 6v13',
+  mountains:'M3 20l5 -9l3 4l3 -6l7 11z',
+  running:'M14 4m-1.4 0a1.4 1.4 0 1 0 2.8 0a1.4 1.4 0 1 0 -2.8 0 M4 17l4 1l1 -2 M14 21v-5l-3 -2l1 -5l3 3l3 1',
+  carlog:'M7 17m-1.6 0a1.6 1.6 0 1 0 3.2 0a1.6 1.6 0 1 0 -3.2 0 M17 17m-1.6 0a1.6 1.6 0 1 0 3.2 0a1.6 1.6 0 1 0 -3.2 0 M5 17H3v-5l2 -4h9l3 4h2a1 1 0 0 1 1 1v4h-2 M8.6 17h4.8',
+  diary:'M6 4h10a2 2 0 0 1 2 2v12a2 2 0 0 1 -2 2H6a1 1 0 0 1 -1 -1V5a1 1 0 0 1 1 -1z M9 4v16 M12.5 9h3 M12.5 13h3'
+};
+function tabIco(id, m){ const ic=ND_ICONS[id];
+  return ic ? `<svg class="tabico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="${ic}"/></svg>`
+            : `<span class="tabemo">${m.icon}</span>`; }
 function renderTabs(){ $("#tabs").innerHTML=getActive().map(id=>{ const m=MANIFESTS[id]; if(!m) return "";
-  return `<button class="tab" role="tab" data-id="${id}" aria-selected="${id===state.domain}"><span>${m.icon}</span> ${m.title}</button>`; }).join(""); }
+  return `<button class="tab" role="tab" data-id="${id}" aria-selected="${id===state.domain}">${tabIco(id,m)} ${m.title}</button>`; }).join(""); }
 function renderStats(m, rows){
   const isMovie = m.id==="movies";
   $("#stats").className="stats";
