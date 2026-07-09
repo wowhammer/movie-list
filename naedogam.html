@@ -356,11 +356,11 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
 <div class="wrap" id="root" data-domain="movies">
   <header class="masthead">
     <div class="mh-row">
-      <button id="brandBtn" type="button" class="brandbtn" aria-label="홈"><!-- Naedogam v79 -->
+      <button id="brandBtn" type="button" class="brandbtn" aria-label="홈"><!-- Naedogam v80 -->
         <svg class="brandmark" width="34" height="30" viewBox="26 28 62 54" aria-hidden="true"><rect x="28" y="40" width="12" height="38" rx="5" fill="#F7F5F0"/><rect x="44" y="30" width="12" height="48" rx="5" fill="#F7F5F0"/><rect x="60" y="32" width="12" height="46" rx="5" fill="#E0483F" transform="rotate(16 66 78)"/></svg>
         <span class="brandwm"><span class="bwm-ko">내도감</span><span class="bwm-en">NAEDOGAM</span></span>
       </button>
-      <span class="mhver">v79</span>
+      <span class="mhver">v80</span>
       <span class="spacer"></span>
       <span class="src-chip" id="srcChip" style="display:none">데모</span>
       <button class="icon-btn" id="searchToggle" type="button" style="display:none">🔍</button>
@@ -1046,6 +1046,20 @@ async function fetchMtnInfo(name){   // 위키백과 MediaWiki API: 대표사진
 function ensureGeo(){ return new Promise(res=>{ if(userGeo||geoAsked) return res(userGeo); geoAsked=true;
   if(!navigator.geolocation) return res(null);
   navigator.geolocation.getCurrentPosition(p=>{ userGeo={lat:p.coords.latitude,lng:p.coords.longitude}; res(userGeo); }, ()=>res(null), {timeout:8000,maximumAge:600000}); }); }
+let _coverLoading={};
+async function loadCovers(m, nameField){   // 커버 자동: 올린 사진 없고 이름/장소 있으면 위키 이미지로 채움(캐시)
+  if(_coverLoading[m.id]) return;
+  const todo=(state.rows||[]).filter(r=>!r.cover && !r._cover && r[nameField]).slice(0,60);
+  if(!todo.length) return;
+  _coverLoading[m.id]=true;
+  try{
+    const CH=6;
+    for(let i=0;i<todo.length;i+=CH){
+      await Promise.all(todo.slice(i,i+CH).map(async r=>{ const info=await fetchMtnInfo(String(r[nameField]).trim()); if(info&&info.cover) r._cover=info.cover; }));
+      if(state.domain===m.id) paintDomain(m);
+    }
+  } finally { _coverLoading[m.id]=false; }
+}
 async function loadMountainMeta(m){   // 커버 + (위치 허용 시) 거리 — 병렬로 채우고 진행되며 다시 그림
   if(_mtnLoading) return; _mtnLoading=true;
   try{
@@ -1157,13 +1171,13 @@ function renderCard(m, r, no){ if(m.id==="books") return bookCard(r); const c=m.
     const tags=tarr.map(t=>`<span class="tag">${t}</span>`).join("");
     const flags=(typeof c.flags==="function"?c.flags(r):[]).filter(Boolean)
       .map(f=>`<span class="flag ${f.cls||""}">${f.t}</span>`).join("");
-    const _cov=r.cover;
+    const _cov=r.cover||r._cover;
     const _memo=(c.memo&&r[c.memo])?`<div class="cmemo">${String(r[c.memo]).replace(/</g,"&lt;")}</div>`:"";
     return `<button class="card catcard" data-id="${r._id}"><span class="thumb">${_cov?`<img src="${_cov}" alt="">`:c.thumb}</span>
       <span class="body"><h3>${r.title}</h3><div class="meta">${meta}</div>${_memo}${(flags||tags)?`<div class="cbadges">${flags}${tags}</div>`:""}</span></button>`; }
   const kv=c.kv.map(col=>{ const v=r[col.f]; if(v==null||v==="") return ""; const s=(typeof v==="number"?fmt(v):v)+(col.u?` ${col.u}`:"");
     return `<span>${col.k} <b>${s}</b></span>`; }).filter(Boolean).join("");
-  return `<button class="card catcard" data-id="${r._id}"><span class="thumb">${r.cover?`<img src="${r.cover}" alt="">`:(c.thumb||"🧾")}</span>
+  return `<button class="card catcard" data-id="${r._id}"><span class="thumb">${(r.cover||r._cover)?`<img src="${r.cover||r._cover}" alt="">`:(c.thumb||"🧾")}</span>
     <span class="body"><h3 style="font-size:15px">${c.title(r)}</h3><div class="kv">${kv}</div>${(r.memo||r.content)?`<div class="meta" style="margin-top:5px">${(t=>t.slice(0,70).replace(/</g,"&lt;")+(t.length>70?"…":""))(String(r.memo||r.content))}</div>`:""}</span></button>`; }
 function openDetail(m, r){
   if(m.id==="movies"){ openMovieDetail(m, r); return; }
@@ -1531,7 +1545,11 @@ function paintDomain(m){   // state.rows를 화면에 그림 (데이터 다시 �
     const _sb=m.sorts.map(so=>{ const on=state.sort===so.k; return `<button class="sort-btn ${on?'on':''}" data-gs="${so.k}">${so.label}${on?(state.sortAsc?"↑":"↓"):(so.asc?"↑":"↓")}</button>`; }).join("");
     _cnt.innerHTML=`<span class="cnt-lbl">총 ${rows.length}건</span><span class="sort-btns">${_sb}</span>`;
     _cnt.querySelectorAll(".sort-btn").forEach(b=>b.onclick=()=>{ const k=b.dataset.gs, so=m.sorts.find(x=>x.k===k); if(k===state.sort) state.sortAsc=!state.sortAsc; else { state.sort=k; state.sortAsc=!!so.asc; } if(k==="_dist" && !userGeo){ geoAsked=false; loadMountainMeta(m); } paintDomain(m); });
-  } else { _cnt.classList.remove("countrow"); _cnt.innerHTML=""; _cnt.style.display="none"; }   // 총 N건 줄 숨김(자리만 차지)
+  } else if(state.statFilter!=null && m.stats[state.statFilter]){   // 통계 필터 켜졌을 때: 무엇으로 걸렀는지 + 해제 버튼
+    _cnt.classList.add("countrow"); _cnt.style.display="";
+    _cnt.innerHTML=`<span class="cnt-lbl">${m.stats[state.statFilter].label} · ${rows.length}건</span><button class="sort-btn on" id="clrStat">✕ 필터 해제</button>`;
+    const _cb=$("#clrStat"); if(_cb) _cb.onclick=()=>{ state.statFilter=null; state.page=0; paintDomain(m); };
+  } else { _cnt.classList.remove("countrow"); _cnt.innerHTML=""; _cnt.style.display="none"; }   // 총 N건 줄 숨김
   const _qg=(state.query||"").replace(/</g,"&lt;");
   const emptyG = _qg ? `<div class="noresult"><div class="nr-t">검색 결과 없음</div><div class="nr-s">"${_qg}"는 목록에 없어요</div><button class="btn nr-add" id="nrAdd">+ "${_qg}" 새로 추가</button></div>` : `<div class="count">결과가 없습니다.</div>`;
   const PER=40, total=rows.length, shown=rows.slice(0,(state.page+1)*PER);
@@ -1540,6 +1558,8 @@ function paintDomain(m){   // state.rows를 화면에 그림 (데이터 다시 �
   $("#list").querySelectorAll(".card").forEach((b,i)=>{ const r=shown[i]; if(r) b.onclick=()=>openDetail(m, r); });
   { const more=$("#moreBtn"); if(more) more.onclick=()=>{ state.page++; paintDomain(m); }; }
   { const na=$("#nrAdd"); if(na) na.onclick=()=>{ if(m.id==="books"){ openAddBook(); const bq=$("#bq"); if(bq){ bq.value=state.query; bq.dispatchEvent(new Event("input")); } } else openRecordForm(m, null); }; }
+  if(m.id==="mountains") loadCovers(m,"title");
+  if(m.id==="running") loadCovers(m,"place");
   if(m.id==="books") lazyBookInfo();
 }
 
