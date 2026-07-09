@@ -85,8 +85,8 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
   .tab[aria-selected="true"] span{ opacity:1; }
 
   /* 통계(압축 스트립) */
-  .stats{ display:flex; justify-content:flex-start; gap:0; padding:16px 0 10px; }
-  .stat{ flex:0 0 25%; text-align:center; padding:5px 4px; border-radius:6px; }
+  .stats{ display:flex; justify-content:center; gap:0; padding:16px 0 10px; }
+  .stat{ flex:1; text-align:center; padding:5px 4px; border-radius:6px; }
   .stat .n{ font-family:var(--sans); font-weight:700; font-size:23px; color:var(--ink); letter-spacing:-.01em; }
   .stat .l{ font-size:11px; color:var(--ink-soft); margin-top:2px; }
   .stat.sf-watched .n{ color:var(--green); }
@@ -148,8 +148,10 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
   .cat-no{ font-family:var(--mono); font-size:11px; color:var(--ink-soft); padding-top:3px; min-width:40px; }
   .thumb{ width:46px; height:64px; border-radius:3px; background:var(--accent-wash); display:flex; align-items:center; justify-content:center; font-size:20px; color:var(--accent); border:1px solid var(--line-soft); overflow:hidden; }
   .thumb img{ width:100%; height:100%; object-fit:cover; }
-  .det-cover{ margin:2px 0 14px; border-radius:10px; overflow:hidden; }
-  .det-cover img{ width:100%; max-height:240px; object-fit:cover; display:block; }
+  .thumb.photo{ background:var(--line-soft); }
+  .thumb.photo img{ object-fit:contain; }
+  .det-cover{ margin:2px 0 14px; border-radius:10px; overflow:hidden; background:var(--line-soft); }
+  .det-cover img{ display:block; width:100%; height:auto; max-height:66vh; object-fit:contain; }
   .body{ min-width:0; }
   .body h3{ font-family:var(--sans); font-size:15px; font-weight:600; color:#1a1a1a; margin:0 0 3px; }
   .body .meta{ font-family:var(--sans); font-size:12px; color:#888; }
@@ -312,8 +314,8 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
 <div class="wrap" id="root" data-domain="movies">
   <header class="masthead">
     <div class="mh-row">
-      <button id="brandBtn" type="button" class="brandbtn" aria-label="홈"><!-- Naedogam v68 -->
-        <svg class="brandmark" width="27" height="29" viewBox="26 28 50 54" aria-hidden="true"><rect x="28" y="40" width="12" height="38" rx="5" fill="#F7F5F0"/><rect x="44" y="30" width="12" height="48" rx="5" fill="#F7F5F0"/><rect x="60" y="32" width="12" height="46" rx="5" fill="#E0483F" transform="rotate(16 66 78)"/></svg>
+      <button id="brandBtn" type="button" class="brandbtn" aria-label="홈"><!-- Naedogam v69 -->
+        <svg class="brandmark" width="29" height="31" viewBox="22 22 58 62" aria-hidden="true"><rect x="28" y="40" width="12" height="38" rx="5" fill="#F7F5F0"/><rect x="44" y="30" width="12" height="48" rx="5" fill="#F7F5F0"/><rect x="60" y="32" width="12" height="46" rx="5" fill="#E0483F" transform="rotate(16 66 78)"/></svg>
         <span class="brandwm"><span class="bwm-ko">내도감</span><span class="bwm-en">NAEDOGAM</span></span>
       </button>
       <span class="spacer"></span>
@@ -435,7 +437,7 @@ const MANIFESTS = {
     filterBy:{ field:"car", allLabel:"전체" },
     search:["work","shop","car","memo"],
     activity:{ df:"date", when:r=>true, label:"정비", name:r=>[r.car,r.work].filter(Boolean).join(" ") },
-    stats:[ {label:"기록 수",type:"count"},
+    stats:[ {label:"기록",type:"count"},
             {label:"총 정비비",type:"sum",field:"cost",unit:"원"},
             {label:"총 주행",type:"max",field:"odo",unit:"km"} ],
     card:{ kind:"data", title:r=>`${r.date}${r.car?" · "+r.car:""}`,
@@ -511,11 +513,12 @@ const MANIFESTS = {
              {k:"memo",sheet:"메모",label:"메모",type:"text"},
              {k:"cover",sheet:"커버",label:"사진",type:"image"} ],
     search:["memo","place","shoes"],
+    scopeSort:[{k:"date",label:"최신",desc:true},{k:"dist",label:"거리",desc:true},{k:"time",label:"시간",desc:true}],
     activity:{ df:"date", when:r=>true, label:"러닝", name:r=>[r.date, r.dist?r.dist+"km":""].filter(Boolean).join(" ") },
     computed:{ cpace:{ deps:["dist","time"], calc:"pacePerKm" } },
     stats:[ {label:"총 거리",type:"sum",field:"dist",unit:"km"},
             {label:"평균 페이스",type:"avgComputed",field:"cpace",unit:"분/km"},
-            {label:"기록 수",type:"count"} ],
+            {label:"기록",type:"count"} ],
     card:{ kind:"data", thumb:"🏃",
            title:r=>`${r.date}${r.place?" · "+r.place:""}`,
            kv:[{k:"거리",f:"dist",u:"km"},{k:"시간",f:"time",u:"분"},{k:"페이스",f:"pace"},{k:"심박",f:"hr"}] } },
@@ -532,8 +535,9 @@ const MANIFESTS = {
              {k:"tags",sheet:"태그",label:"태그(쉼표로 여러 개)",type:"tags"},
              {k:"cover",sheet:"사진",label:"사진",type:"image"} ],
     search:["title","content","tags","place"],
+    scopeSort:[{k:"date",label:"최신",desc:true},{k:"mood",label:"기분"}],
     activity:{ df:"date", when:r=>true, label:"일기", name:r=>r.title||r.date },
-    stats:[ {label:"기록 수",type:"count"} ],
+    stats:[ {label:"기록",type:"count"} ],
     card:{ kind:"data", thumb:"📔",
            title:r=>`${r.date}${r.title?" · "+r.title:""}`,
            kv:[{k:"기분",f:"mood"},{k:"날씨",f:"weather"}] } }
@@ -779,7 +783,7 @@ function showView(v){ state.view=v;
   $("#domainView").style.display = v==="domain"?"block":"none";
   if(v==="home") $("#searchToggle").style.display="none"; }
 function goHome(){ state.domain=null; state.query=""; state.pick=""; setMhSub(""); showView("home"); renderHome(); }
-function openDomain(id){ state.domain=id; state.query=""; state.pick=""; state.statFilter=null; state.sort="default"; state.sortAsc=false; state.searchScope="title"; state.selectQ=""; state.searchOpen=false; state.page=0; carWorkFilter=""; carSort="date"; carSortAsc=false; bookGenreFilter=""; mtnRegion=""; diaryTag=""; $("#search").value=""; $("#search").style.display="none"; $("#mvselect").style.display="none"; $("#scope").style.display="none"; showView("domain"); loadAndRender(); }
+function openDomain(id){ state.domain=id; state.query=""; state.pick=""; state.statFilter=null; state.sort="default"; state.sortAsc=false; state.searchScope="title"; state.selectQ=""; state.searchOpen=false; state.page=0; carWorkFilter=""; carSort="date"; carSortAsc=false; bookGenreFilter=""; mtnRegion=""; diaryTag=""; $("#search").value=""; $("#search").style.display="none"; $("#mvselect").style.display="none"; $("#scope").style.display="none"; if(MANIFESTS[id]&&MANIFESTS[id].scopeSort){ state.sort=MANIFESTS[id].scopeSort[0].k; state.sortAsc=false; } showView("domain"); loadAndRender(); }
 
 /* 홈: 켜둔 카테고리를 카드로. 건수는 한 번 열어본 분야만 표시(홈을 빠르게 유지). */
 function renderHome(){
@@ -881,6 +885,16 @@ function renderMtnRegions(m){
   const sc=$("#scope"); sc.style.display="flex"; sc.style.flexDirection="row";
   sc.innerHTML=`<button class="chip ${mtnRegion===''?'on':''}" data-mr="">전체</button>`+MTN_REGIONS.map(([l])=>`<button class="chip ${mtnRegion===l?'on':''}" data-mr="${l}">${l}</button>`).join("");
   sc.querySelectorAll("[data-mr]").forEach(b=>b.onclick=()=>{ mtnRegion=b.dataset.mr; state.page=0; paintDomain(m); });
+}
+function renderScopeSort(m){   // 러닝·일기: 정렬칩 줄(다른 탭의 필터줄과 높이 맞춤)
+  const sc=$("#scope"); sc.style.display="flex"; sc.style.flexDirection="row";
+  let html=(m.scopeSort||[]).map(o=>{ const on=state.sort===o.k; const ar=on?(state.sortAsc?" ↑":" ↓"):""; return `<button class="chip ${on?'on':''}" data-ss="${o.k}" data-desc="${o.desc?1:0}">${o.label}${ar}</button>`; }).join("");
+  if(m.id==="diary"){ const tags=[...new Set(state.rows.flatMap(rowTags))].sort((a,b)=>a.localeCompare(b,"ko"));
+    if(tags.length){ html+=`<span style="flex:0 0 8px"></span><button class="chip ${diaryTag===''?'on':''}" data-dt2="">#전체</button>`+tags.map(g=>`<button class="chip ${diaryTag===g?'on':''}" data-dt2="${g.replace(/"/g,'&quot;')}">#${g}</button>`).join(""); }
+  }
+  sc.innerHTML=html;
+  sc.querySelectorAll("[data-ss]").forEach(b=>b.onclick=()=>{ const k=b.dataset.ss; if(k===state.sort) state.sortAsc=!state.sortAsc; else { state.sort=k; state.sortAsc=(b.dataset.desc==="1")?false:true; } state.page=0; paintDomain(m); });
+  sc.querySelectorAll("[data-dt2]").forEach(b=>b.onclick=()=>{ diaryTag=b.dataset.dt2; state.page=0; paintDomain(m); });
 }
 function rowTags(r){ const t=r.tags; return Array.isArray(t)?t:(t==null||t===""?[]:String(t).split(",").map(s=>s.trim()).filter(Boolean)); }
 function renderDiaryTags(m){
@@ -1060,7 +1074,7 @@ function renderCard(m, r, no){ if(m.id==="books") return bookCard(r); const c=m.
       <span class="body"><h3>${r.title}</h3><div class="meta">${meta}</div>${(flags||tags)?`<div class="cbadges">${flags}${tags}</div>`:""}</span></button>`; }
   const kv=c.kv.map(col=>{ const v=r[col.f]; if(v==null||v==="") return ""; const s=(typeof v==="number"?fmt(v):v)+(col.u?` ${col.u}`:"");
     return `<span>${col.k} <b>${s}</b></span>`; }).filter(Boolean).join("");
-  return `<button class="card catcard" data-id="${r._id}"><span class="thumb">${r.cover?`<img src="${r.cover}" alt="">`:(c.thumb||"🧾")}</span>
+  return `<button class="card catcard" data-id="${r._id}"><span class="thumb${r.cover?' photo':''}">${r.cover?`<img src="${r.cover}" alt="">`:(c.thumb||"🧾")}</span>
     <span class="body"><h3 style="font-size:15px">${c.title(r)}</h3><div class="kv">${kv}</div>${(r.memo||r.content)?`<div class="meta" style="margin-top:5px">${(t=>t.slice(0,70).replace(/</g,"&lt;")+(t.length>70?"…":""))(String(r.memo||r.content))}</div>`:""}</span></button>`; }
 function openDetail(m, r){
   if(m.id==="movies"){ openMovieDetail(m, r); return; }
@@ -1408,15 +1422,18 @@ function paintDomain(m){   // state.rows를 화면에 그림 (데이터 다시 �
   setMhSub("");
   if(m.id==="books") renderBookGenres(m);
   if(m.id==="mountains") renderMtnRegions(m);
-  if(m.id==="diary") renderDiaryTags(m);
+  if(m.scopeSort) renderScopeSort(m);
   let listBase = applyStatFilter(m, base);
   if(m.id==="books" && bookGenreFilter) listBase = listBase.filter(r=>bookGenresOf(r).includes(bookGenreFilter));
   if(m.id==="mountains" && mtnRegion) listBase = listBase.filter(r=>mtnRegionMatch(r, mtnRegion));
   if(m.id==="diary" && diaryTag) listBase = listBase.filter(r=>rowTags(r).includes(diaryTag));
   let rows=filterRows(m, listBase, state.query);
-  if(m.sorts && state.sort && state.sort!=="default"){
-    const asc=state.sortAsc;
-    rows=[...rows].sort((a,b)=>{ const av=(a[state.sort]==null?(asc?Infinity:-Infinity):(+a[state.sort]||0)), bv=(b[state.sort]==null?(asc?Infinity:-Infinity):(+b[state.sort]||0)); return asc?av-bv:bv-av; });
+  if((m.sorts||m.scopeSort) && state.sort && state.sort!=="default"){
+    const asc=state.sortAsc, k=state.sort;
+    const isNum=v=>/^\s*-?[\d.,]+\s*$/.test(String(v));   // 문자열 전체가 숫자일 때만 숫자정렬(날짜는 문자정렬)
+    rows=[...rows].sort((a,b)=>{ const av=a[k],bv=b[k];
+      if(isNum(av)&&isNum(bv)){ const an=parseFloat(av),bn=parseFloat(bv); return asc?an-bn:bn-an; }
+      const as=String(av==null?"":av),bs=String(bv==null?"":bv); return asc?as.localeCompare(bs,"ko"):bs.localeCompare(as,"ko"); });
   }
   const _cnt=$("#count");
   if(m.sorts && m.sorts.length){ _cnt.classList.add("countrow");
