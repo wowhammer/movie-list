@@ -339,6 +339,14 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
   .mvreview{ font-size:14px; line-height:1.7; background:var(--ochre-wash); border-radius:6px; padding:15px 16px; margin:0 18px 14px; min-height:62px; }
   .statusbtns .btn{ font-size:12px; padding:6px 11px; font-weight:500; }
   .stars{ position:relative; display:inline-block; font-size:17px; line-height:1; letter-spacing:1px; }
+  .rf-stars-bar{ position:relative; display:inline-block; font-size:26px; line-height:1; letter-spacing:2px; vertical-align:middle; user-select:none; }
+  .rf-stars-bar .rf-stars-bg{ color:#e2e2e2; }
+  .rf-stars-fg{ position:absolute; top:0; left:0; overflow:hidden; white-space:nowrap; color:#f5b301; pointer-events:none; }
+  .rf-stars-zones{ position:absolute; top:0; left:0; width:100%; height:100%; display:flex; }
+  .rf-stars-zones span{ flex:1; cursor:pointer; }
+  .rf-starbox{ display:flex; align-items:center; gap:9px; margin-top:2px; }
+  .rf-star-num{ font-size:14px; color:var(--ink-soft); font-weight:600; min-width:18px; }
+  .rf-star-clr{ font-size:11px; color:var(--ink-soft); background:none; border:1px solid var(--line); border-radius:6px; padding:3px 8px; cursor:pointer; }
   .stars-bg{ color:#e2e2e2; }
   .stars-fg{ position:absolute; top:0; left:0; overflow:hidden; white-space:nowrap; color:#f5b301; }
   .bkstars{ display:flex; align-items:center; gap:7px; margin-top:6px; }
@@ -360,11 +368,11 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
 <div class="wrap" id="root" data-domain="movies">
   <header class="masthead">
     <div class="mh-row">
-      <button id="brandBtn" type="button" class="brandbtn" aria-label="홈"><!-- Naedogam v81 -->
+      <button id="brandBtn" type="button" class="brandbtn" aria-label="홈"><!-- Naedogam v82 -->
         <svg class="brandmark" width="34" height="30" viewBox="26 28 62 54" aria-hidden="true"><rect x="28" y="40" width="12" height="38" rx="5" fill="#F7F5F0"/><rect x="44" y="30" width="12" height="48" rx="5" fill="#F7F5F0"/><rect x="60" y="32" width="12" height="46" rx="5" fill="#E0483F" transform="rotate(16 66 78)"/></svg>
         <span class="brandwm"><span class="bwm-ko">내도감</span><span class="bwm-en">NAEDOGAM</span></span>
       </button>
-      <span class="mhver">v81</span>
+      <span class="mhver">v82</span>
       <span class="spacer"></span>
       <span class="src-chip" id="srcChip" style="display:none">데모</span>
       <button class="icon-btn" id="searchToggle" type="button" style="display:none">🔍</button>
@@ -500,7 +508,7 @@ const MANIFESTS = {
              {k:"year",sheet:"출판연도",label:"출판연도",type:"number"},
              {k:"genre",sheet:"장르",label:"장르(쉼표로 여러 개)",type:"tags"},
              {k:"status",sheet:"상태",label:"상태",type:"select",options:["","읽음","읽는중"]},
-             {k:"rating",sheet:"평점",label:"평점",type:"number"},
+             {k:"rating",sheet:"평점",label:"평점",type:"rating"},
              {k:"pick",sheet:"찜",label:"읽고싶다(찜)",type:"bool"},
              {k:"reread",sheet:"다시",label:"다시읽을것",type:"bool"},
              {k:"owned",sheet:"소장",label:"소장",type:"bool"},
@@ -1129,15 +1137,14 @@ async function openBookDetail(m, r){
   const q=encodeURIComponent(r.title||"");
   const qa=encodeURIComponent(((r.title||"")+" "+(r.author||"")).trim());
   const _rt=(r.rating!=null&&r.rating!=="")?parseFloat(r.rating):null;
-  const _st5=_rt==null?null:(_rt>5?_rt/2:_rt);
-  const _starHTML=_st5==null?"":`<span class="stars"><span class="stars-bg">★★★★★</span><span class="stars-fg" style="width:${Math.max(0,Math.min(100,_st5/5*100)).toFixed(1)}%">★★★★★</span></span>`;
+
   d.innerHTML=`<div class="dhead"><h3>${r.title}</h3></div>
     <div class="mvtop">
       <div class="mvposter" id="bkCover">${r.cover?`<img src="${r.cover}" alt="">`:"📖"}</div>
       <div class="mvinfo" style="min-width:0">
         <div class="mvmeta">${r.author||""}</div>
         ${r.status?`<div class="mvorig">${r.status}</div>`:""}
-        ${_st5!=null?`<div class="bkstars">${_starHTML}<span class="bkstars-n">${_rt}</span></div>`:""}
+        <div class="bkstars rf-starbox" id="bkStars">${starBarHTML(_rt||0)}<span class="rf-star-num" id="bkStarsNum"></span></div>
       </div>
     </div>
     ${String(r.review||"").trim()?`<div class="mvreview"><b>📝 내 감상</b><br>${r.review}</div>`:""}
@@ -1158,6 +1165,10 @@ async function openBookDetail(m, r){
     </div>`;
   d.showModal();
   wireStatusBtns(m, r, d);
+  { const _sb=$("#bkStars"); if(_sb) wireStarWidget(_sb, (r.rating||0), $("#bkStarsNum"), async v=>{
+      const old=r.rating; r.rating=v;
+      try{ await sheetSrc().update("books", r._id, r); const arr=CACHE.books; if(arr){ const it=arr.find(x=>String(x._id)===String(r._id)); if(it) it.rating=v; savePersist("books",arr); } if(state.domain==="books") paintDomain(MANIFESTS.books); }
+      catch(e){ r.rating=old; alert("평점 저장 실패: "+e.message); } }); }
   $("#bkEdit").onclick=()=>{ d.close(); openRecordForm(m, r); };
   $("#bkDel").onclick=()=>deleteRecord(m, r);
   $("#bkClose").onclick=()=>d.close();
@@ -1168,6 +1179,17 @@ async function openBookDetail(m, r){
     const ex=info.pages?(" · "+info.pages+"쪽"):"";
     if(ex && $("#bkExtra")) $("#bkExtra").textContent=ex;
   } else if($("#bkOver")) $("#bkOver").textContent="책 소개를 불러오지 못했어요.";
+}
+function starBarHTML(rt){ const disp=Math.max(0,Math.min(5, rt>5?rt/2:(rt||0)));
+  return `<span class="rf-stars-bar"><span class="rf-stars-bg">★★★★★</span><span class="rf-stars-fg" style="width:${(disp/5*100).toFixed(1)}%">★★★★★</span><span class="rf-stars-zones">${[1,2,3,4,5,6,7,8,9,10].map(i=>`<span data-v="${i/2}"></span>`).join("")}</span></span>`; }
+function wireStarWidget(box, initial, numEl, onSet){
+  const fg=box.querySelector(".rf-stars-fg"), zones=box.querySelectorAll(".rf-stars-zones span");
+  const disp=v=>Math.max(0,Math.min(5, v>5?v/2:(v||0)));
+  const fill=v=>{ fg.style.width=(disp(v)/5*100).toFixed(1)+"%"; };
+  let cur=parseFloat(initial)||0; fill(cur); if(numEl) numEl.textContent=cur?disp(cur):"";
+  zones.forEach(z=>{ z.onmouseenter=()=>fill(parseFloat(z.dataset.v)); z.onclick=()=>{ cur=parseFloat(z.dataset.v); fill(cur); if(numEl) numEl.textContent=cur; onSet(cur); }; });
+  const zc=box.querySelector(".rf-stars-zones"); if(zc) zc.onmouseleave=()=>fill(cur);
+  return { set:v=>{ cur=parseFloat(v)||0; fill(cur); if(numEl) numEl.textContent=cur?disp(cur):""; } };
 }
 function renderCard(m, r, no){ if(m.id==="books") return bookCard(r); const c=m.card;
   if(c.kind==="specimen"){ const meta=c.meta(r);
@@ -1393,6 +1415,7 @@ function openRecordForm(m, existing){
       else if(f.today && !isEdit) dv=todayStr();
       return `<label>${f.label}</label><input type="date" class="rf" data-k="${f.k}" data-type="date" value="${dv}">`; }
     if(f.type==="textarea"){ const tv=(val==null?"":String(val)).replace(/&/g,'&amp;').replace(/</g,'&lt;'); return `<label>${f.label}</label><textarea class="rf" data-k="${f.k}" data-type="text" rows="5" style="width:100%;font-family:inherit;font-size:15px;padding:9px 11px;border:1px solid var(--line);border-radius:9px;box-sizing:border-box;resize:vertical" autocomplete="off">${tv}</textarea>`; }
+    if(f.type==="rating"){ const rv=(val==null||val==='')?'':val; return `<label>${f.label}</label><div class="rf-starbox" data-k="${f.k}"><input type="hidden" class="rf" data-k="${f.k}" data-type="number" value="${rv}">${starBarHTML(rv===''?0:parseFloat(rv))}<span class="rf-star-num"></span><button type="button" class="rf-star-clr">✕</button></div>`; }
     const v = (f.type==="tags" && Array.isArray(val)) ? val.join(", ") : (val==null?"":val);
     return `<label>${f.label}</label><input class="rf" data-k="${f.k}" data-type="${f.type}" value="${String(v).replace(/"/g,'&quot;')}" autocomplete="off" />`;
   }).join("");
@@ -1403,6 +1426,9 @@ function openRecordForm(m, existing){
     </div></div>`;
   d.showModal();
   d.querySelectorAll(".rf-bool").forEach(b=>b.onclick=()=>{ b.classList.toggle("on"); });
+  d.querySelectorAll(".rf-starbox").forEach(box=>{ const inp=box.querySelector("input.rf"), numEl=box.querySelector(".rf-star-num");
+    const w=wireStarWidget(box, inp.value, numEl, v=>{ inp.value=v; });
+    const clr=box.querySelector(".rf-star-clr"); if(clr) clr.onclick=()=>{ inp.value=""; w.set(0); }; });
   d.querySelectorAll(".rf-imgfile").forEach(inp=>inp.onchange=ev=>{
     const file=ev.target.files&&ev.target.files[0]; if(!file) return; const k=inp.dataset.k;
     const rd=new FileReader(); rd.onload=()=>{ const img=new Image(); img.onload=()=>{
@@ -1425,7 +1451,7 @@ function openRecordForm(m, existing){
       if(f.type==="bool"){ row[f.k]=d.querySelector(`.rf-bool[data-k="${f.k}"]`).classList.contains("on"); return; }
       if(f.type==="image"){ row[f.k]=d.querySelector(`.rf-imgval[data-k="${f.k}"]`).value; return; }
       const el=d.querySelector(`.rf[data-k="${f.k}"]`); let v=el.value;
-      if(f.type==="number") v = (v===""?null:Number(v));
+      if(f.type==="number"||f.type==="rating") v = (v===""?null:Number(v));
       if(f.type==="tags")   v = v.split(",").map(s=>s.trim()).filter(Boolean);
       row[f.k]=v;
     });
