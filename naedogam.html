@@ -44,14 +44,15 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
   /* 마스트헤드(압축·상단 고정) */
   .masthead{ background:transparent; padding:0 0 6px; border-bottom:none; }
   .wrap{ max-width:600px; margin:0 auto; padding:0 16px 40px; }
-  .mh-row{ display:flex; align-items:center; gap:9px; background:#18181B; border-radius:14px; margin:9px 0 0; padding:12px 15px; }
+  .mh-row{ display:flex; align-items:center; gap:7px; background:#18181B; border-radius:14px; margin:9px 0 0; padding:12px 14px; }
   .brandbtn{ display:flex; align-items:center; gap:9px; background:none; border:none; padding:0; cursor:pointer; }
   .brandmark{ display:block; flex-shrink:0; }
   .brandwm{ display:flex; flex-direction:column; align-items:flex-start; line-height:1; }
   .bwm-ko{ font-family:var(--sans); font-weight:800; font-size:20px; letter-spacing:.5px; color:#F7F5F0; }
   .bwm-en{ font-family:var(--mono); font-size:8.5px; letter-spacing:.32em; color:#6f6a62; margin-top:3px; }
   .mhver{ font-family:var(--mono); font-size:10px; color:#7c776e; align-self:flex-end; margin:0 0 4px 3px; letter-spacing:.04em; }
-  .mh-row .icon-btn{ background:transparent; border-color:#3a3a3d; color:#cfcbc3; }
+  .mh-row .icon-btn{ background:transparent; border-color:#3a3a3d; color:#cfcbc3; flex-shrink:0; }
+  .brandbtn{ flex-shrink:0; }
   .mh-row .icon-btn:hover{ border-color:#F7F5F0; color:#F7F5F0; }
   .icon-btn.spin{ animation:ndspin .8s linear infinite; pointer-events:none; }
   @keyframes ndspin{ to{ transform:rotate(360deg); } }
@@ -71,7 +72,7 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
   .masthead .sub{ font-family:var(--mono); font-size:10px; color:var(--ink-soft); letter-spacing:.18em; text-transform:uppercase; }
   .masthead .spacer{ flex:1; }
   .src-chip{ display:none; }
-  .icon-btn{ font-family:var(--mono); font-size:11px; cursor:pointer; background:var(--card); border:1px solid var(--line); color:var(--ink-soft); padding:7px 11px; border-radius:7px; }
+  .icon-btn{ font-family:var(--mono); font-size:11px; cursor:pointer; background:var(--card); border:1px solid var(--line); color:var(--ink-soft); padding:6px 10px; border-radius:7px; white-space:nowrap; }
   .icon-btn:hover{ border-color:var(--accent); color:var(--accent); }
   #backBtn{ margin:12px 0 0 !important; padding:5px 10px; }
 
@@ -323,6 +324,7 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
 
   @media (max-width:520px){ .card{ grid-template-columns:auto 1fr; } .flags{ grid-column:2; flex-direction:row; margin-top:6px; } }
   @media (min-width:520px){ .home-grid{ grid-template-columns:repeat(3,1fr); } }
+  @media (max-width:430px){ .mh-row{ gap:5px; padding:11px 11px; } .mh-row .icon-btn{ padding:5px 7px; } .bwm-ko{ font-size:18px; } .mhver{ margin-left:1px; } }
   @media (prefers-reduced-motion:no-preference){ .card{ transition:border-color .15s ease; } }
 </style>
 </head>
@@ -330,11 +332,11 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
 <div class="wrap" id="root" data-domain="movies">
   <header class="masthead">
     <div class="mh-row">
-      <button id="brandBtn" type="button" class="brandbtn" aria-label="홈"><!-- Naedogam v76 -->
+      <button id="brandBtn" type="button" class="brandbtn" aria-label="홈"><!-- Naedogam v77 -->
         <svg class="brandmark" width="34" height="30" viewBox="26 28 62 54" aria-hidden="true"><rect x="28" y="40" width="12" height="38" rx="5" fill="#F7F5F0"/><rect x="44" y="30" width="12" height="48" rx="5" fill="#F7F5F0"/><rect x="60" y="32" width="12" height="46" rx="5" fill="#E0483F" transform="rotate(16 66 78)"/></svg>
         <span class="brandwm"><span class="bwm-ko">내도감</span><span class="bwm-en">NAEDOGAM</span></span>
       </button>
-      <span class="mhver">v76</span>
+      <span class="mhver">v77</span>
       <span class="spacer"></span>
       <span class="src-chip" id="srcChip" style="display:none">데모</span>
       <button class="icon-btn" id="searchToggle" type="button" style="display:none">🔍</button>
