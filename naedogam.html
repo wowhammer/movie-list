@@ -373,11 +373,11 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
 <div class="wrap" id="root" data-domain="movies">
   <header class="masthead">
     <div class="mh-row">
-      <button id="brandBtn" type="button" class="brandbtn" aria-label="홈"><!-- Naedogam v85 -->
+      <button id="brandBtn" type="button" class="brandbtn" aria-label="홈"><!-- Naedogam v86 -->
         <svg class="brandmark" width="34" height="30" viewBox="26 28 62 54" aria-hidden="true"><rect x="28" y="40" width="12" height="38" rx="5" fill="#F7F5F0"/><rect x="44" y="30" width="12" height="48" rx="5" fill="#F7F5F0"/><rect x="60" y="32" width="12" height="46" rx="5" fill="#E0483F" transform="rotate(16 66 78)"/></svg>
         <span class="brandwm"><span class="bwm-ko">내도감</span><span class="bwm-en">NAEDOGAM</span></span>
       </button>
-      <span class="mhver">v85</span>
+      <span class="mhver">v86</span>
       <span class="spacer"></span>
       <span class="src-chip" id="srcChip" style="display:none">데모</span>
       <button class="icon-btn" id="searchToggle" type="button" style="display:none">🔍</button>
@@ -483,6 +483,8 @@ const MANIFESTS = {
       clean(o){
         o.cost = parseInt(String(o.cost==null?"":o.cost).replace(/[^\d]/g,''),10) || 0;
         o.odo  = (o.odo==null||o.odo==="") ? null : (parseInt(String(o.odo).replace(/[^\d]/g,''),10) || null);
+        if(!o.date && !o.car && !o.work && !o.cost && o.odo==null) return null;   // 시트의 완전 빈 줄은 버림(카드로 안 그림)
+        if(o._id==null || o._id==="") o._id = "nd_"+[o.date,o.car,o.odo,o.work].join("|");   // ID 없는 옛 기록: 내용 기반 안정 id(표시·필터·클릭 되게)
         return o;
       } },
     fields:[ {k:"date",sheet:"날짜",label:"날짜",type:"date",today:true},
@@ -776,7 +778,7 @@ class SheetDataSource {
     const clean=m.source&&m.source.clean;
     return (Array.isArray(raw)?raw:[]).map(row=>{ const o={}; for(const kh in row){ const ek=inv[ndNorm(kh)]||kh; const val=coerce(row[kh]);
       if(o[ek]===undefined || o[ek]===null || o[ek]==="") o[ek]=val;   // 중복 열이 있어도 빈 값이 실제 값을 안 덮게(첫 비어있지않은 값 우선)
-    } return clean?clean(o):o; });
+    } return clean?clean(o):o; }).filter(Boolean);   // clean이 null(빈 줄) 반환하면 목록에서 제외
   }
   async upsert(id,row){   // 탭 맨 아래에 한 줄 추가(저장)
     const m=MANIFESTS[id];
