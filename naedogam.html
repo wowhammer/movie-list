@@ -373,11 +373,11 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
 <div class="wrap" id="root" data-domain="movies">
   <header class="masthead">
     <div class="mh-row">
-      <button id="brandBtn" type="button" class="brandbtn" aria-label="홈"><!-- Naedogam v89 (v88 로컬이관 되돌림, 구글시트 방식 복귀) -->
+      <button id="brandBtn" type="button" class="brandbtn" aria-label="홈"><!-- Naedogam v90 (영화 nd 합류: MOVIE 탭 구글시트 방식) -->
         <svg class="brandmark" width="34" height="30" viewBox="26 28 62 54" aria-hidden="true"><rect x="28" y="40" width="12" height="38" rx="5" fill="#F7F5F0"/><rect x="44" y="30" width="12" height="48" rx="5" fill="#F7F5F0"/><rect x="60" y="32" width="12" height="46" rx="5" fill="#E0483F" transform="rotate(16 66 78)"/></svg>
         <span class="brandwm"><span class="bwm-ko">내도감</span><span class="bwm-en">NAEDOGAM</span></span>
       </button>
-      <span class="mhver">v89</span>
+      <span class="mhver">v90</span>
       <span class="spacer"></span>
       <span class="src-chip" id="srcChip" style="display:none">데모</span>
       <button class="icon-btn" id="searchToggle" type="button" style="display:none">🔍</button>
@@ -434,21 +434,23 @@ const MANIFESTS = {
   /* 영화: 실제 구글시트(Apps Script)에서 라이브로 불러옴.
      source.map = 시트 한글 헤더 → 엔진 항목 이름.  source.derive = 특수 처리(코드·수식·숫자). */
   movies:{ id:"movies", title:"영화", icon:"🎬", vol:"卷1", canAdd:true,
-    source:{ type:"appsscript", sheet:"",   // 영화는 기본 시트(파라미터 없음)
-      map:{ director:"감독", actors:"배우", country:"국적", recommend:"추천", review:"리뷰" },
-      derive(o, row, re){
-        o.title  = re(row['한국 개봉명']) || re(row['원제']);   // 한국명 우선, 없으면 원제
-        o.orig   = re(row['원제']);
-        o.year   = parseInt(re(row['개봉연도']),10) || null;   // "2007.0" → 2007
-        o.rating = parseFloat(re(row['TMDB평점'])) || null;
-        o.streaming = re(row['스트리밍']).split(/[,\/]+/).map(s=>s.trim()).filter(Boolean);
-        const code = re(row['시청여부']);                       // 두 글자 코드 해석
-        o.watched = code.charAt(0)==='W' ? "O" : "";           // W_ = 시청완료
-        o.rewatch = code.charAt(1)==='R';                       // _R = 다시볼것
-        o.pick    = (function(){ const pc=re(row['찜']); return pc?(pc==='TRUE'||pc==='true'||pc==='O'||pc==='1'||pc==='찜'):(code.charAt(1)==='P'); })();  // 찜=별도 열(없으면 옛 P코드 호환)
-        o.recommendList = re(row['추천']).split(/[\/,]+/).map(s=>s.trim()).filter(Boolean);  // BBC/뉴욕타임즈…
-        o.watchDate = re(row['본날']);                          // 본날: 봤음 켠 날짜(대시보드 일별 집계용)
-        o._id = (o.orig||o.title||'') + '_' + (o.year||'');
+    source:{ type:"sheet", tab:"MOVIE", idCol:"원제", skipEnsure:true,
+      /* nd 합류(v90): 영화도 차계부처럼 nd(구글시트) 방식으로 통일. 데이터는 MOVIE 탭 그대로.
+         식별키=원제(중복·공백 없음 확인). clean: 시청여부 2자코드→watched/rewatch, 스트리밍/추천 분리. */
+      clean(o){
+        o._id=String(o._id==null?"":o._id); o.orig=o._id;
+        if(!o.orig) return null;
+        const code=String(o["시청여부"]==null?"":o["시청여부"]).trim();
+        o.watched=code.charAt(0)==='W'?"O":""; o.rewatch=code.charAt(1)==='R';
+        const jjim=String(o["찜"]==null?"":o["찜"]).trim().toLowerCase();
+        o.pick=(jjim==='true'||jjim==='o'||jjim==='1'||jjim==='찜')?true:(code.charAt(1)==='P');
+        o.rating=(o["TMDB평점"]===""||o["TMDB평점"]==null)?null:(parseFloat(o["TMDB평점"])||null);
+        o.watchDate=String(o["본날"]==null?"":o["본날"]);
+        o.directSearch=String(o["직접검색"]==null?"":o["직접검색"]);
+        o.streaming=(typeof o.streaming==="string")?o.streaming.split(/[,\/|]+/).map(x=>x.trim()).filter(Boolean):(Array.isArray(o.streaming)?o.streaming:[]);
+        o.recommendList=String(o.recommend==null?"":o.recommend).split(/[\/,]+/).map(x=>x.trim()).filter(Boolean);
+        delete o["시청여부"]; delete o["찜"]; delete o["TMDB평점"]; delete o["본날"]; delete o["직접검색"];
+        return o;
       } },
     search:["title","orig","director","actors"],
     activity:{ df:"watchDate", when:r=>r.watched==="O", label:"시청", name:r=>r.title },
@@ -1285,6 +1287,27 @@ function openDetail(m, r){
   }
 }
 /* 영화 시청상태 토글 → 기존 앱의 '시청여부' 저장통로 재사용. 2자리 코드: (W/X)+(O/R/P) */
+/* 엔진 영화행 → MOVIE 탭 한글 헤더 한 줄(전체). 부분갱신 컬럼유실 방지 위해 항상 전체 기록. */
+function movieKorRow(r){ r=r||{};
+  const code=(r.watched==='O'?'W':'X')+(r.rewatch?'R':'O');
+  const rec=Array.isArray(r.recommendList)&&r.recommendList.length ? r.recommendList.join(" / ") : (r.recommend==null?"":String(r.recommend));
+  return {
+    "원제": r.orig==null?"":String(r.orig),
+    "한국 개봉명": r.title==null?"":String(r.title),
+    "개봉연도": r.year==null?"":String(r.year),
+    "시청여부": code==='XO'?'':code,
+    "감독": r.director==null?"":String(r.director),
+    "배우": r.actors==null?"":String(r.actors),
+    "스트리밍": Array.isArray(r.streaming)?r.streaming.join(", "):(r.streaming==null?"":String(r.streaming)),
+    "직접검색": r.directSearch==null?"":String(r.directSearch),
+    "추천": rec,
+    "국적": r.country==null?"":String(r.country),
+    "TMDB평점": r.rating==null?"":String(r.rating),
+    "리뷰": r.review==null?"":String(r.review),
+    "찜": r.pick?'true':'',
+    "본날": r.watchDate==null?"":String(r.watchDate)
+  };
+}
 async function toggleMovie(r, kind){
   let watched = r.watched==='O', rewatch = !!r.rewatch, pick = !!r.pick;
   if(kind==='W') watched=!watched;
@@ -1300,11 +1323,12 @@ async function toggleMovie(r, kind){
     if(mR) mR.className="btn "+(r.rewatch?'':'ghost'); if(mP) mP.className="btn "+(r.pick?'':'ghost');
     paintDomain(MANIFESTS.movies); };
   r.watched=watched?'O':''; r.rewatch=rewatch; r.pick=pick; r.watchDate=watchDate;
-  const raw=(CACHE.movies||[]).find(x=>reCell(x['원제'])===r.orig); if(raw){ raw['시청여부']=code; raw['찜']=pick?'TRUE':''; if(watchDate) raw['본날']=watchDate; }
+  const raw=(CACHE.movies||[]).find(x=>String(x._id)===String(r._id)) || (CACHE.movies||[]).find(x=>x.orig===r.orig);
+  if(raw){ raw.watched=r.watched; raw.rewatch=r.rewatch; raw.pick=r.pick; raw.watchDate=r.watchDate; }
   paint();
-  try{ await appsSrc().post({action:'updateStatus', orig:r.orig, status:code, pick:pick, watchDate:watchDate}); }
+  try{ await sheetSrc().updateRaw("MOVIE", r.orig, movieKorRow(raw||r), "원제"); savePersist('movies', CACHE.movies||[]); }
   catch(e){ r.watched=prev.watched; r.rewatch=prev.rewatch; r.pick=prev.pick; r.watchDate=prev.watchDate;
-    if(raw){ var pc=(prev.watched==='O'?'W':'X')+(prev.rewatch?'R':'O'); raw['시청여부']=pc==='XO'?'':pc; raw['찜']=prev.pick?'TRUE':''; }
+    if(raw){ raw.watched=prev.watched; raw.rewatch=prev.rewatch; raw.pick=prev.pick; raw.watchDate=prev.watchDate; }
     paint(); alert("상태 저장 실패(되돌림): "+e.message); }
 }
 
@@ -1510,11 +1534,11 @@ function openRecordForm(m, existing){
 }
 /* 저장을 분야에 맞는 통로로 보냄 (영화=기존 수정통로 / 차계부=nd문(ID) / 도서·명산·러닝=nd문(_id)) */
 async function saveRecord(m, row, existing){
-  if(m.id==="movies"){                       // 영화 정보수정: 기존 앱 수정통로 재사용(원제로 찾음)
-    const updates={};
-    (m.fields||[]).forEach(f=>{ updates[f.sheet] = f.type==="tags"
-      ? (Array.isArray(row[f.k])?row[f.k].join(", "):(row[f.k]||"")) : (row[f.k]==null?"":row[f.k]); });
-    return appsSrc().post({action:"updateMovie", orig:existing.orig, updates});
+  if(m.id==="movies"){                       // 영화 정보수정: MOVIE 탭, 원제 기준(전체 행 재작성)
+    const base=(CACHE.movies||[]).find(x=>String(x._id)===String((existing&&existing._id)||row._id)) || existing || {};
+    const merged=Object.assign({}, base, row);
+    merged.recommendList=String(merged.recommend==null?"":merged.recommend).split(/[\/,]+/).map(x=>x.trim()).filter(Boolean);
+    return sheetSrc().updateRaw("MOVIE", (existing&&existing.orig)||merged.orig||merged._id, movieKorRow(merged), "원제");
   }
   if(m.id==="carlog"){                        // 차계부: CARLOG 탭, ID 기준
     const kor={};
@@ -1530,6 +1554,7 @@ async function deleteRecord(m, r){
   if(!confirm(`'${r.title||r.date||r._id}' 삭제할까요? 되돌릴 수 없어요.`)) return;
   try{
     if(m.id==="carlog") await sheetSrc().deleteRaw("CARLOG", r._id, "ID");
+    else if(m.id==="movies") await sheetSrc().deleteRaw("MOVIE", r.orig||r._id, "원제");
     else await sheetSrc().remove(state.domain, r._id);
     unmarkPending(m.id, r._id);   // 삭제한 줄은 보호 해제(되살아나지 않게)
     const _c=CACHE[m.id]; if(_c){ const _n=_c.filter(x=>String(x._id)!==String(r._id)); CACHE[m.id]=_n; savePersist(m.id,_n); }
@@ -2147,17 +2172,21 @@ async function pickMovie(m){
   const code = addMovieStatus==="봤음" ? "WO" : addMovieStatus==="찜" ? "XP" : "XO";
   if($("#mres")) $("#mres").innerHTML=`<div class="count">추가 중…</div>`;
   const extra = await fetchMovieExtra(m.id);
-  const movie = { orig:m.orig, kor:m.kor, year:m.year, status:code,
+  const _id=(m.orig||m.kor||'');
+  if(!_id){ alert("원제 정보가 없어 추가할 수 없어요."); if($("#mres")) $("#mres").innerHTML=""; return; }
+  const _have=(CACHE.movies||loadPersist("movies")||[]);
+  if(_have.some(x=>String(x._id)===_id || x.orig===_id)){ alert("이미 목록에 있는 영화예요."); if($("#mres")) $("#mres").innerHTML=""; return; }
+  const row={ _id, orig:m.orig, title:(m.kor||m.orig||""), year:m.year,
     director:extra.director, actors:extra.actors, country:extra.country,
-    rating:m.rating, stream:"", verified:"", rec:"" };
+    rating:m.rating, streaming:[], recommend:"", recommendList:[], review:"", directSearch:"",
+    watched: code.charAt(0)==='W'?"O":"", rewatch: code.charAt(1)==='R', pick: code.charAt(1)==='P',
+    watchDate: code.charAt(0)==='W'?todayStr():"" };
   try{
-    await appsSrc().post({action:"addMovie", movie});
+    await sheetSrc().appendRaw("MOVIE", movieKorRow(row));
+    markPending("movies", _id);
+    const arr=(CACHE.movies||loadPersist("movies")||[]); arr.push(row); CACHE.movies=arr; savePersist("movies", arr);
     $("#add").close(); refreshDomain();
-  }catch(e){
-    const msg = /이미 목록/.test(e.message) ? "이미 목록에 있는 영화예요." : ("추가 실패: "+e.message);
-    alert(msg);
-    if($("#mres")) $("#mres").innerHTML="";
-  }
+  }catch(e){ const msg=/이미/.test(e.message)?"이미 목록에 있는 영화예요.":("추가 실패: "+e.message); alert(msg); if($("#mres")) $("#mres").innerHTML=""; }
 }
 
 async function boot(){
