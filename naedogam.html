@@ -78,6 +78,7 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
   .mh-row .icon-btn{ background:transparent; border-color:#3a3a3d; color:#cfcbc3; flex-shrink:0; }
   .brandbtn{ flex-shrink:0; }
   .mh-row .icon-btn:hover{ border-color:#F7F5F0; color:#F7F5F0; }
+  #syncBtn{ font-size:18px; font-weight:700; line-height:1; padding-top:4px; padding-bottom:4px; }
   .icon-btn.spin{ animation:ndspin .8s linear infinite; pointer-events:none; }
   @keyframes ndspin{ to{ transform:rotate(360deg); } }
   .mh-sub{ font-family:var(--mono); font-size:12px; color:var(--ink-soft); margin-top:5px; letter-spacing:.01em; }
@@ -393,11 +394,11 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
 <div class="wrap" id="root" data-domain="movies">
   <header class="masthead">
     <div class="mh-row">
-      <button id="brandBtn" type="button" class="brandbtn" aria-label="홈"><!-- Naedogam v97 (여행 카테고리 추가: 기간·동행·비용·만족도·예정/다녀옴) -->
+      <button id="brandBtn" type="button" class="brandbtn" aria-label="홈"><!-- Naedogam v98 (탭 드래그·동기화아이콘 확대·띄어쓰기무시 검색·스와이프 완화) -->
         <svg class="brandmark" width="34" height="30" viewBox="26 28 62 54" aria-hidden="true"><rect x="28" y="40" width="12" height="38" rx="5" fill="#F7F5F0"/><rect x="44" y="30" width="12" height="48" rx="5" fill="#F7F5F0"/><rect x="60" y="32" width="12" height="46" rx="5" fill="#E0483F" transform="rotate(16 66 78)"/></svg>
         <span class="brandwm"><span class="bwm-ko">내도감</span><span class="bwm-en">NAEDOGAM</span></span>
       </button>
-      <span class="mhver">v97</span>
+      <span class="mhver">v98</span>
       <span class="spacer"></span>
       <span class="src-chip" id="srcChip" style="display:none">데모</span>
       <button class="icon-btn" id="searchToggle" type="button" style="display:none">🔍</button>
@@ -908,7 +909,8 @@ function calcStat(s, rows){
 }
 const fmt = n => typeof n==="number"?n.toLocaleString("ko-KR"):n;
 function filterRows(m, rows, q){ q=(q||"").trim().toLowerCase(); if(!q) return rows;
-  return rows.filter(r=>m.search.some(f=>String(r[f]??"").toLowerCase().includes(q))); }
+  const nq=q.replace(/\s+/g,"");
+  return rows.filter(r=>m.search.some(f=>{ const v=String(r[f]??"").toLowerCase(); return v.includes(q)||v.replace(/\s+/g,"").includes(nq); })); }
 
 /* ── 4. State + App ── */
 const state = { view:"home", domain:null, query:"", pick:"", statFilter:"", sort:"default", sortAsc:false, searchScope:"title", selectQ:"", searchOpen:false, page:0, rows:[] };
@@ -2305,7 +2307,7 @@ async function boot(){
     const _upd=()=>_tt.classList.toggle("show", (window.scrollY||document.documentElement.scrollTop||0)>360);
     window.addEventListener("scroll", _upd, {passive:true}); _upd(); }
   document.addEventListener("wheel", e=>{ const row=e.target.closest&&e.target.closest(".scope,.picker,.tabs,.sort-btns"); if(row && row.scrollWidth>row.clientWidth+2 && e.deltaY){ row.scrollLeft+=e.deltaY; e.preventDefault(); } }, {passive:false});
-  (function(){ let el=null,sx=0,sl=0,moved=false; const SEL=".scope,.picker,.sort-btns";
+  (function(){ let el=null,sx=0,sl=0,moved=false; const SEL=".scope,.picker,.sort-btns,.tabs";
     document.addEventListener("mousedown",e=>{ const row=e.target.closest&&e.target.closest(SEL); if(row&&row.scrollWidth>row.clientWidth+2){ el=row; sx=e.pageX; sl=row.scrollLeft; moved=false; el.classList.add("nd-drag"); } });
     document.addEventListener("mousemove",e=>{ if(!el) return; const dx=e.pageX-sx; if(Math.abs(dx)>4) moved=true; el.scrollLeft=sl-dx; });
     document.addEventListener("mouseup",()=>{ if(!el) return; const wm=moved; el.classList.remove("nd-drag"); el=null; if(wm){ const kill=ev=>{ ev.stopPropagation(); ev.preventDefault(); document.removeEventListener("click",kill,true); }; document.addEventListener("click",kill,true); setTimeout(()=>document.removeEventListener("click",kill,true),50); } });
@@ -2314,7 +2316,7 @@ async function boot(){
   (function(){ let x0=null,y0=null,t0=0,skip=false;
     document.addEventListener("touchstart",e=>{ if(e.touches.length!==1){ skip=true; return; } const t=e.touches[0]; x0=t.clientX; y0=t.clientY; t0=Date.now(); skip=!!(e.target.closest&&e.target.closest(".scope,.picker,.tabs,.sort-btns,dialog")); }, {passive:true});
     document.addEventListener("touchend",e=>{ if(skip||x0==null){ x0=null; return; } const t=e.changedTouches[0]; const dx=t.clientX-x0, dy=t.clientY-y0, dt=Date.now()-t0; x0=null;
-      if(dt<600 && dx<-70 && Math.abs(dx)>Math.abs(dy)*1.6 && Math.abs(dy)<50){ if(state.view==="domain") goHome(); } }, {passive:true});
+      if(dt<800 && dx<-50 && Math.abs(dx)>Math.abs(dy)*1.15 && Math.abs(dy)<80){ if(state.view==="domain") goHome(); } }, {passive:true});
   })();
 }
 $("#brandBtn").addEventListener("click",goHome);
