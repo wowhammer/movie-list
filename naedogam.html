@@ -286,6 +286,7 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
   .dclose-x{ position:absolute; top:11px; right:12px; width:30px; height:30px; display:flex; align-items:center; justify-content:center; border:none; background:transparent; color:var(--ink-soft); font-size:19px; line-height:1; cursor:pointer; border-radius:8px; }
   .dclose-x:hover{ background:var(--line-soft); color:var(--ink); }
   .det-del{ color:#c0392b !important; }
+  .drow span:not(.k){ white-space:pre-line; }
   .dbody{ padding:16px 18px; display:flex; flex-direction:column; gap:9px; }
   .drow{ display:grid; grid-template-columns:96px 1fr; gap:10px; font-size:13.5px; }
   .drow .k{ color:var(--ink-soft); font-family:var(--mono); font-size:11.5px; padding-top:2px; }
@@ -396,11 +397,11 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
 <div class="wrap" id="root" data-domain="movies">
   <header class="masthead">
     <div class="mh-row">
-      <button id="brandBtn" type="button" class="brandbtn" aria-label="홈"><!-- Naedogam v100 (여행폼 개선: 제목full·상태버튼·추천·후기→내용 / 수정라벨 / 스크랩·카드) -->
+      <button id="brandBtn" type="button" class="brandbtn" aria-label="홈"><!-- Naedogam v101 (일기: 오늘내도감 별칸+상세분리·날짜정렬·폼레이아웃 / 검색 홈유지 모달) -->
         <svg class="brandmark" width="34" height="30" viewBox="26 28 62 54" aria-hidden="true"><rect x="28" y="40" width="12" height="38" rx="5" fill="#F7F5F0"/><rect x="44" y="30" width="12" height="48" rx="5" fill="#F7F5F0"/><rect x="60" y="32" width="12" height="46" rx="5" fill="#E0483F" transform="rotate(16 66 78)"/></svg>
         <span class="brandwm"><span class="bwm-ko">내도감</span><span class="bwm-en">NAEDOGAM</span></span>
       </button>
-      <span class="mhver">v100</span>
+      <span class="mhver">v101</span>
       <span class="spacer"></span>
       <span class="src-chip" id="srcChip" style="display:none">데모</span>
       <button class="icon-btn" id="searchToggle" type="button" style="display:none">🔍</button>
@@ -622,14 +623,16 @@ const MANIFESTS = {
   diary:{ id:"diary", title:"일기", icon:"📔", vol:"卷6", canAdd:true,
     source:{ type:"sheet", tab:"일기" },
     fields:[ {k:"date",sheet:"날짜",label:"날짜",type:"date",today:true},
-             {k:"title",sheet:"제목",label:"제목",type:"text"},
+             {k:"title",sheet:"제목",label:"제목",type:"text",full:true},
              {k:"content",sheet:"내용",label:"내용",type:"textarea"},
+             {k:"nddaily",sheet:"오늘내도감",label:"오늘 내도감 (자동)",type:"textarea",rows:3},
              {k:"mood",sheet:"기분",label:"기분",type:"select",options:["","😊 좋음","😐 보통","😔 힘듦","😡 화남","😢 슬픔","🥰 설렘"]},
              {k:"weather",sheet:"날씨",label:"날씨",type:"select",options:["","☀️ 맑음","⛅ 구름","🌧️ 비","❄️ 눈","🌫️ 흐림"]},
              {k:"place",sheet:"장소",label:"장소",type:"text"},
              {k:"tags",sheet:"태그",label:"태그(쉼표로 여러 개)",type:"tags"},
              {k:"cover",sheet:"사진",label:"사진",type:"image"} ],
-    search:["title","content","tags","place"],
+    search:["title","content","nddaily","tags","place"],
+    dateSort:"date",
     activity:{ df:"date", when:r=>true, label:"일기", name:r=>r.title||r.date },
     stats:[ {label:"기록",type:"count",c:"#9333ea"},
             {label:"좋음",type:"countIf",field:"mood",eq:"😊 좋음",c:"#16a34a"},
@@ -1010,10 +1013,11 @@ function runHomeSearch(q){
 }
 function openFromSearch(catId, id){
   const m=MANIFESTS[catId]; if(!m) return;
-  openDomain(catId);
-  let n=0; const tryOpen=()=>{ const rows=state.rows||[]; const r=rows.find(x=>String(x._id)===String(id));
-    if(r){ openDetail(m, r); } else if(n++<12){ setTimeout(tryOpen,150); } };
-  setTimeout(tryOpen, 250);
+  const openIt=(rows)=>{ state.domain=catId; state.rows=applyComputed(m,(rows||[]).map(r=>({_id:r._id||crypto.randomUUID(),...r})));
+    const r=state.rows.find(x=>String(x._id)===String(id)); if(r) openDetail(m,r); };   // 홈 유지 + 상세만 모달
+  const cached=CACHE[catId]||loadPersist(catId);
+  if(cached) openIt(cached);
+  else sourceFor(m).list(catId).then(rows=>{ CACHE[catId]=rows; savePersist(catId,rows); openIt(rows); }).catch(()=>{});
 }
 function sourceFor(m){
   if(m.source?.type==="appsscript" && CONFIG.APPS_SCRIPT_URL) return _apps||(_apps=new AppsScriptDataSource(CONFIG.APPS_SCRIPT_URL));
@@ -1605,7 +1609,7 @@ function buildDayLog(dateStr){
   return lines;
 }
 async function fillDiaryLog(d, silent){
-  const dateEl=d.querySelector('.rf[data-k="date"]'), contEl=d.querySelector('.rf[data-k="content"]');
+  const dateEl=d.querySelector('.rf[data-k="date"]'), contEl=d.querySelector('.rf[data-k="nddaily"]');
   if(!contEl) return;
   const dateStr=(dateEl&&dateEl.value)||todayStr();
   await Promise.all(getActive().filter(id=>id!=="diary"&&!(CACHE[id]||loadPersist(id))).map(id=>{
@@ -1629,7 +1633,7 @@ function openRecordForm(m, existing){
       if(raw){ const pd=parseDate(raw); if(pd) dv=pd.getFullYear()+"-"+String(pd.getMonth()+1).padStart(2,"0")+"-"+String(pd.getDate()).padStart(2,"0"); }
       else if(f.today && !isEdit) dv=todayStr();
       return `<label>${f.label}</label><input type="date" class="rf" data-k="${f.k}" data-type="date" value="${dv}">`; }
-    if(f.type==="textarea"){ const tv=(val==null?"":String(val)).replace(/&/g,'&amp;').replace(/</g,'&lt;'); return `<label>${f.label}</label><textarea class="rf" data-k="${f.k}" data-type="text" rows="5" style="width:100%;font-family:inherit;font-size:15px;padding:9px 11px;border:1px solid var(--line);border-radius:9px;box-sizing:border-box;resize:vertical" autocomplete="off">${tv}</textarea>`; }
+    if(f.type==="textarea"){ const tv=(val==null?"":String(val)).replace(/&/g,'&amp;').replace(/</g,'&lt;'); return `<label>${f.label}</label><textarea class="rf" data-k="${f.k}" data-type="text" rows="${f.rows||5}" style="width:100%;font-family:inherit;font-size:15px;padding:9px 11px;border:1px solid var(--line);border-radius:9px;box-sizing:border-box;resize:vertical" autocomplete="off">${tv}</textarea>`; }
     if(f.type==="rating"){ const rv=(val==null||val==='')?'':val; return `<div class="rf-ratewrap" data-k="${f.k}"><label>${f.label}</label><div class="rf-starbox" data-k="${f.k}"><input type="hidden" class="rf" data-k="${f.k}" data-type="number" value="${rv}">${starBarHTML(rv===''?0:parseFloat(rv))}<span class="rf-star-num"></span><button type="button" class="rf-star-clr">✕</button></div><div class="rf-ratehint" style="display:none;font-size:12.5px;color:var(--sub);margin-top:5px">‘읽음’ 상태로 표시하면 내 평점을 매길 수 있어요</div></div>`; }
     if(f.type==="seg") return `<label>${f.label}</label><div class="rf-seg" data-k="${f.k}">${(f.options||[]).map(o=>`<button type="button" class="btn ghost rf-segbtn ${String(val||'')===o?'on':''}" data-v="${o}">${o}</button>`).join("")}</div>`;
     const v = (f.type==="tags" && Array.isArray(val)) ? val.join(", ") : (val==null?"":val);
@@ -1687,8 +1691,11 @@ function openRecordForm(m, existing){
     }catch(e){ btn.textContent="저장"; btn.disabled=false; alert("저장 실패: "+e.message); }
   };
   if(m.id==="diary"){
-    const _bd=d.querySelector(".dbody.set");
-    if(_bd){ const _lb=document.createElement("button"); _lb.type="button"; _lb.className="btn ghost"; _lb.textContent="🪄 오늘 활동 불러오기"; _lb.style.cssText="flex:1 1 100%;margin-bottom:8px"; _bd.insertBefore(_lb, _bd.firstChild); _lb.onclick=()=>fillDiaryLog(d, false); }
+    const _df=d.querySelector('.rff .rf[data-k="date"]'); const _dw=_df?_df.closest('.rff'):null;
+    if(_dw && _dw.parentNode){ const _bw=document.createElement("div"); _bw.className="rff rff-half";
+      _bw.innerHTML='<label>&nbsp;</label><button type="button" class="btn ghost" id="ndDailyBtn" style="width:100%">🪄 오늘 활동 불러오기</button>';
+      _dw.parentNode.insertBefore(_bw, _dw.nextSibling);
+      const _b=d.querySelector("#ndDailyBtn"); if(_b) _b.onclick=()=>fillDiaryLog(d, false); }
     if(!existing) fillDiaryLog(d, true);
   }
 }
@@ -1809,6 +1816,7 @@ function paintDomain(m){   // state.rows를 화면에 그림 (데이터 다시 �
   if(m.id==="mountains" && mtnRegion) listBase = listBase.filter(r=>mtnRegionMatch(r, mtnRegion));
   if(m.id==="diary" && diaryTag) listBase = listBase.filter(r=>rowTags(r).includes(diaryTag));
   let rows=filterRows(m, listBase, state.query);
+  if(m.dateSort && !((m.sorts||m.scopeSort) && state.sort && state.sort!=="default")){ rows=[...rows].sort((a,b)=>{ const ad=parseDate(a[m.dateSort]), bd=parseDate(b[m.dateSort]); return (bd?bd.getTime():-Infinity)-(ad?ad.getTime():-Infinity); }); }
   if((m.sorts||m.scopeSort) && state.sort && state.sort!=="default"){
     const asc=state.sortAsc, k=state.sort;
     const isNum=v=>/^\s*-?[\d.,]+\s*$/.test(String(v));   // 문자열 전체가 숫자일 때만 숫자정렬(날짜는 문자정렬)
