@@ -397,11 +397,11 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
 <div class="wrap" id="root" data-domain="movies">
   <header class="masthead">
     <div class="mh-row">
-      <button id="brandBtn" type="button" class="brandbtn" aria-label="홈"><!-- Naedogam v101 (일기: 오늘내도감 별칸+상세분리·날짜정렬·폼레이아웃 / 검색 홈유지 모달) -->
+      <button id="brandBtn" type="button" class="brandbtn" aria-label="홈"><!-- Naedogam v102 (러닝 누적숨김·일기 자동갱신·기분통계·도서토글·일기카드 내도감) -->
         <svg class="brandmark" width="34" height="30" viewBox="26 28 62 54" aria-hidden="true"><rect x="28" y="40" width="12" height="38" rx="5" fill="#F7F5F0"/><rect x="44" y="30" width="12" height="48" rx="5" fill="#F7F5F0"/><rect x="60" y="32" width="12" height="46" rx="5" fill="#E0483F" transform="rotate(16 66 78)"/></svg>
         <span class="brandwm"><span class="bwm-ko">내도감</span><span class="bwm-en">NAEDOGAM</span></span>
       </button>
-      <span class="mhver">v101</span>
+      <span class="mhver">v102</span>
       <span class="spacer"></span>
       <span class="src-chip" id="srcChip" style="display:none">데모</span>
       <button class="icon-btn" id="searchToggle" type="button" style="display:none">🔍</button>
@@ -604,7 +604,7 @@ const MANIFESTS = {
              {k:"hr",sheet:"심박수",label:"심박수(bpm)",type:"number"},
              {k:"cadence",sheet:"케이던스",label:"케이던스(spm)",type:"number"},
              {k:"shoes",sheet:"신발",label:"신발",type:"text"},
-             {k:"cumulative",sheet:"누적",label:"누적 거리(km)",type:"number"},
+             {k:"cumulative",sheet:"누적",label:"누적 거리(km)",type:"number",hideForm:true},
              {k:"place",sheet:"장소",label:"장소",type:"text"},
              {k:"memo",sheet:"메모",label:"메모",type:"text"},
              {k:"cover",sheet:"커버",label:"사진",type:"image"} ],
@@ -634,10 +634,13 @@ const MANIFESTS = {
     search:["title","content","nddaily","tags","place"],
     dateSort:"date",
     activity:{ df:"date", when:r=>true, label:"일기", name:r=>r.title||r.date },
-    stats:[ {label:"기록",type:"count",c:"#9333ea"},
-            {label:"좋음",type:"countIf",field:"mood",eq:"😊 좋음",c:"#16a34a"},
-            {label:"슬픔",type:"countIf",field:"mood",eq:"😢 슬픔",c:"#0ea5e9"},
-            {label:"화남",type:"countIf",field:"mood",eq:"😡 화남",c:"#dc2626"} ],
+    stats:[ {label:"전체",type:"count",c:"#9333ea"},
+            {label:"😊",type:"countIf",field:"mood",eq:"😊 좋음",c:"#16a34a"},
+            {label:"😐",type:"countIf",field:"mood",eq:"😐 보통",c:"#64748b"},
+            {label:"😔",type:"countIf",field:"mood",eq:"😔 힘듦",c:"#b45309"},
+            {label:"😡",type:"countIf",field:"mood",eq:"😡 화남",c:"#dc2626"},
+            {label:"😢",type:"countIf",field:"mood",eq:"😢 슬픔",c:"#0ea5e9"},
+            {label:"🥰",type:"countIf",field:"mood",eq:"🥰 설렘",c:"#db2777"} ],
     card:{ kind:"data", thumb:"📔",
            title:r=>`${r.date}${r.title?" · "+r.title:""}`,
            kv:[{k:"기분",f:"mood"},{k:"날씨",f:"weather"}] } },
@@ -1253,9 +1256,8 @@ const TOGGLE_DEFS={
   books:[
     {label:"읽음",   on:r=>r.status==="읽음",   ch:r=>({status:r.status==="읽음"?"":"읽음"})},
     {label:"읽는중", on:r=>r.status==="읽는중", ch:r=>({status:r.status==="읽는중"?"":"읽는중"})},
-    {label:"다시읽을것", on:r=>!!r.reread, ch:r=>({reread:!r.reread})},
-    {label:"소장",   on:r=>!!r.owned,  ch:r=>({owned:!r.owned})},
     {label:"찜",     on:r=>!!r.pick,   ch:r=>({pick:!r.pick})},
+    {label:"소장",   on:r=>!!r.owned,  ch:r=>({owned:!r.owned})},
   ],
   mountains:[
     {label:"다녀옴", on:r=>!!r.climbed, ch:r=>({climbed:!r.climbed})},
@@ -1362,7 +1364,7 @@ function renderCard(m, r, no){ if(m.id==="books") return bookCard(r); const c=m.
   const kv=c.kv.map(col=>{ const v=r[col.f]; if(v==null||v==="") return ""; const s=(typeof v==="number"?fmt(v):v)+(col.u?` ${col.u}`:"");
     return `<span>${col.k} <b>${s}</b></span>`; }).filter(Boolean).join("");
   return `<button class="card catcard" data-id="${r._id}"><span class="thumb">${(r.cover||r._cover)?`<img src="${r.cover||r._cover}" alt="">`:(c.thumb||"🧾")}</span>
-    <span class="body"><h3 style="font-size:15px">${c.title(r)}</h3><div class="kv">${kv}</div>${(r.memo||r.content)?`<div class="meta" style="margin-top:5px">${(t=>t.slice(0,70).replace(/</g,"&lt;")+(t.length>70?"…":""))(String(r.memo||r.content))}</div>`:""}</span></button>`; }
+    <span class="body"><h3 style="font-size:15px">${c.title(r)}</h3><div class="kv">${kv}</div>${(r.memo||r.content||r.nddaily)?`<div class="meta" style="margin-top:5px">${(t=>t.slice(0,70).replace(/</g,"&lt;")+(t.length>70?"…":""))(String(r.memo||r.content||r.nddaily))}</div>`:""}</span></button>`; }
 function openDetail(m, r){
   if(m.id==="movies"){ openMovieDetail(m, r); return; }
   if(m.id==="books"){ openBookDetail(m, r); return; }
@@ -1621,7 +1623,7 @@ async function fillDiaryLog(d, silent){
   contEl.value = cur ? (cur.replace(/\s+$/,"")+"\n"+add.join("\n")) : add.join("\n");
 }
 function openRecordForm(m, existing){
-  const d=$("#add"); const isEdit=!!existing; const fields=m.fields||[];
+  const d=$("#add"); const isEdit=!!existing; const fields=(m.fields||[]).filter(f=>!f.hideForm);
   const _cell=f=>{
     const val = existing ? existing[f.k] : (f.type==="bool"?false:"");
     if(f.type==="bool")
@@ -1696,7 +1698,7 @@ function openRecordForm(m, existing){
       _bw.innerHTML='<label>&nbsp;</label><button type="button" class="btn ghost" id="ndDailyBtn" style="width:100%">🪄 오늘 활동 불러오기</button>';
       _dw.parentNode.insertBefore(_bw, _dw.nextSibling);
       const _b=d.querySelector("#ndDailyBtn"); if(_b) _b.onclick=()=>fillDiaryLog(d, false); }
-    if(!existing) fillDiaryLog(d, true);
+    fillDiaryLog(d, true);
   }
 }
 /* 저장을 분야에 맞는 통로로 보냄 (영화=기존 수정통로 / 차계부=nd문(ID) / 도서·명산·러닝=nd문(_id)) */
