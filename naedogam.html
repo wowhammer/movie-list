@@ -280,8 +280,11 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
 
   dialog{ border:none; border-radius:16px; padding:0; max-width:460px; width:92%; background:#fff; color:var(--ink); box-shadow:0 12px 44px rgba(0,0,0,.22); }
   dialog::backdrop{ background:rgba(30,26,20,.5); }
-  .dhead{ padding:16px 18px; border-bottom:1px solid var(--line); }
-  .dhead h3{ font-family:var(--sans); font-weight:700; margin:0; font-size:19px; }
+  .dhead{ padding:16px 18px; border-bottom:1px solid var(--line); position:relative; }
+  .dhead h3{ font-family:var(--sans); font-weight:700; margin:0; font-size:19px; padding-right:36px; }
+  .dclose-x{ position:absolute; top:11px; right:12px; width:30px; height:30px; display:flex; align-items:center; justify-content:center; border:none; background:transparent; color:var(--ink-soft); font-size:19px; line-height:1; cursor:pointer; border-radius:8px; }
+  .dclose-x:hover{ background:var(--line-soft); color:var(--ink); }
+  .det-del{ color:#c0392b !important; }
   .dbody{ padding:16px 18px; display:flex; flex-direction:column; gap:9px; }
   .drow{ display:grid; grid-template-columns:96px 1fr; gap:10px; font-size:13.5px; }
   .drow .k{ color:var(--ink-soft); font-family:var(--mono); font-size:11.5px; padding-top:2px; }
@@ -373,11 +376,11 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
 <div class="wrap" id="root" data-domain="movies">
   <header class="masthead">
     <div class="mh-row">
-      <button id="brandBtn" type="button" class="brandbtn" aria-label="홈"><!-- Naedogam v93 (영화 탭 _id 열 마이그레이션 완료 → movieKorRow _id 복귀) -->
+      <button id="brandBtn" type="button" class="brandbtn" aria-label="홈"><!-- Naedogam v94 (상세뷰 버튼 재배치+헤더X, 모바일 왼쪽스와이프→홈) -->
         <svg class="brandmark" width="34" height="30" viewBox="26 28 62 54" aria-hidden="true"><rect x="28" y="40" width="12" height="38" rx="5" fill="#F7F5F0"/><rect x="44" y="30" width="12" height="48" rx="5" fill="#F7F5F0"/><rect x="60" y="32" width="12" height="46" rx="5" fill="#E0483F" transform="rotate(16 66 78)"/></svg>
         <span class="brandwm"><span class="bwm-ko">내도감</span><span class="bwm-en">NAEDOGAM</span></span>
       </button>
-      <span class="mhver">v93</span>
+      <span class="mhver">v94</span>
       <span class="spacer"></span>
       <span class="src-chip" id="srcChip" style="display:none">데모</span>
       <button class="icon-btn" id="searchToggle" type="button" style="display:none">🔍</button>
@@ -1196,7 +1199,7 @@ async function openBookDetail(m, r){
   const qa=encodeURIComponent(((r.title||"")+" "+(r.author||"")).trim());
   const _rt=(r.rating!=null&&r.rating!=="")?parseFloat(r.rating):null;
 
-  d.innerHTML=`<div class="dhead"><h3>${r.title}</h3></div>
+  d.innerHTML=`<div class="dhead"><h3>${r.title}</h3><button class="dclose-x" onclick="this.closest('dialog').close()" aria-label="닫기">✕</button></div>
     <div class="mvtop">
       <div class="mvposter" id="bkCover">${r.cover?`<img src="${r.cover}" alt="">`:"📖"}</div>
       <div class="mvinfo" style="min-width:0">
@@ -1220,9 +1223,9 @@ async function openBookDetail(m, r){
     </div>
     <div class="dfoot" style="flex-wrap:wrap">
       <div class="statusbtns" style="display:flex;gap:6px;flex-wrap:wrap;width:100%;margin-bottom:4px">${statusBtnsHTML(m,r)}</div>
+      <span style="flex:1"></span>
       <button class="btn ghost" id="bkEdit">정보수정</button>
-      <button class="btn ghost" id="bkDel">삭제</button>
-      <button class="btn ghost" id="bkClose" style="margin-left:auto">닫기</button>
+      <button class="btn ghost det-del" id="bkDel">삭제</button>
     </div>`;
   d.showModal();
   wireStatusBtns(m, r, d);
@@ -1232,7 +1235,6 @@ async function openBookDetail(m, r){
       catch(e){ r.rating=old; alert("평점 저장 실패: "+e.message); } }); }
   $("#bkEdit").onclick=()=>{ d.close(); openRecordForm(m, r); };
   $("#bkDel").onclick=()=>deleteRecord(m, r);
-  $("#bkClose").onclick=()=>d.close();
   const info=await fetchBookInfo(r.title, r.author);
   if(info){
     if(!r.cover && info.cover && $("#bkCover")) $("#bkCover").innerHTML=`<img src="${info.cover}" alt="">`;
@@ -1290,14 +1292,14 @@ function openDetail(m, r){
   } else if(editable){
     foot=`<div class="dfoot" style="flex-wrap:wrap;gap:6px">
        ${TOGGLE_DEFS[m.id]?`<span class="statusbtns" style="display:contents">${statusBtnsHTML(m,r)}</span>`:""}
-       <button class="btn ghost" id="detEdit" style="margin-left:auto">정보수정</button>
-       <button class="btn ghost" id="detDel">삭제</button>
-       <button class="btn ghost" onclick="this.closest('dialog').close()">닫기</button></div>`;
+       <span style="flex:1"></span>
+       <button class="btn ghost" id="detEdit">정보수정</button>
+       <button class="btn ghost det-del" id="detDel">삭제</button></div>`;
   } else {
-    foot=`<button class="dclose" onclick="this.closest('dialog').close()">닫기</button>`;
+    foot="";
   }
   const _cf=(m.fields||[]).find(f=>f.type==="image"); const coverImg=(_cf&&r[_cf.k])?`<div class="det-cover"><img src="${String(r[_cf.k]).replace(/"/g,'&quot;')}" alt=""></div>`:"";
-  const d=$("#detail"); d.innerHTML=`<div class="dhead"><h3>${m.card.kind==="specimen"?r.title:(r.date+(r.car?" · "+r.car:""))}</h3></div><div class="dbody">${coverImg}${rows}</div>${mapLinks}${foot}`;
+  const d=$("#detail"); d.innerHTML=`<div class="dhead"><h3>${m.card.kind==="specimen"?r.title:(r.date+(r.car?" · "+r.car:""))}</h3><button class="dclose-x" onclick="this.closest('dialog').close()" aria-label="닫기">✕</button></div><div class="dbody">${coverImg}${rows}</div>${mapLinks}${foot}`;
   d.showModal();
   if(isMovie){
     $("#mW").onclick=()=>toggleMovie(r,'W'); $("#mR").onclick=()=>toggleMovie(r,'R'); $("#mP").onclick=()=>toggleMovie(r,'P');
@@ -1380,7 +1382,7 @@ async function openMovieDetail(m, r){
   const people=[personSpan(r.director,"director"), personSpan(r.actors,"actor")].filter(Boolean).join(' <span style="color:var(--line)">/</span> ');
   const stream=(r.streaming||[]).map(t=>`<span class="tag">${t}</span>`).join("");
   const rec=(r.recommendList||[]).map(t=>`<span class="tag rec">${t}</span>`).join("");
-  d.innerHTML=`<div class="dhead"><h3>${r.title}</h3></div>
+  d.innerHTML=`<div class="dhead"><h3>${r.title}</h3><button class="dclose-x" onclick="this.closest('dialog').close()" aria-label="닫기">✕</button></div>
     <div class="mvtop">
       <div class="mvposter" id="mvPoster">🎬</div>
       <div class="mvinfo" style="min-width:0">
@@ -1401,13 +1403,14 @@ async function openMovieDetail(m, r){
       <button class="btn ${r.watched==='O'?'':'ghost'}" id="mW">${r.watched==='O'?'✓ 봤음':'봤음'}</button>
       <button class="btn ${r.rewatch?'':'ghost'}" id="mR">다시볼것</button>
       <button class="btn ${r.pick?'':'ghost'}" id="mP">찜</button>
+      <span style="flex:1"></span>
       <button class="btn ghost" id="mEdit">정보수정</button>
-      <button class="btn ghost" id="mClose" style="margin-left:auto">닫기</button>
+      <button class="btn ghost det-del" id="mDel">삭제</button>
     </div>`;
   d.showModal();
   $("#mW").onclick=()=>toggleMovie(r,'W'); $("#mR").onclick=()=>toggleMovie(r,'R'); $("#mP").onclick=()=>toggleMovie(r,'P');
   $("#mEdit").onclick=()=>{ d.close(); openRecordForm(m, r); };
-  $("#mClose").onclick=()=>d.close();
+  $("#mDel").onclick=()=>deleteRecord(m, r);
   d.querySelectorAll(".plink").forEach(el=>el.onclick=e=>{ e.stopPropagation(); openPersonModal(el.dataset.name, el.dataset.role); });
   const info=await fetchMovieInfo(r.orig, r.title, r.year);   // 포스터·줄거리 채우기
   if($("#mvPoster")&&info.poster) $("#mvPoster").innerHTML=`<img src="${info.poster}" alt="">`;
@@ -2225,6 +2228,12 @@ async function boot(){
     document.addEventListener("mousedown",e=>{ const row=e.target.closest&&e.target.closest(SEL); if(row&&row.scrollWidth>row.clientWidth+2){ el=row; sx=e.pageX; sl=row.scrollLeft; moved=false; el.classList.add("nd-drag"); } });
     document.addEventListener("mousemove",e=>{ if(!el) return; const dx=e.pageX-sx; if(Math.abs(dx)>4) moved=true; el.scrollLeft=sl-dx; });
     document.addEventListener("mouseup",()=>{ if(!el) return; const wm=moved; el.classList.remove("nd-drag"); el=null; if(wm){ const kill=ev=>{ ev.stopPropagation(); ev.preventDefault(); document.removeEventListener("click",kill,true); }; document.addEventListener("click",kill,true); setTimeout(()=>document.removeEventListener("click",kill,true),50); } });
+  })();
+  /* #4 모바일: 왼쪽으로 스와이프하면 홈으로 */
+  (function(){ let x0=null,y0=null,t0=0,skip=false;
+    document.addEventListener("touchstart",e=>{ if(e.touches.length!==1){ skip=true; return; } const t=e.touches[0]; x0=t.clientX; y0=t.clientY; t0=Date.now(); skip=!!(e.target.closest&&e.target.closest(".scope,.picker,.tabs,.sort-btns,dialog")); }, {passive:true});
+    document.addEventListener("touchend",e=>{ if(skip||x0==null){ x0=null; return; } const t=e.changedTouches[0]; const dx=t.clientX-x0, dy=t.clientY-y0, dt=Date.now()-t0; x0=null;
+      if(dt<600 && dx<-70 && Math.abs(dx)>Math.abs(dy)*1.6 && Math.abs(dy)<50){ if(state.view==="domain") goHome(); } }, {passive:true});
   })();
 }
 $("#brandBtn").addEventListener("click",goHome);
