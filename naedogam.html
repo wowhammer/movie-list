@@ -292,6 +292,11 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
   .set label{ display:block; font-size:12px; color:var(--ink-soft); margin:12px 0 4px; }
   .set input,.set select,.set textarea{ width:100%; font-family:inherit; font-size:15px; padding:9px 11px; border:1px solid var(--line); border-radius:6px; background:var(--paper); color:var(--ink); box-sizing:border-box; }
   .set .hint{ font-size:11px; color:var(--ink-soft); margin-top:4px; }
+  .rfgrid{ flex-direction:row; flex-wrap:wrap; column-gap:12px; row-gap:0; align-items:flex-start; }
+  .rfgrid .rff{ box-sizing:border-box; }
+  .rfgrid .rff-full{ flex:1 1 100%; }
+  .rfgrid .rff-half{ flex:1 1 calc(50% - 6px); min-width:calc(50% - 6px); }
+  .rfgrid .rff-bool{ flex:0 0 auto; align-self:center; }
   .btn{ font-family:var(--sans); font-size:13px; font-weight:500; cursor:pointer; background:var(--accent); color:#fff; border:none; padding:10px 16px; border-radius:7px; }
   .btn.ghost{ background:none; color:var(--ink); border:1px solid var(--line); }
   .btn.ghost.on{ background:var(--accent); color:#fff; border-color:var(--accent); }
@@ -376,11 +381,11 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
 <div class="wrap" id="root" data-domain="movies">
   <header class="masthead">
     <div class="mh-row">
-      <button id="brandBtn" type="button" class="brandbtn" aria-label="홈"><!-- Naedogam v94 (상세뷰 버튼 재배치+헤더X, 모바일 왼쪽스와이프→홈) -->
+      <button id="brandBtn" type="button" class="brandbtn" aria-label="홈"><!-- Naedogam v95 (폼 2열 배치: 짧은 필드 2개/줄, 헤더X) -->
         <svg class="brandmark" width="34" height="30" viewBox="26 28 62 54" aria-hidden="true"><rect x="28" y="40" width="12" height="38" rx="5" fill="#F7F5F0"/><rect x="44" y="30" width="12" height="48" rx="5" fill="#F7F5F0"/><rect x="60" y="32" width="12" height="46" rx="5" fill="#E0483F" transform="rotate(16 66 78)"/></svg>
         <span class="brandwm"><span class="bwm-ko">내도감</span><span class="bwm-en">NAEDOGAM</span></span>
       </button>
-      <span class="mhver">v94</span>
+      <span class="mhver">v95</span>
       <span class="spacer"></span>
       <span class="src-chip" id="srcChip" style="display:none">데모</span>
       <button class="icon-btn" id="searchToggle" type="button" style="display:none">🔍</button>
@@ -1492,7 +1497,7 @@ function afterSave(m,row){   // 저장 성공 후: 시트 재조회 없이 로�
 }
 function openRecordForm(m, existing){
   const d=$("#add"); const isEdit=!!existing; const fields=m.fields||[];
-  const body=fields.map(f=>{
+  const _cell=f=>{
     const val = existing ? existing[f.k] : (f.type==="bool"?false:"");
     if(f.type==="bool")
       return `<button type="button" class="btn ghost rf-bool ${val?'on':''}" data-k="${f.k}" style="margin-top:6px;margin-right:6px">${f.sheet||f.label}</button>`;
@@ -1507,11 +1512,12 @@ function openRecordForm(m, existing){
     if(f.type==="rating"){ const rv=(val==null||val==='')?'':val; return `<div class="rf-ratewrap" data-k="${f.k}"><label>${f.label}</label><div class="rf-starbox" data-k="${f.k}"><input type="hidden" class="rf" data-k="${f.k}" data-type="number" value="${rv}">${starBarHTML(rv===''?0:parseFloat(rv))}<span class="rf-star-num"></span><button type="button" class="rf-star-clr">✕</button></div><div class="rf-ratehint" style="display:none;font-size:12.5px;color:var(--sub);margin-top:5px">‘읽음’ 상태로 표시하면 내 평점을 매길 수 있어요</div></div>`; }
     const v = (f.type==="tags" && Array.isArray(val)) ? val.join(", ") : (val==null?"":val);
     return `<label>${f.label}</label><input class="rf" data-k="${f.k}" data-type="${f.type}" value="${String(v).replace(/"/g,'&quot;')}" autocomplete="off" />`;
-  }).join("");
-  d.innerHTML=`<div class="dhead"><h3>${m.title} ${isEdit?'수정':'추가'}</h3></div><div class="dbody set">${body}
-    <div style="display:flex;gap:8px;margin-top:18px">
-      <button class="btn" id="rfSave">저장</button>
-      <button class="btn ghost" id="rfClose">닫기</button>
+  };
+  const _wcls=f=> f.type==="bool"?"rff-bool":((f.type==="textarea"||f.type==="image"||f.type==="rating")?"rff-full":"rff-half");
+  const body=fields.map(f=>`<div class="rff ${_wcls(f)}">${_cell(f)}</div>`).join("");
+  d.innerHTML=`<div class="dhead"><h3>${m.title} ${isEdit?'수정':'추가'}</h3><button class="dclose-x" onclick="this.closest('dialog').close()" aria-label="닫기">✕</button></div><div class="dbody set rfgrid">${body}
+    <div class="rff-full" style="display:flex;gap:8px;margin-top:18px;flex:1 1 100%">
+      <button class="btn" id="rfSave" style="flex:1">저장</button>
     </div></div>`;
   d.showModal();
   d.querySelectorAll(".rf-bool").forEach(b=>b.onclick=()=>{ b.classList.toggle("on"); });
@@ -1535,7 +1541,6 @@ function openRecordForm(m, existing){
       const pv=d.querySelector(`.rf-imgprev[data-k="${k}"]`); pv.src=url; pv.style.display="";
     }; img.src=rd.result; }; rd.readAsDataURL(file);
   });
-  $("#rfClose").onclick=()=>d.close();
   $("#rfSave").onclick=async()=>{
     // 한글 마지막 글자 잘림 방지: 조합 확정(blur) → 아주 짧은 틈 뒤 값 읽기
     if(document.activeElement && document.activeElement.blur) document.activeElement.blur();
