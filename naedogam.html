@@ -373,11 +373,11 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
 <div class="wrap" id="root" data-domain="movies">
   <header class="masthead">
     <div class="mh-row">
-      <button id="brandBtn" type="button" class="brandbtn" aria-label="홈"><!-- Naedogam v92 (movieKorRow _id 헤더 제거: 백엔드 _id열 자동생성 방지) -->
+      <button id="brandBtn" type="button" class="brandbtn" aria-label="홈"><!-- Naedogam v93 (영화 탭 _id 열 마이그레이션 완료 → movieKorRow _id 복귀) -->
         <svg class="brandmark" width="34" height="30" viewBox="26 28 62 54" aria-hidden="true"><rect x="28" y="40" width="12" height="38" rx="5" fill="#F7F5F0"/><rect x="44" y="30" width="12" height="48" rx="5" fill="#F7F5F0"/><rect x="60" y="32" width="12" height="46" rx="5" fill="#E0483F" transform="rotate(16 66 78)"/></svg>
         <span class="brandwm"><span class="bwm-ko">내도감</span><span class="bwm-en">NAEDOGAM</span></span>
       </button>
-      <span class="mhver">v92</span>
+      <span class="mhver">v93</span>
       <span class="spacer"></span>
       <span class="src-chip" id="srcChip" style="display:none">데모</span>
       <button class="icon-btn" id="searchToggle" type="button" style="display:none">🔍</button>
@@ -1314,6 +1314,7 @@ function movieKorRow(r){ r=r||{};
   const code=(r.watched==='O'?'W':'X')+(r.rewatch?'R':'O');
   const rec=Array.isArray(r.recommendList)&&r.recommendList.length ? r.recommendList.join(" / ") : (r.recommend==null?"":String(r.recommend));
   return {
+    "_id": r.orig==null?"":String(r.orig),
     "원제": r.orig==null?"":String(r.orig),
     "한국 개봉명": r.title==null?"":String(r.title),
     "개봉연도": r.year==null?"":String(r.year),
