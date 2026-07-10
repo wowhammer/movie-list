@@ -282,9 +282,14 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
   dialog{ border:none; border-radius:16px; padding:0; max-width:460px; width:92%; background:#fff; color:var(--ink); box-shadow:0 12px 44px rgba(0,0,0,.22); }
   dialog::backdrop{ background:rgba(30,26,20,.5); }
   .dhead{ padding:16px 18px; border-bottom:1px solid var(--line); position:relative; }
-  .dhead h3{ font-family:var(--sans); font-weight:700; margin:0; font-size:19px; padding-right:36px; }
+  .dhead h3{ font-family:var(--sans); font-weight:700; margin:0; font-size:19px; padding-right:128px; }
   .dclose-x{ position:absolute; top:11px; right:12px; width:30px; height:30px; display:flex; align-items:center; justify-content:center; border:none; background:transparent; color:var(--ink-soft); font-size:19px; line-height:1; cursor:pointer; border-radius:8px; }
   .dclose-x:hover{ background:var(--line-soft); color:var(--ink); }
+  .dh-actions{ position:absolute; top:10px; right:11px; display:flex; align-items:center; gap:5px; }
+  .dh-actions .dclose-x{ position:static; top:auto; right:auto; }
+  .dh-btn{ font-family:inherit; font-size:12px; padding:5px 9px; border:1px solid var(--line); border-radius:7px; background:transparent; color:var(--ink-soft); cursor:pointer; }
+  .dh-btn:hover{ border-color:var(--ink); color:var(--ink); }
+  .dh-btn.dh-del{ color:#c0392b; }
   .det-del{ color:#c0392b !important; }
   .drow span:not(.k){ white-space:pre-line; }
   .dbody{ padding:16px 18px; display:flex; flex-direction:column; gap:9px; }
@@ -397,11 +402,11 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
 <div class="wrap" id="root" data-domain="movies">
   <header class="masthead">
     <div class="mh-row">
-      <button id="brandBtn" type="button" class="brandbtn" aria-label="홈"><!-- Naedogam v102 (러닝 누적숨김·일기 자동갱신·기분통계·도서토글·일기카드 내도감) -->
+      <button id="brandBtn" type="button" class="brandbtn" aria-label="홈"><!-- Naedogam v103 (상세 수정·삭제를 헤더로, 하단은 상태 토글만) -->
         <svg class="brandmark" width="34" height="30" viewBox="26 28 62 54" aria-hidden="true"><rect x="28" y="40" width="12" height="38" rx="5" fill="#F7F5F0"/><rect x="44" y="30" width="12" height="48" rx="5" fill="#F7F5F0"/><rect x="60" y="32" width="12" height="46" rx="5" fill="#E0483F" transform="rotate(16 66 78)"/></svg>
         <span class="brandwm"><span class="bwm-ko">내도감</span><span class="bwm-en">NAEDOGAM</span></span>
       </button>
-      <span class="mhver">v102</span>
+      <span class="mhver">v103</span>
       <span class="spacer"></span>
       <span class="src-chip" id="srcChip" style="display:none">데모</span>
       <button class="icon-btn" id="searchToggle" type="button" style="display:none">🔍</button>
@@ -1294,7 +1299,7 @@ async function openBookDetail(m, r){
   const qa=encodeURIComponent(((r.title||"")+" "+(r.author||"")).trim());
   const _rt=(r.rating!=null&&r.rating!=="")?parseFloat(r.rating):null;
 
-  d.innerHTML=`<div class="dhead"><h3>${r.title}</h3><button class="dclose-x" onclick="this.closest('dialog').close()" aria-label="닫기">✕</button></div>
+  d.innerHTML=`<div class="dhead"><h3>${r.title}</h3><div class="dh-actions"><button class="dh-btn" id="dEdit">수정</button><button class="dh-btn dh-del" id="dDel">삭제</button><button class="dclose-x" onclick="this.closest('dialog').close()" aria-label="닫기">✕</button></div></div>
     <div class="mvtop">
       <div class="mvposter" id="bkCover">${r.cover?`<img src="${r.cover}" alt="">`:"📖"}</div>
       <div class="mvinfo" style="min-width:0">
@@ -1317,10 +1322,7 @@ async function openBookDetail(m, r){
       <a class="btn ghost" target="_blank" rel="noopener" href="https://search.naver.com/search.naver?query=${qa}%20책"><img class="lnkico" src="https://www.google.com/s2/favicons?domain=naver.com&sz=64" onerror="this.remove()">네이버</a>
     </div>
     <div class="dfoot" style="flex-wrap:wrap">
-      <div class="statusbtns" style="display:flex;gap:6px;flex-wrap:wrap;width:100%;margin-bottom:4px">${statusBtnsHTML(m,r)}</div>
-      <span style="flex:1"></span>
-      <button class="btn ghost" id="bkEdit">수정</button>
-      <button class="btn ghost det-del" id="bkDel">삭제</button>
+      <div class="statusbtns" style="display:flex;gap:6px;flex-wrap:wrap;width:100%">${statusBtnsHTML(m,r)}</div>
     </div>`;
   d.showModal();
   wireStatusBtns(m, r, d);
@@ -1328,8 +1330,8 @@ async function openBookDetail(m, r){
       const old=r.rating; r.rating=v;
       try{ await sheetSrc().update("books", r._id, r); const arr=CACHE.books; if(arr){ const it=arr.find(x=>String(x._id)===String(r._id)); if(it) it.rating=v; savePersist("books",arr); } if(state.domain==="books") paintDomain(MANIFESTS.books); }
       catch(e){ r.rating=old; alert("평점 저장 실패: "+e.message); } }); }
-  $("#bkEdit").onclick=()=>{ d.close(); openRecordForm(m, r); };
-  $("#bkDel").onclick=()=>deleteRecord(m, r);
+  $("#dEdit").onclick=()=>{ d.close(); openRecordForm(m, r); };
+  $("#dDel").onclick=()=>deleteRecord(m, r);
   const info=await fetchBookInfo(r.title, r.author);
   if(info){
     if(!r.cover && info.cover && $("#bkCover")) $("#bkCover").innerHTML=`<img src="${info.cover}" alt="">`;
@@ -1385,24 +1387,20 @@ function openDetail(m, r){
       <button class="btn ghost" id="mEdit">수정</button>
       <button class="btn ghost" style="margin-left:auto" onclick="this.closest('dialog').close()">닫기</button></div>`;
   } else if(editable){
-    foot=`<div class="dfoot" style="flex-wrap:wrap;gap:6px">
-       ${TOGGLE_DEFS[m.id]?`<span class="statusbtns" style="display:contents">${statusBtnsHTML(m,r)}</span>`:""}
-       <span style="flex:1"></span>
-       <button class="btn ghost" id="detEdit">수정</button>
-       <button class="btn ghost det-del" id="detDel">삭제</button></div>`;
+    foot=TOGGLE_DEFS[m.id] ? `<div class="dfoot" style="flex-wrap:wrap;gap:6px"><span class="statusbtns" style="display:contents">${statusBtnsHTML(m,r)}</span></div>` : "";
   } else {
     foot="";
   }
   const _cf=(m.fields||[]).find(f=>f.type==="image"); const coverImg=(_cf&&r[_cf.k])?`<div class="det-cover"><img src="${String(r[_cf.k]).replace(/"/g,'&quot;')}" alt=""></div>`:"";
-  const d=$("#detail"); d.innerHTML=`<div class="dhead"><h3>${m.card.kind==="specimen"?r.title:(r.date+(r.car?" · "+r.car:""))}</h3><button class="dclose-x" onclick="this.closest('dialog').close()" aria-label="닫기">✕</button></div><div class="dbody">${coverImg}${rows}</div>${mapLinks}${foot}`;
+  const d=$("#detail"); d.innerHTML=`<div class="dhead"><h3>${m.card.kind==="specimen"?r.title:(r.date+(r.car?" · "+r.car:""))}</h3><div class="dh-actions"><button class="dh-btn" id="dEdit">수정</button><button class="dh-btn dh-del" id="dDel">삭제</button><button class="dclose-x" onclick="this.closest('dialog').close()" aria-label="닫기">✕</button></div></div><div class="dbody">${coverImg}${rows}</div>${mapLinks}${foot}`;
   d.showModal();
   if(isMovie){
     $("#mW").onclick=()=>toggleMovie(r,'W'); $("#mR").onclick=()=>toggleMovie(r,'R'); $("#mP").onclick=()=>toggleMovie(r,'P');
-    $("#mEdit").onclick=()=>{ d.close(); openRecordForm(m, r); };
+    $("#dEdit").onclick=()=>{ d.close(); openRecordForm(m, r); };
   } else if(editable){
     if(TOGGLE_DEFS[m.id]) wireStatusBtns(m, r, d);
-    $("#detEdit").onclick=()=>{ d.close(); openRecordForm(m, r); };
-    $("#detDel").onclick=()=>deleteRecord(m, r);
+    $("#dEdit").onclick=()=>{ d.close(); openRecordForm(m, r); };
+    $("#dDel").onclick=()=>deleteRecord(m, r);
   }
 }
 /* 영화 시청상태 토글 → 기존 앱의 '시청여부' 저장통로 재사용. 2자리 코드: (W/X)+(O/R/P) */
@@ -1477,7 +1475,7 @@ async function openMovieDetail(m, r){
   const people=[personSpan(r.director,"director"), personSpan(r.actors,"actor")].filter(Boolean).join(' <span style="color:var(--line)">/</span> ');
   const stream=(r.streaming||[]).map(t=>`<span class="tag">${t}</span>`).join("");
   const rec=(r.recommendList||[]).map(t=>`<span class="tag rec">${t}</span>`).join("");
-  d.innerHTML=`<div class="dhead"><h3>${r.title}</h3><button class="dclose-x" onclick="this.closest('dialog').close()" aria-label="닫기">✕</button></div>
+  d.innerHTML=`<div class="dhead"><h3>${r.title}</h3><div class="dh-actions"><button class="dh-btn" id="dEdit">수정</button><button class="dh-btn dh-del" id="dDel">삭제</button><button class="dclose-x" onclick="this.closest('dialog').close()" aria-label="닫기">✕</button></div></div>
     <div class="mvtop">
       <div class="mvposter" id="mvPoster">🎬</div>
       <div class="mvinfo" style="min-width:0">
@@ -1498,14 +1496,11 @@ async function openMovieDetail(m, r){
       <button class="btn ${r.watched==='O'?'':'ghost'}" id="mW">${r.watched==='O'?'✓ 봤음':'봤음'}</button>
       <button class="btn ${r.rewatch?'':'ghost'}" id="mR">다시볼것</button>
       <button class="btn ${r.pick?'':'ghost'}" id="mP">찜</button>
-      <span style="flex:1"></span>
-      <button class="btn ghost" id="mEdit">수정</button>
-      <button class="btn ghost det-del" id="mDel">삭제</button>
     </div>`;
   d.showModal();
   $("#mW").onclick=()=>toggleMovie(r,'W'); $("#mR").onclick=()=>toggleMovie(r,'R'); $("#mP").onclick=()=>toggleMovie(r,'P');
-  $("#mEdit").onclick=()=>{ d.close(); openRecordForm(m, r); };
-  $("#mDel").onclick=()=>deleteRecord(m, r);
+  $("#dEdit").onclick=()=>{ d.close(); openRecordForm(m, r); };
+  $("#dDel").onclick=()=>deleteRecord(m, r);
   d.querySelectorAll(".plink").forEach(el=>el.onclick=e=>{ e.stopPropagation(); openPersonModal(el.dataset.name, el.dataset.role); });
   const info=await fetchMovieInfo(r.orig, r.title, r.year);   // 포스터·줄거리 채우기
   if($("#mvPoster")&&info.poster) $("#mvPoster").innerHTML=`<img src="${info.poster}" alt="">`;
