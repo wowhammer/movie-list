@@ -394,6 +394,14 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
   .bkrate-hint{ font-size:12.5px; color:var(--ink-soft); margin-top:7px; line-height:1.4; }
   .bkmeta2{ font-size:12.5px; color:var(--ink-soft); margin:0 18px 4px; }
   .mvlinks{ display:flex; gap:8px; padding:0 18px 8px; }
+  .walletcard{ display:block; width:100%; text-align:left; border:none; border-radius:15px; padding:16px 18px 15px; min-height:126px; color:#fff; background:linear-gradient(135deg, var(--cc,#334155), rgba(0,0,0,.42)); box-shadow:0 4px 16px rgba(0,0,0,.18); cursor:pointer; position:relative; overflow:hidden; font:inherit; margin-bottom:10px; }
+  .wc-top{ display:flex; justify-content:space-between; align-items:center; font-size:12.5px; opacity:.92; font-weight:500; }
+  .wc-kind{ font-size:10.5px; border:1px solid rgba(255,255,255,.45); border-radius:20px; padding:1px 8px; }
+  .wc-name{ font-size:18px; font-weight:700; margin-top:15px; letter-spacing:-.01em; }
+  .wc-benefit{ font-size:11.5px; opacity:.85; margin-top:5px; line-height:1.45; }
+  .wc-bot{ display:flex; justify-content:space-between; align-items:flex-end; margin-top:14px; }
+  .wc-chip{ width:30px; height:22px; border-radius:5px; background:linear-gradient(135deg,#f0e2ad,#c9a94f); display:inline-block; }
+  .wc-pay{ font-family:var(--mono); font-size:12.5px; opacity:.95; }
   .lnkico{ width:15px; height:15px; vertical-align:-3px; margin-right:5px; border-radius:3px; }
   .mvlinks .btn{ text-decoration:none; text-align:center; flex:1; }
   .dfoot{ display:flex; gap:8px; padding:6px 18px 18px; flex-wrap:wrap; }
@@ -409,11 +417,11 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
 <div class="wrap" id="root" data-domain="movies">
   <header class="masthead">
     <div class="mh-row">
-      <button id="brandBtn" type="button" class="brandbtn" aria-label="홈"><!-- Naedogam v104 (모바일 홈 3열·통계 크기 축소·일기 기분 이모지 2줄) -->
+      <button id="brandBtn" type="button" class="brandbtn" aria-label="홈"><!-- Naedogam v105 (신용/체크카드 카테고리: 카드형 표시·혜택검색·결제일→일기) -->
         <svg class="brandmark" width="34" height="30" viewBox="26 28 62 54" aria-hidden="true"><rect x="28" y="40" width="12" height="38" rx="5" fill="#F7F5F0"/><rect x="44" y="30" width="12" height="48" rx="5" fill="#F7F5F0"/><rect x="60" y="32" width="12" height="46" rx="5" fill="#E0483F" transform="rotate(16 66 78)"/></svg>
         <span class="brandwm"><span class="bwm-ko">내도감</span><span class="bwm-en">NAEDOGAM</span></span>
       </button>
-      <span class="mhver">v104</span>
+      <span class="mhver">v105</span>
       <span class="spacer"></span>
       <span class="src-chip" id="srcChip" style="display:none">데모</span>
       <button class="icon-btn" id="searchToggle" type="button" style="display:none">🔍</button>
@@ -712,7 +720,26 @@ const MANIFESTS = {
            flags:r=>[ (r.rating!=null&&r.rating!=="")?{t:"★ "+r.rating,cls:"star"}:0,
                       r.status==="다녀옴"?{t:"다녀옴",cls:"on"}:0,
                       r.status==="예정"?{t:"예정",cls:"on"}:0,
-                      r.status==="찜"?{t:"찜",cls:"on"}:0 ] } }
+                      r.status==="찜"?{t:"찜",cls:"on"}:0 ] } },
+
+  /* 신용/체크카드: 내 카드 혜택·결제일 모아보기(카드형). 결제일은 일기 오늘내도감에도. */
+  cards:{ id:"cards", title:"신용/체크카드", icon:"💳", vol:"卷9", canAdd:true,
+    source:{ type:"sheet", tab:"카드" },
+    fields:[ {k:"name",sheet:"카드명",label:"카드명",type:"text",full:true},
+             {k:"issuer",sheet:"카드사",label:"카드사",type:"text"},
+             {k:"kind",sheet:"종류",label:"종류",type:"seg",options:["신용","체크"]},
+             {k:"payday",sheet:"결제일",label:"결제일(예: 매월 15일)",type:"text"},
+             {k:"fee",sheet:"연회비",label:"연회비(원)",type:"number"},
+             {k:"color",sheet:"색상",label:"카드 색상",type:"select",options:["남색","차콜","와인","포레스트","퍼플","티일"]},
+             {k:"condition",sheet:"실적",label:"전월실적 조건",type:"text"},
+             {k:"benefit",sheet:"혜택",label:"혜택(줄바꿈으로 여러 개)",type:"textarea"} ],
+    search:["name","issuer","benefit","condition"],
+    filterBy:{ field:"kind", allLabel:"전체" },
+    stats:[ {label:"전체",type:"count",c:"#334155"},
+            {label:"신용",type:"countIf",field:"kind",eq:"신용",c:"#c2410c"},
+            {label:"체크",type:"countIf",field:"kind",eq:"체크",c:"#0891b2"},
+            {label:"연회비합",type:"sum",field:"fee",unit:"원",c:"#16a34a"} ],
+    card:{ kind:"wallet" } }
 };
 
 /* ── 2. DataSource 추상화 ──
@@ -1055,7 +1082,6 @@ const ND_ICONS={
 };
 const HOME_SOON=[
   {t:"스크랩",   d:'M6 4h12a1 1 0 0 1 1 1v15l-7 -4l-7 4V5a1 1 0 0 1 1 -1z'},
-  {t:"신용/체크카드", d:'M3 7a2 2 0 0 1 2 -2h14a2 2 0 0 1 2 2v10a2 2 0 0 1 -2 2H5a2 2 0 0 1 -2 -2z M3 10h18 M7 15h2'},
   {t:"맛집",     d:'M5 3v6a2 2 0 0 0 4 0V3 M7 9v12 M16 3c-1.5 1 -2.5 3 -2.5 6c0 2 1 3 2.5 3v9'},
   {t:"펫일기",   d:'M5 11a1.4 1.4 0 1 0 .01 0 M9 7a1.4 1.4 0 1 0 .01 0 M15 7a1.4 1.4 0 1 0 .01 0 M19 11a1.4 1.4 0 1 0 .01 0 M12 15c-2 0 -3.5 1 -3.5 2.7c0 1.6 1.5 2.8 3.5 2.8s3.5 -1.2 3.5 -2.8c0 -1.7 -1.5 -2.7 -3.5 -2.7z'},
   {t:"장보기",   d:'M6 19m-1.3 0a1.3 1.3 0 1 0 2.6 0a1.3 1.3 0 1 0 -2.6 0 M17 19m-1.3 0a1.3 1.3 0 1 0 2.6 0a1.3 1.3 0 1 0 -2.6 0 M3 4h2l2.2 11h9.6l1.7 -8H6'},
@@ -1368,7 +1394,21 @@ function wireStarWidget(box, initial, numEl, onSet){
   const zc=box.querySelector(".rf-stars-zones"); if(zc) zc.onmouseleave=()=>fill(cur);
   return { set:v=>{ cur=parseFloat(v)||0; fill(cur); if(numEl) numEl.textContent=cur?disp(cur):""; } };
 }
+const CARD_COLORS={ "남색":"#1e3a5f","차콜":"#2b2b30","와인":"#6b2737","포레스트":"#1f4d3a","퍼플":"#4b2e6b","티일":"#1f5459" };
+function walletCard(r){
+  const col=CARD_COLORS[r.color]||"#334155";
+  const ben=String(r.benefit||"");
+  const benShort = ben ? (ben.replace(/\n+/g," · ").slice(0,46).replace(/</g,"&lt;")+(ben.length>46?"…":"")) : "";
+  const esc=x=>String(x==null?"":x).replace(/</g,"&lt;");
+  return `<button class="card walletcard" data-id="${r._id}" style="--cc:${col}">
+    <div class="wc-top"><span class="wc-issuer">${esc(r.issuer)}</span><span class="wc-kind">${esc(r.kind)}</span></div>
+    <div class="wc-name">${esc(r.name)||"카드"}</div>
+    ${benShort?`<div class="wc-benefit">${benShort}</div>`:""}
+    <div class="wc-bot"><span class="wc-chip"></span><span class="wc-pay">${esc(r.payday)}</span></div>
+  </button>`;
+}
 function renderCard(m, r, no){ if(m.id==="books") return bookCard(r); const c=m.card;
+  if(c.kind==="wallet") return walletCard(r);
   if(c.kind==="specimen"){ const meta=c.meta(r);
     const traw=r[c.tags]; const tarr=Array.isArray(traw)?traw:(traw==null||traw===""?[]:[traw]);   // 하나만 있어도 안전
     const tags=tarr.map(t=>`<span class="tag">${t}</span>`).join("");
@@ -1407,7 +1447,7 @@ function openDetail(m, r){
     foot="";
   }
   const _cf=(m.fields||[]).find(f=>f.type==="image"); const coverImg=(_cf&&r[_cf.k])?`<div class="det-cover"><img src="${String(r[_cf.k]).replace(/"/g,'&quot;')}" alt=""></div>`:"";
-  const d=$("#detail"); d.innerHTML=`<div class="dhead"><h3>${m.card.kind==="specimen"?r.title:(r.date+(r.car?" · "+r.car:""))}</h3><div class="dh-actions"><button class="dh-btn" id="dEdit">수정</button><button class="dh-btn dh-del" id="dDel">삭제</button><button class="dclose-x" onclick="this.closest('dialog').close()" aria-label="닫기">✕</button></div></div><div class="dbody">${coverImg}${rows}</div>${mapLinks}${foot}`;
+  const d=$("#detail"); d.innerHTML=`<div class="dhead"><h3>${m.card.kind==="specimen"?r.title:(r.date+(r.car?" · "+r.car:""))}</h3><div class="dh-actions"><button class="dh-btn" id="dEdit">수정</button><button class="dh-btn dh-del" id="dDel">삭제</button><button class="dclose-x" onclick="this.closest('dialog').close()" aria-label="닫기">✕</button></div></div><div class="dbody">${coverImg}${rows}</div>${mapLinks}${m.id==="cards"?`<div class="mvlinks"><a class="btn ghost" target="_blank" rel="noopener" href="https://search.naver.com/search.naver?query=${encodeURIComponent(((r.issuer||"")+" "+(r.name||"")+" 카드 혜택").trim())}">🔍 혜택 검색</a></div>`:""}${foot}`;
   d.showModal();
   if(isMovie){
     $("#mW").onclick=()=>toggleMovie(r,'W'); $("#mR").onclick=()=>toggleMovie(r,'R'); $("#mP").onclick=()=>toggleMovie(r,'P');
@@ -1618,6 +1658,9 @@ function buildDayLog(dateStr){
       const pm=String(r.payday||"").match(/(\d{1,2})/); if(pm && parseInt(pm[1],10)===day){
         lines.push(`🔄 ${r.name} 결제일${r.cost?` (${Number(r.cost).toLocaleString()}원)`:""}`); } });
   }
+  if(getActive().includes("cards")){ const day=parseInt(dateStr.slice(8,10),10);
+    (CACHE.cards||loadPersist("cards")||[]).forEach(r=>{ const pm=String(r.payday||"").match(/(\d{1,2})/); if(pm && parseInt(pm[1],10)===day) lines.push("💳 "+(r.name||r.issuer||"카드")+" 결제일"); });
+  }
   return lines;
 }
 async function fillDiaryLog(d, silent){
@@ -1709,6 +1752,11 @@ function openRecordForm(m, existing){
       _dw.parentNode.insertBefore(_bw, _dw.nextSibling);
       const _b=d.querySelector("#ndDailyBtn"); if(_b) _b.onclick=()=>fillDiaryLog(d, false); }
     fillDiaryLog(d, true);
+  }
+  if(m.id==="cards"){
+    const _cb=d.querySelector(".dbody.set");
+    if(_cb){ const _sb=document.createElement("button"); _sb.type="button"; _sb.className="btn ghost"; _sb.textContent="🔍 혜택 검색"; _sb.style.cssText="flex:1 1 100%;margin-bottom:8px"; _cb.insertBefore(_sb, _cb.firstChild);
+      _sb.onclick=()=>{ const iss=(d.querySelector('.rf[data-k="issuer"]')||{}).value||""; const nm=(d.querySelector('.rf[data-k="name"]')||{}).value||""; window.open("https://search.naver.com/search.naver?query="+encodeURIComponent((iss+" "+nm+" 카드 혜택").trim()),"_blank"); }; }
   }
 }
 /* 저장을 분야에 맞는 통로로 보냄 (영화=기존 수정통로 / 차계부=nd문(ID) / 도서·명산·러닝=nd문(_id)) */
