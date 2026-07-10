@@ -298,6 +298,8 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
   .rfgrid .rff-full{ flex:1 1 100%; }
   .rfgrid .rff-half{ flex:1 1 calc(50% - 6px); min-width:calc(50% - 6px); }
   .rfgrid .rff-bool{ flex:0 0 auto; align-self:center; }
+  .rf-seg{ display:flex; gap:6px; flex-wrap:wrap; margin-top:2px; }
+  .rf-segbtn.on{ background:var(--ink); color:var(--paper); border-color:var(--ink); }
   .home-search-wrap{ margin:10px 0 2px; }
   .home-search{ width:100%; box-sizing:border-box; font-size:15px; padding:11px 14px; border:1px solid #3a3a3d; border-radius:12px; background:#18181B; color:#F7F5F0; }
   .home-search::placeholder{ color:#8a8a8f; }
@@ -394,11 +396,11 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
 <div class="wrap" id="root" data-domain="movies">
   <header class="masthead">
     <div class="mh-row">
-      <button id="brandBtn" type="button" class="brandbtn" aria-label="홈"><!-- Naedogam v99 (일기 유니버스 자동채움 + 스와이프 카테고리 이동) -->
+      <button id="brandBtn" type="button" class="brandbtn" aria-label="홈"><!-- Naedogam v100 (여행폼 개선: 제목full·상태버튼·추천·후기→내용 / 수정라벨 / 스크랩·카드) -->
         <svg class="brandmark" width="34" height="30" viewBox="26 28 62 54" aria-hidden="true"><rect x="28" y="40" width="12" height="38" rx="5" fill="#F7F5F0"/><rect x="44" y="30" width="12" height="48" rx="5" fill="#F7F5F0"/><rect x="60" y="32" width="12" height="46" rx="5" fill="#E0483F" transform="rotate(16 66 78)"/></svg>
         <span class="brandwm"><span class="bwm-ko">내도감</span><span class="bwm-en">NAEDOGAM</span></span>
       </button>
-      <span class="mhver">v99</span>
+      <span class="mhver">v100</span>
       <span class="spacer"></span>
       <span class="src-chip" id="srcChip" style="display:none">데모</span>
       <button class="icon-btn" id="searchToggle" type="button" style="display:none">🔍</button>
@@ -663,7 +665,7 @@ const MANIFESTS = {
   /* 여행: 다녀온 여행 기록 + 갈 곳(예정/다녀옴). 기간·동행·비용·만족도·명소·사진. */
   travel:{ id:"travel", title:"여행", icon:"✈️", vol:"卷8", canAdd:true,
     source:{ type:"sheet", tab:"여행" },
-    fields:[ {k:"title",sheet:"제목",label:"여행 제목(예: 제주 3박4일)",type:"text"},
+    fields:[ {k:"title",sheet:"제목",label:"여행 제목(예: 제주 3박4일)",type:"text",full:true},
              {k:"place",sheet:"여행지",label:"여행지",type:"text"},
              {k:"country",sheet:"국가",label:"국가",type:"text"},
              {k:"startDate",sheet:"시작일",label:"시작일",type:"date"},
@@ -673,11 +675,12 @@ const MANIFESTS = {
              {k:"stay",sheet:"숙소",label:"숙소",type:"text"},
              {k:"cost",sheet:"비용",label:"비용(원)",type:"number"},
              {k:"rating",sheet:"만족도",label:"만족도(별점)",type:"rating"},
-             {k:"status",sheet:"상태",label:"상태",type:"select",options:["다녀옴","예정"]},
+             {k:"status",sheet:"상태",label:"상태",type:"seg",options:["다녀옴","예정","찜"]},
              {k:"spots",sheet:"명소",label:"가본 곳·명소(쉼표로 여러 개)",type:"tags"},
-             {k:"review",sheet:"후기",label:"후기",type:"textarea"},
+             {k:"recommend",sheet:"추천",label:"추천(누구·어디서)",type:"text"},
+             {k:"content",sheet:"내용",label:"내용",type:"textarea"},
              {k:"cover",sheet:"사진",label:"사진",type:"image"} ],
-    search:["title","place","country","spots","review","companion"],
+    search:["title","place","country","spots","recommend","content","companion"],
     filterBy:{ field:"status", allLabel:"전체" },
     activity:{ df:"startDate", when:r=>r.status==="다녀옴", label:"여행", name:r=>r.title||r.place },
     stats:[ {label:"전체",type:"count"},
@@ -689,7 +692,8 @@ const MANIFESTS = {
            tags:"spots",
            flags:r=>[ (r.rating!=null&&r.rating!=="")?{t:"★ "+r.rating,cls:"star"}:0,
                       r.status==="다녀옴"?{t:"다녀옴",cls:"on"}:0,
-                      r.status==="예정"?{t:"예정",cls:"on"}:0 ] } }
+                      r.status==="예정"?{t:"예정",cls:"on"}:0,
+                      r.status==="찜"?{t:"찜",cls:"on"}:0 ] } }
 };
 
 /* ── 2. DataSource 추상화 ──
@@ -1030,6 +1034,8 @@ const ND_ICONS={
   travel:'M22 2L11 13 M22 2l-7 20l-4 -9l-9 -4z'
 };
 const HOME_SOON=[
+  {t:"스크랩",   d:'M6 4h12a1 1 0 0 1 1 1v15l-7 -4l-7 4V5a1 1 0 0 1 1 -1z'},
+  {t:"신용/체크카드", d:'M3 7a2 2 0 0 1 2 -2h14a2 2 0 0 1 2 2v10a2 2 0 0 1 -2 2H5a2 2 0 0 1 -2 -2z M3 10h18 M7 15h2'},
   {t:"맛집",     d:'M5 3v6a2 2 0 0 0 4 0V3 M7 9v12 M16 3c-1.5 1 -2.5 3 -2.5 6c0 2 1 3 2.5 3v9'},
   {t:"펫일기",   d:'M5 11a1.4 1.4 0 1 0 .01 0 M9 7a1.4 1.4 0 1 0 .01 0 M15 7a1.4 1.4 0 1 0 .01 0 M19 11a1.4 1.4 0 1 0 .01 0 M12 15c-2 0 -3.5 1 -3.5 2.7c0 1.6 1.5 2.8 3.5 2.8s3.5 -1.2 3.5 -2.8c0 -1.7 -1.5 -2.7 -3.5 -2.7z'},
   {t:"장보기",   d:'M6 19m-1.3 0a1.3 1.3 0 1 0 2.6 0a1.3 1.3 0 1 0 -2.6 0 M17 19m-1.3 0a1.3 1.3 0 1 0 2.6 0a1.3 1.3 0 1 0 -2.6 0 M3 4h2l2.2 11h9.6l1.7 -8H6'},
@@ -1307,7 +1313,7 @@ async function openBookDetail(m, r){
     <div class="dfoot" style="flex-wrap:wrap">
       <div class="statusbtns" style="display:flex;gap:6px;flex-wrap:wrap;width:100%;margin-bottom:4px">${statusBtnsHTML(m,r)}</div>
       <span style="flex:1"></span>
-      <button class="btn ghost" id="bkEdit">정보수정</button>
+      <button class="btn ghost" id="bkEdit">수정</button>
       <button class="btn ghost det-del" id="bkDel">삭제</button>
     </div>`;
   d.showModal();
@@ -1370,13 +1376,13 @@ function openDetail(m, r){
       <button class="btn ${r.watched==='O'?'':'ghost'}" id="mW">${r.watched==='O'?'✓ 봤음':'봤음'}</button>
       <button class="btn ${r.rewatch?'':'ghost'}" id="mR">다시볼것</button>
       <button class="btn ${r.pick?'':'ghost'}" id="mP">찜</button>
-      <button class="btn ghost" id="mEdit">정보 수정</button>
+      <button class="btn ghost" id="mEdit">수정</button>
       <button class="btn ghost" style="margin-left:auto" onclick="this.closest('dialog').close()">닫기</button></div>`;
   } else if(editable){
     foot=`<div class="dfoot" style="flex-wrap:wrap;gap:6px">
        ${TOGGLE_DEFS[m.id]?`<span class="statusbtns" style="display:contents">${statusBtnsHTML(m,r)}</span>`:""}
        <span style="flex:1"></span>
-       <button class="btn ghost" id="detEdit">정보수정</button>
+       <button class="btn ghost" id="detEdit">수정</button>
        <button class="btn ghost det-del" id="detDel">삭제</button></div>`;
   } else {
     foot="";
@@ -1487,7 +1493,7 @@ async function openMovieDetail(m, r){
       <button class="btn ${r.rewatch?'':'ghost'}" id="mR">다시볼것</button>
       <button class="btn ${r.pick?'':'ghost'}" id="mP">찜</button>
       <span style="flex:1"></span>
-      <button class="btn ghost" id="mEdit">정보수정</button>
+      <button class="btn ghost" id="mEdit">수정</button>
       <button class="btn ghost det-del" id="mDel">삭제</button>
     </div>`;
   d.showModal();
@@ -1625,10 +1631,11 @@ function openRecordForm(m, existing){
       return `<label>${f.label}</label><input type="date" class="rf" data-k="${f.k}" data-type="date" value="${dv}">`; }
     if(f.type==="textarea"){ const tv=(val==null?"":String(val)).replace(/&/g,'&amp;').replace(/</g,'&lt;'); return `<label>${f.label}</label><textarea class="rf" data-k="${f.k}" data-type="text" rows="5" style="width:100%;font-family:inherit;font-size:15px;padding:9px 11px;border:1px solid var(--line);border-radius:9px;box-sizing:border-box;resize:vertical" autocomplete="off">${tv}</textarea>`; }
     if(f.type==="rating"){ const rv=(val==null||val==='')?'':val; return `<div class="rf-ratewrap" data-k="${f.k}"><label>${f.label}</label><div class="rf-starbox" data-k="${f.k}"><input type="hidden" class="rf" data-k="${f.k}" data-type="number" value="${rv}">${starBarHTML(rv===''?0:parseFloat(rv))}<span class="rf-star-num"></span><button type="button" class="rf-star-clr">✕</button></div><div class="rf-ratehint" style="display:none;font-size:12.5px;color:var(--sub);margin-top:5px">‘읽음’ 상태로 표시하면 내 평점을 매길 수 있어요</div></div>`; }
+    if(f.type==="seg") return `<label>${f.label}</label><div class="rf-seg" data-k="${f.k}">${(f.options||[]).map(o=>`<button type="button" class="btn ghost rf-segbtn ${String(val||'')===o?'on':''}" data-v="${o}">${o}</button>`).join("")}</div>`;
     const v = (f.type==="tags" && Array.isArray(val)) ? val.join(", ") : (val==null?"":val);
     return `<label>${f.label}</label><input class="rf" data-k="${f.k}" data-type="${f.type}" value="${String(v).replace(/"/g,'&quot;')}" autocomplete="off" />`;
   };
-  const _wcls=f=> f.type==="bool"?"rff-bool":((f.type==="textarea"||f.type==="image"||f.type==="rating")?"rff-full":"rff-half");
+  const _wcls=f=> f.full?"rff-full":(f.type==="bool"?"rff-bool":((f.type==="textarea"||f.type==="image"||f.type==="rating"||f.type==="seg")?"rff-full":"rff-half"));
   const body=fields.map(f=>`<div class="rff ${_wcls(f)}">${_cell(f)}</div>`).join("");
   d.innerHTML=`<div class="dhead"><h3>${m.title} ${isEdit?'수정':'추가'}</h3><button class="dclose-x" onclick="this.closest('dialog').close()" aria-label="닫기">✕</button></div><div class="dbody set rfgrid">${body}
     <div class="rff-full" style="display:flex;gap:8px;margin-top:18px;flex:1 1 100%">
@@ -1636,6 +1643,7 @@ function openRecordForm(m, existing){
     </div></div>`;
   d.showModal();
   d.querySelectorAll(".rf-bool").forEach(b=>b.onclick=()=>{ b.classList.toggle("on"); });
+  d.querySelectorAll(".rf-seg").forEach(seg=>seg.querySelectorAll(".rf-segbtn").forEach(b=>b.onclick=()=>{ const was=b.classList.contains("on"); seg.querySelectorAll(".rf-segbtn").forEach(x=>x.classList.remove("on")); if(!was) b.classList.add("on"); }));
   d.querySelectorAll(".rf-starbox").forEach(box=>{ const inp=box.querySelector("input.rf"), numEl=box.querySelector(".rf-star-num");
     const w=wireStarWidget(box, inp.value, numEl, v=>{ inp.value=v; });
     const clr=box.querySelector(".rf-star-clr"); if(clr) clr.onclick=()=>{ inp.value=""; w.set(0); }; });
@@ -1664,6 +1672,7 @@ function openRecordForm(m, existing){
     const row = existing ? {...existing} : { _id: crypto.randomUUID() };
     fields.forEach(f=>{
       if(f.type==="bool"){ row[f.k]=d.querySelector(`.rf-bool[data-k="${f.k}"]`).classList.contains("on"); return; }
+      if(f.type==="seg"){ const sel=d.querySelector(`.rf-seg[data-k="${f.k}"] .rf-segbtn.on`); row[f.k]=sel?sel.dataset.v:""; return; }
       if(f.type==="image"){ row[f.k]=d.querySelector(`.rf-imgval[data-k="${f.k}"]`).value; return; }
       const el=d.querySelector(`.rf[data-k="${f.k}"]`); let v=el.value;
       if(f.type==="number"||f.type==="rating") v = (v===""?null:Number(v));
