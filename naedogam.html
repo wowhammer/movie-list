@@ -373,11 +373,11 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
 <div class="wrap" id="root" data-domain="movies">
   <header class="masthead">
     <div class="mh-row">
-      <button id="brandBtn" type="button" class="brandbtn" aria-label="홈"><!-- Naedogam v90 (영화 nd 합류: MOVIE 탭 구글시트 방식) -->
+      <button id="brandBtn" type="button" class="brandbtn" aria-label="홈"><!-- Naedogam v91 (탭명 한글통일 + _id 첫열 대비: 옛/새 이름·ID 자동수용) -->
         <svg class="brandmark" width="34" height="30" viewBox="26 28 62 54" aria-hidden="true"><rect x="28" y="40" width="12" height="38" rx="5" fill="#F7F5F0"/><rect x="44" y="30" width="12" height="48" rx="5" fill="#F7F5F0"/><rect x="60" y="32" width="12" height="46" rx="5" fill="#E0483F" transform="rotate(16 66 78)"/></svg>
         <span class="brandwm"><span class="bwm-ko">내도감</span><span class="bwm-en">NAEDOGAM</span></span>
       </button>
-      <span class="mhver">v90</span>
+      <span class="mhver">v91</span>
       <span class="spacer"></span>
       <span class="src-chip" id="srcChip" style="display:none">데모</span>
       <button class="icon-btn" id="searchToggle" type="button" style="display:none">🔍</button>
@@ -429,12 +429,20 @@ const store = (() => {
   catch(e){ const m={}; return { getItem:k=>k in m?m[k]:null, setItem:(k,v)=>{m[k]=String(v);}, removeItem:k=>{delete m[k];} }; }
 })();
 
+/* =====================================================================
+ *  ROADMAP (박아둠) — STEP 2: 배포용 '각자 구글 로그인' (나중에 배포할 때 구현)
+ *  - 목표: 각 사용자가 자기 구글로 로그인 → 본인 드라이브에 '내도감 Data' 시트 자동 생성
+ *          → 모든 수정이 그 시트에 저장(앱 지워도 데이터는 각자 드라이브에 남음).
+ *  - 코드: GoogleSheetDataSource(type:"mysheet", drive.file) 골조 있음 → sourceFor에 연결 필요.
+ *  - 준비물: 구글 클라우드 OAuth 클라이언트 ID 1개(+Sheets·Drive API), '구글로 로그인' 버튼.
+ *  - 지금(Step1): 7개 카테고리 nd 규격 통일 완료. 탭명 한글·_id 첫열로 정리 중(앱은 옛/새 이름 자동수용).
+ * ===================================================================== */
 /* ── 1. MANIFESTS: 도메인 정의(여기만 늘리면 도메인이 는다) ── */
 const MANIFESTS = {
   /* 영화: 실제 구글시트(Apps Script)에서 라이브로 불러옴.
      source.map = 시트 한글 헤더 → 엔진 항목 이름.  source.derive = 특수 처리(코드·수식·숫자). */
   movies:{ id:"movies", title:"영화", icon:"🎬", vol:"卷1", canAdd:true,
-    source:{ type:"sheet", tab:"MOVIE", idCol:"원제", skipEnsure:true,
+    source:{ type:"sheet", tab:"영화", tabAlt:"MOVIE", idCol:"원제", skipEnsure:true,
       /* nd 합류(v90): 영화도 차계부처럼 nd(구글시트) 방식으로 통일. 데이터는 MOVIE 탭 그대로.
          식별키=원제(중복·공백 없음 확인). clean: 시청여부 2자코드→watched/rewatch, 스트리밍/추천 분리. */
       clean(o){
@@ -481,7 +489,7 @@ const MANIFESTS = {
     /* nd 공통 방식으로 통일(정식 출시 대비): 읽기도 nd 게이트 사용. 쓰기(추가·수정·삭제)는 기존 CARLOG 탭 그대로.
        기존 시트가 식별자로 'ID' 열을 써서 idCol:"ID"로 _id에 매핑. skipEnsure: 이미 있는 탭이라 건드리지 않음.
        clean: 가격/주행거리의 쉼표 등 비숫자 정리(예전 derive가 하던 일). */
-    source:{ type:"sheet", tab:"CARLOG", idCol:"ID", skipEnsure:true,
+    source:{ type:"sheet", tab:"차계부", tabAlt:"CARLOG", idCol:"ID", skipEnsure:true,
       clean(o){
         o.cost = parseInt(String(o.cost==null?"":o.cost).replace(/[^\d]/g,''),10) || 0;
         o.odo  = (o.odo==null||o.odo==="") ? null : (parseInt(String(o.odo).replace(/[^\d]/g,''),10) || null);
@@ -753,7 +761,7 @@ class AppsScriptDataSource {
    도서·명산·러닝처럼 우리가 관리하는 탭에 씀. 영화·차계부는 위 AppsScriptDataSource(기존 방식) 유지. */
 function sheetCell(v){ return Array.isArray(v)?v.join("|") : v===true?"TRUE" : v===false?"FALSE" : (v==null?"":String(v)); }
 class SheetDataSource {
-  constructor(url){ this.url=url; this.isLive=true; this.label="구글시트"; this._ensured=new Set(); }
+  constructor(url){ this.url=url; this.isLive=true; this.label="구글시트"; this._ensured=new Set(); this._tab={}; this._idkey={}; }
   async ensureReady(){ if(!this.url) throw new Error("APPS_SCRIPT_URL이 비어 있습니다"); return true; }
   _flatten(m, r){ const o={_id:sheetCell(r._id)}; (m.fields||[]).forEach(f=>{ o[f.sheet||f.k]=sheetCell(r[f.k]); }); return o; }
   async _post(payload){   // 탭 만들기·한 줄 추가 같은 '쓰기'. text/plain로 보내야 브라우저가 안 막음.
@@ -773,16 +781,30 @@ class SheetDataSource {
   async list(id){
     const m=MANIFESTS[id];
     await this.ensure(m);
-    const res=await fetch(this.url+"?nd=1&action=read&tab="+encodeURIComponent(m.source.tab));
-    if(!res.ok) throw new Error("HTTP "+res.status);
-    const raw=await res.json();
-    if(raw && raw.error) throw new Error(raw.error);
-    const inv=ndInv(m);
-    const clean=m.source&&m.source.clean;
-    return (Array.isArray(raw)?raw:[]).map(row=>{ const o={}; for(const kh in row){ const ek=inv[ndNorm(kh)]||kh; const val=coerce(row[kh]);
-      if(o[ek]===undefined || o[ek]===null || o[ek]==="") o[ek]=val;   // 중복 열이 있어도 빈 값이 실제 값을 안 덮게(첫 비어있지않은 값 우선)
-    } return clean?clean(o):o; }).filter(Boolean);   // clean이 null(빈 줄) 반환하면 목록에서 제외
+    // 탭 이름 자동 감지: 새 이름(예: 영화/차계부)과 옛 이름(MOVIE/CARLOG) 둘 다 수용
+    const cands = this._tab[id]
+      ? [this._tab[id], m.source.tab, m.source.tabAlt].filter((v,i,a)=>v&&a.indexOf(v)===i)
+      : [m.source.tab, m.source.tabAlt].filter(Boolean);
+    let raw=[], used=cands[0]||m.source.tab, got=false;
+    for(const t of cands){
+      const res=await fetch(this.url+"?nd=1&action=read&tab="+encodeURIComponent(t));
+      if(!res.ok) continue;
+      const j=await res.json();
+      if(j && j.error) throw new Error(j.error);
+      const arr=Array.isArray(j)?j:[];
+      if(arr.length){ raw=arr; used=t; got=true; break; }
+      if(!got){ raw=arr; used=t; }
+    }
+    this._tab[id]=used;
+    const hdr = raw[0] ? Object.keys(raw[0]) : [];
+    this._idkey[id] = hdr.includes("_id") ? "_id" : ((m.source.idCol && hdr.includes(m.source.idCol)) ? m.source.idCol : "_id");
+    const inv=ndInv(m); const clean=m.source&&m.source.clean;
+    return raw.map(row=>{ const o={}; for(const kh in row){ const ek=inv[ndNorm(kh)]||kh; const val=coerce(row[kh]);
+      if(o[ek]===undefined || o[ek]===null || o[ek]==="") o[ek]=val;   // 중복 열: 첫 비어있지않은 값 우선
+    } return clean?clean(o):o; }).filter(Boolean);
   }
+  tabOf(id){ return this._tab[id] || (MANIFESTS[id] && MANIFESTS[id].source.tab); }
+  idkeyOf(id){ return this._idkey[id] || (MANIFESTS[id] && MANIFESTS[id].source.idCol) || "_id"; }
   async upsert(id,row){   // 탭 맨 아래에 한 줄 추가(저장)
     const m=MANIFESTS[id];
     return this._post({action:"append", tab:m.source.tab, header:ndHeaders(m), row:this._flatten(m,row)});
@@ -1292,6 +1314,7 @@ function movieKorRow(r){ r=r||{};
   const code=(r.watched==='O'?'W':'X')+(r.rewatch?'R':'O');
   const rec=Array.isArray(r.recommendList)&&r.recommendList.length ? r.recommendList.join(" / ") : (r.recommend==null?"":String(r.recommend));
   return {
+    "_id": r.orig==null?"":String(r.orig),
     "원제": r.orig==null?"":String(r.orig),
     "한국 개봉명": r.title==null?"":String(r.title),
     "개봉연도": r.year==null?"":String(r.year),
@@ -1326,7 +1349,7 @@ async function toggleMovie(r, kind){
   const raw=(CACHE.movies||[]).find(x=>String(x._id)===String(r._id)) || (CACHE.movies||[]).find(x=>x.orig===r.orig);
   if(raw){ raw.watched=r.watched; raw.rewatch=r.rewatch; raw.pick=r.pick; raw.watchDate=r.watchDate; }
   paint();
-  try{ await sheetSrc().updateRaw("MOVIE", r.orig, movieKorRow(raw||r), "원제"); savePersist('movies', CACHE.movies||[]); }
+  try{ await sheetSrc().updateRaw(sheetSrc().tabOf("movies"), r.orig, movieKorRow(raw||r), "원제"); savePersist('movies', CACHE.movies||[]); }
   catch(e){ r.watched=prev.watched; r.rewatch=prev.rewatch; r.pick=prev.pick; r.watchDate=prev.watchDate;
     if(raw){ raw.watched=prev.watched; raw.rewatch=prev.rewatch; raw.pick=prev.pick; raw.watchDate=prev.watchDate; }
     paint(); alert("상태 저장 실패(되돌림): "+e.message); }
@@ -1538,14 +1561,15 @@ async function saveRecord(m, row, existing){
     const base=(CACHE.movies||[]).find(x=>String(x._id)===String((existing&&existing._id)||row._id)) || existing || {};
     const merged=Object.assign({}, base, row);
     merged.recommendList=String(merged.recommend==null?"":merged.recommend).split(/[\/,]+/).map(x=>x.trim()).filter(Boolean);
-    return sheetSrc().updateRaw("MOVIE", (existing&&existing.orig)||merged.orig||merged._id, movieKorRow(merged), "원제");
+    return sheetSrc().updateRaw(sheetSrc().tabOf("movies"), (existing&&existing.orig)||merged.orig||merged._id, movieKorRow(merged), "원제");
   }
-  if(m.id==="carlog"){                        // 차계부: CARLOG 탭, ID 기준
+  if(m.id==="carlog"){                        // 차계부: 차계부/CARLOG 탭, _id 또는 ID 자동감지
+    const S=sheetSrc(), tab=S.tabOf("carlog"), idk=S.idkeyOf("carlog");
     const kor={};
     (m.fields||[]).forEach(f=>{ kor[f.sheet] = (row[f.k]==null?"":row[f.k]); });
-    if(existing) return sheetSrc().updateRaw("CARLOG", existing._id, kor, "ID");
-    kor["ID"]=String(Date.now());
-    return sheetSrc().appendRaw("CARLOG", kor);
+    if(existing) return S.updateRaw(tab, existing._id, kor, idk);
+    kor[idk]=String(Date.now());
+    return S.appendRaw(tab, kor);
   }
   if(existing) return sheetSrc().update(state.domain, row._id, row);   // 도서·명산·러닝
   return sheetSrc().upsert(state.domain, row);
@@ -1553,8 +1577,8 @@ async function saveRecord(m, row, existing){
 async function deleteRecord(m, r){
   if(!confirm(`'${r.title||r.date||r._id}' 삭제할까요? 되돌릴 수 없어요.`)) return;
   try{
-    if(m.id==="carlog") await sheetSrc().deleteRaw("CARLOG", r._id, "ID");
-    else if(m.id==="movies") await sheetSrc().deleteRaw("MOVIE", r.orig||r._id, "원제");
+    if(m.id==="carlog"){ const S=sheetSrc(); await S.deleteRaw(S.tabOf("carlog"), r._id, S.idkeyOf("carlog")); }
+    else if(m.id==="movies") await sheetSrc().deleteRaw(sheetSrc().tabOf("movies"), r.orig||r._id, "원제");
     else await sheetSrc().remove(state.domain, r._id);
     unmarkPending(m.id, r._id);   // 삭제한 줄은 보호 해제(되살아나지 않게)
     const _c=CACHE[m.id]; if(_c){ const _n=_c.filter(x=>String(x._id)!==String(r._id)); CACHE[m.id]=_n; savePersist(m.id,_n); }
@@ -2182,7 +2206,7 @@ async function pickMovie(m){
     watched: code.charAt(0)==='W'?"O":"", rewatch: code.charAt(1)==='R', pick: code.charAt(1)==='P',
     watchDate: code.charAt(0)==='W'?todayStr():"" };
   try{
-    await sheetSrc().appendRaw("MOVIE", movieKorRow(row));
+    await sheetSrc().appendRaw(sheetSrc().tabOf("movies"), movieKorRow(row));
     markPending("movies", _id);
     const arr=(CACHE.movies||loadPersist("movies")||[]); arr.push(row); CACHE.movies=arr; savePersist("movies", arr);
     $("#add").close(); refreshDomain();
