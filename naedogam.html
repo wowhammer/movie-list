@@ -393,11 +393,11 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
 <div class="wrap" id="root" data-domain="movies">
   <header class="masthead">
     <div class="mh-row">
-      <button id="brandBtn" type="button" class="brandbtn" aria-label="홈"><!-- Naedogam v96 (홈 통합검색창: 모든 카테고리 제목·이름 검색) -->
+      <button id="brandBtn" type="button" class="brandbtn" aria-label="홈"><!-- Naedogam v97 (여행 카테고리 추가: 기간·동행·비용·만족도·예정/다녀옴) -->
         <svg class="brandmark" width="34" height="30" viewBox="26 28 62 54" aria-hidden="true"><rect x="28" y="40" width="12" height="38" rx="5" fill="#F7F5F0"/><rect x="44" y="30" width="12" height="48" rx="5" fill="#F7F5F0"/><rect x="60" y="32" width="12" height="46" rx="5" fill="#E0483F" transform="rotate(16 66 78)"/></svg>
         <span class="brandwm"><span class="bwm-ko">내도감</span><span class="bwm-en">NAEDOGAM</span></span>
       </button>
-      <span class="mhver">v96</span>
+      <span class="mhver">v97</span>
       <span class="spacer"></span>
       <span class="src-chip" id="srcChip" style="display:none">데모</span>
       <button class="icon-btn" id="searchToggle" type="button" style="display:none">🔍</button>
@@ -657,7 +657,38 @@ const MANIFESTS = {
             {label:"연 환산",type:"sum",field:"_yearly",unit:"원",where:{status:"구독중"},c:"#0891b2"} ],
     card:{ kind:"data", thumb:"🔄",
            title:r=>`${r.name||""}${r.cost?" · "+Number(r.cost).toLocaleString()+"원/"+(r.cycle||"월"):""}`,
-           kv:[{k:"주기",f:"cycle"},{k:"결제일",f:"payday"},{k:"수단",f:"method"},{k:"상태",f:"status"}] } }
+           kv:[{k:"주기",f:"cycle"},{k:"결제일",f:"payday"},{k:"수단",f:"method"},{k:"상태",f:"status"}] } },
+
+  /* 여행: 다녀온 여행 기록 + 갈 곳(예정/다녀옴). 기간·동행·비용·만족도·명소·사진. */
+  travel:{ id:"travel", title:"여행", icon:"✈️", vol:"卷8", canAdd:true,
+    source:{ type:"sheet", tab:"여행" },
+    fields:[ {k:"title",sheet:"제목",label:"여행 제목(예: 제주 3박4일)",type:"text"},
+             {k:"place",sheet:"여행지",label:"여행지",type:"text"},
+             {k:"country",sheet:"국가",label:"국가",type:"text"},
+             {k:"startDate",sheet:"시작일",label:"시작일",type:"date"},
+             {k:"endDate",sheet:"종료일",label:"종료일",type:"date"},
+             {k:"companion",sheet:"동행",label:"동행(가족/친구/혼자)",type:"text"},
+             {k:"transport",sheet:"교통",label:"교통편",type:"text"},
+             {k:"stay",sheet:"숙소",label:"숙소",type:"text"},
+             {k:"cost",sheet:"비용",label:"비용(원)",type:"number"},
+             {k:"rating",sheet:"만족도",label:"만족도(별점)",type:"rating"},
+             {k:"status",sheet:"상태",label:"상태",type:"select",options:["다녀옴","예정"]},
+             {k:"spots",sheet:"명소",label:"가본 곳·명소(쉼표로 여러 개)",type:"tags"},
+             {k:"review",sheet:"후기",label:"후기",type:"textarea"},
+             {k:"cover",sheet:"사진",label:"사진",type:"image"} ],
+    search:["title","place","country","spots","review","companion"],
+    filterBy:{ field:"status", allLabel:"전체" },
+    activity:{ df:"startDate", when:r=>r.status==="다녀옴", label:"여행", name:r=>r.title||r.place },
+    stats:[ {label:"전체",type:"count"},
+            {label:"다녀옴",type:"countIf",field:"status",eq:"다녀옴",c:"#16a34a"},
+            {label:"예정",type:"countIf",field:"status",eq:"예정",c:"#c2410c"},
+            {label:"총 비용",type:"sum",field:"cost",unit:"원",c:"#0891b2"} ],
+    card:{ kind:"specimen", thumb:"✈",
+           meta:r=>[ (r.startDate?String(r.startDate).slice(0,10)+(r.endDate&&r.endDate!==r.startDate?" ~ "+String(r.endDate).slice(0,10):""):""), r.place, r.country ].filter(Boolean).join(" · "),
+           tags:"spots",
+           flags:r=>[ (r.rating!=null&&r.rating!=="")?{t:"★ "+r.rating,cls:"star"}:0,
+                      r.status==="다녀옴"?{t:"다녀옴",cls:"on"}:0,
+                      r.status==="예정"?{t:"예정",cls:"on"}:0 ] } }
 };
 
 /* ── 2. DataSource 추상화 ──
@@ -993,10 +1024,10 @@ const ND_ICONS={
   running:'M14 4m-1.4 0a1.4 1.4 0 1 0 2.8 0a1.4 1.4 0 1 0 -2.8 0 M4 17l4 1l1 -2 M14 21v-5l-3 -2l1 -5l3 3l3 1',
   carlog:'M7 17m-1.6 0a1.6 1.6 0 1 0 3.2 0a1.6 1.6 0 1 0 -3.2 0 M17 17m-1.6 0a1.6 1.6 0 1 0 3.2 0a1.6 1.6 0 1 0 -3.2 0 M5 17H3v-5l2 -4h9l3 4h2a1 1 0 0 1 1 1v4h-2 M8.6 17h4.8',
   diary:'M6 4h10a2 2 0 0 1 2 2v12a2 2 0 0 1 -2 2H6a1 1 0 0 1 -1 -1V5a1 1 0 0 1 1 -1z M9 4v16 M12.5 9h3 M12.5 13h3',
-  subs:'M20 11a8 8 0 0 0 -14 -5l-2 2 M4 13a8 8 0 0 0 14 5l2 -2 M4 4v4h4 M20 20v-4h-4'
+  subs:'M20 11a8 8 0 0 0 -14 -5l-2 2 M4 13a8 8 0 0 0 14 5l2 -2 M4 4v4h4 M20 20v-4h-4',
+  travel:'M22 2L11 13 M22 2l-7 20l-4 -9l-9 -4z'
 };
 const HOME_SOON=[
-  {t:"여행",     d:'M22 2L11 13 M22 2l-7 20l-4 -9l-9 -4z'},
   {t:"맛집",     d:'M5 3v6a2 2 0 0 0 4 0V3 M7 9v12 M16 3c-1.5 1 -2.5 3 -2.5 6c0 2 1 3 2.5 3v9'},
   {t:"펫일기",   d:'M5 11a1.4 1.4 0 1 0 .01 0 M9 7a1.4 1.4 0 1 0 .01 0 M15 7a1.4 1.4 0 1 0 .01 0 M19 11a1.4 1.4 0 1 0 .01 0 M12 15c-2 0 -3.5 1 -3.5 2.7c0 1.6 1.5 2.8 3.5 2.8s3.5 -1.2 3.5 -2.8c0 -1.7 -1.5 -2.7 -3.5 -2.7z'},
   {t:"장보기",   d:'M6 19m-1.3 0a1.3 1.3 0 1 0 2.6 0a1.3 1.3 0 1 0 -2.6 0 M17 19m-1.3 0a1.3 1.3 0 1 0 2.6 0a1.3 1.3 0 1 0 -2.6 0 M3 4h2l2.2 11h9.6l1.7 -8H6'},
