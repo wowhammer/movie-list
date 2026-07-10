@@ -434,11 +434,11 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
 <div class="wrap" id="root" data-domain="movies">
   <header class="masthead">
     <div class="mh-row">
-      <button id="brandBtn" type="button" class="brandbtn" aria-label="홈"><!-- Naedogam v107 (카드: 소유/찜 토글, 메모, 상세헤더=카드사·카드명, 연회비 콤마) -->
+      <button id="brandBtn" type="button" class="brandbtn" aria-label="홈"><!-- Naedogam v108 (카드 상세: 미사용 옛 컬럼·빈 값 행 숨김) -->
         <svg class="brandmark" width="34" height="30" viewBox="26 28 62 54" aria-hidden="true"><rect x="28" y="40" width="12" height="38" rx="5" fill="#F7F5F0"/><rect x="44" y="30" width="12" height="48" rx="5" fill="#F7F5F0"/><rect x="60" y="32" width="12" height="46" rx="5" fill="#E0483F" transform="rotate(16 66 78)"/></svg>
         <span class="brandwm"><span class="bwm-ko">내도감</span><span class="bwm-en">NAEDOGAM</span></span>
       </button>
-      <span class="mhver">v107</span>
+      <span class="mhver">v108</span>
       <span class="spacer"></span>
       <span class="src-chip" id="srcChip" style="display:none">데모</span>
       <button class="icon-btn" id="searchToggle" type="button" style="display:none">🔍</button>
@@ -1465,7 +1465,7 @@ function openDetail(m, r){
   const _imgKeys=(m.fields||[]).filter(f=>f.type==="image").map(f=>f.k);
   const _compKeys=Object.keys(m.computed||{});
   const _skipK=["_id","orig","_cover","_dist","benefit"].concat(m.id==="cards"?["name","issuer","owned","fav"]:[]);
-  const rows=Object.entries(r).filter(([k])=>!_skipK.includes(k)&&!_imgKeys.includes(k)&&!_compKeys.includes(k)&&!(TOGGLE_HIDE[m.id]||[]).includes(k)).map(([k,v])=>{
+  const rows=Object.entries(r).filter(([k,v])=>!_skipK.includes(k)&&!_imgKeys.includes(k)&&!_compKeys.includes(k)&&!(TOGGLE_HIDE[m.id]||[]).includes(k)&&(m.id!=="cards"||(FT[k]!==undefined&&!(v===""||v==null)))).map(([k,v])=>{
     if(FT[k]==="tiers"){ const arr=parseTiers({tiers:v}); if(!arr.length) return "";
       return arr.map(t=>{ const mn=String(t.min==null?"":t.min).trim(); const bl=String(t.benefits||"").split(/\n+/).map(x=>x.trim()).filter(Boolean);
         return `<div class="drow"><span class="k">${mn?mn+"만원↑":"기본"}</span><span>${bl.map(b=>String(b).replace(/</g,"&lt;")).join("<br>")||"—"}</span></div>`; }).join(""); }
