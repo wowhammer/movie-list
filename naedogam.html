@@ -297,6 +297,18 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
   .rfgrid .rff-full{ flex:1 1 100%; }
   .rfgrid .rff-half{ flex:1 1 calc(50% - 6px); min-width:calc(50% - 6px); }
   .rfgrid .rff-bool{ flex:0 0 auto; align-self:center; }
+  .home-search-wrap{ margin:10px 0 2px; }
+  .home-search{ width:100%; box-sizing:border-box; font-size:15px; padding:11px 14px; border:1px solid #3a3a3d; border-radius:12px; background:#18181B; color:#F7F5F0; }
+  .home-search::placeholder{ color:#8a8a8f; }
+  #homeSearchRes{ margin:6px 0 10px; }
+  .hs-group{ margin:8px 0; }
+  .hs-cat{ font-size:12px; color:var(--ink-soft); font-weight:600; margin:8px 2px 5px; display:flex; gap:6px; align-items:center; }
+  .hs-cat span{ color:var(--accent); }
+  .hs-item{ display:flex; flex-direction:column; align-items:flex-start; gap:2px; width:100%; text-align:left; background:#fff; border:1px solid var(--line-soft); border-radius:10px; padding:9px 12px; margin-bottom:5px; cursor:pointer; }
+  .hs-item:hover{ border-color:var(--line); }
+  .hs-item b{ font-size:14.5px; color:var(--ink); font-weight:600; }
+  .hs-item span{ font-size:12px; color:var(--ink-soft); }
+  .hs-none{ font-size:13px; color:var(--ink-soft); padding:8px 2px; }
   .btn{ font-family:var(--sans); font-size:13px; font-weight:500; cursor:pointer; background:var(--accent); color:#fff; border:none; padding:10px 16px; border-radius:7px; }
   .btn.ghost{ background:none; color:var(--ink); border:1px solid var(--line); }
   .btn.ghost.on{ background:var(--accent); color:#fff; border-color:var(--accent); }
@@ -381,11 +393,11 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
 <div class="wrap" id="root" data-domain="movies">
   <header class="masthead">
     <div class="mh-row">
-      <button id="brandBtn" type="button" class="brandbtn" aria-label="홈"><!-- Naedogam v95 (폼 2열 배치: 짧은 필드 2개/줄, 헤더X) -->
+      <button id="brandBtn" type="button" class="brandbtn" aria-label="홈"><!-- Naedogam v96 (홈 통합검색창: 모든 카테고리 제목·이름 검색) -->
         <svg class="brandmark" width="34" height="30" viewBox="26 28 62 54" aria-hidden="true"><rect x="28" y="40" width="12" height="38" rx="5" fill="#F7F5F0"/><rect x="44" y="30" width="12" height="48" rx="5" fill="#F7F5F0"/><rect x="60" y="32" width="12" height="46" rx="5" fill="#E0483F" transform="rotate(16 66 78)"/></svg>
         <span class="brandwm"><span class="bwm-ko">내도감</span><span class="bwm-en">NAEDOGAM</span></span>
       </button>
-      <span class="mhver">v95</span>
+      <span class="mhver">v96</span>
       <span class="spacer"></span>
       <span class="src-chip" id="srcChip" style="display:none">데모</span>
       <button class="icon-btn" id="searchToggle" type="button" style="display:none">🔍</button>
@@ -921,7 +933,7 @@ function renderHome(){
     $("#emptyAdd").onclick=openSettings; return;
   }
   const _ics=d=>`<svg class="ci-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="${d}"/></svg>`;
-  home.innerHTML=`<div class="home-grid">`+active.map(m=>{
+  home.innerHTML=`<div class="home-search-wrap"><input class="home-search" id="homeSearch" type="search" placeholder="🔍 전체 검색 — 제목·이름" autocomplete="off"></div><div id="homeSearchRes" style="display:none"></div><div class="home-grid">`+active.map(m=>{
     const _arr = CACHE[m.id] || loadPersist(m.id); const cnt = _arr ? `${fmt(_arr.length)}건` : "";
     const ic = ND_ICONS[m.id] ? _ics(ND_ICONS[m.id]) : `<span style="font-size:24px">${m.icon}</span>`;
     return `<button class="cat-card" data-id="${m.id}"><span class="ci">${ic}</span><span class="cn">${m.title}</span><span class="cc" data-cnt="${m.id}">${cnt}</span></button>`;
@@ -929,10 +941,43 @@ function renderHome(){
   +`<div class="home-soon-h">준비중 · 앞으로 추가할 것들</div>`
   +`<div class="home-grid">`+HOME_SOON.map(x=>`<button class="cat-card soon" type="button"><span class="ci">${_ics(x.d)}</span><span class="cn">${x.t}</span><span class="cc">준비중</span></button>`).join("")+`</div>`;
   home.querySelectorAll(".cat-card[data-id]").forEach(b=>b.onclick=()=>openDomain(b.dataset.id));
+  { const _hs=$("#homeSearch"); if(_hs){ let _t=null; _hs.addEventListener("input",()=>{ clearTimeout(_t); _t=setTimeout(()=>runHomeSearch(_hs.value),200); }); } }
   active.forEach(m=>{ if(CACHE[m.id]||loadPersist(m.id)) return; try{ sourceFor(m).list(m.id).then(rows=>{ CACHE[m.id]=rows; savePersist(m.id,rows); const el=home.querySelector(`.cc[data-cnt="${m.id}"]`); if(el) el.textContent=`${fmt(rows.length)}건`; }).catch(()=>{}); }catch(e){} });
 }
 /* 분야가 선언한 source.type 에 따라 출처를 고른다.
    appsscript → 영화·차계부(기존 방식) / sheet → 도서·명산·러닝(기존 시트에 탭으로) */
+function _hsTitle(m,r){ return r.title||r.name||(m.card&&m.card.title?m.card.title(r):"")||r.date||String(r._id||""); }
+function _hsMeta(m,r){ try{
+  if(m.card&&m.card.kind==="specimen"&&m.card.meta) return m.card.meta(r)||"";
+  if(m.card&&m.card.kv) return m.card.kv.map(c=>(r[c.f]!=null&&r[c.f]!=="")?`${c.k} ${typeof r[c.f]==="number"?fmt(r[c.f]):r[c.f]}${c.u?" "+c.u:""}`:"").filter(Boolean).slice(0,2).join(" · ");
+}catch(e){} return ""; }
+function runHomeSearch(q){
+  q=(q||"").trim().toLowerCase();
+  const res=$("#homeSearchRes"); if(!res) return;
+  if(!q){ res.innerHTML=""; res.style.display="none"; return; }
+  res.style.display="";
+  const active=getActive().map(id=>MANIFESTS[id]).filter(Boolean);
+  let html="", pending=0;
+  active.forEach(m=>{
+    let rows=CACHE[m.id]||loadPersist(m.id);
+    if(!rows){ pending++; try{ sourceFor(m).list(m.id).then(r=>{ CACHE[m.id]=r; savePersist(m.id,r); const cur=$("#homeSearch"); if(cur&&cur.value.trim().toLowerCase()===q) runHomeSearch(cur.value); }).catch(()=>{}); }catch(e){} return; }
+    const hits=filterRows(m, rows, q).slice(0,6);
+    if(hits.length){
+      html+=`<div class="hs-group"><div class="hs-cat">${m.icon} ${m.title} <span>${hits.length}</span></div>`
+        +hits.map(r=>`<button class="hs-item" data-cat="${m.id}" data-id="${String(r._id).replace(/"/g,'&quot;')}"><b>${String(_hsTitle(m,r)).replace(/</g,"&lt;")}</b>${_hsMeta(m,r)?`<span>${String(_hsMeta(m,r)).replace(/</g,"&lt;")}</span>`:""}</button>`).join("")
+        +`</div>`;
+    }
+  });
+  res.innerHTML = html || `<div class="hs-none">${pending?"불러오는 중…":"검색 결과가 없어요"}</div>`;
+  res.querySelectorAll(".hs-item").forEach(b=>b.onclick=()=>openFromSearch(b.dataset.cat, b.dataset.id));
+}
+function openFromSearch(catId, id){
+  const m=MANIFESTS[catId]; if(!m) return;
+  openDomain(catId);
+  let n=0; const tryOpen=()=>{ const rows=state.rows||[]; const r=rows.find(x=>String(x._id)===String(id));
+    if(r){ openDetail(m, r); } else if(n++<12){ setTimeout(tryOpen,150); } };
+  setTimeout(tryOpen, 250);
+}
 function sourceFor(m){
   if(m.source?.type==="appsscript" && CONFIG.APPS_SCRIPT_URL) return _apps||(_apps=new AppsScriptDataSource(CONFIG.APPS_SCRIPT_URL));
   if(m.source?.type==="sheet" && CONFIG.APPS_SCRIPT_URL) return sheetSrc();
