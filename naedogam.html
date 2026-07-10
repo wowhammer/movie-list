@@ -187,7 +187,12 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
   .thumb{ width:46px; height:64px; border-radius:3px; background:var(--accent-wash); display:flex; align-items:center; justify-content:center; font-size:20px; color:var(--accent); border:1px solid var(--line-soft); overflow:hidden; }
   .thumb img{ width:100%; height:100%; object-fit:cover; }
   .det-cover{ margin:2px 0 14px; border-radius:10px; overflow:hidden; background:var(--line-soft); }
-  .det-cover img{ display:block; width:100%; height:auto; max-height:66vh; object-fit:contain; }
+  .det-cover img{ display:block; width:100%; height:240px; max-height:44vh; object-fit:cover; }
+  .rf-imgzone{ position:relative; border:1.5px dashed var(--line); border-radius:10px; padding:12px; text-align:center; cursor:pointer; }
+  .rf-imgzone.drag{ border-color:#E0483F; background:var(--line-soft); }
+  .rf-imghint{ font-size:12px; color:var(--ink-soft); margin-top:6px; }
+  .rf-imgzone .rf-imgprev{ max-width:100%; max-height:170px; border-radius:8px; }
+  .rf-imgzone .rf-imgfile{ margin-top:8px; }
   .body{ min-width:0; }
   .body h3{ font-family:var(--sans); font-size:15px; font-weight:600; color:#1a1a1a; margin:0 0 3px; }
   .body .meta{ font-family:var(--sans); font-size:12px; color:#888; }
@@ -434,11 +439,11 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
 <div class="wrap" id="root" data-domain="movies">
   <header class="masthead">
     <div class="mh-row">
-      <button id="brandBtn" type="button" class="brandbtn" aria-label="홈"><!-- Naedogam v108 (카드 상세: 미사용 옛 컬럼·빈 값 행 숨김) -->
+      <button id="brandBtn" type="button" class="brandbtn" aria-label="홈"><!-- Naedogam v109 (정기구독 카드결제수단·커버·분류필터, 일기 오늘내도감, 상세사진 세로고정, 러닝 전체표시, 도서/등산 폼 정리) -->
         <svg class="brandmark" width="34" height="30" viewBox="26 28 62 54" aria-hidden="true"><rect x="28" y="40" width="12" height="38" rx="5" fill="#F7F5F0"/><rect x="44" y="30" width="12" height="48" rx="5" fill="#F7F5F0"/><rect x="60" y="32" width="12" height="46" rx="5" fill="#E0483F" transform="rotate(16 66 78)"/></svg>
         <span class="brandwm"><span class="bwm-ko">내도감</span><span class="bwm-en">NAEDOGAM</span></span>
       </button>
-      <span class="mhver">v108</span>
+      <span class="mhver">v109</span>
       <span class="spacer"></span>
       <span class="src-chip" id="srcChip" style="display:none">데모</span>
       <button class="icon-btn" id="searchToggle" type="button" style="display:none">🔍</button>
@@ -583,7 +588,7 @@ const MANIFESTS = {
              {k:"author",sheet:"저자",label:"저자",type:"text"},
              {k:"status",sheet:"상태",label:"상태",type:"select",options:["","읽음","읽는중"]},
              {k:"rating",sheet:"평점",label:"내 평점(읽은 책만)",type:"rating"},
-             {k:"review",sheet:"감상평",label:"감상평",type:"textarea"},
+             {k:"review",sheet:"감상평",label:"서평/메모",type:"textarea"},
              {k:"pick",sheet:"찜",label:"읽고싶다(찜)",type:"bool"},
              {k:"reread",sheet:"다시",label:"다시읽을것",type:"bool"},
              {k:"owned",sheet:"소장",label:"소장",type:"bool"},
@@ -591,7 +596,7 @@ const MANIFESTS = {
              {k:"publisher",sheet:"출판사",label:"출판사",type:"text"},
              {k:"year",sheet:"출판연도",label:"출판연도",type:"number"},
              {k:"genre",sheet:"장르",label:"장르(쉼표로 여러 개)",type:"tags"},
-             {k:"cover",sheet:"표지",label:"표지 주소",type:"text"},
+             {k:"cover",sheet:"표지",label:"표지 주소",type:"text",hideForm:true},
              {k:"readDate",sheet:"읽은날",label:"읽은날",type:"date"} ],
     search:["title","author"],
     activity:{ df:"readDate", when:r=>r.status==="읽음", label:"읽음", name:r=>r.title },
@@ -612,7 +617,7 @@ const MANIFESTS = {
     source:{ type:"sheet", tab:"등산" },
     fields:[ {k:"title",sheet:"산 이름",label:"산 이름",type:"text"},
              {k:"height",sheet:"높이",label:"높이(m)",type:"number"},
-             {k:"region",sheet:"지역",label:"지역",type:"text"},
+             {k:"region",sheet:"지역",label:"지역",type:"text",full:true},
              {k:"climbed",sheet:"다녀옴",label:"다녀옴",type:"bool"},
              {k:"revisit",sheet:"또갈것",label:"또갈것",type:"bool"},
              {k:"pick",sheet:"찜",label:"찜",type:"bool"},
@@ -654,7 +659,7 @@ const MANIFESTS = {
             {label:"기록",type:"count",c:"#16a34a"} ],
     card:{ kind:"data", thumb:"🏃",
            title:r=>`${r.date}${r.place?" · "+r.place:""}`,
-           kv:[{k:"거리",f:"dist",u:"km"},{k:"시간",f:"time",u:"분"},{k:"페이스",f:"pace"},{k:"심박",f:"hr"}] } },
+           kv:[{k:"거리",f:"dist",u:"km"},{k:"시간",f:"time",u:"분"},{k:"페이스",f:"pace"},{k:"심박",f:"hr"},{k:"케이던스",f:"cadence"},{k:"신발",f:"shoes"},{k:"장소",f:"place"}] } },
 
   /* 일기: 하루 기록. 날짜·제목·내용·기분·날씨·장소·태그·사진. */
   diary:{ id:"diary", title:"일기", icon:"📔", vol:"卷6", canAdd:true,
@@ -692,11 +697,12 @@ const MANIFESTS = {
              {k:"payday",sheet:"결제일",label:"결제일(예: 매월 15일)",type:"text"},
              {k:"category",sheet:"분류",label:"분류(쉼표로 여러 개 · OTT/음악/생산성)",type:"tags"},
              {k:"status",sheet:"상태",label:"상태",type:"select",options:["구독중","해지"]},
-             {k:"method",sheet:"결제수단",label:"결제수단",type:"text"},
+             {k:"method",sheet:"결제수단",label:"결제수단(내 카드)",type:"cardsel"},
              {k:"startDate",sheet:"시작일",label:"시작일",type:"date"},
-             {k:"memo",sheet:"메모",label:"메모",type:"text"} ],
+             {k:"memo",sheet:"메모",label:"메모",type:"text"},
+             {k:"cover",sheet:"사진",label:"커버 이미지 (끌어다 놓기 가능)",type:"image"} ],
     search:["name","category","method","memo"],
-    filterBy:{ field:"status", allLabel:"전체" },
+    filterBy:{ field:"category", allLabel:"전체" },
     activity:{ df:"startDate", when:r=>r.status==="구독중", label:"구독", name:r=>r.name },
     computed:{ _monthly:{calc:"subMonthly"}, _yearly:{calc:"subYearly"} },
     stats:[ {label:"구독중",type:"countIf",field:"status",eq:"구독중",c:"#16a34a"},
@@ -1154,7 +1160,7 @@ function renderSearch(m){ const L={title:"제목",director:"감독",actors:"배�
 function renderPicker(m){
   const p=$("#picker");
   if(!m.filterBy){ p.style.display="none"; p.innerHTML=""; return; }
-  const vals=[...new Set(state.rows.map(r=>String(r[m.filterBy.field]||"").trim()).filter(Boolean))];
+  const vals=[...new Set(state.rows.flatMap(r=>{ const v=r[m.filterBy.field]; return Array.isArray(v)?v.map(x=>String(x).trim()):[String(v||"").trim()]; }).filter(Boolean))];
   if(vals.length<2){ p.style.display="none"; p.innerHTML=""; state.pick=""; return; }  // 1개뿐이면 숨김
   p.style.display="flex";
   const opts=[{v:"",label:m.filterBy.allLabel||"전체"}, ...vals.map(v=>({v,label:v}))];
@@ -1457,14 +1463,14 @@ function renderCard(m, r, no){ if(m.id==="books") return bookCard(r); const c=m.
   const kv=c.kv.map(col=>{ const v=r[col.f]; if(v==null||v==="") return ""; const s=(typeof v==="number"?fmt(v):v)+(col.u?` ${col.u}`:"");
     return `<span>${col.k} <b>${s}</b></span>`; }).filter(Boolean).join("");
   return `<button class="card catcard" data-id="${r._id}"><span class="thumb">${(r.cover||r._cover)?`<img src="${r.cover||r._cover}" alt="">`:(c.thumb||"🧾")}</span>
-    <span class="body"><h3 style="font-size:15px">${c.title(r)}</h3><div class="kv">${kv}</div>${(r.memo||r.content||r.nddaily)?`<div class="meta" style="margin-top:5px">${(t=>t.slice(0,70).replace(/</g,"&lt;")+(t.length>70?"…":""))(String(r.memo||r.content||r.nddaily))}</div>`:""}</span></button>`; }
+    <span class="body"><h3 style="font-size:15px">${c.title(r)}</h3><div class="kv">${kv}</div>${(()=>{ const cut=t=>t.slice(0,70).replace(/</g,"&lt;")+(t.length>70?"…":""); if(m.id==="diary"){ const a=[]; if(r.content) a.push(`<div class="meta" style="margin-top:5px">${cut(String(r.content))}</div>`); if(r.nddaily) a.push(`<div class="meta" style="margin-top:4px;opacity:.85">🗓 ${cut(String(r.nddaily).replace(/\n+/g," · "))}</div>`); return a.join(""); } const e=r.memo||r.content||r.nddaily; return e?`<div class="meta" style="margin-top:5px">${cut(String(e))}</div>`:""; })()}</span></button>`; }
 function openDetail(m, r){
   if(m.id==="movies"){ openMovieDetail(m, r); return; }
   if(m.id==="books"){ openBookDetail(m, r); return; }
   const LBL={pace:"페이스"}; const FT={}; (m.fields||[]).forEach(f=>{ LBL[f.k]=f.sheet||String(f.label||f.k).replace(/\s*\(.*$/,""); FT[f.k]=f.type; });
   const _imgKeys=(m.fields||[]).filter(f=>f.type==="image").map(f=>f.k);
   const _compKeys=Object.keys(m.computed||{});
-  const _skipK=["_id","orig","_cover","_dist","benefit"].concat(m.id==="cards"?["name","issuer","owned","fav"]:[]);
+  const _skipK=["_id","orig","_cover","_dist","benefit"].concat(m.id==="cards"?["name","issuer","owned","fav"]:(m.id==="subs"?["name"]:[]));
   const rows=Object.entries(r).filter(([k,v])=>!_skipK.includes(k)&&!_imgKeys.includes(k)&&!_compKeys.includes(k)&&!(TOGGLE_HIDE[m.id]||[]).includes(k)&&(m.id!=="cards"||(FT[k]!==undefined&&!(v===""||v==null)))).map(([k,v])=>{
     if(FT[k]==="tiers"){ const arr=parseTiers({tiers:v}); if(!arr.length) return "";
       return arr.map(t=>{ const mn=String(t.min==null?"":t.min).trim(); const bl=String(t.benefits||"").split(/\n+/).map(x=>x.trim()).filter(Boolean);
@@ -1489,7 +1495,7 @@ function openDetail(m, r){
     foot="";
   }
   const _cf=(m.fields||[]).find(f=>f.type==="image"); const coverImg=(_cf&&r[_cf.k])?`<div class="det-cover"><img src="${String(r[_cf.k]).replace(/"/g,'&quot;')}" alt=""></div>`:"";
-  const d=$("#detail"); d.innerHTML=`<div class="dhead"><h3>${m.id==="cards"?((r.issuer?String(r.issuer).replace(/</g,"&lt;")+" · ":"")+String(r.name||"카드").replace(/</g,"&lt;")):(m.card.kind==="specimen"?r.title:(r.date+(r.car?" · "+r.car:"")))}</h3><div class="dh-actions"><button class="dh-btn" id="dEdit">수정</button><button class="dh-btn dh-del" id="dDel">삭제</button><button class="dclose-x" onclick="this.closest('dialog').close()" aria-label="닫기">✕</button></div></div><div class="dbody">${coverImg}${rows}</div>${mapLinks}${m.id==="cards"?`<div class="mvlinks"><a class="btn ghost" target="_blank" rel="noopener" href="https://search.naver.com/search.naver?query=${encodeURIComponent(((r.issuer||"")+" "+(r.name||"")+" 카드 혜택").trim())}">🔍 혜택 검색</a></div>`:""}${foot}`;
+  const d=$("#detail"); d.innerHTML=`<div class="dhead"><h3>${m.id==="cards"?((r.issuer?String(r.issuer).replace(/</g,"&lt;")+" · ":"")+String(r.name||"카드").replace(/</g,"&lt;")):(m.id==="subs"?String(r.name||"구독").replace(/</g,"&lt;"):(m.card.kind==="specimen"?r.title:(r.date+(r.car?" · "+r.car:""))))}</h3><div class="dh-actions"><button class="dh-btn" id="dEdit">수정</button><button class="dh-btn dh-del" id="dDel">삭제</button><button class="dclose-x" onclick="this.closest('dialog').close()" aria-label="닫기">✕</button></div></div><div class="dbody">${coverImg}${rows}</div>${mapLinks}${m.id==="cards"?`<div class="mvlinks"><a class="btn ghost" target="_blank" rel="noopener" href="https://search.naver.com/search.naver?query=${encodeURIComponent(((r.issuer||"")+" "+(r.name||"")+" 카드 혜택").trim())}">🔍 혜택 검색</a></div>`:""}${foot}`;
   d.showModal();
   if(isMovie){
     $("#mW").onclick=()=>toggleMovie(r,'W'); $("#mR").onclick=()=>toggleMovie(r,'R'); $("#mP").onclick=()=>toggleMovie(r,'P');
@@ -1726,7 +1732,10 @@ function openRecordForm(m, existing){
       return `<button type="button" class="btn ghost rf-bool ${val?'on':''}" data-k="${f.k}" style="margin-top:6px;margin-right:6px">${f.sheet||f.label}</button>`;
     if(f.type==="select")
       return `<label>${f.label}</label><select class="rf" data-k="${f.k}" data-type="select">${(f.options||[]).map(o=>`<option value="${o}" ${String(val||'')===o?'selected':''}>${o||'(없음)'}</option>`).join("")}</select>`;
-    if(f.type==="image"){ const cur=String(val||""); return `<label>${f.label}</label><div><img class="rf-imgprev" data-k="${f.k}" src="${cur.replace(/"/g,'&quot;')}" style="${cur?'':'display:none'}"><input type="hidden" class="rf-imgval" data-k="${f.k}" value="${cur.replace(/"/g,'&quot;')}"><input type="file" accept="image/*" class="rf-imgfile" data-k="${f.k}"></div>`; }
+    if(f.type==="cardsel"){ const cache=(CACHE.cards&&CACHE.cards.length?CACHE.cards:(loadPersist("cards")||[])); const names=cache.map(c=>c.name).filter(Boolean);
+      const opts=["", ...names, "기타"]; const cur=String(val||""); if(cur&&!opts.includes(cur)) opts.splice(1,0,cur);
+      return `<label>${f.label}</label><select class="rf" data-k="${f.k}" data-type="select">${opts.map(o=>`<option value="${String(o).replace(/"/g,'&quot;')}" ${cur===o?'selected':''}>${o||'(선택)'}</option>`).join("")}</select>`; }
+    if(f.type==="image"){ const cur=String(val||""); return `<label>${f.label}</label><div class="rf-imgzone" data-k="${f.k}"><img class="rf-imgprev" data-k="${f.k}" src="${cur.replace(/"/g,'&quot;')}" style="${cur?'':'display:none'}"><div class="rf-imghint">이미지를 끌어다 놓거나 클릭해서 선택</div><input type="hidden" class="rf-imgval" data-k="${f.k}" value="${cur.replace(/"/g,'&quot;')}"><input type="file" accept="image/*" class="rf-imgfile" data-k="${f.k}"></div>`; }
     if(f.type==="date"){ let dv=""; const raw=(val==null?"":String(val)).trim();
       if(raw){ const pd=parseDate(raw); if(pd) dv=pd.getFullYear()+"-"+String(pd.getMonth()+1).padStart(2,"0")+"-"+String(pd.getDate()).padStart(2,"0"); }
       else if(f.today && !isEdit) dv=todayStr();
@@ -1772,16 +1781,21 @@ function openRecordForm(m, existing){
       const gate=()=>{ const read=statusSel.value==="읽음"; rbox.style.display=read?"":"none"; rhint.style.display=read?"none":""; };
       statusSel.addEventListener("change", gate); gate(); }
   }
-  d.querySelectorAll(".rf-imgfile").forEach(inp=>inp.onchange=ev=>{
-    const file=ev.target.files&&ev.target.files[0]; if(!file) return; const k=inp.dataset.k;
+  const _encImg=(file,k)=>{ if(!file||!/^image\//.test(file.type||"")) return;
     const rd=new FileReader(); rd.onload=()=>{ const img=new Image(); img.onload=()=>{
       let mx=880, q=0.72;
       const enc=()=>{ const sc=Math.min(1,mx/Math.max(img.width,img.height)); const cv=document.createElement("canvas"); cv.width=Math.max(1,Math.round(img.width*sc)); cv.height=Math.max(1,Math.round(img.height*sc)); cv.getContext("2d").drawImage(img,0,0,cv.width,cv.height); try{ return cv.toDataURL("image/jpeg",q); }catch(e){ return rd.result; } };
       let url=enc();
-      while(url.length>49000 && (mx>160 || q>0.34)){ if(q>0.44) q-=0.07; else mx-=60; url=enc(); }   // 구글시트 셀 한도(5만자) 안에서 최대한 크게
+      while(url.length>49000 && (mx>160 || q>0.34)){ if(q>0.44) q-=0.07; else mx-=60; url=enc(); }
       d.querySelector(`.rf-imgval[data-k="${k}"]`).value=url;
       const pv=d.querySelector(`.rf-imgprev[data-k="${k}"]`); pv.src=url; pv.style.display="";
-    }; img.src=rd.result; }; rd.readAsDataURL(file);
+    }; img.src=rd.result; }; rd.readAsDataURL(file); };
+  d.querySelectorAll(".rf-imgfile").forEach(inp=>inp.onchange=ev=>_encImg(ev.target.files&&ev.target.files[0], inp.dataset.k));
+  d.querySelectorAll(".rf-imgzone").forEach(z=>{ const k=z.dataset.k;
+    ["dragenter","dragover"].forEach(ev=>z.addEventListener(ev,e=>{ e.preventDefault(); z.classList.add("drag"); }));
+    ["dragleave","dragend","drop"].forEach(ev=>z.addEventListener(ev,e=>{ e.preventDefault(); z.classList.remove("drag"); }));
+    z.addEventListener("drop",e=>{ const f=e.dataTransfer&&e.dataTransfer.files&&e.dataTransfer.files[0]; if(f) _encImg(f,k); });
+    z.addEventListener("click",e=>{ if(e.target.classList.contains("rf-imgfile")) return; const fi=z.querySelector(".rf-imgfile"); if(fi) fi.click(); });
   });
   $("#rfSave").onclick=async()=>{
     // 한글 마지막 글자 잘림 방지: 조합 확정(blur) → 아주 짧은 틈 뒤 값 읽기
@@ -1934,7 +1948,7 @@ function paintDomain(m){   // state.rows를 화면에 그림 (데이터 다시 �
   renderPicker(m);
   applySearchUI(m);
   let base = state.rows;
-  if(m.filterBy && state.pick) base = base.filter(r=>String(r[m.filterBy.field]||"").trim()===state.pick);
+  if(m.filterBy && state.pick) base = base.filter(r=>{ const v=r[m.filterBy.field]; return Array.isArray(v)?v.map(x=>String(x).trim()).includes(state.pick):String(v||"").trim()===state.pick; });
   renderStats(m, base);
   setMhSub("");
   if(m.id==="books") renderBookGenres(m);
