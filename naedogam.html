@@ -192,6 +192,12 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
   .det-cover img{ display:block; width:100%; height:300px; max-height:56vh; object-fit:contain; }
   .rf-imgzone{ position:relative; border:1.5px dashed var(--line); border-radius:10px; padding:12px; text-align:center; cursor:pointer; }
   .rf-imgzone.drag{ border-color:#E0483F; background:var(--line-soft); }
+  .ord-list{ margin:2px 0 6px; }
+  .ord-row{ display:flex; align-items:center; gap:10px; padding:9px 10px; background:var(--card); border:1px solid var(--line); border-radius:9px; margin:6px 0; touch-action:none; }
+  .ord-row.dragging{ opacity:.55; border-color:var(--accent); box-shadow:0 4px 12px rgba(0,0,0,.15); }
+  .ord-row .oi{ font-size:17px; line-height:1; }
+  .ord-row .ordn{ flex:1; font-size:14px; }
+  .ord-handle{ cursor:grab; color:var(--sub); font-size:20px; padding:2px 8px; line-height:1; user-select:none; touch-action:none; }
   .rf-imghint{ font-size:12px; color:var(--ink-soft); margin-top:6px; }
   .rf-imgzone .rf-imgprev{ max-width:100%; max-height:170px; border-radius:8px; }
   .rf-imgzone .rf-imgfile{ margin-top:8px; }
@@ -443,11 +449,11 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
 <div class="wrap" id="root" data-domain="movies">
   <header class="masthead">
     <div class="mh-row">
-      <button id="brandBtn" type="button" class="brandbtn" aria-label="홈"><!-- Naedogam v114 (러닝 날짜 표시정상화·금액입력 콤마·여행 오늘내도감 기간표시·미술관/전시회 개명) -->
+      <button id="brandBtn" type="button" class="brandbtn" aria-label="홈"><!-- Naedogam v115 (설정 카테고리 순서 드래그·차계부 차량사진 차량별기억·준비중 공연/콘서트) -->
         <svg class="brandmark" width="34" height="30" viewBox="26 28 62 54" aria-hidden="true"><rect x="28" y="40" width="12" height="38" rx="5" fill="#F7F5F0"/><rect x="44" y="30" width="12" height="48" rx="5" fill="#F7F5F0"/><rect x="60" y="32" width="12" height="46" rx="5" fill="#E0483F" transform="rotate(16 66 78)"/></svg>
         <span class="brandwm"><span class="bwm-ko">내도감</span><span class="bwm-en">NAEDOGAM</span></span>
       </button>
-      <span class="mhver">v114</span>
+      <span class="mhver">v115</span>
       <span class="spacer"></span>
       <span class="src-chip" id="srcChip" style="display:none">데모</span>
       <button class="icon-btn" id="searchToggle" type="button" style="display:none">🔍</button>
@@ -574,7 +580,8 @@ const MANIFESTS = {
              {k:"shop",sheet:"정비소",label:"정비소",type:"text"},
              {k:"cost",sheet:"가격",label:"가격(원)",type:"number",money:true},
              {k:"odo",sheet:"주행거리",label:"주행거리(km)",type:"number"},
-             {k:"memo",sheet:"비고",label:"비고",type:"text"} ],
+             {k:"memo",sheet:"비고",label:"비고",type:"text"},
+             {k:"cover",sheet:"사진",label:"차량 사진",type:"image"} ],
     filterBy:{ field:"car", allLabel:"전체" },
     search:["work","shop","car","memo"],
     activity:{ df:"date", when:r=>true, label:"정비", name:r=>[r.car,r.work].filter(Boolean).join(" ") },
@@ -1027,6 +1034,9 @@ function getActive(){ try{ return JSON.parse(store.getItem("nd.active")||"[]"); 
 function setActive(list){ store.setItem("nd.active", JSON.stringify(list)); }
 function isActive(id){ return getActive().includes(id); }
 function toggleActive(id,on){ let a=getActive(); if(on){ if(!a.includes(id)) a.push(id); } else a=a.filter(x=>x!==id); setActive(a); }
+function carCoverMap(){ try{ return JSON.parse(store.getItem("nd.carCover")||"{}"); }catch(e){ return {}; } }
+function setCarCover(car,url){ car=String(car||"").trim(); if(!car) return; const mp=carCoverMap(); if(url) mp[car]=url; else delete mp[car]; try{ store.setItem("nd.carCover", JSON.stringify(mp)); }catch(e){} }
+function carDefaultCover(car){ car=String(car||"").trim(); return car?(carCoverMap()[car]||""):""; }
 
 /* 화면 전환: home(카드 격자) ↔ domain(분야 목록) */
 function showView(v){ state.view=v;
@@ -1128,7 +1138,7 @@ const HOME_SOON=[
   {t:"가계부",   d:'M17 8V6a2 2 0 0 0 -2 -2H5a2 2 0 0 0 -2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2 -2v-2 M21 12h-4a2 2 0 0 0 0 4h4z'},
   {t:"위시리스트", d:'M12 20l-1.5 -1.4C5.5 14 3 11.5 3 8.5A4.5 4.5 0 0 1 12 6a4.5 4.5 0 0 1 9 2.5c0 3 -2.5 5.5 -7.5 10.1z'},
   {t:"공부",     d:'M12 4L2 9l10 5l8 -4v6 M6 11.5V16c0 1.5 3 3 6 3s6 -1.5 6 -3v-4.5'},
-  {t:"음악",     d:'M9 18a3 3 0 1 0 .01 0 M9 18V6l10 -2v10 M19 14a3 3 0 1 0 .01 0'}
+  {t:"공연/콘서트", d:'M15 5a3 3 0 0 0 -6 0v5a3 3 0 0 0 6 0z M5 10a7 7 0 0 0 14 0 M8 21l8 0 M12 17l0 4'}
 ];
 function tabIco(id, m){ const ic=ND_ICONS[id]; const _c=ND_COLORS[id]||"currentColor";
   return ic ? `<svg class="tabico" style="color:${_c}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="${ic}"/></svg>`
@@ -1886,6 +1896,25 @@ function openRecordForm(m, existing){
     if(_cb){ const _sb=document.createElement("button"); _sb.type="button"; _sb.className="btn ghost"; _sb.textContent="🔍 혜택 검색"; _sb.style.cssText="flex:1 1 100%;margin-bottom:8px"; _cb.insertBefore(_sb, _cb.firstChild);
       _sb.onclick=()=>{ const iss=(d.querySelector('.rf[data-k="issuer"]')||{}).value||""; const nm=(d.querySelector('.rf[data-k="name"]')||{}).value||""; window.open("https://search.naver.com/search.naver?query="+encodeURIComponent((iss+" "+nm+" 카드 혜택").trim()),"_blank"); }; }
   }
+  if(m.id==="carlog"){
+    const _iz=d.querySelector('.rf-imgzone[data-k="cover"]');
+    if(_iz && !d.querySelector("#carAllCover")){ const _wrap=document.createElement("label"); _wrap.className="rff";
+      _wrap.style.cssText="display:flex;align-items:flex-start;gap:8px;margin-top:7px;font-size:13px;color:var(--ink-soft)";
+      _wrap.innerHTML='<input type="checkbox" id="carAllCover" style="width:auto;margin-top:2px"><span>이 사진을 <b>이 차량의 모든 기록</b>에 적용<br><span style="color:var(--sub);font-size:12px">체크 안 하면 이 기록에만 적용됩니다</span></span>';
+      _iz.parentNode.insertBefore(_wrap, _iz.nextSibling); }
+    const _carEl=d.querySelector('.rf[data-k="car"]'), _covVal=d.querySelector('.rf-imgval[data-k="cover"]'), _covPv=d.querySelector('.rf-imgprev[data-k="cover"]');
+    const _prefill=()=>{ if(!_covVal||!_covPv) return; if((_covVal.value||"").trim()) return; const def=carDefaultCover(_carEl&&_carEl.value); if(def){ _covPv.src=def; _covPv.style.display=""; } else { _covPv.removeAttribute("src"); _covPv.style.display="none"; } };
+    if(_carEl){ _carEl.addEventListener("input",_prefill); _carEl.addEventListener("change",_prefill); }
+    _prefill();
+    const _orig=$("#rfSave").onclick;
+    $("#rfSave").onclick=async()=>{
+      const car=(_carEl&&_carEl.value||"").trim();
+      const allChk=d.querySelector("#carAllCover");
+      const cur=(_covVal&&_covVal.value||"").trim();
+      if(allChk&&allChk.checked){ if(cur) setCarCover(car,cur); if(_covVal) _covVal.value=""; }   // 모두 적용: 차량 기본으로 저장, 이 행은 기본을 사용(빈칸)
+      return _orig();
+    };
+  }
 }
 /* 저장을 분야에 맞는 통로로 보냄 (영화=기존 수정통로 / 차계부=nd문(ID) / 도서·명산·러닝=nd문(_id)) */
 async function saveRecord(m, row, existing){
@@ -2211,7 +2240,7 @@ function carlogCard(r, no){
   const badge=(car&&CAR_ORDER.length>1)?`<span class="clx-badge" style="background:${carColor(car)}">${car}</span>`:"";
   const odo=carNum(r.odo), cost=carNum(r.cost);
   const sub=[r.shop,r.memo].filter(Boolean).join(" · ");
-  const cov=r.cover||r._cover;
+  const cov=r.cover||carDefaultCover(car);
   const thumb=`<span class="clx-thumb${cov?"":" clx-thumb-e"}">${cov?`<img src="${cov}" alt="">`:"🚗"}</span>`;
   return `<button class="card clx-card" data-id="${r._id}">${thumb}<span class="clx-body">
     <div class="clx-top"><span class="clx-date">${badge}${r.date||"-"}</span><span class="clx-odo">${odo?fmt(odo)+"km":""}</span></div>
@@ -2268,7 +2297,7 @@ function paintCarlog(m){
   const cnt=$("#count"); cnt.classList.remove("countrow"); cnt.innerHTML=""; cnt.style.display="none";   // 차계부: 총건수/정렬 줄 숨김(기본 날짜 정렬 유지)
   $("#list").innerHTML=rows.map((r,i)=>{ try{ return carlogCard(r, rows.length-i); }catch(e){ console.error(e); return ""; } }).join("")||`<div class="count">기록이 없어요.</div>`;
   document.querySelectorAll(".clx-card").forEach(b=>b.onclick=()=>{ const r=state.rows.find(x=>String(x._id)===String(b.dataset.id)); if(r) openDetail(m, r); });   // _id 숫자/문자 섞여도 매칭
-  loadCovers(m,"car");
+  state.rows.forEach(r=>{ const c=String(r.car||"").trim(); if(c&&r.cover&&!carCoverMap()[c]) setCarCover(c,r.cover); });   // 자동 위키검색 제거: 차량 사진은 수동 관리+차량별 기억
 }
 
 /* ── 5. 설정: 카테고리 켜고 끄기 + 구글/개인 설정 자리 ── */
@@ -2400,10 +2429,14 @@ function openSettings(){
      <span class="mn">${m.title} <span class="mv">${m.vol}</span></span>
      <button class="sw ${isActive(m.id)?'on':''}" data-id="${m.id}" role="switch" aria-checked="${isActive(m.id)}" type="button"></button>
    </div>`).join("");
+  const orderRows=getActive().map(id=>MANIFESTS[id]).filter(Boolean).map(m=>`<div class="ord-row" data-id="${m.id}"><span class="oi">${m.icon}</span><span class="ordn">${m.title}</span><span class="ord-handle" aria-label="끌어서 순서 이동">≡</span></div>`).join("");
   d.innerHTML=`<div class="dhead"><h3>설정</h3></div><div class="dbody set">
     <h4>카테고리 관리</h4>
     <div class="hint">켜면 홈에 카드가 생기고(그 분야 탭도 시트에 자동 생성), 끄면 홈에서 사라집니다. (시트의 데이터는 지워지지 않아요)</div>
     ${rows}
+    <h4>카테고리 순서 <span style="font-weight:400;font-size:12px;color:var(--sub)">홈·상단 탭 순서</span></h4>
+    <div class="hint">오른쪽 <b>≡</b>을 잡고 위·아래로 끌어 순서를 바꾸세요. 바뀐 순서는 이 기기에 저장돼 홈과 상단 탭에 바로 반영됩니다.</div>
+    <div class="ord-list" id="ordList">${orderRows}</div>
     <h4>구글 계정 · 개인 설정</h4>
     <div class="hint">모든 데이터는 내 구글시트 하나에 탭으로 모입니다. 남에게 배포할 때 쓰는 '구글 로그인'은 다음 단계에서 붙입니다.</div>
     <button class="btn ghost" id="closeSet" style="margin-top:22px">닫기</button>
@@ -2416,7 +2449,23 @@ function openSettings(){
     if(on) ensureCategoryTab(id);          // 켜면 시트에 그 탭 생성(없을 때만)
     if(state.view==="home") renderHome();
   });
+  const _ol=$("#ordList"); if(_ol) wireReorder(_ol, order=>{ setActive(order); if(state.view==="home") renderHome(); else if(state.view==="domain") renderTabs(); });
   $("#closeSet").onclick=()=>d.close();
+}
+function wireReorder(box, onCommit){
+  let drag=null;
+  box.querySelectorAll(".ord-handle").forEach(h=>{
+    h.addEventListener("pointerdown", e=>{ e.preventDefault(); drag=h.closest(".ord-row"); if(!drag) return; drag.classList.add("dragging"); try{ h.setPointerCapture(e.pointerId); }catch(_){}} );
+  });
+  const move=e=>{ if(!drag) return; e.preventDefault(); const y=e.clientY;
+    const after=[...box.querySelectorAll(".ord-row:not(.dragging)")].find(sib=>{ const r=sib.getBoundingClientRect(); return y < r.top + r.height/2; });
+    if(after){ if(after!==drag.nextSibling) box.insertBefore(drag, after); }
+    else { if(drag!==box.lastElementChild) box.appendChild(drag); } };
+  const end=()=>{ if(!drag) return; drag.classList.remove("dragging"); drag=null; onCommit([...box.querySelectorAll(".ord-row")].map(r=>r.dataset.id)); };
+  box.addEventListener("pointermove", move);
+  box.addEventListener("pointerup", end);
+  box.addEventListener("pointercancel", end);
+  box.addEventListener("lostpointercapture", end);
 }
 
 /* ── 6. 부트: 저장된 Client ID 있으면 구글, 없으면 데모 ── */
