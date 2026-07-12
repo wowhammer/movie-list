@@ -443,11 +443,11 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
 <div class="wrap" id="root" data-domain="movies">
   <header class="masthead">
     <div class="mh-row">
-      <button id="brandBtn" type="button" class="brandbtn" aria-label="홈"><!-- Naedogam v113 (탭 자동스크롤·정기구독 커버칸 제거·일기 자동채움·영화 제목 keep-all·준비중 미술관/박물관) -->
+      <button id="brandBtn" type="button" class="brandbtn" aria-label="홈"><!-- Naedogam v114 (러닝 날짜 표시정상화·금액입력 콤마·여행 오늘내도감 기간표시·미술관/전시회 개명) -->
         <svg class="brandmark" width="34" height="30" viewBox="26 28 62 54" aria-hidden="true"><rect x="28" y="40" width="12" height="38" rx="5" fill="#F7F5F0"/><rect x="44" y="30" width="12" height="48" rx="5" fill="#F7F5F0"/><rect x="60" y="32" width="12" height="46" rx="5" fill="#E0483F" transform="rotate(16 66 78)"/></svg>
         <span class="brandwm"><span class="bwm-ko">내도감</span><span class="bwm-en">NAEDOGAM</span></span>
       </button>
-      <span class="mhver">v113</span>
+      <span class="mhver">v114</span>
       <span class="spacer"></span>
       <span class="src-chip" id="srcChip" style="display:none">데모</span>
       <button class="icon-btn" id="searchToggle" type="button" style="display:none">🔍</button>
@@ -572,7 +572,7 @@ const MANIFESTS = {
              {k:"car",sheet:"차량",label:"차량(싼타페/제네시스)",type:"text"},
              {k:"work",sheet:"작업내용",label:"작업내용",type:"text"},
              {k:"shop",sheet:"정비소",label:"정비소",type:"text"},
-             {k:"cost",sheet:"가격",label:"가격(원)",type:"number"},
+             {k:"cost",sheet:"가격",label:"가격(원)",type:"number",money:true},
              {k:"odo",sheet:"주행거리",label:"주행거리(km)",type:"number"},
              {k:"memo",sheet:"비고",label:"비고",type:"text"} ],
     filterBy:{ field:"car", allLabel:"전체" },
@@ -662,7 +662,7 @@ const MANIFESTS = {
             {label:"평균 페이스",type:"avgComputed",field:"cpace",unit:"분/km",c:"#6366f1"},
             {label:"기록",type:"count",c:"#16a34a"} ],
     card:{ kind:"data", thumb:"🏃",
-           title:r=>`${r.date}${r.place?" · "+r.place:""}`,
+           title:r=>`${_isoOf(r.date)||r.date}${r.place?" · "+r.place:""}`,
            kv:[{k:"거리",f:"dist",u:"km"},{k:"시간",f:"time",u:"분"},{k:"페이스",f:"pace"},{k:"심박",f:"hr"},{k:"케이던스",f:"cadence"},{k:"신발",f:"shoes"}] } },
 
   /* 일기: 하루 기록. 날짜·제목·내용·기분·날씨·장소·태그·사진. */
@@ -696,7 +696,7 @@ const MANIFESTS = {
   subs:{ id:"subs", title:"정기구독", icon:"🔄", vol:"卷7", canAdd:true,
     source:{ type:"sheet", tab:"정기구독" },
     fields:[ {k:"name",sheet:"서비스",label:"서비스명",type:"text"},
-             {k:"cost",sheet:"요금",label:"요금(원)",type:"number"},
+             {k:"cost",sheet:"요금",label:"요금(원)",type:"number",money:true},
              {k:"cycle",sheet:"주기",label:"결제주기",type:"select",options:["월","연"]},
              {k:"payday",sheet:"결제일",label:"결제일(예: 매월 15일)",type:"text"},
              {k:"category",sheet:"분류",label:"분류(쉼표로 여러 개 · OTT/음악/생산성)",type:"tags"},
@@ -727,7 +727,7 @@ const MANIFESTS = {
              {k:"companion",sheet:"동행",label:"동행(가족/친구/혼자)",type:"text"},
              {k:"transport",sheet:"교통",label:"교통편",type:"text"},
              {k:"stay",sheet:"숙소",label:"숙소",type:"text"},
-             {k:"cost",sheet:"비용",label:"비용(원)",type:"number"},
+             {k:"cost",sheet:"비용",label:"비용(원)",type:"number",money:true},
              {k:"rating",sheet:"만족도",label:"만족도(별점)",type:"rating"},
              {k:"status",sheet:"상태",label:"상태",type:"seg",options:["다녀옴","예정","찜"]},
              {k:"spots",sheet:"명소",label:"가본 곳·명소(쉼표로 여러 개)",type:"tags"},
@@ -1114,7 +1114,7 @@ const ND_ICONS={
 };
 const ND_COLORS={ movies:'#e8590c', books:'#2f9e44', mountains:'#2b8a3e', running:'#1c7ed6', carlog:'#e67700', diary:'#7048e8', subs:'#0ca678', travel:'#f08c00', cards:'#4263eb' };
 const HOME_SOON=[
-  {t:"미술관/박물관", d:'M3 21l18 0 M3 10l18 0 M5 6l7 -3l7 3 M4 10l0 11 M20 10l0 11 M8 14l0 3 M12 14l0 3 M16 14l0 3'},
+  {t:"미술관/전시회", d:'M3 21l18 0 M3 10l18 0 M5 6l7 -3l7 3 M4 10l0 11 M20 10l0 11 M8 14l0 3 M12 14l0 3 M16 14l0 3'},
   {t:"스크랩",   d:'M6 4h12a1 1 0 0 1 1 1v15l-7 -4l-7 4V5a1 1 0 0 1 1 -1z'},
   {t:"맛집",     d:'M5 3v6a2 2 0 0 0 4 0V3 M7 9v12 M16 3c-1.5 1 -2.5 3 -2.5 6c0 2 1 3 2.5 3v9'},
   {t:"펫일기",   d:'M5 11a1.4 1.4 0 1 0 .01 0 M9 7a1.4 1.4 0 1 0 .01 0 M15 7a1.4 1.4 0 1 0 .01 0 M19 11a1.4 1.4 0 1 0 .01 0 M12 15c-2 0 -3.5 1 -3.5 2.7c0 1.6 1.5 2.8 3.5 2.8s3.5 -1.2 3.5 -2.8c0 -1.7 -1.5 -2.7 -3.5 -2.7z'},
@@ -1523,6 +1523,7 @@ function openDetail(m, r){
     if(FT[k]==="tiers"){ const arr=parseTiers({tiers:v}); if(!arr.length) return "";
       return arr.map(t=>{ const mn=String(t.min==null?"":t.min).trim(); const bl=String(t.benefits||"").split(/\n+/).map(x=>x.trim()).filter(Boolean);
         return `<div class="drow"><span class="k">${mn?mn+"만원↑":"기본"}</span><span>${bl.map(b=>String(b).replace(/</g,"&lt;")).join("<br>")||"—"}</span></div>`; }).join(""); }
+    if(FT[k]==="date"){ return `<div class="drow"><span class="k">${LBL[k]||k}</span><span>${_isoOf(v)||(v==null||v===""?"—":v)}</span></div>`; }
     return `<div class="drow"><span class="k">${LBL[k]||k}</span><span>${Array.isArray(v)?v.join(", "):v===null?"—":v===true?"예":v===false?"아니오":(typeof v==="number"&&k!=="year"&&!/연도/.test(LBL[k]||"")?v.toLocaleString():v)}</span></div>`; }).join("");
   const mapLinks = (m.id==="mountains") ? `<div class="mvlinks"><a class="btn ghost" target="_blank" rel="noopener" href="https://map.naver.com/p/search/${encodeURIComponent(r.title||"")}"><img class="lnkico" src="https://www.google.com/s2/favicons?domain=map.naver.com&sz=64" onerror="this.remove()">네이버지도</a><a class="btn ghost" target="_blank" rel="noopener" href="https://www.google.com/maps/search/${encodeURIComponent((r.title||"")+" "+(r.region||""))}"><img class="lnkico" src="https://www.google.com/s2/favicons?domain=google.com&sz=64" onerror="this.remove()">구글지도</a></div>` : "";
   const editable = m.source?.type==="sheet" || m.id==="carlog";
@@ -1543,7 +1544,7 @@ function openDetail(m, r){
     foot="";
   }
   const _cf=(m.fields||[]).find(f=>f.type==="image"); const coverImg=(_cf&&r[_cf.k])?`<div class="det-cover"><img src="${String(r[_cf.k]).replace(/"/g,'&quot;')}" alt=""></div>`:"";
-  const d=$("#detail"); d.innerHTML=`<div class="dhead"><h3>${m.id==="cards"?((r.issuer?String(r.issuer).replace(/</g,"&lt;")+" · ":"")+String(r.name||"카드").replace(/</g,"&lt;")):(m.id==="subs"?String(r.name||"구독").replace(/</g,"&lt;"):(m.card.kind==="specimen"?r.title:(r.date+(r.car?" · "+r.car:""))))}</h3><div class="dh-actions"><button class="dh-btn" id="dEdit">수정</button><button class="dh-btn dh-del" id="dDel">삭제</button><button class="dclose-x" onclick="this.closest('dialog').close()" aria-label="닫기">✕</button></div></div><div class="dbody">${coverImg}${rows}</div>${mapLinks}${m.id==="cards"?`<div class="mvlinks">${r.link?`<a class="btn ghost" target="_blank" rel="noopener" href="${(/^https?:\/\//i.test(String(r.link))?String(r.link):"https://"+String(r.link)).replace(/"/g,"&quot;")}">🔗 상세 링크</a>`:""}<a class="btn ghost" target="_blank" rel="noopener" href="https://search.naver.com/search.naver?query=${encodeURIComponent(((r.issuer||"")+" "+(r.name||"")+" 카드 혜택").trim())}">🔍 혜택 검색</a></div>`:""}${foot}`;
+  const d=$("#detail"); d.innerHTML=`<div class="dhead"><h3>${m.id==="cards"?((r.issuer?String(r.issuer).replace(/</g,"&lt;")+" · ":"")+String(r.name||"카드").replace(/</g,"&lt;")):(m.id==="subs"?String(r.name||"구독").replace(/</g,"&lt;"):(m.card.kind==="specimen"?r.title:((_isoOf(r.date)||r.date)+(r.car?" · "+r.car:""))))}</h3><div class="dh-actions"><button class="dh-btn" id="dEdit">수정</button><button class="dh-btn dh-del" id="dDel">삭제</button><button class="dclose-x" onclick="this.closest('dialog').close()" aria-label="닫기">✕</button></div></div><div class="dbody">${coverImg}${rows}</div>${mapLinks}${m.id==="cards"?`<div class="mvlinks">${r.link?`<a class="btn ghost" target="_blank" rel="noopener" href="${(/^https?:\/\//i.test(String(r.link))?String(r.link):"https://"+String(r.link)).replace(/"/g,"&quot;")}">🔗 상세 링크</a>`:""}<a class="btn ghost" target="_blank" rel="noopener" href="https://search.naver.com/search.naver?query=${encodeURIComponent(((r.issuer||"")+" "+(r.name||"")+" 카드 혜택").trim())}">🔍 혜택 검색</a></div>`:""}${foot}`;
   d.showModal();
   if(isMovie){
     $("#mW").onclick=()=>toggleMovie(r,'W'); $("#mR").onclick=()=>toggleMovie(r,'R'); $("#mP").onclick=()=>toggleMovie(r,'P');
@@ -1744,7 +1745,7 @@ const DIARY_LOG={
 function _isoOf(raw){ const pd=parseDate(String(raw)); if(!pd) return null; return pd.getFullYear()+"-"+String(pd.getMonth()+1).padStart(2,"0")+"-"+String(pd.getDate()).padStart(2,"0"); }
 function buildDayLog(dateStr){
   const lines=[];
-  getActive().forEach(id=>{ if(id==="diary"||id==="subs"||!DIARY_LOG[id]) return;
+  getActive().forEach(id=>{ if(id==="diary"||id==="subs"||id==="travel"||!DIARY_LOG[id]) return;
     const m=MANIFESTS[id]; const act=m.activity; if(!act||!act.df) return;
     (CACHE[id]||loadPersist(id)||[]).forEach(r=>{ const raw=r[act.df]; if(!raw) return;
       if(_isoOf(raw)!==dateStr) return; if(act.when && !act.when(r)) return;
@@ -1757,6 +1758,11 @@ function buildDayLog(dateStr){
   }
   if(getActive().includes("cards")){ const day=parseInt(dateStr.slice(8,10),10);
     (CACHE.cards||loadPersist("cards")||[]).forEach(r=>{ const pm=String(r.payday||"").match(/(\d{1,2})/); if(pm && parseInt(pm[1],10)===day) lines.push("💳 "+(r.name||r.issuer||"카드")+" 결제일"); });
+  }
+  if(getActive().includes("travel")){                 // 여행: 기간(시작~종료일) 전체 날짜에 표시
+    (CACHE.travel||loadPersist("travel")||[]).forEach(r=>{ if(r.status!=="다녀옴") return;
+      const s=_isoOf(r.startDate), e=_isoOf(r.endDate)||s; if(!s) return;
+      if(dateStr>=s && dateStr<=e){ try{ lines.push(DIARY_LOG.travel(r)); }catch(_){} } });
   }
   return lines;
 }
