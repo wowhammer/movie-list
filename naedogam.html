@@ -187,6 +187,9 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
   .cal-cell.has .cal-d{ color:#fff; text-shadow:0 1px 2px rgba(0,0,0,.6); }
   .cal-img{ position:absolute; inset:0; width:100%; height:100%; object-fit:cover; }
   .cal-dot{ position:absolute; bottom:6px; left:50%; transform:translateX(-50%); width:6px; height:6px; border-radius:50%; background:var(--accent); }
+  .dnav{ position:fixed; top:50%; transform:translateY(-50%); z-index:6; width:42px; height:42px; border-radius:50%; border:none; background:rgba(20,20,22,.5); color:#fff; font-size:26px; line-height:1; cursor:pointer; display:flex; align-items:center; justify-content:center; box-shadow:0 2px 8px rgba(0,0,0,.3); }
+  .dnav-prev{ left:8px; } .dnav-next{ right:8px; }
+  .dnav:disabled{ opacity:.2; cursor:default; }
   .tag.rec{ color:var(--ochre); border-color:#E4CFB0; }
 
   /* 검색 */
@@ -464,11 +467,11 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
 <div class="wrap" id="root" data-domain="movies">
   <header class="masthead">
     <div class="mh-row">
-      <button id="brandBtn" type="button" class="brandbtn" aria-label="홈"><!-- Naedogam v117 (준비중 공연·전시 통합·일기 달력뷰) -->
+      <button id="brandBtn" type="button" class="brandbtn" aria-label="홈"><!-- Naedogam v118 (상세 좌우 이동·도서 읽는중 오늘내도감·공연·전시 카테고리 활성화) -->
         <svg class="brandmark" width="34" height="30" viewBox="26 28 62 54" aria-hidden="true"><rect x="28" y="40" width="12" height="38" rx="5" fill="#F7F5F0"/><rect x="44" y="30" width="12" height="48" rx="5" fill="#F7F5F0"/><rect x="60" y="32" width="12" height="46" rx="5" fill="#E0483F" transform="rotate(16 66 78)"/></svg>
         <span class="brandwm"><span class="bwm-ko">내도감</span><span class="bwm-en">NAEDOGAM</span></span>
       </button>
-      <span class="mhver">v117</span>
+      <span class="mhver">v118</span>
       <span class="spacer"></span>
       <span class="src-chip" id="srcChip" style="display:none">데모</span>
       <button class="icon-btn" id="searchToggle" type="button" style="display:none">🔍</button>
@@ -794,7 +797,37 @@ const MANIFESTS = {
             {label:"신용",type:"countIf",field:"kind",eq:"신용",c:"#c2410c"},
             {label:"체크",type:"countIf",field:"kind",eq:"체크",c:"#0891b2"},
             {label:"연회비합",type:"sum",field:"fee",unit:"원",c:"#16a34a"} ],
-    card:{ kind:"wallet" } }
+    card:{ kind:"wallet" } },
+
+  culture:{ id:"culture", title:"공연·전시", icon:"🎫", vol:"卷10", canAdd:true,
+    source:{ type:"sheet", tab:"공연전시" },
+    fields:[ {k:"title",sheet:"제목",label:"제목(예: OOO 전시·콘서트)",type:"text",full:true},
+             {k:"kind",sheet:"종류",label:"종류",type:"select",options:["전시","공연","연극","뮤지컬","음악회","기타"]},
+             {k:"place",sheet:"장소",label:"장소",type:"text"},
+             {k:"date",sheet:"날짜",label:"관람일",type:"date"},
+             {k:"companion",sheet:"동행",label:"동행(가족/친구/혼자)",type:"text"},
+             {k:"seat",sheet:"좌석",label:"좌석·티켓",type:"text"},
+             {k:"cost",sheet:"비용",label:"비용(원)",type:"number",money:true},
+             {k:"rating",sheet:"만족도",label:"만족도(별점)",type:"rating"},
+             {k:"status",sheet:"상태",label:"상태",type:"seg",options:["다녀옴","예정","찜"]},
+             {k:"artists",sheet:"출연",label:"출연·작가(쉼표로 여러 개)",type:"tags"},
+             {k:"content",sheet:"관람평",label:"관람평",type:"textarea"},
+             {k:"cover",sheet:"사진",label:"사진",type:"image"} ],
+    search:["title","place","artists","content","companion"],
+    filterBy:{ field:"kind", allLabel:"전체" },
+    newestFirst:true,
+    activity:{ df:"date", when:r=>r.status==="다녀옴", label:"공연·전시", name:r=>r.title||r.place },
+    stats:[ {label:"전체",type:"count"},
+            {label:"다녀옴",type:"countIf",field:"status",eq:"다녀옴",c:"#16a34a"},
+            {label:"예정",type:"countIf",field:"status",eq:"예정",c:"#c2410c"},
+            {label:"총 비용",type:"sum",field:"cost",unit:"원",c:"#0891b2"} ],
+    card:{ kind:"specimen", thumb:"🎫",
+           meta:r=>[ (r.date?(_isoOf(r.date)||String(r.date).slice(0,10)):""), r.kind, r.place ].filter(Boolean).join(" · "),
+           tags:"artists",
+           flags:r=>[ (r.rating!=null&&r.rating!=="")?{t:"★ "+r.rating,cls:"star"}:0,
+                      r.status==="다녀옴"?{t:"다녀옴",cls:"on"}:0,
+                      r.status==="예정"?{t:"예정",cls:"on"}:0,
+                      r.status==="찜"?{t:"찜",cls:"on"}:0 ] } }
 };
 
 /* ── 2. DataSource 추상화 ──
@@ -1129,6 +1162,7 @@ function sourceFor(m){
 
 /* 탭: 홈에서 켜둔 카테고리만 표시(안 켠 건 안 나옴 → 길어지지 않음) */
 const ND_ICONS={
+  culture:'M15 5l0 2 M15 11l0 2 M15 17l0 2 M5 5h14a2 2 0 0 1 2 2v3a2 2 0 0 0 0 4v3a2 2 0 0 1 -2 2h-14a2 2 0 0 1 -2 -2v-3a2 2 0 0 0 0 -4v-3a2 2 0 0 1 2 -2',
   movies:'M4 6a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v12a2 2 0 0 1 -2 2h-12a2 2 0 0 1 -2 -2z M8 4v16 M16 4v16 M4 8h4 M4 16h4 M16 8h4 M16 16h4 M4 12h16',
   books:'M3 19a9 9 0 0 1 9 0a9 9 0 0 1 9 0 M3 6a9 9 0 0 1 9 0a9 9 0 0 1 9 0 M3 6v13 M12 6v13 M21 6v13',
   mountains:'M3 20l5 -9l3 4l3 -6l7 11z',
@@ -1138,9 +1172,8 @@ const ND_ICONS={
   subs:'M20 11a8 8 0 0 0 -14 -5l-2 2 M4 13a8 8 0 0 0 14 5l2 -2 M4 4v4h4 M20 20v-4h-4',
   travel:'M22 2L11 13 M22 2l-7 20l-4 -9l-9 -4z'
 };
-const ND_COLORS={ movies:'#e8590c', books:'#2f9e44', mountains:'#2b8a3e', running:'#1c7ed6', carlog:'#e67700', diary:'#7048e8', subs:'#0ca678', travel:'#f08c00', cards:'#4263eb' };
+const ND_COLORS={ movies:'#e8590c', books:'#2f9e44', mountains:'#2b8a3e', running:'#1c7ed6', carlog:'#e67700', diary:'#7048e8', subs:'#0ca678', travel:'#f08c00', cards:'#4263eb', culture:'#c2255c' };
 const HOME_SOON=[
-  {t:"공연·전시", d:'M15 5l0 2 M15 11l0 2 M15 17l0 2 M5 5h14a2 2 0 0 1 2 2v3a2 2 0 0 0 0 4v3a2 2 0 0 1 -2 2h-14a2 2 0 0 1 -2 -2v-3a2 2 0 0 0 0 -4v-3a2 2 0 0 1 2 -2'},
   {t:"스크랩",   d:'M6 4h12a1 1 0 0 1 1 1v15l-7 -4l-7 4V5a1 1 0 0 1 1 -1z'},
   {t:"맛집",     d:'M5 3v6a2 2 0 0 0 4 0V3 M7 9v12 M16 3c-1.5 1 -2.5 3 -2.5 6c0 2 1 3 2.5 3v9'},
   {t:"펫일기",   d:'M5 11a1.4 1.4 0 1 0 .01 0 M9 7a1.4 1.4 0 1 0 .01 0 M15 7a1.4 1.4 0 1 0 .01 0 M19 11a1.4 1.4 0 1 0 .01 0 M12 15c-2 0 -3.5 1 -3.5 2.7c0 1.6 1.5 2.8 3.5 2.8s3.5 -1.2 3.5 -2.8c0 -1.7 -1.5 -2.7 -3.5 -2.7z'},
@@ -1560,7 +1593,13 @@ function renderCard(m, r, no){ if(m.id==="books") return bookCard(r); const c=m.
     return `<span><i class="kvk">${col.k}</i> <b>${s}</b></span>`; }).filter(Boolean).join("");
   return `<button class="card catcard" data-id="${r._id}"><span class="thumb">${(r.cover||r._cover)?`<img src="${r.cover||r._cover}" alt="">`:(c.thumb||"🧾")}</span>
     <span class="body"><h3 style="font-size:15px">${c.title(r)}</h3><div class="kv">${kv}</div>${(()=>{ const cut=t=>t.slice(0,70).replace(/</g,"&lt;")+(t.length>70?"…":""); if(m.id==="diary"){ const a=[]; if(r.content) a.push(`<div class="meta" style="margin-top:5px">${cut(String(r.content))}</div>`); if(r.nddaily) a.push(`<div class="meta" style="margin-top:4px;opacity:.85">🗓 ${cut(String(r.nddaily).replace(/\n+/g," · "))}</div>`); return a.join(""); } const e=r.memo||r.content||r.nddaily; return e?`<div class="meta" style="margin-top:5px">${cut(String(e))}</div>`:""; })()}</span></button>`; }
-function openDetail(m, r){
+function _navSet(m,r){ const i=NAV_LIST.findIndex(x=>String(x._id)===String(r._id)); NAV_CUR={m, idx:i}; requestAnimationFrame(_mountDetailNav); }
+function _mountDetailNav(){ const d=$("#detail"); if(!d.open||!NAV_CUR) return; d.querySelectorAll(".dnav").forEach(x=>x.remove());
+  const m=NAV_CUR.m, idx=NAV_CUR.idx; if(idx<0||NAV_LIST.length<2) return;
+  const mk=(dir,dis)=>{ const b=document.createElement("button"); b.className="dnav dnav-"+dir; b.type="button"; b.textContent=dir==="prev"?"‹":"›"; b.disabled=dis;
+    b.onclick=e=>{ e.stopPropagation(); const ni=idx+(dir==="prev"?-1:1); if(ni>=0&&ni<NAV_LIST.length) openDetail(m, NAV_LIST[ni]); }; return b; };
+  d.appendChild(mk("prev", idx<=0)); d.appendChild(mk("next", idx>=NAV_LIST.length-1)); }
+function openDetail(m, r){ _navSet(m, r);
   if(m.id==="movies"){ openMovieDetail(m, r); return; }
   if(m.id==="books"){ openBookDetail(m, r); return; }
   const LBL={pace:"페이스"}; const FT={}; (m.fields||[]).forEach(f=>{ LBL[f.k]=f.sheet||String(f.label||f.k).replace(/\s*\(.*$/,""); FT[f.k]=f.type; });
@@ -1788,7 +1827,8 @@ const DIARY_LOG={
   carlog:r=>`- ${[r.car,r.work].filter(Boolean).join(" ")||"차량 정비"}`,
   books:r=>`- ${r.title} 다 읽음`,
   mountains:r=>`- ${r.title} 다녀옴`,
-  travel:r=>`- ${r.title||r.place||"여행"}`
+  travel:r=>`- ${r.title||r.place||"여행"}`,
+  culture:r=>`- ${r.title||r.place||"공연·전시"}`
 };
 function _isoOf(raw){ const pd=parseDate(String(raw)); if(!pd) return null; return pd.getFullYear()+"-"+String(pd.getMonth()+1).padStart(2,"0")+"-"+String(pd.getDate()).padStart(2,"0"); }
 function buildDayLog(dateStr){
@@ -1811,6 +1851,9 @@ function buildDayLog(dateStr){
     (CACHE.travel||loadPersist("travel")||[]).forEach(r=>{ if(r.status!=="다녀옴") return;
       const s=_isoOf(r.startDate), e=_isoOf(r.endDate)||s; if(!s) return;
       if(dateStr>=s && dateStr<=e){ try{ lines.push(DIARY_LOG.travel(r)); }catch(_){} } });
+  }
+  if(getActive().includes("books") && dateStr===todayStr()){
+    (CACHE.books||loadPersist("books")||[]).forEach(r=>{ if(r.status==="읽는중" && r.title) lines.push("- 읽는중 "+r.title); });
   }
   return lines;
 }
@@ -2100,7 +2143,7 @@ function paintDomain(m){   // state.rows를 화면에 그림 (데이터 다시 �
   } else { _cnt.classList.remove("countrow"); _cnt.innerHTML=""; _cnt.style.display="none"; }   // 총 N건 줄 숨김
   const _qg=(state.query||"").replace(/</g,"&lt;");
   const emptyG = _qg ? `<div class="noresult"><div class="nr-t">검색 결과 없음</div><div class="nr-s">"${_qg}"는 목록에 없어요</div><button class="btn nr-add" id="nrAdd">+ "${_qg}" 새로 추가</button></div>` : `<div class="count">결과가 없습니다.</div>`;
-  const PER=40, total=rows.length, shown=rows.slice(0,(state.page+1)*PER);
+  const PER=40, total=rows.length, shown=rows.slice(0,(state.page+1)*PER); NAV_LIST=shown;
   $("#list").innerHTML=(total? shown.map((r,i)=>{ try{ return renderCard(m,r,i+1); }catch(e){ console.error("card",e); return ""; } }).join("") : emptyG)
     + (shown.length<total?`<button class="btn ghost" id="moreBtn" style="width:100%;margin-top:10px">더 보기 (${total-shown.length}개)</button>`:"");
   $("#list").querySelectorAll(".card").forEach((b,i)=>{ const r=shown[i]; if(r) b.onclick=()=>openDetail(m, r); });
@@ -2224,7 +2267,7 @@ function paintMovies(m){
   else if(sort==="year") rows=[...rows].sort((a,b)=>{const d=(a.year||0)-(b.year||0); return asc?d:-d;});
   else if(sort==="rec") rows=[...rows].sort((a,b)=>{const d=((a.recommendList||[]).length)-((b.recommendList||[]).length); return asc?d:-d;});
 
-  const total=rows.length, shown=rows.slice(0,(state.page+1)*MOVIE_PER);
+  const total=rows.length, shown=rows.slice(0,(state.page+1)*MOVIE_PER); NAV_LIST=shown;
   const sorts=[["default","기본"],["rating","평점"],["year","연도"],["rec","추천"]];
   const sortBtns=sorts.map(([v,l])=>{ const on=(state.sort||"default")===v;
     const arrow=v==="default"?"":(on?(state.sortAsc?"↑":"↓"):"↓");
@@ -2272,6 +2315,7 @@ let bookGenreFilter="";
 let mtnRegion="";
 let diaryTag="";
 let diaryView="list", diaryYM=null;
+let NAV_LIST=[], NAV_CUR=null;
 function carNum(v){ return parseInt(String(v==null?"":v).replace(/[^\d]/g,""),10)||0; }
 const CAR_PALETTE=['#2563eb','#16a34a','#db2777','#d97706','#7c3aed'];
 let CAR_ORDER=[];
@@ -2337,7 +2381,7 @@ function paintCarlog(m){
   });
   const cnt=$("#count"); cnt.classList.remove("countrow"); cnt.innerHTML=""; cnt.style.display="none";   // 차계부: 총건수/정렬 줄 숨김(기본 날짜 정렬 유지)
   $("#list").innerHTML=rows.map((r,i)=>{ try{ return carlogCard(r, rows.length-i); }catch(e){ console.error(e); return ""; } }).join("")||`<div class="count">기록이 없어요.</div>`;
-  document.querySelectorAll(".clx-card").forEach(b=>b.onclick=()=>{ const r=state.rows.find(x=>String(x._id)===String(b.dataset.id)); if(r) openDetail(m, r); });   // _id 숫자/문자 섞여도 매칭
+  NAV_LIST=rows; document.querySelectorAll(".clx-card").forEach(b=>b.onclick=()=>{ const r=state.rows.find(x=>String(x._id)===String(b.dataset.id)); if(r) openDetail(m, r); });   // _id 숫자/문자 섞여도 매칭
   state.rows.forEach(r=>{ const c=String(r.car||"").trim(); if(c&&r.cover&&!carCoverMap()[c]) setCarCover(c,r.cover); });   // 자동 위키검색 제거: 차량 사진은 수동 관리+차량별 기억
 }
 
