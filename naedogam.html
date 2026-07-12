@@ -187,6 +187,7 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
   .thumb{ width:46px; height:64px; border-radius:3px; background:var(--accent-wash); display:flex; align-items:center; justify-content:center; font-size:20px; color:var(--accent); border:1px solid var(--line-soft); overflow:hidden; }
   .thumb img{ width:100%; height:100%; object-fit:cover; }
   #root[data-domain="subs"] .thumb img{ object-fit:contain; padding:6px; }
+  #root[data-domain="movies"] .thumb img{ object-position:center 18%; }
   .det-cover{ margin:2px 0 14px; border-radius:10px; overflow:hidden; background:var(--line-soft); }
   .det-cover img{ display:block; width:100%; height:300px; max-height:56vh; object-fit:contain; }
   .rf-imgzone{ position:relative; border:1.5px dashed var(--line); border-radius:10px; padding:12px; text-align:center; cursor:pointer; }
@@ -217,7 +218,7 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
   .mvcard .thumb{ width:56px; height:84px; }
   .mvinfo{ flex:1; min-width:0; }
   .mv-titlerow{ display:flex; justify-content:space-between; align-items:baseline; gap:8px; }
-  .mv-title{ font-family:var(--sans); font-size:15px; font-weight:600; color:#1a1a1a; line-height:1.35; }
+  .mv-title{ font-family:var(--sans); font-size:15px; font-weight:600; color:#1a1a1a; line-height:1.35; word-break:keep-all; overflow-wrap:break-word; }
   .mv-year{ font-family:var(--sans); font-size:12px; color:#aaa; white-space:nowrap; flex-shrink:0; }
   .mv-orig{ font-family:var(--sans); font-size:11px; color:#bbb; margin-top:2px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
   .mv-sub{ font-family:var(--sans); font-size:12px; color:#888; margin-top:5px; line-height:1.5; }
@@ -372,7 +373,7 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
   /* 영화 상세(리치) */
   .mvtop{ display:flex; gap:14px; padding:4px 18px 10px; }
   .mvposter{ width:88px; height:126px; border-radius:5px; background:var(--accent-wash); display:flex; align-items:center; justify-content:center; font-size:28px; flex-shrink:0; overflow:hidden; border:1px solid var(--line-soft); }
-  .mvposter img{ width:100%; height:100%; object-fit:cover; }
+  .mvposter img{ width:100%; height:100%; object-fit:cover; object-position:center 12%; }
   .mvmeta{ font-family:var(--mono); font-size:12px; color:var(--ink-soft); margin-bottom:4px; }
   .mvorig{ font-size:12px; color:var(--ink-soft); font-style:italic; margin-bottom:6px; }
   .mvpeople{ font-size:13px; margin-bottom:8px; line-height:1.6; }
@@ -442,11 +443,11 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
 <div class="wrap" id="root" data-domain="movies">
   <header class="masthead">
     <div class="mh-row">
-      <button id="brandBtn" type="button" class="brandbtn" aria-label="홈"><!-- Naedogam v112 (정기구독 커버=서비스명 도메인 매핑+구글 파비콘 브랜드 로고) -->
+      <button id="brandBtn" type="button" class="brandbtn" aria-label="홈"><!-- Naedogam v113 (탭 자동스크롤·정기구독 커버칸 제거·일기 자동채움·영화 제목 keep-all·준비중 미술관/박물관) -->
         <svg class="brandmark" width="34" height="30" viewBox="26 28 62 54" aria-hidden="true"><rect x="28" y="40" width="12" height="38" rx="5" fill="#F7F5F0"/><rect x="44" y="30" width="12" height="48" rx="5" fill="#F7F5F0"/><rect x="60" y="32" width="12" height="46" rx="5" fill="#E0483F" transform="rotate(16 66 78)"/></svg>
         <span class="brandwm"><span class="bwm-ko">내도감</span><span class="bwm-en">NAEDOGAM</span></span>
       </button>
-      <span class="mhver">v112</span>
+      <span class="mhver">v113</span>
       <span class="spacer"></span>
       <span class="src-chip" id="srcChip" style="display:none">데모</span>
       <button class="icon-btn" id="searchToggle" type="button" style="display:none">🔍</button>
@@ -703,7 +704,7 @@ const MANIFESTS = {
              {k:"method",sheet:"결제수단",label:"결제수단(내 카드)",type:"cardsel"},
              {k:"startDate",sheet:"시작일",label:"시작일",type:"date"},
              {k:"memo",sheet:"메모",label:"메모",type:"text"},
-             {k:"cover",sheet:"사진",label:"커버 이미지 (끌어다 놓기 가능)",type:"image"} ],
+             {k:"cover",sheet:"사진",label:"커버 이미지",type:"image",hideForm:true} ],
     search:["name","category","method","memo"],
     filterBy:{ field:"category", allLabel:"전체" },
     activity:{ df:"startDate", when:r=>r.status==="구독중", label:"구독", name:r=>r.name },
@@ -1113,6 +1114,7 @@ const ND_ICONS={
 };
 const ND_COLORS={ movies:'#e8590c', books:'#2f9e44', mountains:'#2b8a3e', running:'#1c7ed6', carlog:'#e67700', diary:'#7048e8', subs:'#0ca678', travel:'#f08c00', cards:'#4263eb' };
 const HOME_SOON=[
+  {t:"미술관/박물관", d:'M3 21l18 0 M3 10l18 0 M5 6l7 -3l7 3 M4 10l0 11 M20 10l0 11 M8 14l0 3 M12 14l0 3 M16 14l0 3'},
   {t:"스크랩",   d:'M6 4h12a1 1 0 0 1 1 1v15l-7 -4l-7 4V5a1 1 0 0 1 1 -1z'},
   {t:"맛집",     d:'M5 3v6a2 2 0 0 0 4 0V3 M7 9v12 M16 3c-1.5 1 -2.5 3 -2.5 6c0 2 1 3 2.5 3v9'},
   {t:"펫일기",   d:'M5 11a1.4 1.4 0 1 0 .01 0 M9 7a1.4 1.4 0 1 0 .01 0 M15 7a1.4 1.4 0 1 0 .01 0 M19 11a1.4 1.4 0 1 0 .01 0 M12 15c-2 0 -3.5 1 -3.5 2.7c0 1.6 1.5 2.8 3.5 2.8s3.5 -1.2 3.5 -2.8c0 -1.7 -1.5 -2.7 -3.5 -2.7z'},
@@ -1131,8 +1133,9 @@ const HOME_SOON=[
 function tabIco(id, m){ const ic=ND_ICONS[id]; const _c=ND_COLORS[id]||"currentColor";
   return ic ? `<svg class="tabico" style="color:${_c}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="${ic}"/></svg>`
             : `<span class="tabemo">${m.icon}</span>`; }
-function renderTabs(){ $("#tabs").innerHTML=getActive().map(id=>{ const m=MANIFESTS[id]; if(!m) return "";
-  return `<button class="tab" role="tab" data-id="${id}" aria-selected="${id===state.domain}">${tabIco(id,m)} ${m.title}</button>`; }).join(""); }
+function renderTabs(){ const tw=$("#tabs"); tw.innerHTML=getActive().map(id=>{ const m=MANIFESTS[id]; if(!m) return "";
+  return `<button class="tab" role="tab" data-id="${id}" aria-selected="${id===state.domain}">${tabIco(id,m)} ${m.title}</button>`; }).join("");
+  const _sel=tw.querySelector('.tab[aria-selected="true"]'); if(_sel){ tw.scrollLeft=Math.max(0,_sel.offsetLeft-(tw.clientWidth-_sel.offsetWidth)/2); } }
 function renderStats(m, rows){
   const isMovie = m.id==="movies";
   if(m.statStyle==="mood"){
@@ -1314,7 +1317,10 @@ const SUBS_LOGO={
 };
 function subsDomain(name){ const raw=String(name||'').trim(); if(!raw) return null;
   const k=raw.toLowerCase().replace(/[\s+]|프리미엄|premium|플러스|plus/g,'');
-  return SUBS_LOGO[k]||SUBS_LOGO[raw]||SUBS_LOGO[raw.toLowerCase()]||null; }
+  const _hit=SUBS_LOGO[k]||SUBS_LOGO[raw]||SUBS_LOGO[raw.toLowerCase()];
+  if(_hit) return _hit;
+  if(/^[a-z0-9][a-z0-9.-]*$/.test(k)) return k.indexOf('.')>0?k:(k+'.com');   // 매핑에 없는 영문 서비스명은 도메인 추정
+  return null; }
 async function loadSubsCovers(m){   // 서비스명→도메인→구글 파비콘(브랜드 로고). 매칭된 것만 채움.
   if(_coverLoading.subs) return;
   const todo=(state.rows||[]).filter(r=>!r.cover && !r._cover && r.name).slice(0,80);
@@ -1865,12 +1871,9 @@ function openRecordForm(m, existing){
     }catch(e){ btn.textContent="저장"; btn.disabled=false; alert("저장 실패: "+e.message); }
   };
   if(m.id==="diary"){
-    const _df=d.querySelector('.rff .rf[data-k="date"]'); const _dw=_df?_df.closest('.rff'):null;
-    if(_dw && _dw.parentNode){ const _bw=document.createElement("div"); _bw.className="rff rff-half";
-      _bw.innerHTML='<label>&nbsp;</label><button type="button" class="btn ghost" id="ndDailyBtn" style="width:100%">🪄 오늘 활동 불러오기</button>';
-      _dw.parentNode.insertBefore(_bw, _dw.nextSibling);
-      const _b=d.querySelector("#ndDailyBtn"); if(_b) _b.onclick=()=>fillDiaryLog(d, false); }
-    fillDiaryLog(d, true);
+    const _df=d.querySelector('.rff .rf[data-k="date"]');
+    if(_df) _df.addEventListener("change", ()=>fillDiaryLog(d, true));   // 날짜 바꾸면 그 날짜 활동 자동 채움
+    fillDiaryLog(d, true);   // 폼 열 때 오늘 내도감 자동 채움(버튼 제거)
   }
   if(m.id==="cards"){
     const _cb=d.querySelector(".dbody.set");
