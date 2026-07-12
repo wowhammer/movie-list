@@ -467,11 +467,11 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
 <div class="wrap" id="root" data-domain="movies">
   <header class="masthead">
     <div class="mh-row">
-      <button id="brandBtn" type="button" class="brandbtn" aria-label="홈"><!-- Naedogam v118 (상세 좌우 이동·도서 읽는중 오늘내도감·공연·전시 카테고리 활성화) -->
+      <button id="brandBtn" type="button" class="brandbtn" aria-label="홈"><!-- Naedogam v119 (공연·전시 종류에 미술관·박물관 추가) -->
         <svg class="brandmark" width="34" height="30" viewBox="26 28 62 54" aria-hidden="true"><rect x="28" y="40" width="12" height="38" rx="5" fill="#F7F5F0"/><rect x="44" y="30" width="12" height="48" rx="5" fill="#F7F5F0"/><rect x="60" y="32" width="12" height="46" rx="5" fill="#E0483F" transform="rotate(16 66 78)"/></svg>
         <span class="brandwm"><span class="bwm-ko">내도감</span><span class="bwm-en">NAEDOGAM</span></span>
       </button>
-      <span class="mhver">v118</span>
+      <span class="mhver">v119</span>
       <span class="spacer"></span>
       <span class="src-chip" id="srcChip" style="display:none">데모</span>
       <button class="icon-btn" id="searchToggle" type="button" style="display:none">🔍</button>
@@ -802,7 +802,7 @@ const MANIFESTS = {
   culture:{ id:"culture", title:"공연·전시", icon:"🎫", vol:"卷10", canAdd:true,
     source:{ type:"sheet", tab:"공연전시" },
     fields:[ {k:"title",sheet:"제목",label:"제목(예: OOO 전시·콘서트)",type:"text",full:true},
-             {k:"kind",sheet:"종류",label:"종류",type:"select",options:["전시","공연","연극","뮤지컬","음악회","기타"]},
+             {k:"kind",sheet:"종류",label:"종류",type:"select",options:["미술관","박물관","전시","공연","연극","뮤지컬","음악회","기타"]},
              {k:"place",sheet:"장소",label:"장소",type:"text"},
              {k:"date",sheet:"날짜",label:"관람일",type:"date"},
              {k:"companion",sheet:"동행",label:"동행(가족/친구/혼자)",type:"text"},
