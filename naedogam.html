@@ -171,6 +171,7 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
   .dv-seg{ display:flex; gap:6px; margin-left:auto; }
   .dv-btn{ font-family:var(--sans); font-size:12.5px; font-weight:600; padding:6px 12px; border-radius:8px; border:1.5px solid var(--line); background:#fff; color:var(--ink-soft); cursor:pointer; white-space:nowrap; }
   .dv-btn.on{ background:var(--ink); color:#fff; border-color:var(--ink); }
+  .viewbar{ display:flex; gap:6px; justify-content:flex-end; margin:0 0 10px; }
   .cal-wrap{ padding:2px 0 10px; }
   .cal-head{ display:flex; align-items:center; justify-content:space-between; margin:4px 0 12px; }
   .cal-title{ font-family:var(--serif); font-size:16px; font-weight:700; color:var(--ink); }
@@ -467,11 +468,11 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
 <div class="wrap" id="root" data-domain="movies">
   <header class="masthead">
     <div class="mh-row">
-      <button id="brandBtn" type="button" class="brandbtn" aria-label="홈"><!-- Naedogam v125 (일기 달력 모든날 클릭·빈날 추가·기분 클릭필터/컴팩트) -->
+      <button id="brandBtn" type="button" class="brandbtn" aria-label="홈"><!-- Naedogam v126 (달력뷰 8개 카테고리 확대·빈날추가 버그수정·샘플 핵심필드) -->
         <svg class="brandmark" width="34" height="30" viewBox="26 28 62 54" aria-hidden="true"><rect x="28" y="40" width="12" height="38" rx="5" fill="#F7F5F0"/><rect x="44" y="30" width="12" height="48" rx="5" fill="#F7F5F0"/><rect x="60" y="32" width="12" height="46" rx="5" fill="#E0483F" transform="rotate(16 66 78)"/></svg>
         <span class="brandwm"><span class="bwm-ko">내도감</span><span class="bwm-en">NAEDOGAM</span></span>
       </button>
-      <span class="mhver">v125</span>
+      <span class="mhver">v126</span>
       <span class="spacer"></span>
       <span class="src-chip" id="srcChip" style="display:none">데모</span>
       <button class="icon-btn" id="searchToggle" type="button" style="display:none">🔍</button>
@@ -535,7 +536,7 @@ const store = (() => {
 const MANIFESTS = {
   /* 영화: 실제 구글시트(Apps Script)에서 라이브로 불러옴.
      source.map = 시트 한글 헤더 → 엔진 항목 이름.  source.derive = 특수 처리(코드·수식·숫자). */
-  movies:{ id:"movies", title:"영화", icon:"🎬", vol:"卷1", canAdd:true,
+  movies:{ id:"movies", title:"영화", icon:"🎬", vol:"卷1", canAdd:true, shareFields:["title","director","year","country"],
     source:{ type:"sheet", tab:"영화", tabAlt:"MOVIE", idCol:"원제", skipEnsure:true,
       /* nd 합류(v90): 영화도 차계부처럼 nd(구글시트) 방식으로 통일. 데이터는 MOVIE 탭 그대로.
          식별키=원제(중복·공백 없음 확인). clean: 시청여부 2자코드→watched/rewatch, 스트리밍/추천 분리. */
@@ -627,6 +628,7 @@ const MANIFESTS = {
              {k:"genre",sheet:"장르",label:"장르(쉼표로 여러 개)",type:"tags"},
              {k:"cover",sheet:"표지",label:"표지 주소",type:"text",hideForm:true},
              {k:"readDate",sheet:"읽은날",label:"읽은날",type:"date"} ],
+    shareFields:["title","author","publisher","recommend"],
     search:["title","author"],
     activity:{ df:"readDate", when:r=>r.status==="읽음", label:"읽음", name:r=>r.title },
     stats:[ {label:"전체",type:"count"},
@@ -654,6 +656,7 @@ const MANIFESTS = {
              {k:"climbDate",sheet:"다녀온날",label:"다녀온날",type:"date"},
              {k:"memo",sheet:"메모",label:"메모",type:"text"},
              {k:"tags",sheet:"태그",label:"태그(쉼표로 여러 개)",type:"tags"} ],
+    shareFields:["title","region","height"],
     search:["title","region","tags","memo"],
     activity:{ df:"climbDate", when:r=>!!r.climbed, label:"다녀옴", name:r=>r.title },
     stats:[ {label:"전체",type:"count"},
@@ -759,6 +762,7 @@ const MANIFESTS = {
              {k:"recommend",sheet:"추천",label:"추천(누구·어디서)",type:"text"},
              {k:"content",sheet:"내용",label:"내용",type:"textarea"},
              {k:"cover",sheet:"사진",label:"사진",type:"image"} ],
+    shareFields:["title","place","country"],
     search:["title","place","country","spots","recommend","content","companion"],
     filterBy:{ field:"status", allLabel:"전체" },
     newestFirst:true,
@@ -842,6 +846,7 @@ const MANIFESTS = {
              {k:"status",sheet:"상태",label:"상태",type:"seg",options:["다녀옴","가볼곳","찜"]},
              {k:"content",sheet:"메모",label:"메모·후기",type:"textarea"},
              {k:"cover",sheet:"사진",label:"사진",type:"image"} ],
+    shareFields:["title","kind","place"],
     search:["title","place","menu","content","companion"],
     filterBy:{ field:"kind", allLabel:"전체" },
     newestFirst:true,
@@ -1510,10 +1515,14 @@ function renderDiaryViewToggle(m){
   p.innerHTML=`<div class="dv-seg"><button class="dv-btn ${diaryView==='list'?'on':''}" data-dv="list">📋 리스트</button><button class="dv-btn ${diaryView==='cal'?'on':''}" data-dv="cal">📅 달력</button></div>`;
   p.querySelectorAll("[data-dv]").forEach(b=>b.onclick=()=>{ diaryView=b.dataset.dv; state.page=0; paintDomain(m); });
 }
+const CAL_IDS=new Set(["diary","running","mountains","travel","food","carlog","culture","gift","pet"]);
+function calDateKey(m){ const f=(m.fields||[]).find(x=>x.type==="date"); return f?f.k:"date"; }
+function _viewBar(m){ return `<div class="viewbar"><button class="dv-btn ${diaryView==='list'?'on':''}" type="button" data-dv="list">📋 리스트</button><button class="dv-btn ${diaryView==='cal'?'on':''}" type="button" data-dv="cal">📅 달력</button></div>`; }
+function _wireViewBar(m){ $("#list").querySelectorAll(".viewbar [data-dv]").forEach(b=>b.onclick=()=>{ diaryView=b.dataset.dv; state.page=0; paintDomain(m); }); }
 function renderDiaryCalendar(m, rows){
   if(!diaryYM){ const t=new Date(); diaryYM={y:t.getFullYear(), mo:t.getMonth()}; }
   const y=diaryYM.y, mo=diaryYM.mo;
-  const byDay={}; (rows||[]).forEach(r=>{ const iso=_isoOf(r.date); if(iso) byDay[iso]=r; });   // 같은 날 여러 개면 마지막 것
+  const dk=calDateKey(m); const byDay={}; (rows||[]).forEach(r=>{ const iso=_isoOf(r[dk]); if(iso) byDay[iso]=r; });   // 카테고리 날짜 필드 기준
   const startDow=new Date(y,mo,1).getDay(), days=new Date(y,mo+1,0).getDate();
   const cells=[];
   for(let i=0;i<startDow;i++) cells.push('<div class="cal-cell empty"></div>');
@@ -1523,11 +1532,12 @@ function renderDiaryCalendar(m, rows){
     cells.push(`<div class="cal-cell ${r?'has':''}" data-d="${iso}" ${r?`data-id="${String(r._id).replace(/"/g,'&quot;')}"`:''}><span class="cal-d">${d}</span>${cov?`<img class="cal-img" src="${String(cov).replace(/"/g,'&quot;')}" alt="">`:(r?'<span class="cal-dot"></span>':"")}</div>`);
   }
   const dow=["일","월","화","수","목","금","토"];
-  $("#list").innerHTML=`<div class="cal-wrap"><div class="cal-head"><button class="cal-nav" data-cm="-1">‹</button><span class="cal-title">${y}년 ${mo+1}월</span><button class="cal-nav" data-cm="1">›</button></div><div class="cal-dow">${dow.map(x=>`<span>${x}</span>`).join("")}</div><div class="cal-grid">${cells.join("")}</div></div>`;
+  $("#list").innerHTML=_viewBar(m)+`<div class="cal-wrap"><div class="cal-head"><button class="cal-nav" data-cm="-1">‹</button><span class="cal-title">${y}년 ${mo+1}월</span><button class="cal-nav" data-cm="1">›</button></div><div class="cal-dow">${dow.map(x=>`<span>${x}</span>`).join("")}</div><div class="cal-grid">${cells.join("")}</div></div>`;
+  _wireViewBar(m);
   $("#list").querySelectorAll("[data-cm]").forEach(b=>b.onclick=()=>{ let nm=mo+(+b.dataset.cm), ny=y; if(nm<0){nm=11;ny--;} if(nm>11){nm=0;ny++;} diaryYM={y:ny,mo:nm}; paintDomain(m); });
   $("#list").querySelectorAll(".cal-cell:not(.empty)").forEach(c=>c.onclick=()=>{ const id=c.dataset.id;
     if(id){ const r=(state.rows||[]).find(x=>String(x._id)===String(id)); if(r) openDetail(m,r); }
-    else { const iso=c.dataset.d; openRecordForm(m,null); const _ad=$("#add"), de=_ad&&_ad.querySelector('.rf[data-k="date"]'); if(de){ de.value=iso; if(typeof fillDiaryLog==="function") fillDiaryLog(_ad,true); } }
+    else { const iso=c.dataset.d; const pf={}; pf[calDateKey(m)]=iso; openRecordForm(m,null,pf); }
   });
 }
 function bookCard(r){
@@ -2092,7 +2102,7 @@ async function fillDiaryLog(d, silent){
   if(!add.length){ if(!silent) alert("이미 다 들어가 있어요."); return; }
   contEl.value = cur ? (cur.replace(/\s+$/,"")+"\n"+add.join("\n")) : add.join("\n");
 }
-function openRecordForm(m, existing){
+function openRecordForm(m, existing, prefill){
   const d=$("#add"); const isEdit=!!existing; const fields=(m.fields||[]).filter(f=>!f.hideForm);
   const _cell=f=>{
     const val = existing ? existing[f.k] : (f.type==="bool"?false:"");
@@ -2106,6 +2116,7 @@ function openRecordForm(m, existing){
     if(f.type==="image"){ const cur=String(val||""); return `<label>${f.label}</label><div class="rf-imgzone" data-k="${f.k}"><img class="rf-imgprev" data-k="${f.k}" src="${cur.replace(/"/g,'&quot;')}" style="${cur?'':'display:none'}"><div class="rf-imghint">이미지를 끌어다 놓거나 클릭해서 선택</div><input type="hidden" class="rf-imgval" data-k="${f.k}" value="${cur.replace(/"/g,'&quot;')}"><input type="file" accept="image/*" class="rf-imgfile" data-k="${f.k}"></div>`; }
     if(f.type==="date"){ let dv=""; const raw=(val==null?"":String(val)).trim();
       if(raw){ const pd=parseDate(raw); if(pd) dv=pd.getFullYear()+"-"+String(pd.getMonth()+1).padStart(2,"0")+"-"+String(pd.getDate()).padStart(2,"0"); }
+      else if(prefill && prefill[f.k]) dv=prefill[f.k];
       else if(f.today && !isEdit) dv=todayStr();
       return `<label>${f.label}</label><input type="date" class="rf" data-k="${f.k}" data-type="date" value="${dv}">`; }
     if(f.type==="textarea"){ const tv=(val==null?"":String(val)).replace(/&/g,'&amp;').replace(/</g,'&lt;'); return `<label>${f.label}</label><textarea class="rf" data-k="${f.k}" data-type="text" rows="${f.rows||5}" style="width:100%;font-family:inherit;font-size:15px;padding:9px 11px;border:1px solid var(--line);border-radius:9px;box-sizing:border-box;resize:vertical" autocomplete="off">${tv}</textarea>`; }
@@ -2339,7 +2350,7 @@ function paintDomain(m){   // state.rows를 화면에 그림 (데이터 다시 �
   if(m.id==="mountains") renderMtnRegions(m);
   if(m.scopeSort) renderScopeSort(m);
   if(m.id==="diary") renderDiaryTags(m);
-  if(m.id==="diary"){ renderDiaryViewToggle(m); if(diaryView==="cal"){ $("#scope").style.display="none"; $("#count").style.display="none"; renderDiaryCalendar(m, base); return; } }
+  if(CAL_IDS.has(m.id) && diaryView==="cal"){ $("#scope").style.display="none"; $("#count").style.display="none"; renderDiaryCalendar(m, base); return; }
   let listBase = applyStatFilter(m, base);
   if(m.id==="books" && bookGenreFilter) listBase = listBase.filter(r=>bookGenresOf(r).includes(bookGenreFilter));
   if(m.id==="mountains" && mtnRegion) listBase = listBase.filter(r=>mtnRegionMatch(r, mtnRegion));
@@ -2373,6 +2384,7 @@ function paintDomain(m){   // state.rows를 화면에 그림 (데이터 다시 �
   $("#list").querySelectorAll(".card").forEach((b,i)=>{ const r=shown[i]; if(r) b.onclick=()=>openDetail(m, r); });
   { const more=$("#moreBtn"); if(more) more.onclick=()=>{ state.page++; paintDomain(m); }; }
   { const na=$("#nrAdd"); if(na) na.onclick=()=>{ if(m.id==="books"){ openAddBook(); const bq=$("#bq"); if(bq){ bq.value=state.query; bq.dispatchEvent(new Event("input")); } } else openRecordForm(m, null); }; }
+  if(CAL_IDS.has(m.id)){ $("#list").insertAdjacentHTML("afterbegin", _viewBar(m)); _wireViewBar(m); }
   if(m.id==="scrap" && total){ $("#list").insertAdjacentHTML("afterbegin", '<button class="btn ghost" id="scrapRnd" type="button" style="width:100%;margin-bottom:10px">🎲 다시보기 (랜덤 소환)</button>'); const _sr=$("#scrapRnd"); if(_sr) _sr.onclick=()=>{ const r=shown[Math.floor(Math.random()*shown.length)]; if(r) openDetail(m,r); }; }
   if(m.id==="mountains") loadCovers(m,"title");
   if(m.id==="running") loadCovers(m,"place");
@@ -2745,7 +2757,7 @@ function exportCSV(catId){
 }
 function sampleCSV(catId){
   const m=MANIFESTS[catId]; if(!m) return;
-  const cols=(m.fields||[]).filter(f=>f.type!=="image");
+  const cols=(m.shareFields&&m.shareFields.length)?m.shareFields.map(k=>(m.fields||[]).find(f=>f.k===k)).filter(Boolean):(m.fields||[]).filter(f=>f.type!=="image");
   const ex=f=>{ if(f.type==="date") return todayStr();
     if(f.type==="select"||f.type==="seg"){ const o=(f.options||[]).filter(Boolean); return o[0]||""; }
     if(f.type==="rating") return "4.5";
@@ -2790,6 +2802,7 @@ function csvToRows(catId, text){
 function _prog(msg){ let el=document.getElementById("ndProg"); if(msg==null){ if(el) el.remove(); return; } if(!el){ el=document.createElement("div"); el.id="ndProg"; el.style.cssText="position:fixed;inset:0;z-index:300;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.45);color:#fff;font-family:var(--sans);font-size:16px;font-weight:600"; document.body.appendChild(el); } el.textContent=msg; }
 async function doImport(catId, rows){
   const m=MANIFESTS[catId]; if(!m) return;
+  if(catId==="movies"||catId==="carlog"){ alert("이 카테고리는 불러오기가 아직 지원되지 않아요. (샘플·내보내기만 가능)"); return; }
   if(!rows.length){ alert("불러올 데이터가 없어요. CSV 첫 줄(헤더)이 항목 이름과 맞는지 확인해 주세요."); return; }
   if(!confirm(rows.length+"건을 '"+m.title+"'에 등록할까요?")) return;
   const S=sheetSrc(); let ok=0;
@@ -2816,7 +2829,7 @@ function renderSettingsBody(d){
     <h4>가져오기 · 내보내기 (CSV)</h4>
     <div class="hint">카테고리를 CSV로 내보내 다른 사람에게 주거나, 받은 CSV를 골라 한꺼번에 등록해요. <b>처음이면 '샘플양식'으로 빈 양식을 받아 채우세요.</b> (사진은 제외 · 등록 항목엔 새 번호 자동 부여)</div>
     <div class="io-row">
-      <select id="ioCat" class="io-sel">${getActive().filter(id=>id!=="movies"&&id!=="carlog"&&MANIFESTS[id]).map(id=>`<option value="${id}">${MANIFESTS[id].title}</option>`).join("")}</select>
+      <select id="ioCat" class="io-sel">${getActive().filter(id=>MANIFESTS[id]).map(id=>`<option value="${id}">${MANIFESTS[id].title}</option>`).join("")}</select>
       <button class="btn ghost" id="ioSample" type="button">📄 샘플양식</button>
       <button class="btn ghost" id="ioExport" type="button">⬇ 내보내기</button>
       <button class="btn ghost" id="ioImport" type="button">⬆ 불러오기</button>
