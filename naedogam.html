@@ -173,9 +173,7 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
   .dv-btn.on{ background:var(--ink); color:#fff; border-color:var(--ink); }
   .viewbar{ display:flex; gap:5px; justify-content:flex-end; margin:0 0 6px; }
   .viewbar .dv-btn{ padding:4px 10px; font-size:15px; line-height:1; }
-  .fscroll{ flex:1 1 auto; min-width:0; display:flex; flex-direction:row; gap:6px; overflow-x:auto; scrollbar-width:none; }
-  .fscroll::-webkit-scrollbar{ display:none; }
-  .viewseg{ flex:0 0 auto; display:inline-flex; gap:5px; align-items:center; }
+  .viewseg{ position:sticky; right:0; flex:0 0 auto; display:inline-flex; gap:5px; align-items:center; margin-left:auto; padding-left:10px; background:var(--paper); z-index:1; }
   .viewseg .dv-btn{ display:inline-flex; align-items:center; justify-content:center; width:32px; height:27px; padding:0; border-radius:8px; color:var(--ink-soft); }
   .viewseg .dv-btn.on{ background:var(--ink); color:#fff; border-color:var(--ink); }
   .viewseg .dv-btn svg{ display:block; }
@@ -479,11 +477,11 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
 <div class="wrap" id="root" data-domain="movies">
   <header class="masthead">
     <div class="mh-row">
-      <button id="brandBtn" type="button" class="brandbtn" aria-label="홈"><!-- Naedogam v128 (달력에서 태그·기분 유지 → 선택시 리스트 · 정기결제/신용카드/보험 납부달력 · 리스트/달력 토글 아이콘·필터옆 고정) -->
+      <button id="brandBtn" type="button" class="brandbtn" aria-label="홈"><!-- Naedogam v129 (태그 줄 드래그 스크롤 복구 — 토글 sticky화 · #scope 스타일 누수 차단으로 전 카테고리 정상화) -->
         <svg class="brandmark" width="34" height="30" viewBox="26 28 62 54" aria-hidden="true"><rect x="28" y="40" width="12" height="38" rx="5" fill="#F7F5F0"/><rect x="44" y="30" width="12" height="48" rx="5" fill="#F7F5F0"/><rect x="60" y="32" width="12" height="46" rx="5" fill="#E0483F" transform="rotate(16 66 78)"/></svg>
         <span class="brandwm"><span class="bwm-ko">내도감</span><span class="bwm-en">NAEDOGAM</span></span>
       </button>
-      <span class="mhver">v128</span>
+      <span class="mhver">v129</span>
       <span class="spacer"></span>
       <span class="src-chip" id="srcChip" style="display:none">데모</span>
       <button class="icon-btn" id="searchToggle" type="button" style="display:none">🔍</button>
@@ -1541,13 +1539,8 @@ function _mountViewToggle(m){
   if(sc && sc.style.display!=="none" && sc.children.length) host=sc;
   else if(pk && pk.style.display!=="none" && pk.children.length) host=pk;
   const seg=document.createElement("span"); seg.className="viewseg"; seg.innerHTML=_viewBtns();
-  if(host){
-    if(!host.querySelector(".fscroll")){ const box=document.createElement("div"); box.className="fscroll"; while(host.firstChild) box.appendChild(host.firstChild); host.appendChild(box); }
-    host.style.display="flex"; host.style.flexDirection="row"; host.style.alignItems="center"; host.style.overflow="visible"; host.style.gap="8px";
-    host.appendChild(seg);
-  } else {
-    sc.style.display="flex"; sc.style.flexDirection="row"; sc.style.justifyContent="flex-end"; sc.style.overflow="visible"; sc.innerHTML=""; sc.appendChild(seg);
-  }
+  if(host){ host.appendChild(seg); }                                   // 스크롤/드래그 컨테이너 그대로 두고 토글만 오른쪽에 sticky로 얹음
+  else { sc.style.display="flex"; sc.innerHTML=""; sc.appendChild(seg); }
   seg.querySelectorAll("[data-dv]").forEach(b=>b.onclick=()=>{ diaryView=b.dataset.dv; state.page=0; paintDomain(m); });
 }
 function renderDiaryCalendar(m, rows){
@@ -2386,8 +2379,8 @@ function statSubline(m, rows){   // 통계를 상단 서브라인으로 통일. 
   return `<span class="mhttl">${m.title}</span> ${body}`;
 }
 function paintDomain(m){   // state.rows를 화면에 그림 (데이터 다시 안 받고 재렌더 가능)
-  const pk=$("#picker"); pk.style.alignItems=""; pk.style.overflow="";     // 공유 UI 초기화
-  $("#stats").className="stats"; $("#stats").style.display=""; $("#scope").style.flexDirection=""; $("#scope").classList.remove("scopetabs"); $("#count").classList.remove("countrow"); $("#count").style.display="";
+  const pk=$("#picker"); pk.style.alignItems=""; pk.style.overflow=""; pk.style.justifyContent="";     // 공유 UI 초기화
+  $("#stats").className="stats"; $("#stats").style.display=""; $("#scope").style.flexDirection=""; $("#scope").style.overflow=""; $("#scope").style.justifyContent=""; $("#scope").classList.remove("scopetabs"); $("#count").classList.remove("countrow"); $("#count").style.display="";
   if(m.id==="movies"){ paintMovies(m); return; }
   if(m.id==="carlog"){ paintCarlog(m); return; }
   $("#scope").style.display="none";
@@ -2651,7 +2644,7 @@ function paintCarlog(m){
 
   // 작업내용 칩 — 한 줄
   const works=buildWorkChips(base);
-  const sc=$("#scope"); sc.style.flexDirection="row";
+  const sc=$("#scope"); sc.style.flexDirection="row"; sc.style.overflow=""; sc.style.justifyContent="";
   if(works.length){ sc.style.display="flex";
     sc.innerHTML=`<button class="chip ${carWorkFilter===''?'on':''}" data-cw="">전체</button>${works.map(w=>`<button class="chip ${carWorkFilter===w?'on':''}" data-cw="${w.replace(/"/g,'&quot;')}">${w}</button>`).join("")}`;
     sc.querySelectorAll("[data-cw]").forEach(b=>b.onclick=()=>{ carWorkFilter=b.dataset.cw; paintCarlog(m); });
