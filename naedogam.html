@@ -119,13 +119,11 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
   .stat{ flex:1; min-width:0; text-align:center; padding:5px 3px; border-radius:6px; }
   .stat .n{ font-family:var(--sans); font-weight:700; font-size:19px; color:var(--ink); letter-spacing:-.01em; }
   .stat .l{ font-size:11px; color:var(--ink-soft); margin-top:2px; }
-  .moodstats{ display:flex; align-items:center; gap:16px; justify-content:flex-start; padding:12px 6px 8px; flex-wrap:wrap; }
-  .ms-total{ text-align:center; flex-shrink:0; }
-  .ms-total .n{ font-family:var(--sans); font-weight:700; font-size:22px; color:var(--ink); }
-  .ms-total .l{ font-size:11px; color:var(--ink-soft); margin-top:2px; }
-  .ms-moods{ display:flex; flex-wrap:wrap; gap:7px 13px; }
-  .ms-chip{ display:inline-flex; align-items:center; gap:3px; font-size:18px; }
-  .ms-chip b{ font-size:13px; color:var(--ink-soft); font-weight:600; }
+  .moodstats{ display:flex; align-items:center; gap:6px; padding:6px 2px 6px; flex-wrap:wrap; }
+  .ms-total,.ms-chip{ display:inline-flex; align-items:center; gap:4px; font-family:var(--sans); font-size:15px; padding:5px 11px; border:1px solid var(--line); border-radius:16px; background:#fff; color:var(--ink-soft); cursor:pointer; line-height:1; }
+  .ms-total b,.ms-chip b{ font-size:12.5px; font-weight:700; color:var(--ink-soft); }
+  .ms-total.on,.ms-chip.on{ background:var(--accent-wash); border-color:var(--accent); color:var(--ink); }
+  .ms-total.on b,.ms-chip.on b{ color:var(--ink); }
   .stat.sf-watched .n{ color:var(--green); }
   .stat.sf-rewatch .n{ color:var(--ochre); }
   .stat.sf-pick .n{ color:var(--warn); }
@@ -469,11 +467,11 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
 <div class="wrap" id="root" data-domain="movies">
   <header class="masthead">
     <div class="mh-row">
-      <button id="brandBtn" type="button" class="brandbtn" aria-label="홈"><!-- Naedogam v124 (셀러 신설·CSV 샘플양식 다운로드) -->
+      <button id="brandBtn" type="button" class="brandbtn" aria-label="홈"><!-- Naedogam v125 (일기 달력 모든날 클릭·빈날 추가·기분 클릭필터/컴팩트) -->
         <svg class="brandmark" width="34" height="30" viewBox="26 28 62 54" aria-hidden="true"><rect x="28" y="40" width="12" height="38" rx="5" fill="#F7F5F0"/><rect x="44" y="30" width="12" height="48" rx="5" fill="#F7F5F0"/><rect x="60" y="32" width="12" height="46" rx="5" fill="#E0483F" transform="rotate(16 66 78)"/></svg>
         <span class="brandwm"><span class="bwm-ko">내도감</span><span class="bwm-en">NAEDOGAM</span></span>
       </button>
-      <span class="mhver">v124</span>
+      <span class="mhver">v125</span>
       <span class="spacer"></span>
       <span class="src-chip" id="srcChip" style="display:none">데모</span>
       <button class="icon-btn" id="searchToggle" type="button" style="display:none">🔍</button>
@@ -1310,7 +1308,7 @@ function showView(v){ state.view=v;
   $("#domainView").style.display = v==="domain"?"block":"none";
   if(v==="home") $("#searchToggle").style.display="none"; }
 function goHome(){ state.domain=null; state.query=""; state.pick=""; setMhSub(""); showView("home"); renderHome(); }
-function openDomain(id){ state.domain=id; state.query=""; state.pick=""; state.statFilter=null; state.sort="default"; state.sortAsc=false; state.searchScope="title"; state.selectQ=""; state.searchOpen=false; state.page=0; carWorkFilter=""; carSort="date"; carSortAsc=false; bookGenreFilter=""; mtnRegion=""; diaryTag=""; diaryView="list"; diaryYM=null; $("#search").value=""; $("#search").style.display="none"; $("#mvselect").style.display="none"; $("#scope").style.display="none"; if(MANIFESTS[id]&&MANIFESTS[id].scopeSort){ state.sort=MANIFESTS[id].scopeSort[0].k; state.sortAsc=false; } showView("domain"); loadAndRender(); }
+function openDomain(id){ state.domain=id; state.query=""; state.pick=""; state.statFilter=null; state.sort="default"; state.sortAsc=false; state.searchScope="title"; state.selectQ=""; state.searchOpen=false; state.page=0; carWorkFilter=""; carSort="date"; carSortAsc=false; bookGenreFilter=""; mtnRegion=""; diaryTag=""; diaryView="list"; diaryYM=null; diaryMood=""; $("#search").value=""; $("#search").style.display="none"; $("#mvselect").style.display="none"; $("#scope").style.display="none"; if(MANIFESTS[id]&&MANIFESTS[id].scopeSort){ state.sort=MANIFESTS[id].scopeSort[0].k; state.sortAsc=false; } showView("domain"); loadAndRender(); }
 
 /* 홈: 켜둔 카테고리를 카드로. 건수는 한 번 열어본 분야만 표시(홈을 빠르게 유지). */
 function renderHome(){
@@ -1413,9 +1411,10 @@ function renderStats(m, rows){
   const isMovie = m.id==="movies";
   if(m.statStyle==="mood"){
     const total=calcStat(m.stats[0], rows);
-    const moods=m.stats.slice(1).map(x=>({e:x.label, n:calcStat(x,rows)}));
+    const moods=m.stats.slice(1).map(x=>({e:x.label, eq:x.eq, n:calcStat(x,rows)}));
     $("#stats").className="stats moodstats";
-    $("#stats").innerHTML=`<div class="ms-total"><div class="n">${fmt(total)}</div><div class="l">전체</div></div><div class="ms-moods">`+moods.map(x=>`<span class="ms-chip"><span class="ms-emo">${x.e}</span><b>${fmt(x.n)}</b></span>`).join("")+`</div>`;
+    $("#stats").innerHTML=`<button class="ms-total ${!diaryMood?'on':''}" type="button" data-mood=""><b>${fmt(total)}</b> 전체</button>`+moods.map(x=>`<button class="ms-chip ${diaryMood===x.eq?'on':''}" type="button" data-mood="${String(x.eq||'').replace(/"/g,'&quot;')}"><span class="ms-emo">${x.e}</span><b>${fmt(x.n)}</b></button>`).join("");
+    $("#stats").querySelectorAll("[data-mood]").forEach(b=>b.onclick=()=>{ diaryMood=b.dataset.mood; state.page=0; paintDomain(m); });
     return;
   }
   $("#stats").className="stats";
@@ -1521,12 +1520,15 @@ function renderDiaryCalendar(m, rows){
   for(let d=1;d<=days;d++){
     const iso=y+"-"+String(mo+1).padStart(2,"0")+"-"+String(d).padStart(2,"0");
     const r=byDay[iso]; const cov=r&&(r.cover||r._cover);
-    cells.push(`<div class="cal-cell ${r?'has':''}" ${r?`data-id="${String(r._id).replace(/"/g,'&quot;')}"`:''}><span class="cal-d">${d}</span>${cov?`<img class="cal-img" src="${String(cov).replace(/"/g,'&quot;')}" alt="">`:(r?'<span class="cal-dot"></span>':"")}</div>`);
+    cells.push(`<div class="cal-cell ${r?'has':''}" data-d="${iso}" ${r?`data-id="${String(r._id).replace(/"/g,'&quot;')}"`:''}><span class="cal-d">${d}</span>${cov?`<img class="cal-img" src="${String(cov).replace(/"/g,'&quot;')}" alt="">`:(r?'<span class="cal-dot"></span>':"")}</div>`);
   }
   const dow=["일","월","화","수","목","금","토"];
   $("#list").innerHTML=`<div class="cal-wrap"><div class="cal-head"><button class="cal-nav" data-cm="-1">‹</button><span class="cal-title">${y}년 ${mo+1}월</span><button class="cal-nav" data-cm="1">›</button></div><div class="cal-dow">${dow.map(x=>`<span>${x}</span>`).join("")}</div><div class="cal-grid">${cells.join("")}</div></div>`;
   $("#list").querySelectorAll("[data-cm]").forEach(b=>b.onclick=()=>{ let nm=mo+(+b.dataset.cm), ny=y; if(nm<0){nm=11;ny--;} if(nm>11){nm=0;ny++;} diaryYM={y:ny,mo:nm}; paintDomain(m); });
-  $("#list").querySelectorAll(".cal-cell.has").forEach(c=>c.onclick=()=>{ const r=(state.rows||[]).find(x=>String(x._id)===String(c.dataset.id)); if(r) openDetail(m,r); });
+  $("#list").querySelectorAll(".cal-cell:not(.empty)").forEach(c=>c.onclick=()=>{ const id=c.dataset.id;
+    if(id){ const r=(state.rows||[]).find(x=>String(x._id)===String(id)); if(r) openDetail(m,r); }
+    else { const iso=c.dataset.d; openRecordForm(m,null); const _ad=$("#add"), de=_ad&&_ad.querySelector('.rf[data-k="date"]'); if(de){ de.value=iso; if(typeof fillDiaryLog==="function") fillDiaryLog(_ad,true); } }
+  });
 }
 function bookCard(r){
   const esc2=x=>String(x==null?"":x).replace(/"/g,"&quot;");
@@ -2342,6 +2344,7 @@ function paintDomain(m){   // state.rows를 화면에 그림 (데이터 다시 �
   if(m.id==="books" && bookGenreFilter) listBase = listBase.filter(r=>bookGenresOf(r).includes(bookGenreFilter));
   if(m.id==="mountains" && mtnRegion) listBase = listBase.filter(r=>mtnRegionMatch(r, mtnRegion));
   if(m.id==="diary" && diaryTag) listBase = listBase.filter(r=>rowTags(r).includes(diaryTag));
+  if(m.id==="diary" && diaryMood) listBase = listBase.filter(r=>String(r.mood||"")===diaryMood);
   let rows=filterRows(m, listBase, state.query);
   if(m.newestFirst && (!state.sort || state.sort==="default")){ rows=[...rows].reverse(); }   // 최신 입력이 위로
   if(m.dateSort && !((m.sorts||m.scopeSort) && state.sort && state.sort!=="default")){ rows=[...rows].sort((a,b)=>{ const ad=parseDate(a[m.dateSort]), bd=parseDate(b[m.dateSort]); return (bd?bd.getTime():-Infinity)-(ad?ad.getTime():-Infinity); }); }
@@ -2536,7 +2539,7 @@ let carWorkFilter="", carSort="date", carSortAsc=false;
 let bookGenreFilter="";
 let mtnRegion="";
 let diaryTag="";
-let diaryView="list", diaryYM=null;
+let diaryView="list", diaryYM=null, diaryMood="";
 let NAV_LIST=[], NAV_CUR=null;
 function carNum(v){ return parseInt(String(v==null?"":v).replace(/[^\d]/g,""),10)||0; }
 const CAR_PALETTE=['#2563eb','#16a34a','#db2777','#d97706','#7c3aed'];
