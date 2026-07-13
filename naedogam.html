@@ -467,11 +467,11 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
 <div class="wrap" id="root" data-domain="movies">
   <header class="masthead">
     <div class="mh-row">
-      <button id="brandBtn" type="button" class="brandbtn" aria-label="홈"><!-- Naedogam v119 (공연·전시 종류에 미술관·박물관 추가) -->
+      <button id="brandBtn" type="button" class="brandbtn" aria-label="홈"><!-- Naedogam v120 (준비중 정리+맛집·음반·위시·버킷·명언·펫일기 6개 카테고리 신설) -->
         <svg class="brandmark" width="34" height="30" viewBox="26 28 62 54" aria-hidden="true"><rect x="28" y="40" width="12" height="38" rx="5" fill="#F7F5F0"/><rect x="44" y="30" width="12" height="48" rx="5" fill="#F7F5F0"/><rect x="60" y="32" width="12" height="46" rx="5" fill="#E0483F" transform="rotate(16 66 78)"/></svg>
         <span class="brandwm"><span class="bwm-ko">내도감</span><span class="bwm-en">NAEDOGAM</span></span>
       </button>
-      <span class="mhver">v119</span>
+      <span class="mhver">v120</span>
       <span class="spacer"></span>
       <span class="src-chip" id="srcChip" style="display:none">데모</span>
       <button class="icon-btn" id="searchToggle" type="button" style="display:none">🔍</button>
@@ -827,7 +827,133 @@ const MANIFESTS = {
            flags:r=>[ (r.rating!=null&&r.rating!=="")?{t:"★ "+r.rating,cls:"star"}:0,
                       r.status==="다녀옴"?{t:"다녀옴",cls:"on"}:0,
                       r.status==="예정"?{t:"예정",cls:"on"}:0,
-                      r.status==="찜"?{t:"찜",cls:"on"}:0 ] } }
+                      r.status==="찜"?{t:"찜",cls:"on"}:0 ] } },
+
+  food:{ id:"food", title:"맛집", icon:"🍽", vol:"卷11", canAdd:true,
+    source:{ type:"sheet", tab:"맛집" },
+    fields:[ {k:"title",sheet:"이름",label:"가게 이름",type:"text",full:true},
+             {k:"kind",sheet:"종류",label:"종류",type:"select",options:["한식","중식","일식","양식","분식","카페·디저트","술집","기타"]},
+             {k:"place",sheet:"장소",label:"장소·지역",type:"text"},
+             {k:"date",sheet:"방문일",label:"방문일",type:"date"},
+             {k:"companion",sheet:"동행",label:"동행(가족/친구/혼자)",type:"text"},
+             {k:"menu",sheet:"추천메뉴",label:"추천 메뉴",type:"text"},
+             {k:"price",sheet:"가격대",label:"가격대(1인 원)",type:"number",money:true},
+             {k:"rating",sheet:"만족도",label:"만족도(별점)",type:"rating"},
+             {k:"status",sheet:"상태",label:"상태",type:"seg",options:["다녀옴","가볼곳","찜"]},
+             {k:"content",sheet:"메모",label:"메모·후기",type:"textarea"},
+             {k:"cover",sheet:"사진",label:"사진",type:"image"} ],
+    search:["title","place","menu","content","companion"],
+    filterBy:{ field:"kind", allLabel:"전체" },
+    newestFirst:true,
+    activity:{ df:"date", when:r=>r.status==="다녀옴", label:"맛집", name:r=>r.title||r.place },
+    stats:[ {label:"전체",type:"count"},
+            {label:"다녀옴",type:"countIf",field:"status",eq:"다녀옴",c:"#16a34a"},
+            {label:"가볼곳",type:"countIf",field:"status",eq:"가볼곳",c:"#c2410c"} ],
+    card:{ kind:"specimen", thumb:"🍽", memo:"content",
+           meta:r=>[ (r.date?(_isoOf(r.date)||String(r.date).slice(0,10)):""), r.kind, r.place ].filter(Boolean).join(" · "),
+           flags:r=>[ (r.rating!=null&&r.rating!=="")?{t:"★ "+r.rating,cls:"star"}:0,
+                      r.status==="다녀옴"?{t:"다녀옴",cls:"on"}:0,
+                      r.status==="가볼곳"?{t:"가볼곳",cls:"on"}:0,
+                      r.status==="찜"?{t:"찜",cls:"on"}:0 ] } },
+
+  albums:{ id:"albums", title:"음반컬렉션", icon:"💿", vol:"卷12", canAdd:true,
+    source:{ type:"sheet", tab:"음반" },
+    fields:[ {k:"title",sheet:"앨범",label:"앨범명",type:"text",full:true},
+             {k:"artist",sheet:"아티스트",label:"아티스트",type:"text"},
+             {k:"year",sheet:"발매연도",label:"발매연도",type:"number"},
+             {k:"genre",sheet:"장르",label:"장르",type:"select",options:["팝","록","힙합","R&B","재즈","클래식","OST","가요","기타"]},
+             {k:"format",sheet:"포맷",label:"포맷",type:"select",options:["LP","CD","카세트","디지털"]},
+             {k:"rating",sheet:"별점",label:"별점",type:"rating"},
+             {k:"status",sheet:"상태",label:"상태",type:"seg",options:["소장","위시"]},
+             {k:"content",sheet:"한줄평",label:"한줄평",type:"textarea"},
+             {k:"cover",sheet:"표지",label:"표지",type:"image"} ],
+    search:["title","artist","genre","content"],
+    filterBy:{ field:"genre", allLabel:"전체" },
+    newestFirst:true,
+    stats:[ {label:"전체",type:"count"},
+            {label:"소장",type:"countIf",field:"status",eq:"소장",c:"#16a34a"},
+            {label:"위시",type:"countIf",field:"status",eq:"위시",c:"#c2410c"} ],
+    card:{ kind:"specimen", thumb:"💿", memo:"content",
+           meta:r=>[ r.artist, r.year, r.genre, r.format ].filter(Boolean).join(" · "),
+           flags:r=>[ (r.rating!=null&&r.rating!=="")?{t:"★ "+r.rating,cls:"star"}:0,
+                      r.status==="소장"?{t:"소장",cls:"on"}:0,
+                      r.status==="위시"?{t:"위시",cls:"on"}:0 ] } },
+
+  wish:{ id:"wish", title:"위시리스트", icon:"🎁", vol:"卷13", canAdd:true,
+    source:{ type:"sheet", tab:"위시리스트" },
+    fields:[ {k:"title",sheet:"품목",label:"갖고 싶은 것",type:"text",full:true},
+             {k:"kind",sheet:"분류",label:"분류",type:"select",options:["전자기기","패션","취미","리빙","도서·음반","기타"]},
+             {k:"price",sheet:"가격",label:"가격(원)",type:"number",money:true},
+             {k:"priority",sheet:"우선순위",label:"우선순위",type:"select",options:["높음","중간","낮음"]},
+             {k:"link",sheet:"링크",label:"구매 링크",type:"text",full:true},
+             {k:"status",sheet:"상태",label:"상태",type:"seg",options:["사고싶음","구매함","보류"]},
+             {k:"content",sheet:"메모",label:"메모",type:"textarea"},
+             {k:"cover",sheet:"사진",label:"사진",type:"image"} ],
+    search:["title","kind","content"],
+    filterBy:{ field:"kind", allLabel:"전체" },
+    newestFirst:true,
+    stats:[ {label:"전체",type:"count"},
+            {label:"사고싶음",type:"countIf",field:"status",eq:"사고싶음",c:"#c2410c"},
+            {label:"구매함",type:"countIf",field:"status",eq:"구매함",c:"#16a34a"} ],
+    card:{ kind:"specimen", thumb:"🎁", memo:"content",
+           meta:r=>[ r.kind, (r.price?Number(r.price).toLocaleString()+"원":""), (r.priority?"우선 "+r.priority:"") ].filter(Boolean).join(" · "),
+           flags:r=>[ r.status==="사고싶음"?{t:"사고싶음",cls:"on"}:0,
+                      r.status==="구매함"?{t:"구매함",cls:"on"}:0,
+                      r.status==="보류"?{t:"보류",cls:"on"}:0 ] } },
+
+  bucket:{ id:"bucket", title:"버킷리스트", icon:"🪄", vol:"卷14", canAdd:true,
+    source:{ type:"sheet", tab:"버킷리스트" },
+    fields:[ {k:"title",sheet:"목표",label:"하고 싶은 것",type:"text",full:true},
+             {k:"kind",sheet:"분류",label:"분류",type:"select",options:["여행","도전","배움","경험","관계","기타"]},
+             {k:"target",sheet:"목표시기",label:"목표 시기(예: 2027 / 언젠가)",type:"text"},
+             {k:"status",sheet:"상태",label:"상태",type:"seg",options:["하는중","달성","보류"]},
+             {k:"date",sheet:"달성일",label:"달성일",type:"date"},
+             {k:"content",sheet:"메모",label:"메모",type:"textarea"},
+             {k:"cover",sheet:"사진",label:"사진",type:"image"} ],
+    search:["title","kind","content"],
+    filterBy:{ field:"kind", allLabel:"전체" },
+    newestFirst:true,
+    activity:{ df:"date", when:r=>r.status==="달성", label:"버킷", name:r=>r.title },
+    stats:[ {label:"전체",type:"count"},
+            {label:"달성",type:"countIf",field:"status",eq:"달성",c:"#16a34a"},
+            {label:"하는중",type:"countIf",field:"status",eq:"하는중",c:"#c2410c"} ],
+    card:{ kind:"specimen", thumb:"🪄", memo:"content",
+           meta:r=>[ r.kind, r.target, (r.status==="달성"&&r.date?"달성 "+(_isoOf(r.date)||r.date):"") ].filter(Boolean).join(" · "),
+           flags:r=>[ r.status==="달성"?{t:"✓ 달성",cls:"on"}:0,
+                      r.status==="하는중"?{t:"하는중",cls:"on"}:0,
+                      r.status==="보류"?{t:"보류",cls:"on"}:0 ] } },
+
+  quote:{ id:"quote", title:"명언", icon:"❝", vol:"卷15", canAdd:true,
+    source:{ type:"sheet", tab:"명언" },
+    fields:[ {k:"title",sheet:"문구",label:"명언·문구",type:"textarea",full:true,rows:3},
+             {k:"author",sheet:"출처",label:"출처(인물·책)",type:"text"},
+             {k:"tags",sheet:"태그",label:"태그(쉼표로 여러 개)",type:"tags"},
+             {k:"date",sheet:"수집일",label:"수집일",type:"date",today:true},
+             {k:"content",sheet:"메모",label:"내 생각",type:"textarea"} ],
+    search:["title","author","tags","content"],
+    filterBy:{ field:"tags", allLabel:"전체" },
+    newestFirst:true,
+    stats:[ {label:"전체",type:"count"} ],
+    card:{ kind:"specimen", thumb:"❝", memo:"content", tags:"tags",
+           meta:r=>[ r.author, (r.date?(_isoOf(r.date)||String(r.date).slice(0,10)):"") ].filter(Boolean).join(" · "),
+           flags:r=>[] } },
+
+  pet:{ id:"pet", title:"펫일기", icon:"🐾", vol:"卷16", canAdd:true,
+    source:{ type:"sheet", tab:"펫일기" },
+    fields:[ {k:"date",sheet:"날짜",label:"날짜",type:"date",today:true},
+             {k:"title",sheet:"제목",label:"제목",type:"text",full:true},
+             {k:"kind",sheet:"종류",label:"종류",type:"select",options:["일상","산책","병원","미용","간식·사료","기타"]},
+             {k:"condition",sheet:"컨디션",label:"컨디션",type:"select",options:["","좋음","보통","아픔"]},
+             {k:"content",sheet:"내용",label:"내용",type:"textarea"},
+             {k:"cover",sheet:"사진",label:"사진",type:"image"} ],
+    search:["title","content","kind"],
+    filterBy:{ field:"kind", allLabel:"전체" },
+    newestFirst:true,
+    activity:{ df:"date", when:r=>true, label:"펫", name:r=>r.title||r.kind },
+    stats:[ {label:"전체",type:"count"} ],
+    card:{ kind:"data", thumb:"🐾",
+           title:r=>`${_isoOf(r.date)||r.date||""}${r.title?" · "+r.title:""}`,
+           kv:[{k:"종류",f:"kind"},{k:"컨디션",f:"condition"}] } }
 };
 
 /* ── 2. DataSource 추상화 ──
@@ -1162,6 +1288,12 @@ function sourceFor(m){
 
 /* 탭: 홈에서 켜둔 카테고리만 표시(안 켠 건 안 나옴 → 길어지지 않음) */
 const ND_ICONS={
+  food:'M5 3v6a2 2 0 0 0 4 0V3 M7 9v12 M16 3c-1.5 1 -2.5 3 -2.5 6c0 2 1 3 2.5 3v9',
+  albums:'M12 12m-9 0a9 9 0 1 0 18 0a9 9 0 1 0 -18 0 M12 12m-3 0a3 3 0 1 0 6 0a3 3 0 1 0 -6 0 M12 12l0 .01',
+  wish:'M12 20l-1.5 -1.4C5.5 14 3 11.5 3 8.5A4.5 4.5 0 0 1 12 6a4.5 4.5 0 0 1 9 2.5c0 3 -2.5 5.5 -7.5 10.1z',
+  bucket:'M9 6h11 M9 12h11 M9 18h11 M4 6l1 1l2 -2 M4 12l1 1l2 -2 M4 18l1 1l2 -2',
+  quote:'M7 8h4v4l-2 3H6l1 -3z M15 8h4v4l-2 3h-3l1 -3z',
+  pet:'M5 11a1.4 1.4 0 1 0 .01 0 M9 7a1.4 1.4 0 1 0 .01 0 M15 7a1.4 1.4 0 1 0 .01 0 M19 11a1.4 1.4 0 1 0 .01 0 M12 15c-2 0 -3.5 1 -3.5 2.7c0 1.6 1.5 2.8 3.5 2.8s3.5 -1.2 3.5 -2.8c0 -1.7 -1.5 -2.7 -3.5 -2.7z',
   culture:'M15 5l0 2 M15 11l0 2 M15 17l0 2 M5 5h14a2 2 0 0 1 2 2v3a2 2 0 0 0 0 4v3a2 2 0 0 1 -2 2h-14a2 2 0 0 1 -2 -2v-3a2 2 0 0 0 0 -4v-3a2 2 0 0 1 2 -2',
   movies:'M4 6a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v12a2 2 0 0 1 -2 2h-12a2 2 0 0 1 -2 -2z M8 4v16 M16 4v16 M4 8h4 M4 16h4 M16 8h4 M16 16h4 M4 12h16',
   books:'M3 19a9 9 0 0 1 9 0a9 9 0 0 1 9 0 M3 6a9 9 0 0 1 9 0a9 9 0 0 1 9 0 M3 6v13 M12 6v13 M21 6v13',
@@ -1172,22 +1304,16 @@ const ND_ICONS={
   subs:'M20 11a8 8 0 0 0 -14 -5l-2 2 M4 13a8 8 0 0 0 14 5l2 -2 M4 4v4h4 M20 20v-4h-4',
   travel:'M22 2L11 13 M22 2l-7 20l-4 -9l-9 -4z'
 };
-const ND_COLORS={ movies:'#e8590c', books:'#2f9e44', mountains:'#2b8a3e', running:'#1c7ed6', carlog:'#e67700', diary:'#7048e8', subs:'#0ca678', travel:'#f08c00', cards:'#4263eb', culture:'#c2255c' };
+const ND_COLORS={ movies:'#e8590c', books:'#2f9e44', mountains:'#2b8a3e', running:'#1c7ed6', carlog:'#e67700', diary:'#7048e8', subs:'#0ca678', travel:'#f08c00', cards:'#4263eb', culture:'#c2255c', food:'#d9480f', albums:'#9c36b5', wish:'#e64980', bucket:'#f59f00', quote:'#5c7cfa', pet:'#12b886' };
 const HOME_SOON=[
   {t:"스크랩",   d:'M6 4h12a1 1 0 0 1 1 1v15l-7 -4l-7 4V5a1 1 0 0 1 1 -1z'},
-  {t:"맛집",     d:'M5 3v6a2 2 0 0 0 4 0V3 M7 9v12 M16 3c-1.5 1 -2.5 3 -2.5 6c0 2 1 3 2.5 3v9'},
-  {t:"펫일기",   d:'M5 11a1.4 1.4 0 1 0 .01 0 M9 7a1.4 1.4 0 1 0 .01 0 M15 7a1.4 1.4 0 1 0 .01 0 M19 11a1.4 1.4 0 1 0 .01 0 M12 15c-2 0 -3.5 1 -3.5 2.7c0 1.6 1.5 2.8 3.5 2.8s3.5 -1.2 3.5 -2.8c0 -1.7 -1.5 -2.7 -3.5 -2.7z'},
   {t:"장보기",   d:'M6 19m-1.3 0a1.3 1.3 0 1 0 2.6 0a1.3 1.3 0 1 0 -2.6 0 M17 19m-1.3 0a1.3 1.3 0 1 0 2.6 0a1.3 1.3 0 1 0 -2.6 0 M3 4h2l2.2 11h9.6l1.7 -8H6'},
   {t:"음식레시피", d:'M7 21h10 M8 21v-3a5 5 0 0 1 -1.5 -9.5a4 4 0 0 1 7.8 -1a4 4 0 0 1 2.7 10.5v3'},
   {t:"보험",     d:'M12 3l7 3v5c0 4.5 -3.5 7.5 -7 8.5c-3.5 -1 -7 -4 -7 -8.5V6z M9 12l2 2l4 -4'},
   {t:"운동/건강", d:'M2 12h4l2 5l4 -12l2 7h6'},
-  {t:"버킷리스트", d:'M9 6h11 M9 12h11 M9 18h11 M4 6l1 1l2 -2 M4 12l1 1l2 -2 M4 18l1 1l2 -2'},
   {t:"꿀팁",     d:'M9 18h6 M10 21h4 M12 3a6 6 0 0 0 -4 10.5c.6 .6 1 1.5 1 2.5h6c0 -1 .4 -1.9 1 -2.5A6 6 0 0 0 12 3z'},
-  {t:"명언",     d:'M7 8h4v4l-2 3H6l1 -3z M15 8h4v4l-2 3h-3l1 -3z'},
   {t:"가계부",   d:'M17 8V6a2 2 0 0 0 -2 -2H5a2 2 0 0 0 -2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2 -2v-2 M21 12h-4a2 2 0 0 0 0 4h4z'},
-  {t:"위시리스트", d:'M12 20l-1.5 -1.4C5.5 14 3 11.5 3 8.5A4.5 4.5 0 0 1 12 6a4.5 4.5 0 0 1 9 2.5c0 3 -2.5 5.5 -7.5 10.1z'},
-  {t:"공부",     d:'M12 4L2 9l10 5l8 -4v6 M6 11.5V16c0 1.5 3 3 6 3s6 -1.5 6 -3v-4.5'},
-  {t:"음반컬렉션", d:'M12 12m-9 0a9 9 0 1 0 18 0a9 9 0 1 0 -18 0 M12 12m-3 0a3 3 0 1 0 6 0a3 3 0 1 0 -6 0 M12 12l0 .01'}
+  {t:"공부",     d:'M12 4L2 9l10 5l8 -4v6 M6 11.5V16c0 1.5 3 3 6 3s6 -1.5 6 -3v-4.5'}
 ];
 function tabIco(id, m){ const ic=ND_ICONS[id]; const _c=ND_COLORS[id]||"currentColor";
   return ic ? `<svg class="tabico" style="color:${_c}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="${ic}"/></svg>`
@@ -1828,7 +1954,10 @@ const DIARY_LOG={
   books:r=>`- ${r.title} 다 읽음`,
   mountains:r=>`- ${r.title} 다녀옴`,
   travel:r=>`- ${r.title||r.place||"여행"}`,
-  culture:r=>`- ${r.title||r.place||"공연·전시"}`
+  culture:r=>`- ${r.title||r.place||"공연·전시"}`,
+  food:r=>`- ${r.title||r.place||"맛집"}`,
+  bucket:r=>`- 버킷 달성: ${r.title||""}`,
+  pet:r=>`- 펫 ${r.title||r.kind||"기록"}`
 };
 function _isoOf(raw){ const pd=parseDate(String(raw)); if(!pd) return null; return pd.getFullYear()+"-"+String(pd.getMonth()+1).padStart(2,"0")+"-"+String(pd.getDate()).padStart(2,"0"); }
 function buildDayLog(dateStr){
