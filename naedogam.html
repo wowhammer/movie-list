@@ -216,6 +216,8 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
   .ord-row.dragging{ opacity:.6; background:var(--card); box-shadow:0 4px 12px rgba(0,0,0,.16); border-radius:8px; }
   .ord-handle{ cursor:grab; color:var(--sub); font-size:20px; padding:2px 6px 2px 0; line-height:1; user-select:none; touch-action:none; flex:0 0 auto; }
   .ord-handle.ord-ph{ visibility:hidden; }
+  .io-row{ display:flex; gap:8px; align-items:center; flex-wrap:wrap; margin:4px 0 6px; }
+  .io-sel{ flex:1 1 130px; min-width:120px; padding:8px 10px; border:1px solid var(--line); border-radius:8px; font-size:14px; background:#fff; color:var(--ink); }
   .rf-imghint{ font-size:12px; color:var(--ink-soft); margin-top:6px; }
   .rf-imgzone .rf-imgprev{ max-width:100%; max-height:170px; border-radius:8px; }
   .rf-imgzone .rf-imgfile{ margin-top:8px; }
@@ -467,11 +469,11 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
 <div class="wrap" id="root" data-domain="movies">
   <header class="masthead">
     <div class="mh-row">
-      <button id="brandBtn" type="button" class="brandbtn" aria-label="홈"><!-- Naedogam v120 (준비중 정리+맛집·음반·위시·버킷·명언·펫일기 6개 카테고리 신설) -->
+      <button id="brandBtn" type="button" class="brandbtn" aria-label="홈"><!-- Naedogam v121 (CSV 가져오기·내보내기: 카테고리 데이터 파일로 주고받기) -->
         <svg class="brandmark" width="34" height="30" viewBox="26 28 62 54" aria-hidden="true"><rect x="28" y="40" width="12" height="38" rx="5" fill="#F7F5F0"/><rect x="44" y="30" width="12" height="48" rx="5" fill="#F7F5F0"/><rect x="60" y="32" width="12" height="46" rx="5" fill="#E0483F" transform="rotate(16 66 78)"/></svg>
         <span class="brandwm"><span class="bwm-ko">내도감</span><span class="bwm-en">NAEDOGAM</span></span>
       </button>
-      <span class="mhver">v120</span>
+      <span class="mhver">v121</span>
       <span class="spacer"></span>
       <span class="src-chip" id="srcChip" style="display:none">데모</span>
       <button class="icon-btn" id="searchToggle" type="button" style="display:none">🔍</button>
@@ -2636,6 +2638,61 @@ function renderDash(ids, data){
   b.querySelectorAll("[data-dv]").forEach(x=>x.onclick=()=>{ dashView=x.dataset.dv; renderDash(ids,data); });
   b.querySelectorAll("[data-dp]").forEach(x=>x.onclick=()=>{ dashPeriod=x.dataset.dp; renderDash(ids,data); });
 }
+function exportCSV(catId){
+  const m=MANIFESTS[catId]; if(!m) return;
+  const rows=CACHE[catId]||loadPersist(catId)||[];
+  if(!rows.length){ alert("먼저 이 카테고리를 한 번 열어 데이터를 불러온 뒤 내보내세요."); return; }
+  const cols=(m.fields||[]).filter(f=>f.type!=="image");
+  const esc=v=>{ v=(v==null?"":String(Array.isArray(v)?v.join(", "):v)); return /[",\n\r]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v; };
+  const lines=[cols.map(f=>esc(f.sheet||f.k)).join(",")];
+  rows.forEach(r=>lines.push(cols.map(f=>esc(r[f.k])).join(",")));
+  const blob=new Blob(["\uFEFF"+lines.join("\r\n")],{type:"text/csv;charset=utf-8"});
+  const a=document.createElement("a"); a.href=URL.createObjectURL(blob); a.download="내도감_"+m.title+".csv"; document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(a.href),1500);
+}
+function parseCSV(text){
+  text=String(text||"").replace(/^\uFEFF/,"").replace(/\r\n/g,"\n").replace(/\r/g,"\n");
+  const rows=[]; let cur=[],val="",q=false;
+  for(let i=0;i<text.length;i++){ const ch=text[i];
+    if(q){ if(ch==='"'){ if(text[i+1]==='"'){ val+='"'; i++; } else q=false; } else val+=ch; }
+    else if(ch==='"') q=true;
+    else if(ch===',') { cur.push(val); val=""; }
+    else if(ch==='\n'){ cur.push(val); rows.push(cur); cur=[]; val=""; }
+    else val+=ch;
+  }
+  cur.push(val); rows.push(cur);
+  return rows.filter(r=>r.some(c=>String(c).trim()!==""));
+}
+function csvToRows(catId, text){
+  const m=MANIFESTS[catId]; if(!m) return [];
+  const t=parseCSV(text); if(t.length<2) return [];
+  const inv=ndInv(m); const colKey=t[0].map(h=>inv[ndNorm(h)]||null);
+  const out=[];
+  for(let i=1;i<t.length;i++){ const cells=t[i]; const row={_id:crypto.randomUUID()}; let any=false;
+    colKey.forEach((k,ci)=>{ if(!k||k==="_id") return; const f=(m.fields||[]).find(x=>x.k===k); let v=(cells[ci]==null?"":String(cells[ci])).trim();
+      if(f&&f.type==="tags") v=v?v.split(/[|,，]/).map(x=>x.trim()).filter(Boolean):[];
+      else if(f&&(f.type==="number"||f.type==="rating")){ const n=String(v).replace(/[^0-9.\-]/g,""); v=(n===""?null:Number(n)); }
+      else if(f&&f.type==="bool") v=(v==="예"||/^(true|o)$/i.test(v));
+      row[k]=v; if(v!=null&&v!==""&&!(Array.isArray(v)&&!v.length)) any=true;
+    });
+    if(any) out.push(row);
+  }
+  return out;
+}
+function _prog(msg){ let el=document.getElementById("ndProg"); if(msg==null){ if(el) el.remove(); return; } if(!el){ el=document.createElement("div"); el.id="ndProg"; el.style.cssText="position:fixed;inset:0;z-index:300;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.45);color:#fff;font-family:var(--sans);font-size:16px;font-weight:600"; document.body.appendChild(el); } el.textContent=msg; }
+async function doImport(catId, rows){
+  const m=MANIFESTS[catId]; if(!m) return;
+  if(!rows.length){ alert("불러올 데이터가 없어요. CSV 첫 줄(헤더)이 항목 이름과 맞는지 확인해 주세요."); return; }
+  if(!confirm(rows.length+"건을 '"+m.title+"'에 등록할까요?")) return;
+  const S=sheetSrc(); let ok=0;
+  _prog("등록 준비 중…");
+  for(let i=0;i<rows.length;i++){ _prog("등록 중… "+(i+1)+" / "+rows.length); try{ await S.upsert(catId, rows[i]); ok++; }catch(e){ console.error("import",e); } }
+  const cur=(CACHE[catId]||loadPersist(catId)||[]).slice();
+  rows.forEach(r=>{ cur.push(r); markPending(catId, r._id); });
+  CACHE[catId]=cur; savePersist(catId, cur);
+  if(state.domain===catId){ state.rows=applyComputed(m, cur.map(r=>({_id:r._id||crypto.randomUUID(),...r}))); paintDomain(m); } else if(state.view==="home") renderHome();
+  _prog(null);
+  alert(ok+"건 등록 완료." + (ok<rows.length?(" ("+(rows.length-ok)+"건 실패)"):""));
+}
 function openSettings(){ const d=$("#settings"); renderSettingsBody(d); d.showModal(); }
 function renderSettingsBody(d){
   const act=getActive(); const actSet=new Set(act);
@@ -2647,6 +2704,14 @@ function renderSettingsBody(d){
     <div class="hint">토글로 켜고 끄고, 왼쪽 <b>≡</b>을 끌어 순서를 바꾸세요. 홈·상단 탭에 바로 반영됩니다. (시트 데이터는 지워지지 않아요)</div>
     <div class="ord-list" id="catList">${act.map(arow).join("")}</div>
     ${inact.length?`<div class="hint" style="margin-top:12px;color:var(--sub)">꺼진 카테고리 · 켜면 홈에 추가</div>${inact.map(irow).join("")}`:""}
+    <h4>가져오기 · 내보내기 (CSV)</h4>
+    <div class="hint">카테고리를 CSV로 내보내 다른 사람에게 주거나, 받은 CSV를 골라 한꺼번에 등록해요. (사진은 제외 · 등록 항목엔 새 번호 자동 부여)</div>
+    <div class="io-row">
+      <select id="ioCat" class="io-sel">${getActive().filter(id=>id!=="movies"&&id!=="carlog"&&MANIFESTS[id]).map(id=>`<option value="${id}">${MANIFESTS[id].title}</option>`).join("")}</select>
+      <button class="btn ghost" id="ioExport" type="button">⬇ 내보내기</button>
+      <button class="btn ghost" id="ioImport" type="button">⬆ 불러오기</button>
+      <input type="file" id="ioFile" accept=".csv,text/csv" style="display:none">
+    </div>
     <h4>구글 계정 · 개인 설정</h4>
     <div class="hint">모든 데이터는 내 구글시트 하나에 탭으로 모입니다. 남에게 배포할 때 쓰는 '구글 로그인'은 다음 단계에서 붙입니다.</div>
     <button class="btn ghost" id="closeSet" style="margin-top:22px">닫기</button>
@@ -2659,6 +2724,10 @@ function renderSettingsBody(d){
     renderSettingsBody(d);
   });
   const cl=$("#catList"); if(cl) wireReorder(cl, order=>{ setActive(order); if(state.view==="home") renderHome(); else if(state.view==="domain") renderTabs(); });
+  { const _sel=$("#ioCat"), _fi=$("#ioFile"), _xp=$("#ioExport"), _im=$("#ioImport");
+    if(_xp) _xp.onclick=()=>exportCSV(_sel.value);
+    if(_im) _im.onclick=()=>{ if(_fi) _fi.click(); };
+    if(_fi) _fi.onchange=e=>{ const file=e.target.files&&e.target.files[0]; if(!file) return; const rd=new FileReader(); rd.onload=()=>{ const rows=csvToRows(_sel.value, String(rd.result||"")); doImport(_sel.value, rows); _fi.value=""; }; rd.readAsText(file,"utf-8"); }; }
   $("#closeSet").onclick=()=>d.close();
 }
 function wireReorder(box, onCommit){
