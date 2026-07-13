@@ -171,7 +171,8 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
   .dv-seg{ display:flex; gap:6px; margin-left:auto; }
   .dv-btn{ font-family:var(--sans); font-size:12.5px; font-weight:600; padding:6px 12px; border-radius:8px; border:1.5px solid var(--line); background:#fff; color:var(--ink-soft); cursor:pointer; white-space:nowrap; }
   .dv-btn.on{ background:var(--ink); color:#fff; border-color:var(--ink); }
-  .viewbar{ display:flex; gap:6px; justify-content:flex-end; margin:0 0 10px; }
+  .viewbar{ display:flex; gap:5px; justify-content:flex-end; margin:0 0 6px; }
+  .viewbar .dv-btn{ padding:4px 10px; font-size:15px; line-height:1; }
   .cal-wrap{ padding:2px 0 10px; }
   .cal-head{ display:flex; align-items:center; justify-content:space-between; margin:4px 0 12px; }
   .cal-title{ font-family:var(--serif); font-size:16px; font-weight:700; color:var(--ink); }
@@ -468,11 +469,11 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
 <div class="wrap" id="root" data-domain="movies">
   <header class="masthead">
     <div class="mh-row">
-      <button id="brandBtn" type="button" class="brandbtn" aria-label="홈"><!-- Naedogam v126 (달력뷰 8개 카테고리 확대·빈날추가 버그수정·샘플 핵심필드) -->
+      <button id="brandBtn" type="button" class="brandbtn" aria-label="홈"><!-- Naedogam v127 (러닝 정렬수정·상세 화살표 날짜기준·달력 6개로 정리·정기결제/신용카드 개명·토글 축소) -->
         <svg class="brandmark" width="34" height="30" viewBox="26 28 62 54" aria-hidden="true"><rect x="28" y="40" width="12" height="38" rx="5" fill="#F7F5F0"/><rect x="44" y="30" width="12" height="48" rx="5" fill="#F7F5F0"/><rect x="60" y="32" width="12" height="46" rx="5" fill="#E0483F" transform="rotate(16 66 78)"/></svg>
         <span class="brandwm"><span class="bwm-ko">내도감</span><span class="bwm-en">NAEDOGAM</span></span>
       </button>
-      <span class="mhver">v126</span>
+      <span class="mhver">v127</span>
       <span class="spacer"></span>
       <span class="src-chip" id="srcChip" style="display:none">데모</span>
       <button class="icon-btn" id="searchToggle" type="button" style="display:none">🔍</button>
@@ -721,7 +722,7 @@ const MANIFESTS = {
            kv:[{k:"기분",f:"mood"},{k:"날씨",f:"weather"}] } },
 
   /* 정기구독: 매달·매년 빠져나가는 구독을 한눈에. 월/연 환산 합계까지. */
-  subs:{ id:"subs", title:"정기구독", icon:"🔄", vol:"卷7", canAdd:true,
+  subs:{ id:"subs", title:"정기결제", icon:"🔄", vol:"卷7", canAdd:true,
     source:{ type:"sheet", tab:"정기구독" },
     fields:[ {k:"name",sheet:"서비스",label:"서비스명",type:"text"},
              {k:"cost",sheet:"요금",label:"요금(원)",type:"number",money:true},
@@ -780,7 +781,7 @@ const MANIFESTS = {
                       r.status==="찜"?{t:"찜",cls:"on"}:0 ] } },
 
   /* 신용/체크카드: 내 카드 혜택·결제일 모아보기(카드형). 결제일은 일기 오늘내도감에도. */
-  cards:{ id:"cards", title:"신용/체크카드", icon:"💳", vol:"卷9", canAdd:true,
+  cards:{ id:"cards", title:"신용카드", icon:"💳", vol:"卷9", canAdd:true,
     source:{ type:"sheet", tab:"카드" },
     fields:[ {k:"name",sheet:"카드명",label:"카드명",type:"text",full:true},
              {k:"issuer",sheet:"카드사",label:"카드사",type:"text"},
@@ -1515,9 +1516,9 @@ function renderDiaryViewToggle(m){
   p.innerHTML=`<div class="dv-seg"><button class="dv-btn ${diaryView==='list'?'on':''}" data-dv="list">📋 리스트</button><button class="dv-btn ${diaryView==='cal'?'on':''}" data-dv="cal">📅 달력</button></div>`;
   p.querySelectorAll("[data-dv]").forEach(b=>b.onclick=()=>{ diaryView=b.dataset.dv; state.page=0; paintDomain(m); });
 }
-const CAL_IDS=new Set(["diary","running","mountains","travel","food","carlog","culture","gift","pet"]);
+const CAL_IDS=new Set(["diary","running","travel","culture","gift","pet"]);
 function calDateKey(m){ const f=(m.fields||[]).find(x=>x.type==="date"); return f?f.k:"date"; }
-function _viewBar(m){ return `<div class="viewbar"><button class="dv-btn ${diaryView==='list'?'on':''}" type="button" data-dv="list">📋 리스트</button><button class="dv-btn ${diaryView==='cal'?'on':''}" type="button" data-dv="cal">📅 달력</button></div>`; }
+function _viewBar(m){ return `<div class="viewbar"><button class="dv-btn ${diaryView==='list'?'on':''}" type="button" data-dv="list" aria-label="리스트">📋</button><button class="dv-btn ${diaryView==='cal'?'on':''}" type="button" data-dv="cal" aria-label="달력">📅</button></div>`; }
 function _wireViewBar(m){ $("#list").querySelectorAll(".viewbar [data-dv]").forEach(b=>b.onclick=()=>{ diaryView=b.dataset.dv; state.page=0; paintDomain(m); }); }
 function renderDiaryCalendar(m, rows){
   if(!diaryYM){ const t=new Date(); diaryYM={y:t.getFullYear(), mo:t.getMonth()}; }
@@ -1822,9 +1823,16 @@ function renderCard(m, r, no){ if(m.id==="books") return bookCard(r); const c=m.
 function _navSet(m,r){ const i=NAV_LIST.findIndex(x=>String(x._id)===String(r._id)); NAV_CUR={m, idx:i}; requestAnimationFrame(_mountDetailNav); }
 function _mountDetailNav(){ const d=$("#detail"); if(!d.open||!NAV_CUR) return; d.querySelectorAll(".dnav").forEach(x=>x.remove());
   const m=NAV_CUR.m, idx=NAV_CUR.idx; if(idx<0||NAV_LIST.length<2) return;
-  const mk=(dir,dis)=>{ const b=document.createElement("button"); b.className="dnav dnav-"+dir; b.type="button"; b.textContent=dir==="prev"?"‹":"›"; b.disabled=dis;
-    b.onclick=e=>{ e.stopPropagation(); const ni=idx+(dir==="prev"?-1:1); if(ni>=0&&ni<NAV_LIST.length) openDetail(m, NAV_LIST[ni]); }; return b; };
-  d.appendChild(mk("prev", idx<=0)); d.appendChild(mk("next", idx>=NAV_LIST.length-1)); }
+  const dk=(m.fields||[]).some(f=>f.type==="date")?calDateKey(m):null;
+  let leftI, rightI;
+  if(dk){ const cur=_isoOf(NAV_LIST[idx][dk])||""; let older=null, newer=null;
+    NAV_LIST.forEach((r,i)=>{ if(i===idx) return; const dd=_isoOf(r[dk])||""; if(!dd) return;
+      if(dd<cur){ if(!older||dd>older.d) older={i,d:dd}; } else if(dd>cur){ if(!newer||dd<newer.d) newer={i,d:dd}; } });
+    leftI=older?older.i:-1; rightI=newer?newer.i:-1;
+  } else { leftI=idx>0?idx-1:-1; rightI=idx<NAV_LIST.length-1?idx+1:-1; }
+  const mk=(dir,ti)=>{ const b=document.createElement("button"); b.className="dnav dnav-"+dir; b.type="button"; b.textContent=dir==="prev"?"‹":"›"; b.disabled=ti<0;
+    b.onclick=e=>{ e.stopPropagation(); if(ti>=0) openDetail(m, NAV_LIST[ti]); }; return b; };
+  d.appendChild(mk("prev", leftI)); d.appendChild(mk("next", rightI)); }
 function openDetail(m, r){ _navSet(m, r);
   if(m.id==="movies"){ openMovieDetail(m, r); return; }
   if(m.id==="books"){ openBookDetail(m, r); return; }
@@ -2362,7 +2370,9 @@ function paintDomain(m){   // state.rows를 화면에 그림 (데이터 다시 �
   if((m.sorts||m.scopeSort) && state.sort && state.sort!=="default"){
     const asc=state.sortAsc, k=state.sort;
     const isNum=v=>/^\s*-?[\d.,]+\s*$/.test(String(v));   // 문자열 전체가 숫자일 때만 숫자정렬(날짜는 문자정렬)
+    const _kf=(m.fields||[]).find(f=>f.k===k); const _isDate=_kf&&_kf.type==="date";
     rows=[...rows].sort((a,b)=>{ const av=a[k],bv=b[k];
+      if(_isDate){ const ad=parseDate(av), bd=parseDate(bv); const an=ad?ad.getTime():-Infinity, bn=bd?bd.getTime():-Infinity; return asc?an-bn:bn-an; }
       if(isNum(av)&&isNum(bv)){ const an=parseFloat(av),bn=parseFloat(bv); return asc?an-bn:bn-an; }
       const as=String(av==null?"":av),bs=String(bv==null?"":bv); return asc?as.localeCompare(bs,"ko"):bs.localeCompare(as,"ko"); });
   }
