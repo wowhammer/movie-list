@@ -477,11 +477,11 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
 <div class="wrap" id="root" data-domain="movies">
   <header class="masthead">
     <div class="mh-row">
-      <button id="brandBtn" type="button" class="brandbtn" aria-label="홈"><!-- Naedogam v131 (커스텀 카테고리 개선: 칸이름 중복방지·빌더 UX·카드 제목대체/색상·날짜칸→오늘내도감 포함) -->
+      <button id="brandBtn" type="button" class="brandbtn" aria-label="홈"><!-- Naedogam v132 (커스텀 카테고리 삭제/수정: 설정에서 이름·아이콘 수정 + 삭제) -->
         <svg class="brandmark" width="34" height="30" viewBox="26 28 62 54" aria-hidden="true"><rect x="28" y="40" width="12" height="38" rx="5" fill="#F7F5F0"/><rect x="44" y="30" width="12" height="48" rx="5" fill="#F7F5F0"/><rect x="60" y="32" width="12" height="46" rx="5" fill="#E0483F" transform="rotate(16 66 78)"/></svg>
         <span class="brandwm"><span class="bwm-ko">내도감</span><span class="bwm-en">NAEDOGAM</span></span>
       </button>
-      <span class="mhver">v131</span>
+      <span class="mhver">v132</span>
       <span class="spacer"></span>
       <span class="src-chip" id="srcChip" style="display:none">데모</span>
       <button class="icon-btn" id="searchToggle" type="button" style="display:none">🔍</button>
@@ -518,6 +518,7 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
 <dialog id="rec"></dialog>
 <dialog id="dash"></dialog>
 <dialog id="catbuilder"></dialog>
+<dialog id="catedit"></dialog>
 
 <script>
 /* =====================================================================
@@ -1313,6 +1314,7 @@ async function ensureCategoryTab(id){ const m=MANIFESTS[id]; if(m.source?.type!=
    시트 '_카테고리' 탭에 정의를 저장/로드. 기존 폼·카드·통계·저장 엔진을 그대로 재사용(백엔드 수정 없음). */
 const CUSTOM_TAB = "_카테고리";
 const CUSTOM_HDR = ["_id","제목","아이콘","탭","정의"];
+const CAT_EMOJIS = ["🗂","📁","📦","🥃","🍷","🍺","☕","🍽️","🍰","🍜","🎮","🎧","🎬","📷","🎨","📚","✈️","🏨","🏔️","🏃","🏋️","⚽","🚗","🪴","🌸","🐶","🐱","🐟","💊","💳","🧾","🎁","🎫","⌚","💡","🏆","🎯","🧴"];
 function expandCustomManifest(spec){
   const fields=(spec.fields||[]).map((f,i)=>{
     const o={ k: f.k || ("f"+(i+1)), sheet: f.label, label: f.label, type: f.type||"text" };
@@ -2918,8 +2920,9 @@ function openSettings(){ const d=$("#settings"); renderSettingsBody(d); d.showMo
 function renderSettingsBody(d){
   const act=getActive(); const actSet=new Set(act);
   const inact=Object.values(MANIFESTS).map(m=>m.id).filter(id=>!actSet.has(id));
-  const arow=id=>{ const m=MANIFESTS[id]; return `<div class="cat-mrow ord-row" data-id="${id}"><span class="ord-handle" aria-label="끌어서 순서 이동">≡</span><span class="mi">${m.icon}</span><span class="mn">${m.title} <span class="mv">${m.vol}</span></span><button class="sw on" data-id="${id}" role="switch" aria-checked="true" type="button"></button></div>`; };
-  const irow=id=>{ const m=MANIFESTS[id]; return `<div class="cat-mrow" data-id="${id}"><span class="ord-handle ord-ph">≡</span><span class="mi">${m.icon}</span><span class="mn">${m.title} <span class="mv">${m.vol}</span></span><button class="sw" data-id="${id}" role="switch" aria-checked="false" type="button"></button></div>`; };
+  const _cc=m=>m.custom?`<button class="cat-edit" data-id="${m.id}" title="수정" type="button" style="background:none;border:none;cursor:pointer;font-size:13px;opacity:.6;padding:2px 5px">✏</button><button class="cat-del" data-id="${m.id}" title="삭제" type="button" style="background:none;border:none;cursor:pointer;font-size:13px;opacity:.6;padding:2px 5px">🗑</button>`:"";
+  const arow=id=>{ const m=MANIFESTS[id]; return `<div class="cat-mrow ord-row" data-id="${id}"><span class="ord-handle" aria-label="끌어서 순서 이동">≡</span><span class="mi">${m.icon}</span><span class="mn">${m.title} <span class="mv">${m.vol}</span></span>${_cc(m)}<button class="sw on" data-id="${id}" role="switch" aria-checked="true" type="button"></button></div>`; };
+  const irow=id=>{ const m=MANIFESTS[id]; return `<div class="cat-mrow" data-id="${id}"><span class="ord-handle ord-ph">≡</span><span class="mi">${m.icon}</span><span class="mn">${m.title} <span class="mv">${m.vol}</span></span>${_cc(m)}<button class="sw" data-id="${id}" role="switch" aria-checked="false" type="button"></button></div>`; };
   d.innerHTML=`<div class="dhead"><h3>설정</h3></div><div class="dbody set">
     <h4>카테고리</h4>
     <div class="hint">토글로 켜고 끄고, 왼쪽 <b>≡</b>을 끌어 순서를 바꾸세요. 홈·상단 탭에 바로 반영됩니다. (시트 데이터는 지워지지 않아요)</div>
@@ -2946,6 +2949,8 @@ function renderSettingsBody(d){
     if(state.view==="home") renderHome(); else if(state.view==="domain") renderTabs();
     renderSettingsBody(d);
   });
+  d.querySelectorAll(".cat-edit").forEach(b=>b.onclick=e=>{ e.stopPropagation(); openCatEdit(b.dataset.id); });
+  d.querySelectorAll(".cat-del").forEach(b=>b.onclick=e=>{ e.stopPropagation(); deleteCustomCategory(b.dataset.id); });
   const cl=$("#catList"); if(cl) wireReorder(cl, order=>{ setActive(order); if(state.view==="home") renderHome(); else if(state.view==="domain") renderTabs(); });
   { const _sel=$("#ioCat"), _fi=$("#ioFile"), _xp=$("#ioExport"), _im=$("#ioImport");
     if(_xp) _xp.onclick=()=>exportCSV(_sel.value);
@@ -2997,7 +3002,7 @@ function openCatBuilder(){
       <input id="cb_icon" value="🗂" maxlength="2" aria-label="아이콘" style="flex:0 0 42px;text-align:center;font-size:17px;padding:6px 0">
       <input id="cb_name" placeholder="예: 위스키" style="flex:1;min-width:0;font-size:16px;padding:9px 11px">
     </div>
-    <div style="margin-top:6px">${["🗂","📁","📦","🥃","🍷","🍺","☕","🍽️","🍰","🍜","🎮","🎧","🎬","📷","🎨","📚","✈️","🏨","🏔️","🏃","🏋️","⚽","🚗","🪴","🌸","🐶","🐱","🐟","💊","💳","🧾","🎁","🎫","⌚","💡","🏆","🎯","🧴"].map(e=>`<button type="button" class="cb-emo" data-e="${e}" style="font-size:18px;border:1px solid var(--line);background:#fff;border-radius:8px;padding:3px 7px;margin:0 4px 4px 0;cursor:pointer">${e}</button>`).join("")}</div>
+    <div style="margin-top:6px">${CAT_EMOJIS.map(e=>`<button type="button" class="cb-emo" data-e="${e}" style="font-size:18px;border:1px solid var(--line);background:#fff;border-radius:8px;padding:3px 7px;margin:0 4px 4px 0;cursor:pointer">${e}</button>`).join("")}</div>
     <label style="display:block;margin:14px 0 2px;font-weight:600">칸(입력 항목)</label>
     <div id="cb_fields"></div>
     <button type="button" id="cb_add" class="btn ghost" style="margin-top:4px">＋ 칸 추가</button>
@@ -3053,6 +3058,58 @@ async function saveCustomCategory(d){
   MANIFESTS[id]=m; toggleActive(id,true);
   d.close(); const sd=$("#settings"); if(sd&&sd.open) sd.close();
   openDomain(id);
+}
+
+/* ── 커스텀 카테고리 삭제/수정 — v132 ── */
+async function deleteCustomCategory(id){
+  const m=MANIFESTS[id]; if(!m||!m.custom) return;
+  if(!confirm(`'${m.title}' 카테고리를 삭제할까요?\n\n· 목록에서 사라지고 정의가 지워집니다.\n· 시트의 데이터 탭('${m.source.tab}')과 입력한 값은 그대로 남아요(원하면 시트에서 직접 삭제).`)) return;
+  try{ await sheetSrc()._post({action:"delete", tab:CUSTOM_TAB, id, idKey:"_id"}); }
+  catch(e){ alert("삭제 실패: "+((e&&e.message)||e)); return; }
+  toggleActive(id,false); delete MANIFESTS[id];
+  if(state.domain===id) goHome();
+  const sd=$("#settings"); if(sd&&sd.open) renderSettingsBody(sd);
+  else if(state.view==="home") renderHome();
+}
+function openCatEdit(id){
+  const m=MANIFESTS[id]; if(!m||!m.custom) return;
+  const d=$("#catedit");
+  d.innerHTML=`<div class="dhead"><h3>카테고리 수정</h3></div>
+  <div class="dbody">
+    <div class="hint">이름과 아이콘을 바꿉니다. 칸(입력 항목) 구조는 여기서 못 바꿔요 — 바꾸려면 삭제 후 새로 만들어 주세요.</div>
+    <label style="display:block;margin:12px 0 4px;font-weight:600">이름</label>
+    <div style="display:flex;gap:8px">
+      <input id="ce_icon" value="${String(m.icon||"🗂").replace(/"/g,"&quot;")}" maxlength="2" aria-label="아이콘" style="flex:0 0 42px;text-align:center;font-size:17px;padding:6px 0">
+      <input id="ce_name" value="${String(m.title||"").replace(/"/g,"&quot;")}" style="flex:1;min-width:0;font-size:16px;padding:9px 11px">
+    </div>
+    <div style="margin-top:6px">${CAT_EMOJIS.map(e=>`<button type="button" class="ce-emo" data-e="${e}" style="font-size:18px;border:1px solid var(--line);background:#fff;border-radius:8px;padding:3px 7px;margin:0 4px 4px 0;cursor:pointer">${e}</button>`).join("")}</div>
+    <div style="display:flex;gap:8px;margin-top:20px">
+      <button type="button" id="ce_cancel" class="btn ghost" style="flex:1">취소</button>
+      <button type="button" id="ce_save" class="btn" style="flex:2">저장</button>
+    </div>
+    <div id="ce_msg" class="hint" style="margin-top:10px"></div>
+  </div>`;
+  d.querySelectorAll(".ce-emo").forEach(b=>b.onclick=()=>{ d.querySelector("#ce_icon").value=b.dataset.e; });
+  d.querySelector("#ce_cancel").onclick=()=>d.close();
+  d.querySelector("#ce_save").onclick=()=>saveCatEdit(d, id);
+  d.showModal();
+}
+async function saveCatEdit(d, id){
+  const msg=d.querySelector("#ce_msg"); const setMsg=(t,err)=>{ msg.textContent=t; msg.style.color=err?"#dc2626":"var(--sub)"; };
+  const m=MANIFESTS[id]; if(!m){ d.close(); return; }
+  const name=(d.querySelector("#ce_name").value||"").trim();
+  const icon=(d.querySelector("#ce_icon").value||"🗂").trim()||"🗂";
+  if(!name){ setMsg("이름을 입력하세요.",1); return; }
+  const clash=Object.values(MANIFESTS).some(x=> x.id!==id && (x.title===name || (x.source&&x.source.tab===name)));
+  if(clash || name===CUSTOM_TAB){ setMsg("이미 있는 이름이에요. 다른 이름을 쓰세요.",1); return; }
+  const sv=d.querySelector("#ce_save"); sv.disabled=true; setMsg("저장 중…");
+  try{ await sheetSrc()._post({action:"update", tab:CUSTOM_TAB, id, row:{"제목":name,"아이콘":icon}, idKey:"_id"}); }
+  catch(e){ sv.disabled=false; setMsg("저장 실패: "+((e&&e.message)||e),1); return; }
+  const fieldSpecs=(m.fields||[]).map(f=>{ const o={label:f.label}; if(f.money){ o.type="number"; o.money=true; } else o.type=f.type; if(Array.isArray(f.options)) o.options=f.options.filter(Boolean); return o; });
+  MANIFESTS[id]=expandCustomManifest({id, title:name, icon, tab:m.source.tab, fields:fieldSpecs});   // 원래 탭·칸 보존
+  d.close();
+  const sd=$("#settings"); if(sd&&sd.open) renderSettingsBody(sd);
+  if(state.view==="home") renderHome(); else if(state.view==="domain"){ renderTabs(); if(state.domain===id) loadAndRender(); }
 }
 
 /* ── 6. 부트: 저장된 Client ID 있으면 구글, 없으면 데모 ── */
@@ -3260,7 +3317,7 @@ const SAMPLE = {
   ]
 };
 
-["detail","person","settings","rec","dash","catbuilder"].forEach(id=>{ const dg=document.getElementById(id);
+["detail","person","settings","rec","dash","catbuilder","catedit"].forEach(id=>{ const dg=document.getElementById(id);
   if(dg) dg.addEventListener("click",e=>{ if(e.target===dg) dg.close(); }); });
 boot();
 </script>
