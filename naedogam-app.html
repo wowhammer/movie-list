@@ -1104,6 +1104,50 @@ const MANIFESTS = {
            kv:[{k:"검사일",f:"date"},{k:"수치",f:"value"},{k:"정상범위",f:"range"},{k:"병원",f:"hospital"}] } }
 };
 
+/* ── 배포용: 영화·차계부를 표준 nd 카테고리로 재정의(신규 사용자용 깨끗한 버전). 개인앱은 영향 없음. ── */
+if(typeof CONFIG!=="undefined" && CONFIG.DEPLOY){
+  MANIFESTS.movies={ id:"movies", title:"영화", icon:"🎬", vol:"卷1", canAdd:true,
+    source:{ type:"sheet", tab:"영화" },
+    fields:[ {k:"title",sheet:"제목",label:"제목",type:"text"},
+             {k:"director",sheet:"감독",label:"감독",type:"text"},
+             {k:"actors",sheet:"배우",label:"배우",type:"text"},
+             {k:"year",sheet:"개봉연도",label:"개봉연도",type:"number"},
+             {k:"country",sheet:"국적",label:"국적",type:"text"},
+             {k:"status",sheet:"시청상태",label:"시청상태",type:"select",options:["","안봄","봤음","다시볼것","찜"]},
+             {k:"rating",sheet:"평점",label:"평점",type:"rating"},
+             {k:"streaming",sheet:"스트리밍",label:"스트리밍(쉼표로 여러 개)",type:"tags"},
+             {k:"review",sheet:"메모",label:"메모",type:"textarea"},
+             {k:"cover",sheet:"포스터",label:"포스터",type:"image"} ],
+    search:["title","director","actors"],
+    stats:[ {label:"전체",type:"count"},
+            {label:"봤음",type:"countIf",field:"status",eq:"봤음",c:"#16a34a"},
+            {label:"다시볼것",type:"countIf",field:"status",eq:"다시볼것",c:"#b45309"},
+            {label:"찜",type:"countIf",field:"status",eq:"찜",c:"#c2410c"} ],
+    card:{ kind:"specimen", thumb:"🎞",
+           meta:r=>[r.year, r.director, r.actors].filter(Boolean).join(" · "),
+           tags:"streaming",
+           flags:r=>[ (r.rating!=null&&r.rating!=="")?{t:"★ "+r.rating,cls:"star"}:0,
+                      r.status==="봤음"?{t:"봤음",cls:"on"}:0,
+                      r.status==="다시볼것"?{t:"다시볼것",cls:"on"}:0,
+                      r.status==="찜"?{t:"찜",cls:"on"}:0 ] } };
+  MANIFESTS.carlog={ id:"carlog", title:"차계부", icon:"🚗", vol:"卷2", canAdd:true,
+    source:{ type:"sheet", tab:"차계부" },
+    fields:[ {k:"date",sheet:"날짜",label:"날짜",type:"date",today:true},
+             {k:"car",sheet:"차량",label:"차량",type:"text"},
+             {k:"work",sheet:"작업내용",label:"작업내용",type:"text"},
+             {k:"shop",sheet:"정비소",label:"정비소",type:"text"},
+             {k:"cost",sheet:"가격",label:"가격(원)",type:"number",money:true},
+             {k:"odo",sheet:"주행거리",label:"주행거리(km)",type:"number"},
+             {k:"memo",sheet:"비고",label:"비고",type:"text"},
+             {k:"cover",sheet:"사진",label:"사진",type:"image"} ],
+    filterBy:{ field:"car", allLabel:"전체" },
+    search:["work","shop","car","memo"],
+    stats:[ {label:"기록",type:"count"},
+            {label:"총 정비비",type:"sum",field:"cost",unit:"원",c:"#c2410c"} ],
+    card:{ kind:"data", title:r=>`${r.date||""}${r.car?" · "+r.car:""}`,
+           kv:[{k:"작업",f:"work"},{k:"금액",f:"cost",u:"원"},{k:"주행",f:"odo",u:"km"},{k:"정비소",f:"shop"}] } };
+}
+
 /* ── 2. DataSource 추상화 ──
    계약: ensureReady(), list(domainId)→rows[], upsert(domainId,row), label, isLive */
 class MockDataSource {
@@ -1647,7 +1691,7 @@ function renderTabs(){ const tw=$("#tabs"); tw.innerHTML=getActive().map(id=>{ c
   return `<button class="tab" role="tab" data-id="${id}" aria-selected="${id===state.domain}">${tabIco(id,m)} ${m.title}</button>`; }).join("");
   const _sel=tw.querySelector('.tab[aria-selected="true"]'); if(_sel){ tw.scrollLeft=Math.max(0,_sel.offsetLeft-(tw.clientWidth-_sel.offsetWidth)/2); } }
 function renderStats(m, rows){
-  const isMovie = m.id==="movies";
+  const isMovie = m.id==="movies" && !CONFIG.DEPLOY;
   if(m.statStyle==="mood"){
     const total=calcStat(m.stats[0], rows);
     const moods=m.stats.slice(1).map(x=>({e:x.label, eq:x.eq, n:calcStat(x,rows)}));
@@ -2097,7 +2141,7 @@ function _mountDetailNav(){ const d=$("#detail"); if(!d.open||!NAV_CUR) return; 
     b.onclick=e=>{ e.stopPropagation(); if(ti>=0) openDetail(m, NAV_LIST[ti]); }; return b; };
   d.appendChild(mk("prev", leftI)); d.appendChild(mk("next", rightI)); }
 function openDetail(m, r){ _navSet(m, r);
-  if(m.id==="movies"){ openMovieDetail(m, r); return; }
+  if(m.id==="movies" && !CONFIG.DEPLOY){ openMovieDetail(m, r); return; }
   if(m.id==="books"){ openBookDetail(m, r); return; }
   const LBL={pace:"페이스"}; const FT={}; (m.fields||[]).forEach(f=>{ LBL[f.k]=f.sheet||String(f.label||f.k).replace(/\s*\(.*$/,""); FT[f.k]=f.type; });
   const _imgKeys=(m.fields||[]).filter(f=>f.type==="image").map(f=>f.k);
@@ -2111,7 +2155,7 @@ function openDetail(m, r){ _navSet(m, r);
     return `<div class="drow"><span class="k">${LBL[k]||k}</span><span>${Array.isArray(v)?v.join(", "):v===null?"—":v===true?"예":v===false?"아니오":(typeof v==="number"&&k!=="year"&&!/연도/.test(LBL[k]||"")?v.toLocaleString():v)}</span></div>`; }).join("");
   const mapLinks = (m.id==="mountains") ? `<div class="mvlinks"><a class="btn ghost" target="_blank" rel="noopener" href="https://map.naver.com/p/search/${encodeURIComponent(r.title||"")}"><img class="lnkico" src="https://www.google.com/s2/favicons?domain=map.naver.com&sz=64" onerror="this.remove()">네이버지도</a><a class="btn ghost" target="_blank" rel="noopener" href="https://www.google.com/maps/search/${encodeURIComponent((r.title||"")+" "+(r.region||""))}"><img class="lnkico" src="https://www.google.com/s2/favicons?domain=google.com&sz=64" onerror="this.remove()">구글지도</a></div>` : "";
   const editable = m.source?.type==="sheet" || m.id==="carlog";
-  const isMovie = m.id==="movies";
+  const isMovie = m.id==="movies" && !CONFIG.DEPLOY;
   let foot;
   if(isMovie){
     foot=`<div style="display:flex;gap:8px;padding:6px 18px 18px;flex-wrap:wrap">
@@ -2506,13 +2550,13 @@ function openRecordForm(m, existing, prefill){
 }
 /* 저장을 분야에 맞는 통로로 보냄 (영화=기존 수정통로 / 차계부=nd문(ID) / 도서·명산·러닝=nd문(_id)) */
 async function saveRecord(m, row, existing){
-  if(m.id==="movies"){                       // 영화 정보수정: MOVIE 탭, 원제 기준(전체 행 재작성)
+  if(m.id==="movies" && !CONFIG.DEPLOY){                       // 영화 정보수정: MOVIE 탭, 원제 기준(전체 행 재작성)
     const base=(CACHE.movies||[]).find(x=>String(x._id)===String((existing&&existing._id)||row._id)) || existing || {};
     const merged=Object.assign({}, base, row);
     merged.recommendList=String(merged.recommend==null?"":merged.recommend).split(/[\/,]+/).map(x=>x.trim()).filter(Boolean);
     return sheetSrc().updateRaw(sheetSrc().tabOf("movies"), (existing&&existing.orig)||merged.orig||merged._id, movieKorRow(merged), "원제");
   }
-  if(m.id==="carlog"){                        // 차계부: 차계부/CARLOG 탭, _id 또는 ID 자동감지
+  if(m.id==="carlog" && !CONFIG.DEPLOY){                        // 차계부: 차계부/CARLOG 탭, _id 또는 ID 자동감지
     const S=sheetSrc(), tab=S.tabOf("carlog"), idk=S.idkeyOf("carlog");
     const kor={};
     (m.fields||[]).forEach(f=>{ kor[f.sheet] = (row[f.k]==null?"":row[f.k]); });
@@ -2610,8 +2654,8 @@ function statSubline(m, rows){   // 통계를 상단 서브라인으로 통일. 
 function paintDomain(m){   // state.rows를 화면에 그림 (데이터 다시 안 받고 재렌더 가능)
   const pk=$("#picker"); pk.style.alignItems=""; pk.style.overflow=""; pk.style.justifyContent="";     // 공유 UI 초기화
   $("#stats").className="stats"; $("#stats").style.display=""; $("#scope").style.flexDirection=""; $("#scope").style.overflow=""; $("#scope").style.justifyContent=""; $("#scope").classList.remove("scopetabs"); $("#count").classList.remove("countrow"); $("#count").style.display="";
-  if(m.id==="movies"){ paintMovies(m); return; }
-  if(m.id==="carlog"){ paintCarlog(m); return; }
+  if(m.id==="movies" && !CONFIG.DEPLOY){ paintMovies(m); return; }
+  if(m.id==="carlog" && !CONFIG.DEPLOY){ paintCarlog(m); return; }
   $("#scope").style.display="none";
   renderPicker(m);
   applySearchUI(m);
@@ -3093,7 +3137,7 @@ async function doImport(catId, rows){
 function openSettings(){ const d=$("#settings"); renderSettingsBody(d); d.showModal(); }
 function renderSettingsBody(d){
   const act=getActive(); const actSet=new Set(act);
-  const inact=Object.values(MANIFESTS).map(m=>m.id).filter(id=>!actSet.has(id) && !(CONFIG.DEPLOY && (id==="movies"||id==="carlog")));
+  const inact=Object.values(MANIFESTS).map(m=>m.id).filter(id=>!actSet.has(id));
   const _cc=m=>m.custom?`<button class="cat-edit" data-id="${m.id}" title="수정" type="button" style="background:none;border:none;cursor:pointer;font-size:13px;opacity:.6;padding:2px 5px">✏</button><button class="cat-del" data-id="${m.id}" title="삭제" type="button" style="background:none;border:none;cursor:pointer;font-size:13px;opacity:.6;padding:2px 5px">🗑</button>`:"";
   const arow=id=>{ const m=MANIFESTS[id]; return `<div class="cat-mrow ord-row" data-id="${id}"><span class="ord-handle" aria-label="끌어서 순서 이동">≡</span><span class="mi">${m.icon}</span><span class="mn">${m.title} <span class="mv">${m.vol}</span></span>${_cc(m)}<button class="sw on" data-id="${id}" role="switch" aria-checked="true" type="button"></button></div>`; };
   const irow=id=>{ const m=MANIFESTS[id]; return `<div class="cat-mrow" data-id="${id}"><span class="ord-handle ord-ph">≡</span><span class="mi">${m.icon}</span><span class="mn">${m.title} <span class="mv">${m.vol}</span></span>${_cc(m)}<button class="sw" data-id="${id}" role="switch" aria-checked="false" type="button"></button></div>`; };
@@ -3491,7 +3535,7 @@ $("#setBtn").addEventListener("click",openSettings);
 $("#syncBtn").addEventListener("click",syncNow);
 $("#dashBtn").addEventListener("click",openDashboard);
 $("#addBtn").addEventListener("click",()=>{ const m=MANIFESTS[state.domain]; if(!m?.canAdd) return;
-  if(state.domain==="movies") openAddMovie();
+  if(state.domain==="movies" && !CONFIG.DEPLOY) openAddMovie();
   else if(state.domain==="books") openAddBook();
   else openRecordForm(m, null); });
 
