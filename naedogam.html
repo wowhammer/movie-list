@@ -477,11 +477,11 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
 <div class="wrap" id="root" data-domain="movies">
   <header class="masthead">
     <div class="mh-row">
-      <button id="brandBtn" type="button" class="brandbtn" aria-label="홈"><!-- Naedogam v130 (커스텀 카테고리 STEP1: 사용자 정의 매니페스트 — 설정 '내 카테고리 만들기' + 시트 _카테고리 저장/로드) -->
+      <button id="brandBtn" type="button" class="brandbtn" aria-label="홈"><!-- Naedogam v131 (커스텀 카테고리 개선: 칸이름 중복방지·빌더 UX·카드 제목대체/색상·날짜칸→오늘내도감 포함) -->
         <svg class="brandmark" width="34" height="30" viewBox="26 28 62 54" aria-hidden="true"><rect x="28" y="40" width="12" height="38" rx="5" fill="#F7F5F0"/><rect x="44" y="30" width="12" height="48" rx="5" fill="#F7F5F0"/><rect x="60" y="32" width="12" height="46" rx="5" fill="#E0483F" transform="rotate(16 66 78)"/></svg>
         <span class="brandwm"><span class="bwm-ko">내도감</span><span class="bwm-en">NAEDOGAM</span></span>
       </button>
-      <span class="mhver">v130</span>
+      <span class="mhver">v131</span>
       <span class="spacer"></span>
       <span class="src-chip" id="srcChip" style="display:none">데모</span>
       <button class="icon-btn" id="searchToggle" type="button" style="display:none">🔍</button>
@@ -1325,16 +1325,20 @@ function expandCustomManifest(spec){
   const textKeys = fields.filter(f=>["text","textarea","tags"].includes(f.type)).map(f=>f.k);
   const kv = fields.filter(f=> f!==titleF && !["image","textarea"].includes(f.type))
                    .slice(0,6).map(f=>({k:f.label, f:f.k, ...(f.money?{u:"원"}:{})}));
-  return {
+  const titleOf = r=>{ let v = titleF ? r[titleF.k] : null;
+    if(v==null||v===""){ for(const f of fields){ if(r[f.k]!=null && r[f.k]!==""){ v=r[f.k]; break; } } }
+    return (v==null||v==="") ? "(제목 없음)" : String(v); };
+  const dateF = fields.find(f=>f.type==="date");
+  const man = {
     id: spec.id, title: spec.title||spec.id, icon: spec.icon||"🗂", vol:"", canAdd:true, custom:true,
     source:{ type:"sheet", tab: spec.tab || spec.title || spec.id },
     fields,
     search: textKeys.length?textKeys:(fields[0]?[fields[0].k]:[]),
     stats:[ {label:"전체", type:"count"} ],
-    card:{ kind:"data",
-      title: r=> (titleF ? String(r[titleF.k]==null?"":r[titleF.k]) : "") || "(제목 없음)",
-      kv }
+    card:{ kind:"data", title: titleOf, kv }
   };
+  if(dateF){ man.activity={ df:dateF.k, when:r=>true, label:spec.title||spec.id, name:titleOf }; man.dateSort=dateF.k; }
+  return man;
 }
 function customSpecFromRow(row){
   const id=String(row._id==null?"":row._id).trim(); if(!id) return null;
@@ -1897,8 +1901,10 @@ function renderCard(m, r, no){ if(m.id==="books") return bookCard(r); const c=m.
     const _memo=(c.memo&&r[c.memo])?`<div class="cmemo">${String(r[c.memo]).replace(/</g,"&lt;")}</div>`:"";
     return `<button class="card catcard" data-id="${r._id}"><span class="thumb">${_cov?`<img src="${_cov}" alt="">`:c.thumb}</span>
       <span class="body"><h3>${r.title}</h3><div class="meta">${meta}</div>${_memo}${(flags||tags)?`<div class="cbadges">${flags}${tags}</div>`:""}</span></button>`; }
-  const kv=c.kv.map(col=>{ const v=r[col.f]; if(v==null||v==="") return ""; const s=(typeof v==="number"?fmt(v):v)+(col.u?` ${col.u}`:"");
-    return `<span><i class="kvk">${col.k}</i> <b>${s}</b></span>`; }).filter(Boolean).join("");
+  const _kvcol=["#b45309","#0891b2","#16a34a","#9333ea","#dc2626","#0ea5e9"];
+  const kv=c.kv.map((col,ci)=>{ const v=r[col.f]; if(v==null||v==="") return ""; const s=(typeof v==="number"?fmt(v):v)+(col.u?` ${col.u}`:"");
+    const _cs=m.custom?` style="color:${_kvcol[ci%_kvcol.length]}"`:"";
+    return `<span><i class="kvk"${_cs}>${col.k}</i> <b>${s}</b></span>`; }).filter(Boolean).join("");
   return `<button class="card catcard" data-id="${r._id}"><span class="thumb">${(r.cover||r._cover)?`<img src="${r.cover||r._cover}" alt="">`:(c.thumb||"🧾")}</span>
     <span class="body"><h3 style="font-size:15px">${c.title(r)}</h3><div class="kv">${kv}</div>${(()=>{ const cut=t=>t.slice(0,70).replace(/</g,"&lt;")+(t.length>70?"…":""); if(m.id==="diary"){ const a=[]; if(r.content) a.push(`<div class="meta" style="margin-top:5px">${cut(String(r.content))}</div>`); if(r.nddaily) a.push(`<div class="meta" style="margin-top:4px;opacity:.85">🗓 ${cut(String(r.nddaily).replace(/\n+/g," · "))}</div>`); return a.join(""); } const e=r.memo||r.content||r.nddaily; return e?`<div class="meta" style="margin-top:5px">${cut(String(e))}</div>`:""; })()}</span></button>`; }
 function _navSet(m,r){ const i=NAV_LIST.findIndex(x=>String(x._id)===String(r._id)); NAV_CUR={m, idx:i}; requestAnimationFrame(_mountDetailNav); }
@@ -2152,11 +2158,13 @@ const DIARY_LOG={
 function _isoOf(raw){ const pd=parseDate(String(raw)); if(!pd) return null; return pd.getFullYear()+"-"+String(pd.getMonth()+1).padStart(2,"0")+"-"+String(pd.getDate()).padStart(2,"0"); }
 function buildDayLog(dateStr){
   const lines=[];
-  getActive().forEach(id=>{ if(id==="diary"||id==="subs"||id==="travel"||!DIARY_LOG[id]) return;
-    const m=MANIFESTS[id]; const act=m.activity; if(!act||!act.df) return;
+  getActive().forEach(id=>{ if(id==="diary"||id==="subs"||id==="travel") return;
+    const m=MANIFESTS[id]; if(!m) return; const act=m.activity; if(!act||!act.df) return;
+    const logf = DIARY_LOG[id] || (m.custom ? (r=>`- ${m.title}: ${(m.card&&m.card.title)?m.card.title(r):(r._id||"")}`) : null);
+    if(!logf) return;
     (CACHE[id]||loadPersist(id)||[]).forEach(r=>{ const raw=r[act.df]; if(!raw) return;
       if(_isoOf(raw)!==dateStr) return; if(act.when && !act.when(r)) return;
-      try{ lines.push(DIARY_LOG[id](r)); }catch(e){} });
+      try{ lines.push(logf(r)); }catch(e){} });
   });
   if(getActive().includes("subs")){ const day=parseInt(dateStr.slice(8,10),10);
     (CACHE.subs||loadPersist("subs")||[]).forEach(r=>{ if(r.status!=="구독중") return;
@@ -2972,7 +2980,7 @@ function cbFieldBlock(label,type){
   const t=type||"text";
   return `<div class="cb-fblock" style="border:1px solid var(--line);border-radius:8px;padding:8px;margin:7px 0;background:var(--card)">
     <div style="display:flex;gap:6px;align-items:center">
-      <input class="cb-flabel" placeholder="칸 이름 (예: 증류소)" value="${String(label||"").replace(/"/g,"&quot;")}" style="flex:1;min-width:0">
+      <input class="cb-flabel" placeholder="칸 이름 (예: 제목, 증류소)" value="${String(label||"").replace(/"/g,"&quot;")}" style="flex:1;min-width:0">
       <select class="cb-ftype" style="flex:0 0 100px">${cbTypeOptions(t)}</select>
       <button type="button" class="cb-fdel" aria-label="칸 삭제" style="flex:0 0 auto;border:1px solid var(--line);background:#fff;border-radius:7px;padding:6px 9px;cursor:pointer">✕</button>
     </div>
@@ -2986,10 +2994,10 @@ function openCatBuilder(){
     <div class="hint">이름과 칸(입력 항목)만 정하면 목록·검색·통계·저장이 자동으로 만들어집니다. 정의는 내 구글시트 <b>${CUSTOM_TAB}</b> 탭에 저장돼요.</div>
     <label style="display:block;margin:12px 0 4px;font-weight:600">이름</label>
     <div style="display:flex;gap:8px">
-      <input id="cb_icon" value="🗂" maxlength="2" style="flex:0 0 54px;text-align:center;font-size:20px">
-      <input id="cb_name" placeholder="예: 위스키" style="flex:1;min-width:0">
+      <input id="cb_icon" value="🗂" maxlength="2" aria-label="아이콘" style="flex:0 0 42px;text-align:center;font-size:17px;padding:6px 0">
+      <input id="cb_name" placeholder="예: 위스키" style="flex:1;min-width:0;font-size:16px;padding:9px 11px">
     </div>
-    <div style="margin-top:6px">${["🗂","🥃","🍷","☕","🎮","🪴","🎧","🧾","🏆","🐟"].map(e=>`<button type="button" class="cb-emo" data-e="${e}" style="font-size:18px;border:1px solid var(--line);background:#fff;border-radius:8px;padding:3px 7px;margin:0 4px 4px 0;cursor:pointer">${e}</button>`).join("")}</div>
+    <div style="margin-top:6px">${["🗂","📁","📦","🥃","🍷","🍺","☕","🍽️","🍰","🍜","🎮","🎧","🎬","📷","🎨","📚","✈️","🏨","🏔️","🏃","🏋️","⚽","🚗","🪴","🌸","🐶","🐱","🐟","💊","💳","🧾","🎁","🎫","⌚","💡","🏆","🎯","🧴"].map(e=>`<button type="button" class="cb-emo" data-e="${e}" style="font-size:18px;border:1px solid var(--line);background:#fff;border-radius:8px;padding:3px 7px;margin:0 4px 4px 0;cursor:pointer">${e}</button>`).join("")}</div>
     <label style="display:block;margin:14px 0 2px;font-weight:600">칸(입력 항목)</label>
     <div id="cb_fields"></div>
     <button type="button" id="cb_add" class="btn ghost" style="margin-top:4px">＋ 칸 추가</button>
@@ -3008,7 +3016,7 @@ function openCatBuilder(){
     });
   }
   const addRow=(label,type)=>{ box.insertAdjacentHTML("beforeend", cbFieldBlock(label,type)); wireBlocks(); };
-  addRow("제목","text");
+  addRow("","text");
   d.querySelector("#cb_add").onclick=()=>addRow("","text");
   d.querySelectorAll(".cb-emo").forEach(b=>b.onclick=()=>{ d.querySelector("#cb_icon").value=b.dataset.e; });
   d.querySelector("#cb_cancel").onclick=()=>d.close();
@@ -3029,6 +3037,8 @@ async function saveCustomCategory(d){
     fields.push(f);
   });
   if(!fields.length){ setMsg("칸을 최소 1개 만드세요.",1); return; }
+  const _labs=fields.map(f=>f.label); const _dup=_labs.find((l,i)=>_labs.indexOf(l)!==i);
+  if(_dup){ setMsg("칸 이름이 겹쳐요: \""+_dup+"\" — 서로 다르게 지어주세요.",1); return; }
   const clash=Object.values(MANIFESTS).some(m=> m.title===name || (m.source&&m.source.tab===name));
   if(clash || name===CUSTOM_TAB){ setMsg("이미 있는 이름이에요. 다른 이름을 쓰세요.",1); return; }
   const id="cx_"+Date.now().toString(36);
