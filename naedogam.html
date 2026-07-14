@@ -477,11 +477,11 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
 <div class="wrap" id="root" data-domain="movies">
   <header class="masthead">
     <div class="mh-row">
-      <button id="brandBtn" type="button" class="brandbtn" aria-label="홈"><!-- Naedogam v134 (템플릿 갤러리: 완성 템플릿 12종 → 빌더 자동채움) -->
+      <button id="brandBtn" type="button" class="brandbtn" aria-label="홈"><!-- Naedogam v135 (탭 이름 충돌 안전장치: 같은 이름 탭에 다른 구조 있으면 자동 새 이름) -->
         <svg class="brandmark" width="34" height="30" viewBox="26 28 62 54" aria-hidden="true"><rect x="28" y="40" width="12" height="38" rx="5" fill="#F7F5F0"/><rect x="44" y="30" width="12" height="48" rx="5" fill="#F7F5F0"/><rect x="60" y="32" width="12" height="46" rx="5" fill="#E0483F" transform="rotate(16 66 78)"/></svg>
         <span class="brandwm"><span class="bwm-ko">내도감</span><span class="bwm-en">NAEDOGAM</span></span>
       </button>
-      <span class="mhver">v134</span>
+      <span class="mhver">v135</span>
       <span class="spacer"></span>
       <span class="src-chip" id="srcChip" style="display:none">데모</span>
       <button class="icon-btn" id="searchToggle" type="button" style="display:none">🔍</button>
@@ -3094,6 +3094,14 @@ function openCatBuilder(){
   d.querySelector("#cb_make").onclick=()=>saveCustomCategory(d);
   d.showModal();
 }
+/* 같은 이름 탭에 '다른 구조'의 데이터가 이미 있으면 '이름 (2)' 식으로 비켜서 만든다(데이터 꼬임 방지). */
+async function freeTabName(name, fields){
+  const expected = JSON.stringify(["_id"].concat((fields||[]).map(f=>f.label)));
+  async function conflict(t){ try{ const rows=await sheetSrc().readTab(t); if(!rows.length) return false; return JSON.stringify(Object.keys(rows[0]))!==expected; }catch(e){ return false; } }
+  let tab=name, n=2;
+  while(await conflict(tab)){ tab=name+" ("+n+")"; n++; if(n>50) break; }
+  return tab;
+}
 async function saveCustomCategory(d){
   const msg=d.querySelector("#cb_msg"); const setMsg=(t,err)=>{ msg.textContent=t; msg.style.color=err?"#dc2626":"var(--sub)"; };
   const name=(d.querySelector("#cb_name").value||"").trim();
@@ -3115,16 +3123,18 @@ async function saveCustomCategory(d){
   const clash=Object.values(MANIFESTS).some(m=> m.title===name || (m.source&&m.source.tab===name));
   if(clash || name===CUSTOM_TAB){ setMsg("이미 있는 이름이에요. 다른 이름을 쓰세요.",1); return; }
   const id="cx_"+Date.now().toString(36);
-  const spec={ id, title:name, icon, tab:name, fields };
-  const m=expandCustomManifest(spec);
   const S=sheetSrc(); const mk=d.querySelector("#cb_make"); mk.disabled=true; setMsg("저장 중…");
+  const tab=await freeTabName(name, fields);   // 같은 이름 탭이 다른 구조면 자동으로 새 이름
+  const spec={ id, title:name, icon, tab, fields };
+  const m=expandCustomManifest(spec);
   try{
     await S._post({action:"ensureTab", tab:CUSTOM_TAB, header:CUSTOM_HDR, rows:[]});
-    await S._post({action:"append", tab:CUSTOM_TAB, header:CUSTOM_HDR, row:{_id:id,"제목":name,"아이콘":icon,"탭":name,"정의":JSON.stringify(fields)}});
+    await S._post({action:"append", tab:CUSTOM_TAB, header:CUSTOM_HDR, row:{_id:id,"제목":name,"아이콘":icon,"탭":tab,"정의":JSON.stringify(fields)}});
     await S.ensure(m);
   }catch(e){ mk.disabled=false; setMsg("저장 실패: "+((e&&e.message)||e),1); return; }
   MANIFESTS[id]=m; toggleActive(id,true); cacheCustomDefs();
   d.close(); const sd=$("#settings"); if(sd&&sd.open) sd.close();
+  if(tab!==name) alert("'"+name+"' 탭이 이미 다른 데이터로 쓰이고 있어, 데이터는 '"+tab+"' 탭에 새로 만들었어요.");
   openDomain(id);
 }
 
