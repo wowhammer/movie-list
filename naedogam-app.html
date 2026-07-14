@@ -7,16 +7,16 @@
 
 <!-- 카톡·슬랙·페북 링크 미리보기 (Open Graph) -->
 <meta property="og:type" content="website" />
-<meta property="og:title" content="내도감" />
-<meta property="og:description" content="내 삶을 수집하는 개인 도감 — 영화·책·산·러닝을 한 곳에, 내 데이터로 영원히." />
+<meta property="og:title" content="내도감 — 내 삶을 수집하는 도감" />
+<meta property="og:description" content="영화·책·산·러닝·일기, 필요한 칸은 내가 만든다. 내 기록은 내 구글드라이브에 영원히 — 앱이 사라져도 남습니다." />
 <meta property="og:image" content="https://wowhammer.github.io/movie-list/og-image.png" />
 <meta property="og:image:width" content="1200" />
 <meta property="og:image:height" content="630" />
-<meta property="og:url" content="https://wowhammer.github.io/movie-list/naedogam.html" />
+<meta property="og:url" content="https://wowhammer.github.io/movie-list/naedogam-app.html" />
 <meta property="og:site_name" content="내도감" />
 <meta name="twitter:card" content="summary_large_image" />
-<meta name="twitter:title" content="내도감" />
-<meta name="twitter:description" content="내 삶을 수집하는 개인 도감 — 영화·책·산·러닝을 한 곳에, 내 데이터로 영원히." />
+<meta name="twitter:title" content="내도감 — 내 삶을 수집하는 도감" />
+<meta name="twitter:description" content="영화·책·산·러닝·일기, 필요한 칸은 내가 만든다. 내 기록은 내 구글드라이브에 영원히 — 앱이 사라져도 남습니다." />
 <meta name="twitter:image" content="https://wowhammer.github.io/movie-list/og-image.png" />
 
 <!-- 파비콘 · 스마트폰 홈화면 아이콘(PWA) -->
@@ -521,7 +521,7 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
 <dialog id="dash"></dialog>
 <dialog id="catbuilder"></dialog>
 <div id="gate" style="display:none;position:fixed;inset:0;z-index:200;background:#18181B;color:#F7F5F0;flex-direction:column;align-items:center;justify-content:center;padding:24px;text-align:center;font-family:var(--sans)">
-  <div style="font-size:34px;margin-bottom:8px">📔</div>
+  <svg width="66" height="58" viewBox="26 28 62 54" aria-hidden="true" style="margin-bottom:10px"><rect x="28" y="40" width="12" height="38" rx="5" fill="#F7F5F0"/><rect x="44" y="30" width="12" height="48" rx="5" fill="#F7F5F0"/><rect x="60" y="32" width="12" height="46" rx="5" fill="#E0483F" transform="rotate(16 66 78)"/></svg>
   <div style="font-size:21px;font-weight:700;margin-bottom:8px">내도감</div>
   <div style="font-size:13px;color:#a1a1aa;line-height:1.65;max-width:300px;margin-bottom:22px">구글로 로그인하면 <b style="color:#F7F5F0">내 구글드라이브에 내 시트</b>가 자동으로 만들어지고, 모든 기록이 거기 <b style="color:#F7F5F0">영원히</b> 저장됩니다. (앱이 만든 파일만 접근)</div>
   <button id="gateBtn" style="background:#E0483F;color:#fff;border:none;border-radius:10px;padding:13px 26px;font-size:15px;font-weight:600;cursor:pointer">구글로 시작하기</button>
@@ -540,7 +540,9 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
 
 /* ── 0. 안전 저장소: 배포본은 localStorage, 미리보기/샌드박스는 메모리로 자동 폴백 ── */
 const store = (() => {
-  try { const k="__nd"; localStorage.setItem(k,"1"); localStorage.removeItem(k); return localStorage; }
+  const NS = (typeof CONFIG!=="undefined" && CONFIG.DEPLOY) ? "app:" : "";   // 배포앱은 개인앱과 로컬저장소 분리
+  try { const k="__nd"; localStorage.setItem(k,"1"); localStorage.removeItem(k);
+    return { getItem:k=>localStorage.getItem(NS+k), setItem:(k,v)=>localStorage.setItem(NS+k,String(v)), removeItem:k=>localStorage.removeItem(NS+k) }; }
   catch(e){ const m={}; return { getItem:k=>k in m?m[k]:null, setItem:(k,v)=>{m[k]=String(v);}, removeItem:k=>{delete m[k];} }; }
 })();
 
