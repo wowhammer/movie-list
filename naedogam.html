@@ -477,11 +477,11 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
 <div class="wrap" id="root" data-domain="movies">
   <header class="masthead">
     <div class="mh-row">
-      <button id="brandBtn" type="button" class="brandbtn" aria-label="홈"><!-- Naedogam v136 (빌더 이모지: 입력칸 대신 미리보기로 표시, 아래 그리드로 변경) -->
+      <button id="brandBtn" type="button" class="brandbtn" aria-label="홈"><!-- Naedogam v137 (정식 카테고리 추가: 약·영양제 卷21 · 건강검진 卷22) -->
         <svg class="brandmark" width="34" height="30" viewBox="26 28 62 54" aria-hidden="true"><rect x="28" y="40" width="12" height="38" rx="5" fill="#F7F5F0"/><rect x="44" y="30" width="12" height="48" rx="5" fill="#F7F5F0"/><rect x="60" y="32" width="12" height="46" rx="5" fill="#E0483F" transform="rotate(16 66 78)"/></svg>
         <span class="brandwm"><span class="bwm-ko">내도감</span><span class="bwm-en">NAEDOGAM</span></span>
       </button>
-      <span class="mhver">v136</span>
+      <span class="mhver">v137</span>
       <span class="spacer"></span>
       <span class="src-chip" id="srcChip" style="display:none">데모</span>
       <button class="icon-btn" id="searchToggle" type="button" style="display:none">🔍</button>
@@ -1058,7 +1058,39 @@ const MANIFESTS = {
            flags:r=>[ (r.rating!=null&&r.rating!=="")?{t:"★ "+r.rating,cls:"star"}:0,
                       r.status==="소장"?{t:"소장",cls:"on"}:0,
                       r.status==="마심"?{t:"마심",cls:"on"}:0,
-                      r.status==="위시"?{t:"위시",cls:"on"}:0 ] } }
+                      r.status==="위시"?{t:"위시",cls:"on"}:0 ] } },
+
+  /* 약·영양제: 복용 기록. 복용시작 날짜로 일기 '오늘 내도감'에도 반영. */
+  meds:{ id:"meds", title:"약·영양제", icon:"💊", vol:"卷21", canAdd:true,
+    source:{ type:"sheet", tab:"약·영양제" },
+    fields:[ {k:"name",sheet:"이름",label:"이름",type:"text"},
+             {k:"kind",sheet:"종류",label:"종류",type:"select",options:["","처방약","영양제","한약","기타"]},
+             {k:"startDate",sheet:"복용시작",label:"복용시작",type:"date"},
+             {k:"dose",sheet:"복용법",label:"복용법",type:"text"},
+             {k:"place",sheet:"처방·구입처",label:"처방·구입처",type:"text"},
+             {k:"memo",sheet:"메모",label:"메모",type:"textarea"} ],
+    search:["name","dose","place","memo"],
+    activity:{ df:"startDate", when:r=>true, label:"약·영양제", name:r=>r.name },
+    stats:[ {label:"전체",type:"count"},
+            {label:"처방약",type:"countIf",field:"kind",eq:"처방약",c:"#dc2626"},
+            {label:"영양제",type:"countIf",field:"kind",eq:"영양제",c:"#16a34a"} ],
+    card:{ kind:"data", title:r=>r.name||"(제목 없음)",
+           kv:[{k:"종류",f:"kind"},{k:"복용시작",f:"startDate"},{k:"복용법",f:"dose"},{k:"처방·구입처",f:"place"}] } },
+
+  /* 건강검진: 검사 항목·수치·정상범위 기록. 검사일로 활동 반영. */
+  checkup:{ id:"checkup", title:"건강검진", icon:"🩺", vol:"卷22", canAdd:true,
+    source:{ type:"sheet", tab:"건강검진" },
+    fields:[ {k:"item",sheet:"항목",label:"항목",type:"text"},
+             {k:"date",sheet:"검사일",label:"검사일",type:"date"},
+             {k:"value",sheet:"수치",label:"수치",type:"text"},
+             {k:"range",sheet:"정상범위",label:"정상범위",type:"text"},
+             {k:"hospital",sheet:"병원",label:"병원",type:"text"},
+             {k:"memo",sheet:"메모",label:"메모",type:"textarea"} ],
+    search:["item","value","hospital","memo"],
+    activity:{ df:"date", when:r=>true, label:"건강검진", name:r=>r.item },
+    stats:[ {label:"전체",type:"count"} ],
+    card:{ kind:"data", title:r=>r.item||"(제목 없음)",
+           kv:[{k:"검사일",f:"date"},{k:"수치",f:"value"},{k:"정상범위",f:"range"},{k:"병원",f:"hospital"}] } }
 };
 
 /* ── 2. DataSource 추상화 ──
