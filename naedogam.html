@@ -477,11 +477,11 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
 <div class="wrap" id="root" data-domain="movies">
   <header class="masthead">
     <div class="mh-row">
-      <button id="brandBtn" type="button" class="brandbtn" aria-label="홈"><!-- Naedogam v129 (태그 줄 드래그 스크롤 복구 — 토글 sticky화 · #scope 스타일 누수 차단으로 전 카테고리 정상화) -->
+      <button id="brandBtn" type="button" class="brandbtn" aria-label="홈"><!-- Naedogam v130 (커스텀 카테고리 STEP1: 사용자 정의 매니페스트 — 설정 '내 카테고리 만들기' + 시트 _카테고리 저장/로드) -->
         <svg class="brandmark" width="34" height="30" viewBox="26 28 62 54" aria-hidden="true"><rect x="28" y="40" width="12" height="38" rx="5" fill="#F7F5F0"/><rect x="44" y="30" width="12" height="48" rx="5" fill="#F7F5F0"/><rect x="60" y="32" width="12" height="46" rx="5" fill="#E0483F" transform="rotate(16 66 78)"/></svg>
         <span class="brandwm"><span class="bwm-ko">내도감</span><span class="bwm-en">NAEDOGAM</span></span>
       </button>
-      <span class="mhver">v129</span>
+      <span class="mhver">v130</span>
       <span class="spacer"></span>
       <span class="src-chip" id="srcChip" style="display:none">데모</span>
       <button class="icon-btn" id="searchToggle" type="button" style="display:none">🔍</button>
@@ -517,6 +517,7 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
 <dialog id="add"></dialog>
 <dialog id="rec"></dialog>
 <dialog id="dash"></dialog>
+<dialog id="catbuilder"></dialog>
 
 <script>
 /* =====================================================================
@@ -1222,6 +1223,7 @@ class SheetDataSource {
       if(o[ek]===undefined || o[ek]===null || o[ek]==="") o[ek]=val;   // 중복 열: 첫 비어있지않은 값 우선
     } return clean?clean(o):o; }).filter(Boolean);
   }
+  async readTab(tab){ const res=await fetch(this.url+"?nd=1&action=read&tab="+encodeURIComponent(tab)); if(!res.ok) return []; let j; try{ j=await res.json(); }catch(e){ return []; } if(j&&j.error) return []; return Array.isArray(j)?j:[]; }
   tabOf(id){ return this._tab[id] || (MANIFESTS[id] && MANIFESTS[id].source.tab); }
   idkeyOf(id){ return this._idkey[id] || (MANIFESTS[id] && MANIFESTS[id].source.idCol) || "_id"; }
   async upsert(id,row){   // 탭 맨 아래에 한 줄 추가(저장)
@@ -1306,6 +1308,49 @@ function sheetSrc(){ return _sheet||(_sheet=new SheetDataSource(CONFIG.APPS_SCRI
 /* 설정에서 카테고리를 켜면, 그 분야가 기존 시트에 탭으로 생기게 한다(없을 때만 생성). */
 async function ensureCategoryTab(id){ const m=MANIFESTS[id]; if(m.source?.type!=="sheet") return;
   try{ await sheetSrc().ensure(m); }catch(e){ /* 실패해도 나중에 열 때 다시 시도 */ } }
+
+/* ── 커스텀 카테고리(사용자 정의 매니페스트) — v130 STEP1 ──
+   시트 '_카테고리' 탭에 정의를 저장/로드. 기존 폼·카드·통계·저장 엔진을 그대로 재사용(백엔드 수정 없음). */
+const CUSTOM_TAB = "_카테고리";
+const CUSTOM_HDR = ["_id","제목","아이콘","탭","정의"];
+function expandCustomManifest(spec){
+  const fields=(spec.fields||[]).map((f,i)=>{
+    const o={ k: f.k || ("f"+(i+1)), sheet: f.label, label: f.label, type: f.type||"text" };
+    if(Array.isArray(f.options)&&f.options.length) o.options=[""].concat(f.options.filter(Boolean));
+    if(f.type==="number"&&f.money) o.money=true;
+    if(f.type==="textarea"||f.type==="image") o.full=true;
+    return o;
+  });
+  const titleF = fields.find(f=>f.type==="text") || fields[0] || null;
+  const textKeys = fields.filter(f=>["text","textarea","tags"].includes(f.type)).map(f=>f.k);
+  const kv = fields.filter(f=> f!==titleF && !["image","textarea"].includes(f.type))
+                   .slice(0,6).map(f=>({k:f.label, f:f.k, ...(f.money?{u:"원"}:{})}));
+  return {
+    id: spec.id, title: spec.title||spec.id, icon: spec.icon||"🗂", vol:"", canAdd:true, custom:true,
+    source:{ type:"sheet", tab: spec.tab || spec.title || spec.id },
+    fields,
+    search: textKeys.length?textKeys:(fields[0]?[fields[0].k]:[]),
+    stats:[ {label:"전체", type:"count"} ],
+    card:{ kind:"data",
+      title: r=> (titleF ? String(r[titleF.k]==null?"":r[titleF.k]) : "") || "(제목 없음)",
+      kv }
+  };
+}
+function customSpecFromRow(row){
+  const id=String(row._id==null?"":row._id).trim(); if(!id) return null;
+  let fields=[]; try{ fields=JSON.parse(row["정의"]||row["def"]||"[]"); }catch(e){ fields=[]; }
+  if(!Array.isArray(fields)) fields=[];
+  return { id, title:String(row["제목"]||id), icon:String(row["아이콘"]||"🗂"), tab:String(row["탭"]||row["제목"]||id), fields };
+}
+async function loadCustomManifests(){
+  let rows=[];
+  try{ rows=await sheetSrc().readTab(CUSTOM_TAB); }catch(e){ return []; }
+  const ids=[];
+  (rows||[]).forEach(row=>{ const spec=customSpecFromRow(row); if(!spec) return;
+    if(MANIFESTS[spec.id] && !MANIFESTS[spec.id].custom) return;
+    MANIFESTS[spec.id]=expandCustomManifest(spec); ids.push(spec.id); });
+  return ids;
+}
 
 /* 켜둔 카테고리 목록(브라우저에 기억). 처음엔 빈 상태 → 설정에서 추가. */
 function getActive(){ try{ return JSON.parse(store.getItem("nd.active")||"[]"); }catch(e){ return []; } }
@@ -2872,6 +2917,7 @@ function renderSettingsBody(d){
     <div class="hint">토글로 켜고 끄고, 왼쪽 <b>≡</b>을 끌어 순서를 바꾸세요. 홈·상단 탭에 바로 반영됩니다. (시트 데이터는 지워지지 않아요)</div>
     <div class="ord-list" id="catList">${act.map(arow).join("")}</div>
     ${inact.length?`<div class="hint" style="margin-top:12px;color:var(--sub)">꺼진 카테고리 · 켜면 홈에 추가</div>${inact.map(irow).join("")}`:""}
+    <button class="btn ghost" id="catNew" type="button" style="margin-top:14px">＋ 내 카테고리 만들기</button>
     <h4>가져오기 · 내보내기 (CSV)</h4>
     <div class="hint">카테고리를 CSV로 내보내 다른 사람에게 주거나, 받은 CSV를 골라 한꺼번에 등록해요. <b>처음이면 '샘플양식'으로 빈 양식을 받아 채우세요.</b> (사진은 제외 · 등록 항목엔 새 번호 자동 부여)</div>
     <div class="io-row">
@@ -2899,6 +2945,7 @@ function renderSettingsBody(d){
     if(_im) _im.onclick=()=>{ if(_fi) _fi.click(); };
     if(_fi) _fi.onchange=e=>{ const file=e.target.files&&e.target.files[0]; if(!file) return; const rd=new FileReader(); rd.onload=()=>{ const rows=csvToRows(_sel.value, String(rd.result||"")); doImport(_sel.value, rows); _fi.value=""; }; rd.readAsText(file,"utf-8"); }; }
   $("#closeSet").onclick=()=>d.close();
+  { const cn=$("#catNew"); if(cn) cn.onclick=()=>openCatBuilder(); }
 }
 function wireReorder(box, onCommit){
   let drag=null;
@@ -2914,6 +2961,88 @@ function wireReorder(box, onCommit){
   box.addEventListener("pointerup", end);
   box.addEventListener("pointercancel", end);
   box.addEventListener("lostpointercapture", end);
+}
+
+/* ── 내 카테고리 만들기(빌더) — v130 STEP1 ── */
+function cbTypeOptions(sel){
+  return [["text","글자"],["textarea","여러 줄"],["number","숫자"],["money","금액(원)"],["date","날짜"],["select","드롭다운"],["rating","별점 ★"],["tags","태그"],["image","사진"],["bool","예/아니오"]]
+    .map(([v,l])=>`<option value="${v}"${v===sel?" selected":""}>${l}</option>`).join("");
+}
+function cbFieldBlock(label,type){
+  const t=type||"text";
+  return `<div class="cb-fblock" style="border:1px solid var(--line);border-radius:8px;padding:8px;margin:7px 0;background:var(--card)">
+    <div style="display:flex;gap:6px;align-items:center">
+      <input class="cb-flabel" placeholder="칸 이름 (예: 증류소)" value="${String(label||"").replace(/"/g,"&quot;")}" style="flex:1;min-width:0">
+      <select class="cb-ftype" style="flex:0 0 100px">${cbTypeOptions(t)}</select>
+      <button type="button" class="cb-fdel" aria-label="칸 삭제" style="flex:0 0 auto;border:1px solid var(--line);background:#fff;border-radius:7px;padding:6px 9px;cursor:pointer">✕</button>
+    </div>
+    <input class="cb-fopts" placeholder="드롭다운 항목 · 쉼표로 구분 (예: 소장, 오픈)" style="display:${t==="select"?"block":"none"};width:100%;margin-top:6px">
+  </div>`;
+}
+function openCatBuilder(){
+  const d=$("#catbuilder");
+  d.innerHTML=`<div class="dhead"><h3>내 카테고리 만들기</h3></div>
+  <div class="dbody">
+    <div class="hint">이름과 칸(입력 항목)만 정하면 목록·검색·통계·저장이 자동으로 만들어집니다. 정의는 내 구글시트 <b>${CUSTOM_TAB}</b> 탭에 저장돼요.</div>
+    <label style="display:block;margin:12px 0 4px;font-weight:600">이름</label>
+    <div style="display:flex;gap:8px">
+      <input id="cb_icon" value="🗂" maxlength="2" style="flex:0 0 54px;text-align:center;font-size:20px">
+      <input id="cb_name" placeholder="예: 위스키" style="flex:1;min-width:0">
+    </div>
+    <div style="margin-top:6px">${["🗂","🥃","🍷","☕","🎮","🪴","🎧","🧾","🏆","🐟"].map(e=>`<button type="button" class="cb-emo" data-e="${e}" style="font-size:18px;border:1px solid var(--line);background:#fff;border-radius:8px;padding:3px 7px;margin:0 4px 4px 0;cursor:pointer">${e}</button>`).join("")}</div>
+    <label style="display:block;margin:14px 0 2px;font-weight:600">칸(입력 항목)</label>
+    <div id="cb_fields"></div>
+    <button type="button" id="cb_add" class="btn ghost" style="margin-top:4px">＋ 칸 추가</button>
+    <div style="display:flex;gap:8px;margin-top:20px">
+      <button type="button" id="cb_cancel" class="btn ghost" style="flex:1">취소</button>
+      <button type="button" id="cb_make" class="btn" style="flex:2">이 카테고리 만들기</button>
+    </div>
+    <div id="cb_msg" class="hint" style="margin-top:10px"></div>
+  </div>`;
+  const box=d.querySelector("#cb_fields");
+  function wireBlocks(){
+    box.querySelectorAll(".cb-fblock").forEach(bl=>{
+      const ty=bl.querySelector(".cb-ftype"), op=bl.querySelector(".cb-fopts"), del=bl.querySelector(".cb-fdel");
+      ty.onchange=()=>{ op.style.display=(ty.value==="select")?"block":"none"; };
+      del.onclick=()=>{ bl.remove(); };
+    });
+  }
+  const addRow=(label,type)=>{ box.insertAdjacentHTML("beforeend", cbFieldBlock(label,type)); wireBlocks(); };
+  addRow("제목","text");
+  d.querySelector("#cb_add").onclick=()=>addRow("","text");
+  d.querySelectorAll(".cb-emo").forEach(b=>b.onclick=()=>{ d.querySelector("#cb_icon").value=b.dataset.e; });
+  d.querySelector("#cb_cancel").onclick=()=>d.close();
+  d.querySelector("#cb_make").onclick=()=>saveCustomCategory(d);
+  d.showModal();
+}
+async function saveCustomCategory(d){
+  const msg=d.querySelector("#cb_msg"); const setMsg=(t,err)=>{ msg.textContent=t; msg.style.color=err?"#dc2626":"var(--sub)"; };
+  const name=(d.querySelector("#cb_name").value||"").trim();
+  const icon=(d.querySelector("#cb_icon").value||"🗂").trim()||"🗂";
+  if(!name){ setMsg("이름을 입력하세요.",1); return; }
+  const fields=[];
+  d.querySelectorAll("#cb_fields .cb-fblock").forEach(bl=>{
+    const label=(bl.querySelector(".cb-flabel").value||"").trim(); if(!label) return;
+    const type=bl.querySelector(".cb-ftype").value; const f={label};
+    if(type==="money"){ f.type="number"; f.money=true; } else f.type=type;
+    if(type==="select"){ const opts=(bl.querySelector(".cb-fopts").value||"").split(",").map(s=>s.trim()).filter(Boolean); if(opts.length) f.options=opts; }
+    fields.push(f);
+  });
+  if(!fields.length){ setMsg("칸을 최소 1개 만드세요.",1); return; }
+  const clash=Object.values(MANIFESTS).some(m=> m.title===name || (m.source&&m.source.tab===name));
+  if(clash || name===CUSTOM_TAB){ setMsg("이미 있는 이름이에요. 다른 이름을 쓰세요.",1); return; }
+  const id="cx_"+Date.now().toString(36);
+  const spec={ id, title:name, icon, tab:name, fields };
+  const m=expandCustomManifest(spec);
+  const S=sheetSrc(); const mk=d.querySelector("#cb_make"); mk.disabled=true; setMsg("저장 중…");
+  try{
+    await S._post({action:"ensureTab", tab:CUSTOM_TAB, header:CUSTOM_HDR, rows:[]});
+    await S._post({action:"append", tab:CUSTOM_TAB, header:CUSTOM_HDR, row:{_id:id,"제목":name,"아이콘":icon,"탭":name,"정의":JSON.stringify(fields)}});
+    await S.ensure(m);
+  }catch(e){ mk.disabled=false; setMsg("저장 실패: "+((e&&e.message)||e),1); return; }
+  MANIFESTS[id]=m; toggleActive(id,true);
+  d.close(); const sd=$("#settings"); if(sd&&sd.open) sd.close();
+  openDomain(id);
 }
 
 /* ── 6. 부트: 저장된 Client ID 있으면 구글, 없으면 데모 ── */
@@ -3052,6 +3181,7 @@ async function pickMovie(m){
 }
 
 async function boot(){
+  try{ await loadCustomManifests(); }catch(e){}
   // 첫 화면은 홈(켜둔 카테고리 카드 격자). 처음엔 비어 있고, 설정에서 카테고리를 켜면 카드가 생김.
   showView("home"); renderHome();
   const _tt=$("#toTop");
@@ -3120,7 +3250,7 @@ const SAMPLE = {
   ]
 };
 
-["detail","person","settings","rec","dash"].forEach(id=>{ const dg=document.getElementById(id);
+["detail","person","settings","rec","dash","catbuilder"].forEach(id=>{ const dg=document.getElementById(id);
   if(dg) dg.addEventListener("click",e=>{ if(e.target===dg) dg.close(); }); });
 boot();
 </script>
