@@ -1533,8 +1533,9 @@ function openFromSearch(catId, id){
    SheetDataSource와 같은 인터페이스를 구현 → sheetSrc() 자리에 그대로 끼움.
    안전: 탭은 없을 때만 생성, 삭제는 '행' 단위만. 스프레드시트/탭을 지우는 코드는 없음. */
 class GSheetSource {
-  constructor(clientId){ this.clientId=clientId; this.isLive=true; this.label="내 구글시트"; this.token=null; this.ssId=store.getItem("nd.ssId"); this._ensured=new Set(); this._titles=null; }
+  constructor(clientId){ this.clientId=clientId; this.isLive=true; this.label="내 구글시트"; this.token=null; this.ssId=store.getItem("nd.ssId"); this._ensured=new Set(); this._titles=null; this._q=Promise.resolve(); this._ensuring={}; }
   _flatten(m,r){ const o={_id:sheetCell(r._id)}; (m.fields||[]).forEach(f=>{ o[f.sheet||f.k]=sheetCell(r[f.k]); }); return o; }
+  _mut(fn){ const p=this._q.then(fn,fn); this._q=p.then(()=>{},()=>{}); return p; }
   connected(){ return !!this.token && !!this.ssId; }
   async ensureReady(){ await this._auth(); await this._ensureSpreadsheet(); return true; }
   _auth(){ return new Promise((res,rej)=>{
@@ -1558,14 +1559,14 @@ class GSheetSource {
   async _tabTitles(force){ if(this._titles && !force) return this._titles;
     const d=await this._api("https://sheets.googleapis.com/v4/spreadsheets/"+this.ssId+"?fields=sheets.properties.title");
     this._titles=(d.sheets||[]).map(s=>s.properties.title); return this._titles; }
-  async _addSheet(tab){ await this._api("https://sheets.googleapis.com/v4/spreadsheets/"+this.ssId+":batchUpdate",{method:"POST",
-    body:JSON.stringify({requests:[{addSheet:{properties:{title:tab}}}]})}); if(this._titles && !this._titles.includes(tab)) this._titles.push(tab); }
+  async _addSheet(tab){ return this._mut(async()=>{ const t=await this._tabTitles(true); if(t.includes(tab)) return;
+    await this._api("https://sheets.googleapis.com/v4/spreadsheets/"+this.ssId+":batchUpdate",{method:"POST", body:JSON.stringify({requests:[{addSheet:{properties:{title:tab}}}]})}); if(!this._titles.includes(tab)) this._titles.push(tab); }); }
   async _sheetIdOf(tab){ const d=await this._api("https://sheets.googleapis.com/v4/spreadsheets/"+this.ssId+"?fields=sheets.properties");
     const s=(d.sheets||[]).find(x=>x.properties.title===tab); return s?s.properties.sheetId:null; }
   async _getValues(tab){ try{ const d=await this._api("https://sheets.googleapis.com/v4/spreadsheets/"+this.ssId+"/values/"+this._rng(tab,"A1:Z10000")); return d.values||[]; }
     catch(e){ if(e.status===400) return null; throw e; } }
-  async _setRow(tab,rowNum,row){ return this._api("https://sheets.googleapis.com/v4/spreadsheets/"+this.ssId+"/values/"+this._rng(tab,"A"+rowNum)+"?valueInputOption=RAW",{method:"PUT",body:JSON.stringify({values:[row]})}); }
-  async _appendLine(tab,line){ return this._api("https://sheets.googleapis.com/v4/spreadsheets/"+this.ssId+"/values/"+this._rng(tab,"A1")+":append?valueInputOption=RAW&insertDataOption=INSERT_ROWS",{method:"POST",body:JSON.stringify({values:[line]})}); }
+  async _setRow(tab,rowNum,row){ return this._mut(()=>this._api("https://sheets.googleapis.com/v4/spreadsheets/"+this.ssId+"/values/"+this._rng(tab,"A"+rowNum)+"?valueInputOption=RAW",{method:"PUT",body:JSON.stringify({values:[row]})})); }
+  async _appendLine(tab,line){ return this._mut(()=>this._api("https://sheets.googleapis.com/v4/spreadsheets/"+this.ssId+"/values/"+this._rng(tab,"A1")+":append?valueInputOption=RAW&insertDataOption=INSERT_ROWS",{method:"POST",body:JSON.stringify({values:[line]})})); }
   async _ensureTab(tab,header){ const titles=await this._tabTitles(); if(!titles.includes(tab)) await this._addSheet(tab);
     const vals=await this._getValues(tab); if((!vals||!vals.length) && header && header.length) await this._setRow(tab,1,header); }
   async _rowsOf(tab){ const vals=await this._getValues(tab); if(!vals||vals.length<2) return {head:(vals&&vals[0])||[],rows:[]};
@@ -1581,10 +1582,12 @@ class GSheetSource {
   async _deleteRow(tab,idKey,id){ const vals=await this._getValues(tab); if(!vals||!vals.length) return {error:"탭 비어있음"};
     const head=vals[0]; let ic=head.indexOf(idKey); if(ic===-1) ic=0;
     for(let i=1;i<vals.length;i++){ if(String(vals[i][ic])===String(id)){ const sid=await this._sheetIdOf(tab);
-      await this._api("https://sheets.googleapis.com/v4/spreadsheets/"+this.ssId+":batchUpdate",{method:"POST",body:JSON.stringify({requests:[{deleteDimension:{range:{sheetId:sid,dimension:"ROWS",startIndex:i,endIndex:i+1}}}]})}); return {ok:true,deleted:id}; } }
+      await this._mut(()=>this._api("https://sheets.googleapis.com/v4/spreadsheets/"+this.ssId+":batchUpdate",{method:"POST",body:JSON.stringify({requests:[{deleteDimension:{range:{sheetId:sid,dimension:"ROWS",startIndex:i,endIndex:i+1}}}]})})); return {ok:true,deleted:id}; } }
     return {error:"못 찾음: "+id}; }
   /* ── SheetDataSource와 동일 시그니처 ── */
-  async ensure(m){ if(m.source&&m.source.skipEnsure) return; if(this._ensured.has(m.id)) return; await this._ensureTab(m.source.tab, ndHeaders(m)); this._ensured.add(m.id); }
+  async ensure(m){ if(m.source&&m.source.skipEnsure) return; if(this._ensured.has(m.id)) return;
+    if(!this._ensuring[m.id]) this._ensuring[m.id]=(async()=>{ await this._ensureTab(m.source.tab, ndHeaders(m)); this._ensured.add(m.id); })().finally(()=>{ delete this._ensuring[m.id]; });
+    return this._ensuring[m.id]; }
   async readTab(tab){ const {rows}=await this._rowsOf(tab); return rows; }
   async list(id){ const m=MANIFESTS[id]; await this.ensure(m); const {rows}=await this._rowsOf(m.source.tab);
     const inv=ndInv(m); const clean=m.source&&m.source.clean;
