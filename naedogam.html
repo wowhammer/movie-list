@@ -477,11 +477,11 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
 <div class="wrap" id="root" data-domain="movies">
   <header class="masthead">
     <div class="mh-row">
-      <button id="brandBtn" type="button" class="brandbtn" aria-label="홈"><!-- Naedogam v135 (탭 이름 충돌 안전장치: 같은 이름 탭에 다른 구조 있으면 자동 새 이름) -->
+      <button id="brandBtn" type="button" class="brandbtn" aria-label="홈"><!-- Naedogam v136 (빌더 이모지: 입력칸 대신 미리보기로 표시, 아래 그리드로 변경) -->
         <svg class="brandmark" width="34" height="30" viewBox="26 28 62 54" aria-hidden="true"><rect x="28" y="40" width="12" height="38" rx="5" fill="#F7F5F0"/><rect x="44" y="30" width="12" height="48" rx="5" fill="#F7F5F0"/><rect x="60" y="32" width="12" height="46" rx="5" fill="#E0483F" transform="rotate(16 66 78)"/></svg>
         <span class="brandwm"><span class="bwm-ko">내도감</span><span class="bwm-en">NAEDOGAM</span></span>
       </button>
-      <span class="mhver">v135</span>
+      <span class="mhver">v136</span>
       <span class="spacer"></span>
       <span class="src-chip" id="srcChip" style="display:none">데모</span>
       <button class="icon-btn" id="searchToggle" type="button" style="display:none">🔍</button>
@@ -3054,7 +3054,8 @@ function openCatBuilder(){
     <div id="cb_tpls" style="display:flex;flex-wrap:wrap;gap:6px">${CAT_TEMPLATES.map((t,i)=>`<button type="button" class="cb-tpl" data-i="${i}" style="border:1px solid var(--line);background:#fff;border-radius:14px;padding:5px 11px;font-size:13px;cursor:pointer;white-space:nowrap">${t.icon} ${t.title}</button>`).join("")}</div>
     <label style="display:block;margin:16px 0 4px;font-weight:600">이름</label>
     <div style="display:flex;gap:8px">
-      <input id="cb_icon" value="🗂" maxlength="2" aria-label="아이콘" style="flex:0 0 42px;text-align:center;font-size:17px;padding:6px 0">
+      <div id="cb_iconview" title="아래에서 이모지를 고르세요" aria-label="아이콘 미리보기" style="flex:0 0 46px;display:flex;align-items:center;justify-content:center;font-size:22px;border:1px solid var(--line);border-radius:8px;background:var(--card)">🗂</div>
+      <input type="hidden" id="cb_icon" value="🗂">
       <input id="cb_name" placeholder="예: 위스키" style="flex:1;min-width:0;font-size:16px;padding:9px 11px">
     </div>
     <div style="margin-top:6px">${CAT_EMOJIS.map(e=>`<button type="button" class="cb-emo" data-e="${e}" style="font-size:18px;border:1px solid var(--line);background:#fff;border-radius:8px;padding:3px 7px;margin:0 4px 4px 0;cursor:pointer">${e}</button>`).join("")}</div>
@@ -3077,7 +3078,7 @@ function openCatBuilder(){
   }
   const addRow=(label,type)=>{ box.insertAdjacentHTML("beforeend", cbFieldBlock(label,type)); wireBlocks(); };
   function applyTemplate(t){
-    d.querySelector("#cb_name").value=t.title; d.querySelector("#cb_icon").value=t.icon;
+    d.querySelector("#cb_name").value=t.title; d.querySelector("#cb_icon").value=t.icon; { const iv=d.querySelector("#cb_iconview"); if(iv) iv.textContent=t.icon; }
     box.innerHTML="";
     (t.fields||[]).forEach(f=>{ const uiType=f.money?"money":f.type; box.insertAdjacentHTML("beforeend", cbFieldBlock(f.label, uiType)); const bl=box.lastElementChild;
       if(f.type==="select" && Array.isArray(f.options)){ const op=bl.querySelector(".cb-fopts"); op.value=f.options.join(", "); op.style.display="block"; }
@@ -3089,7 +3090,7 @@ function openCatBuilder(){
   d.querySelectorAll(".cb-tpl").forEach(b=>b.onclick=()=>applyTemplate(CAT_TEMPLATES[+b.dataset.i]));
   addRow("","text"); { const _fr=box.querySelector(".cb-ftitle"); if(_fr) _fr.checked=true; }
   d.querySelector("#cb_add").onclick=()=>addRow("","text");
-  d.querySelectorAll(".cb-emo").forEach(b=>b.onclick=()=>{ d.querySelector("#cb_icon").value=b.dataset.e; });
+  d.querySelectorAll(".cb-emo").forEach(b=>b.onclick=()=>{ d.querySelector("#cb_icon").value=b.dataset.e; d.querySelector("#cb_iconview").textContent=b.dataset.e; });
   d.querySelector("#cb_cancel").onclick=()=>d.close();
   d.querySelector("#cb_make").onclick=()=>saveCustomCategory(d);
   d.showModal();
@@ -3157,7 +3158,8 @@ function openCatEdit(id){
     <div class="hint">이름과 아이콘을 바꿉니다. 칸(입력 항목) 구조는 여기서 못 바꿔요 — 바꾸려면 삭제 후 새로 만들어 주세요.</div>
     <label style="display:block;margin:12px 0 4px;font-weight:600">이름</label>
     <div style="display:flex;gap:8px">
-      <input id="ce_icon" value="${String(m.icon||"🗂").replace(/"/g,"&quot;")}" maxlength="2" aria-label="아이콘" style="flex:0 0 42px;text-align:center;font-size:17px;padding:6px 0">
+      <div id="ce_iconview" title="아래에서 이모지를 고르세요" aria-label="아이콘 미리보기" style="flex:0 0 46px;display:flex;align-items:center;justify-content:center;font-size:22px;border:1px solid var(--line);border-radius:8px;background:var(--card)">${String(m.icon||"🗂").replace(/"/g,"&quot;")}</div>
+      <input type="hidden" id="ce_icon" value="${String(m.icon||"🗂").replace(/"/g,"&quot;")}">
       <input id="ce_name" value="${String(m.title||"").replace(/"/g,"&quot;")}" style="flex:1;min-width:0;font-size:16px;padding:9px 11px">
     </div>
     <div style="margin-top:6px">${CAT_EMOJIS.map(e=>`<button type="button" class="ce-emo" data-e="${e}" style="font-size:18px;border:1px solid var(--line);background:#fff;border-radius:8px;padding:3px 7px;margin:0 4px 4px 0;cursor:pointer">${e}</button>`).join("")}</div>
@@ -3167,7 +3169,7 @@ function openCatEdit(id){
     </div>
     <div id="ce_msg" class="hint" style="margin-top:10px"></div>
   </div>`;
-  d.querySelectorAll(".ce-emo").forEach(b=>b.onclick=()=>{ d.querySelector("#ce_icon").value=b.dataset.e; });
+  d.querySelectorAll(".ce-emo").forEach(b=>b.onclick=()=>{ d.querySelector("#ce_icon").value=b.dataset.e; d.querySelector("#ce_iconview").textContent=b.dataset.e; });
   d.querySelector("#ce_cancel").onclick=()=>d.close();
   d.querySelector("#ce_save").onclick=()=>saveCatEdit(d, id);
   d.showModal();
