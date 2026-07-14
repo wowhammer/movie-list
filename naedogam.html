@@ -477,11 +477,11 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
 <div class="wrap" id="root" data-domain="movies">
   <header class="masthead">
     <div class="mh-row">
-      <button id="brandBtn" type="button" class="brandbtn" aria-label="홈"><!-- Naedogam v133 (부팅 속도 복구·상세창 제목 수정·제목 칸 선택) -->
+      <button id="brandBtn" type="button" class="brandbtn" aria-label="홈"><!-- Naedogam v134 (템플릿 갤러리: 완성 템플릿 12종 → 빌더 자동채움) -->
         <svg class="brandmark" width="34" height="30" viewBox="26 28 62 54" aria-hidden="true"><rect x="28" y="40" width="12" height="38" rx="5" fill="#F7F5F0"/><rect x="44" y="30" width="12" height="48" rx="5" fill="#F7F5F0"/><rect x="60" y="32" width="12" height="46" rx="5" fill="#E0483F" transform="rotate(16 66 78)"/></svg>
         <span class="brandwm"><span class="bwm-ko">내도감</span><span class="bwm-en">NAEDOGAM</span></span>
       </button>
-      <span class="mhver">v133</span>
+      <span class="mhver">v134</span>
       <span class="spacer"></span>
       <span class="src-chip" id="srcChip" style="display:none">데모</span>
       <button class="icon-btn" id="searchToggle" type="button" style="display:none">🔍</button>
@@ -1315,6 +1315,52 @@ async function ensureCategoryTab(id){ const m=MANIFESTS[id]; if(m.source?.type!=
 const CUSTOM_TAB = "_카테고리";
 const CUSTOM_HDR = ["_id","제목","아이콘","탭","정의"];
 const CAT_EMOJIS = ["🗂","📁","📦","🥃","🍷","🍺","☕","🍽️","🍰","🍜","🎮","🎧","🎬","📷","🎨","📚","✈️","🏨","🏔️","🏃","🏋️","⚽","🚗","🪴","🌸","🐶","🐱","🐟","💊","💳","🧾","🎁","🎫","⌚","💡","🏆","🎯","🧴"];
+/* ── 카테고리 템플릿(완성형 예시) — v134. 고르면 빌더가 자동으로 채워짐. ── */
+const CAT_TEMPLATES = [
+  { title:"위스키", icon:"🥃", fields:[
+    {label:"이름",type:"text",title:true},{label:"증류소",type:"text"},
+    {label:"종류",type:"select",options:["싱글몰트","블렌디드","버번","라이","기타"]},
+    {label:"도수",type:"number"},{label:"가격",type:"number",money:true},
+    {label:"구입일",type:"date"},{label:"평점",type:"rating"},{label:"사진",type:"image"},{label:"메모",type:"textarea"} ] },
+  { title:"와인", icon:"🍷", fields:[
+    {label:"이름",type:"text",title:true},{label:"품종",type:"text"},{label:"국가",type:"text"},
+    {label:"빈티지",type:"number"},{label:"가격",type:"number",money:true},{label:"마신날",type:"date"},
+    {label:"평점",type:"rating"},{label:"사진",type:"image"},{label:"메모",type:"textarea"} ] },
+  { title:"향수", icon:"🧴", fields:[
+    {label:"이름",type:"text",title:true},{label:"브랜드",type:"text"},
+    {label:"계열",type:"select",options:["시트러스","플로럴","우디","오리엔탈","프레시","기타"]},
+    {label:"용량",type:"text"},{label:"가격",type:"number",money:true},{label:"평점",type:"rating"},{label:"사진",type:"image"},{label:"메모",type:"textarea"} ] },
+  { title:"카페투어", icon:"☕", fields:[
+    {label:"카페명",type:"text",title:true},{label:"지역",type:"text"},{label:"대표메뉴",type:"text"},
+    {label:"가격대",type:"text"},{label:"방문일",type:"date"},{label:"평점",type:"rating"},{label:"사진",type:"image"},{label:"메모",type:"textarea"} ] },
+  { title:"식물", icon:"🪴", fields:[
+    {label:"이름",type:"text",title:true},{label:"종류",type:"text"},{label:"들인날",type:"date"},
+    {label:"물주기",type:"text"},{label:"위치",type:"text"},{label:"사진",type:"image"},{label:"메모",type:"textarea"} ] },
+  { title:"게임", icon:"🎮", fields:[
+    {label:"제목",type:"text",title:true},
+    {label:"플랫폼",type:"select",options:["PC","PS","스위치","엑스박스","모바일","기타"]},
+    {label:"장르",type:"tags"},{label:"상태",type:"select",options:["하는중","클리어","중단","찜"]},
+    {label:"플레이시간",type:"number"},{label:"평점",type:"rating"},{label:"사진",type:"image"},{label:"메모",type:"textarea"} ] },
+  { title:"운동기록", icon:"🏋️", fields:[
+    {label:"운동",type:"text",title:true},{label:"날짜",type:"date"},{label:"부위",type:"tags"},
+    {label:"세트",type:"number"},{label:"시간(분)",type:"number"},{label:"메모",type:"textarea"} ] },
+  { title:"건강검진", icon:"🩺", fields:[
+    {label:"항목",type:"text",title:true},{label:"검사일",type:"date"},{label:"수치",type:"text"},
+    {label:"정상범위",type:"text"},{label:"병원",type:"text"},{label:"메모",type:"textarea"} ] },
+  { title:"약·영양제", icon:"💊", fields:[
+    {label:"이름",type:"text",title:true},
+    {label:"종류",type:"select",options:["처방약","영양제","한약","기타"]},
+    {label:"복용시작",type:"date"},{label:"복용법",type:"text"},{label:"처방·구입처",type:"text"},{label:"메모",type:"textarea"} ] },
+  { title:"반려간식", icon:"🦴", fields:[
+    {label:"이름",type:"text",title:true},{label:"브랜드",type:"text"},{label:"종류",type:"text"},
+    {label:"구입일",type:"date"},{label:"기호도",type:"rating"},{label:"사진",type:"image"},{label:"메모",type:"textarea"} ] },
+  { title:"선물아이디어", icon:"🎁", fields:[
+    {label:"대상",type:"text",title:true},{label:"아이디어",type:"text"},{label:"예산",type:"number",money:true},
+    {label:"기념일",type:"date"},{label:"상태",type:"select",options:["아이디어","구입완료","전달완료"]},{label:"메모",type:"textarea"} ] },
+  { title:"맛집위시", icon:"🍽️", fields:[
+    {label:"가게명",type:"text",title:true},{label:"지역",type:"text"},{label:"메뉴",type:"text"},
+    {label:"가고싶은이유",type:"text"},{label:"가봄",type:"bool"},{label:"사진",type:"image"},{label:"메모",type:"textarea"} ] }
+];
 function expandCustomManifest(spec){
   const fields=(spec.fields||[]).map((f,i)=>{
     const o={ k: f.k || ("f"+(i+1)), sheet: f.label, label: f.label, type: f.type||"text" }; if(f.title) o.isTitle=true;
@@ -3004,7 +3050,9 @@ function openCatBuilder(){
   d.innerHTML=`<div class="dhead"><h3>내 카테고리 만들기</h3></div>
   <div class="dbody">
     <div class="hint">이름과 칸(입력 항목)만 정하면 목록·검색·통계·저장이 자동으로 만들어집니다. 정의는 내 구글시트 <b>${CUSTOM_TAB}</b> 탭에 저장돼요.</div>
-    <label style="display:block;margin:12px 0 4px;font-weight:600">이름</label>
+    <label style="display:block;margin:14px 0 4px;font-weight:600">템플릿에서 시작 <span style="font-weight:400;color:var(--sub);font-size:12px">· 누르면 자동으로 채워져요</span></label>
+    <div id="cb_tpls" style="display:flex;flex-wrap:wrap;gap:6px">${CAT_TEMPLATES.map((t,i)=>`<button type="button" class="cb-tpl" data-i="${i}" style="border:1px solid var(--line);background:#fff;border-radius:14px;padding:5px 11px;font-size:13px;cursor:pointer;white-space:nowrap">${t.icon} ${t.title}</button>`).join("")}</div>
+    <label style="display:block;margin:16px 0 4px;font-weight:600">이름</label>
     <div style="display:flex;gap:8px">
       <input id="cb_icon" value="🗂" maxlength="2" aria-label="아이콘" style="flex:0 0 42px;text-align:center;font-size:17px;padding:6px 0">
       <input id="cb_name" placeholder="예: 위스키" style="flex:1;min-width:0;font-size:16px;padding:9px 11px">
@@ -3028,6 +3076,17 @@ function openCatBuilder(){
     });
   }
   const addRow=(label,type)=>{ box.insertAdjacentHTML("beforeend", cbFieldBlock(label,type)); wireBlocks(); };
+  function applyTemplate(t){
+    d.querySelector("#cb_name").value=t.title; d.querySelector("#cb_icon").value=t.icon;
+    box.innerHTML="";
+    (t.fields||[]).forEach(f=>{ const uiType=f.money?"money":f.type; box.insertAdjacentHTML("beforeend", cbFieldBlock(f.label, uiType)); const bl=box.lastElementChild;
+      if(f.type==="select" && Array.isArray(f.options)){ const op=bl.querySelector(".cb-fopts"); op.value=f.options.join(", "); op.style.display="block"; }
+      if(f.title){ const r=bl.querySelector(".cb-ftitle"); if(r) r.checked=true; } });
+    wireBlocks();
+    if(!box.querySelector(".cb-ftitle:checked")){ const r=box.querySelector(".cb-ftitle"); if(r) r.checked=true; }
+    const mm=d.querySelector("#cb_msg"); if(mm){ mm.style.color="var(--sub)"; mm.textContent="'"+t.title+"' 템플릿을 불러왔어요. 그대로 만들거나 자유롭게 고치세요."; }
+  }
+  d.querySelectorAll(".cb-tpl").forEach(b=>b.onclick=()=>applyTemplate(CAT_TEMPLATES[+b.dataset.i]));
   addRow("","text"); { const _fr=box.querySelector(".cb-ftitle"); if(_fr) _fr.checked=true; }
   d.querySelector("#cb_add").onclick=()=>addRow("","text");
   d.querySelectorAll(".cb-emo").forEach(b=>b.onclick=()=>{ d.querySelector("#cb_icon").value=b.dataset.e; });
