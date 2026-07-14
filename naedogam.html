@@ -477,11 +477,11 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
 <div class="wrap" id="root" data-domain="movies">
   <header class="masthead">
     <div class="mh-row">
-      <button id="brandBtn" type="button" class="brandbtn" aria-label="홈"><!-- Naedogam v132 (커스텀 카테고리 삭제/수정: 설정에서 이름·아이콘 수정 + 삭제) -->
+      <button id="brandBtn" type="button" class="brandbtn" aria-label="홈"><!-- Naedogam v133 (부팅 속도 복구·상세창 제목 수정·제목 칸 선택) -->
         <svg class="brandmark" width="34" height="30" viewBox="26 28 62 54" aria-hidden="true"><rect x="28" y="40" width="12" height="38" rx="5" fill="#F7F5F0"/><rect x="44" y="30" width="12" height="48" rx="5" fill="#F7F5F0"/><rect x="60" y="32" width="12" height="46" rx="5" fill="#E0483F" transform="rotate(16 66 78)"/></svg>
         <span class="brandwm"><span class="bwm-ko">내도감</span><span class="bwm-en">NAEDOGAM</span></span>
       </button>
-      <span class="mhver">v132</span>
+      <span class="mhver">v133</span>
       <span class="spacer"></span>
       <span class="src-chip" id="srcChip" style="display:none">데모</span>
       <button class="icon-btn" id="searchToggle" type="button" style="display:none">🔍</button>
@@ -1317,13 +1317,13 @@ const CUSTOM_HDR = ["_id","제목","아이콘","탭","정의"];
 const CAT_EMOJIS = ["🗂","📁","📦","🥃","🍷","🍺","☕","🍽️","🍰","🍜","🎮","🎧","🎬","📷","🎨","📚","✈️","🏨","🏔️","🏃","🏋️","⚽","🚗","🪴","🌸","🐶","🐱","🐟","💊","💳","🧾","🎁","🎫","⌚","💡","🏆","🎯","🧴"];
 function expandCustomManifest(spec){
   const fields=(spec.fields||[]).map((f,i)=>{
-    const o={ k: f.k || ("f"+(i+1)), sheet: f.label, label: f.label, type: f.type||"text" };
+    const o={ k: f.k || ("f"+(i+1)), sheet: f.label, label: f.label, type: f.type||"text" }; if(f.title) o.isTitle=true;
     if(Array.isArray(f.options)&&f.options.length) o.options=[""].concat(f.options.filter(Boolean));
     if(f.type==="number"&&f.money) o.money=true;
     if(f.type==="textarea"||f.type==="image") o.full=true;
     return o;
   });
-  const titleF = fields.find(f=>f.type==="text") || fields[0] || null;
+  const titleF = fields.find(f=>f.isTitle) || fields.find(f=>f.type==="text") || fields[0] || null;
   const textKeys = fields.filter(f=>["text","textarea","tags"].includes(f.type)).map(f=>f.k);
   const kv = fields.filter(f=> f!==titleF && !["image","textarea"].includes(f.type))
                    .slice(0,6).map(f=>({k:f.label, f:f.k, ...(f.money?{u:"원"}:{})}));
@@ -1355,8 +1355,14 @@ async function loadCustomManifests(){
   (rows||[]).forEach(row=>{ const spec=customSpecFromRow(row); if(!spec) return;
     if(MANIFESTS[spec.id] && !MANIFESTS[spec.id].custom) return;
     MANIFESTS[spec.id]=expandCustomManifest(spec); ids.push(spec.id); });
+  cacheCustomDefs();
   return ids;
 }
+/* 커스텀 정의를 로컬에 캐시 → 다음 부팅 때 시트 기다리지 않고 즉시 표시(느려짐 방지). */
+function customSpecOf(m){ return { id:m.id, title:m.title, icon:m.icon, tab:m.source.tab,
+  fields:(m.fields||[]).map(f=>{ const o={label:f.label}; if(f.money){ o.type="number"; o.money=true; } else o.type=f.type; if(Array.isArray(f.options)) o.options=f.options.filter(Boolean); if(f.isTitle) o.title=true; return o; }) }; }
+function cacheCustomDefs(){ try{ store.setItem("nd.customdefs", JSON.stringify(Object.values(MANIFESTS).filter(m=>m.custom).map(customSpecOf))); }catch(e){} }
+function loadCachedCustomManifests(){ try{ (JSON.parse(store.getItem("nd.customdefs")||"[]")||[]).forEach(spec=>{ if(spec&&spec.id && !(MANIFESTS[spec.id]&&!MANIFESTS[spec.id].custom)) MANIFESTS[spec.id]=expandCustomManifest(spec); }); }catch(e){} }
 
 /* 켜둔 카테고리 목록(브라우저에 기억). 처음엔 빈 상태 → 설정에서 추가. */
 function getActive(){ try{ return JSON.parse(store.getItem("nd.active")||"[]"); }catch(e){ return []; } }
@@ -1954,7 +1960,7 @@ function openDetail(m, r){ _navSet(m, r);
     foot="";
   }
   const _cf=(m.fields||[]).find(f=>f.type==="image"); const coverImg=(_cf&&r[_cf.k])?`<div class="det-cover"><img src="${String(r[_cf.k]).replace(/"/g,'&quot;')}" alt=""></div>`:"";
-  const d=$("#detail"); d.innerHTML=`<div class="dhead"><h3>${(m.id==="cards"||m.id==="insurance")?((r.issuer?String(r.issuer).replace(/</g,"&lt;")+" · ":"")+String(r.name||"카드").replace(/</g,"&lt;")):(m.id==="subs"?String(r.name||"구독").replace(/</g,"&lt;"):(m.card.kind==="specimen"?r.title:((_isoOf(r.date)||r.date)+(r.car?" · "+r.car:""))))}</h3><div class="dh-actions"><button class="dh-btn" id="dEdit">수정</button><button class="dh-btn dh-del" id="dDel">삭제</button><button class="dclose-x" onclick="this.closest('dialog').close()" aria-label="닫기">✕</button></div></div><div class="dbody">${coverImg}${rows}</div>${mapLinks}${m.id==="cards"?`<div class="mvlinks">${r.link?`<a class="btn ghost" target="_blank" rel="noopener" href="${(/^https?:\/\//i.test(String(r.link))?String(r.link):"https://"+String(r.link)).replace(/"/g,"&quot;")}">🔗 상세 링크</a>`:""}<a class="btn ghost" target="_blank" rel="noopener" href="https://search.naver.com/search.naver?query=${encodeURIComponent(((r.issuer||"")+" "+(r.name||"")+" 카드 혜택").trim())}">🔍 혜택 검색</a></div>`:""}${foot}`;
+  const d=$("#detail"); d.innerHTML=`<div class="dhead"><h3>${(m.id==="cards"||m.id==="insurance")?((r.issuer?String(r.issuer).replace(/</g,"&lt;")+" · ":"")+String(r.name||"카드").replace(/</g,"&lt;")):(m.id==="subs"?String(r.name||"구독").replace(/</g,"&lt;"):(m.card.kind==="specimen"?r.title:((m.card&&m.card.title)?m.card.title(r):((_isoOf(r.date)||r.date||"")+(r.car?" · "+r.car:"")))))}</h3><div class="dh-actions"><button class="dh-btn" id="dEdit">수정</button><button class="dh-btn dh-del" id="dDel">삭제</button><button class="dclose-x" onclick="this.closest('dialog').close()" aria-label="닫기">✕</button></div></div><div class="dbody">${coverImg}${rows}</div>${mapLinks}${m.id==="cards"?`<div class="mvlinks">${r.link?`<a class="btn ghost" target="_blank" rel="noopener" href="${(/^https?:\/\//i.test(String(r.link))?String(r.link):"https://"+String(r.link)).replace(/"/g,"&quot;")}">🔗 상세 링크</a>`:""}<a class="btn ghost" target="_blank" rel="noopener" href="https://search.naver.com/search.naver?query=${encodeURIComponent(((r.issuer||"")+" "+(r.name||"")+" 카드 혜택").trim())}">🔍 혜택 검색</a></div>`:""}${foot}`;
   d.showModal();
   if(isMovie){
     $("#mW").onclick=()=>toggleMovie(r,'W'); $("#mR").onclick=()=>toggleMovie(r,'R'); $("#mP").onclick=()=>toggleMovie(r,'P');
@@ -2986,7 +2992,8 @@ function cbFieldBlock(label,type){
   return `<div class="cb-fblock" style="border:1px solid var(--line);border-radius:8px;padding:8px;margin:7px 0;background:var(--card)">
     <div style="display:flex;gap:6px;align-items:center">
       <input class="cb-flabel" placeholder="칸 이름 (예: 제목, 증류소)" value="${String(label||"").replace(/"/g,"&quot;")}" style="flex:1;min-width:0">
-      <select class="cb-ftype" style="flex:0 0 100px">${cbTypeOptions(t)}</select>
+      <select class="cb-ftype" style="flex:0 0 86px">${cbTypeOptions(t)}</select>
+      <label class="cb-ftitle-lbl" title="이 칸을 카드 제목으로 사용" style="flex:0 0 auto;display:flex;align-items:center;gap:3px;font-size:11px;color:var(--sub);cursor:pointer;white-space:nowrap"><input type="radio" name="cb_title" class="cb-ftitle" style="margin:0">제목</label>
       <button type="button" class="cb-fdel" aria-label="칸 삭제" style="flex:0 0 auto;border:1px solid var(--line);background:#fff;border-radius:7px;padding:6px 9px;cursor:pointer">✕</button>
     </div>
     <input class="cb-fopts" placeholder="드롭다운 항목 · 쉼표로 구분 (예: 소장, 오픈)" style="display:${t==="select"?"block":"none"};width:100%;margin-top:6px">
@@ -3017,11 +3024,11 @@ function openCatBuilder(){
     box.querySelectorAll(".cb-fblock").forEach(bl=>{
       const ty=bl.querySelector(".cb-ftype"), op=bl.querySelector(".cb-fopts"), del=bl.querySelector(".cb-fdel");
       ty.onchange=()=>{ op.style.display=(ty.value==="select")?"block":"none"; };
-      del.onclick=()=>{ bl.remove(); };
+      del.onclick=()=>{ bl.remove(); if(!box.querySelector(".cb-ftitle:checked")){ const _fr=box.querySelector(".cb-ftitle"); if(_fr) _fr.checked=true; } };
     });
   }
   const addRow=(label,type)=>{ box.insertAdjacentHTML("beforeend", cbFieldBlock(label,type)); wireBlocks(); };
-  addRow("","text");
+  addRow("","text"); { const _fr=box.querySelector(".cb-ftitle"); if(_fr) _fr.checked=true; }
   d.querySelector("#cb_add").onclick=()=>addRow("","text");
   d.querySelectorAll(".cb-emo").forEach(b=>b.onclick=()=>{ d.querySelector("#cb_icon").value=b.dataset.e; });
   d.querySelector("#cb_cancel").onclick=()=>d.close();
@@ -3039,11 +3046,13 @@ async function saveCustomCategory(d){
     const type=bl.querySelector(".cb-ftype").value; const f={label};
     if(type==="money"){ f.type="number"; f.money=true; } else f.type=type;
     if(type==="select"){ const opts=(bl.querySelector(".cb-fopts").value||"").split(",").map(s=>s.trim()).filter(Boolean); if(opts.length) f.options=opts; }
+    const tr=bl.querySelector(".cb-ftitle"); if(tr&&tr.checked) f.title=true;
     fields.push(f);
   });
   if(!fields.length){ setMsg("칸을 최소 1개 만드세요.",1); return; }
   const _labs=fields.map(f=>f.label); const _dup=_labs.find((l,i)=>_labs.indexOf(l)!==i);
   if(_dup){ setMsg("칸 이름이 겹쳐요: \""+_dup+"\" — 서로 다르게 지어주세요.",1); return; }
+  if(!fields.some(f=>f.title) && fields[0]) fields[0].title=true;
   const clash=Object.values(MANIFESTS).some(m=> m.title===name || (m.source&&m.source.tab===name));
   if(clash || name===CUSTOM_TAB){ setMsg("이미 있는 이름이에요. 다른 이름을 쓰세요.",1); return; }
   const id="cx_"+Date.now().toString(36);
@@ -3055,7 +3064,7 @@ async function saveCustomCategory(d){
     await S._post({action:"append", tab:CUSTOM_TAB, header:CUSTOM_HDR, row:{_id:id,"제목":name,"아이콘":icon,"탭":name,"정의":JSON.stringify(fields)}});
     await S.ensure(m);
   }catch(e){ mk.disabled=false; setMsg("저장 실패: "+((e&&e.message)||e),1); return; }
-  MANIFESTS[id]=m; toggleActive(id,true);
+  MANIFESTS[id]=m; toggleActive(id,true); cacheCustomDefs();
   d.close(); const sd=$("#settings"); if(sd&&sd.open) sd.close();
   openDomain(id);
 }
@@ -3066,7 +3075,7 @@ async function deleteCustomCategory(id){
   if(!confirm(`'${m.title}' 카테고리를 삭제할까요?\n\n· 목록에서 사라지고 정의가 지워집니다.\n· 시트의 데이터 탭('${m.source.tab}')과 입력한 값은 그대로 남아요(원하면 시트에서 직접 삭제).`)) return;
   try{ await sheetSrc()._post({action:"delete", tab:CUSTOM_TAB, id, idKey:"_id"}); }
   catch(e){ alert("삭제 실패: "+((e&&e.message)||e)); return; }
-  toggleActive(id,false); delete MANIFESTS[id];
+  toggleActive(id,false); delete MANIFESTS[id]; cacheCustomDefs();
   if(state.domain===id) goHome();
   const sd=$("#settings"); if(sd&&sd.open) renderSettingsBody(sd);
   else if(state.view==="home") renderHome();
@@ -3106,7 +3115,7 @@ async function saveCatEdit(d, id){
   try{ await sheetSrc()._post({action:"update", tab:CUSTOM_TAB, id, row:{"제목":name,"아이콘":icon}, idKey:"_id"}); }
   catch(e){ sv.disabled=false; setMsg("저장 실패: "+((e&&e.message)||e),1); return; }
   const fieldSpecs=(m.fields||[]).map(f=>{ const o={label:f.label}; if(f.money){ o.type="number"; o.money=true; } else o.type=f.type; if(Array.isArray(f.options)) o.options=f.options.filter(Boolean); return o; });
-  MANIFESTS[id]=expandCustomManifest({id, title:name, icon, tab:m.source.tab, fields:fieldSpecs});   // 원래 탭·칸 보존
+  MANIFESTS[id]=expandCustomManifest({id, title:name, icon, tab:m.source.tab, fields:fieldSpecs}); cacheCustomDefs();   // 원래 탭·칸 보존
   d.close();
   const sd=$("#settings"); if(sd&&sd.open) renderSettingsBody(sd);
   if(state.view==="home") renderHome(); else if(state.view==="domain"){ renderTabs(); if(state.domain===id) loadAndRender(); }
@@ -3248,9 +3257,10 @@ async function pickMovie(m){
 }
 
 async function boot(){
-  try{ await loadCustomManifests(); }catch(e){}
+  loadCachedCustomManifests();   // 캐시로 즉시 표시(빠름)
   // 첫 화면은 홈(켜둔 카테고리 카드 격자). 처음엔 비어 있고, 설정에서 카테고리를 켜면 카드가 생김.
   showView("home"); renderHome();
+  loadCustomManifests().then(()=>{ if(state.view==="home") renderHome(); else if(state.view==="domain") renderTabs(); }).catch(()=>{});   // 시트에서 백그라운드 갱신
   const _tt=$("#toTop");
   if(_tt){ _tt.onclick=()=>window.scrollTo({top:0,behavior:"smooth"});
     const _upd=()=>_tt.classList.toggle("show", (window.scrollY||document.documentElement.scrollTop||0)>360);
