@@ -508,7 +508,7 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
         <svg class="brandmark" width="34" height="30" viewBox="26 28 62 54" aria-hidden="true"><rect x="28" y="40" width="12" height="38" rx="5" fill="#F7F5F0"/><rect x="44" y="30" width="12" height="48" rx="5" fill="#F7F5F0"/><rect x="60" y="32" width="12" height="46" rx="5" fill="#E0483F" transform="rotate(16 66 78)"/></svg>
         <span class="brandwm"><span class="bwm-ko">내도감</span><span class="bwm-en">NAEDOGAM</span></span>
       </button>
-      <span class="mhver">배포 v144</span>
+      <span class="mhver">배포 v145</span>
       <span class="spacer"></span>
       <span class="src-chip" id="srcChip" style="display:none">데모</span>
       <button class="icon-btn" id="searchToggle" type="button" style="display:none">🔍</button>
@@ -1635,6 +1635,7 @@ class GSheetSource {
   }); }
   async _api(url,opt={}){
     const res=await fetch(url,{...opt,headers:{Authorization:"Bearer "+this.token,"Content-Type":"application/json",...(opt.headers||{})}});
+    if(res.status===401 && !opt.__retried){ try{ await this._authSilent(); }catch(e){} if(this.token){ return this._api(url,{...opt,__retried:true}); } }
     const t=await res.text(); let b; try{b=JSON.parse(t);}catch(e){b=t;}
     if(res.status===401){ this.token=null; try{ store.removeItem("nd.tok"); store.removeItem("nd.tokExp"); }catch(e){} }
     if(!res.ok){ const h=res.status===403?" (구글 클라우드 Sheets·Drive 사용설정 확인)":res.status===401?" (다시 연결 필요)":"";
@@ -3707,15 +3708,15 @@ async function openRecoPanel(m){
     const chosen=[...sel].map(i=>items[i]).filter(o=>o&&!o.has);
     if(!chosen.length){ alert("담을 항목을 선택하세요."); return; }
     const aBtn=$("#rcAdd"), allBtn=$("#rcAll"); if(allBtn)allBtn.disabled=true; if(aBtn){ aBtn.disabled=true; aBtn.classList.remove("ghost"); }
-    let added=0, fail=0, n=0; const total=chosen.length;
+    let added=0, fail=0, n=0, authErr=false; const total=chosen.length;
     for(const o of chosen){
       n++; if(aBtn) aBtn.textContent=`담는 중… ${n} / ${total}`;
       try{ await recoAddOne(m, o.it); o.has=true; added++; }
-      catch(e){ if(/이미/.test(e&&e.message||"")){ o.has=true; } else { fail++; } }
+      catch(e){ const em=(e&&e.message)||""; if(/이미/.test(em)){ o.has=true; } else { fail++; if(/401|다시 연결|연결 필요|authentication|credential/i.test(em)) authErr=true; } }
     }
     if(aBtn) aBtn.textContent=`✓ ${added}개 담음`;
     d.close(); refreshDomain();
-    if(fail) setTimeout(()=>alert(`${added}개 담음 · ${fail}개 실패`),120);   /* 성공 시엔 조용히 닫힘 */
+    if(fail) setTimeout(()=>alert(authErr ? `로그인이 만료됐어요. 화면을 새로고침(재연결)한 뒤 다시 담아 주세요.\n(${added}개 담음 · ${fail}개 실패)` : `${added}개 담음 · ${fail}개 실패`),120);   /* 성공 시엔 조용히 닫힘 */
   }
   render();
 }
