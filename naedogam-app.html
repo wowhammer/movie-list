@@ -508,7 +508,7 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
         <svg class="brandmark" width="34" height="30" viewBox="26 28 62 54" aria-hidden="true"><rect x="28" y="40" width="12" height="38" rx="5" fill="#F7F5F0"/><rect x="44" y="30" width="12" height="48" rx="5" fill="#F7F5F0"/><rect x="60" y="32" width="12" height="46" rx="5" fill="#E0483F" transform="rotate(16 66 78)"/></svg>
         <span class="brandwm"><span class="bwm-ko">내도감</span><span class="bwm-en">NAEDOGAM</span></span>
       </button>
-      <span class="mhver">배포 v146</span>
+      <span class="mhver">배포 v147</span>
       <span class="spacer"></span>
       <span class="src-chip" id="srcChip" style="display:none">데모</span>
       <button class="icon-btn" id="searchToggle" type="button" style="display:none">🔍</button>
@@ -2239,8 +2239,10 @@ function movieKorRow(r){ r=r||{};
   return {
     "_id": r.orig==null?"":String(r.orig),
     "원제": r.orig==null?"":String(r.orig),
+    "제목": r.title==null?"":String(r.title),
     "한국 개봉명": r.title==null?"":String(r.title),
     "개봉연도": r.year==null?"":String(r.year),
+    "시청상태": code==='XO'?'':code,
     "시청여부": code==='XO'?'':code,
     "감독": r.director==null?"":String(r.director),
     "배우": r.actors==null?"":String(r.actors),
@@ -2248,7 +2250,9 @@ function movieKorRow(r){ r=r||{};
     "직접검색": r.directSearch==null?"":String(r.directSearch),
     "추천": rec,
     "국적": r.country==null?"":String(r.country),
+    "평점": r.rating==null?"":String(r.rating),
     "TMDB평점": r.rating==null?"":String(r.rating),
+    "메모": r.review==null?"":String(r.review),
     "리뷰": r.review==null?"":String(r.review),
     "찜": r.pick?'true':'',
     "본날": r.watchDate==null?"":String(r.watchDate)
@@ -3517,11 +3521,12 @@ function openAddBook(){
   },600); });
   setTimeout(()=>bq.focus(),50);
 }
-function addBook(b){
+async function addBook(b){
   const row={ _id:crypto.randomUUID(), title:b.title, author:b.author, year:b.year,
     cover:b.cover, genre:b.genre||[], rating:null,
     status: addStatus==="읽고싶다" ? "" : addStatus,
     pick: addStatus==="읽고싶다" };
+  if(!(CACHE.books&&CACHE.books.length)){ try{ CACHE.books=await sheetSrc().list("books"); }catch(e){} }
   if(!ndConfirmDup("books", row)) return;
   $("#add").close();
   sheetSrc().upsert("books", row)          // 시트 '도서' 탭에 실제 저장(영구)
@@ -3615,6 +3620,7 @@ async function pickMovie(m){
   const extra = await fetchMovieExtra(m.id);
   const _id=(m.orig||m.kor||'');
   if(!_id){ alert("원제 정보가 없어 추가할 수 없어요."); if($("#mres")) $("#mres").innerHTML=""; return; }
+  if(!(CACHE.movies&&CACHE.movies.length)){ try{ CACHE.movies=await sheetSrc().list("movies"); }catch(e){} }
   if(!ndConfirmDup("movies", {_id:_id, orig:m.orig, title:(m.kor||m.orig||"")})){ if($("#mres")) $("#mres").innerHTML=""; return; }
   const row={ _id, orig:m.orig, title:(m.kor||m.orig||""), year:m.year,
     director:extra.director, actors:extra.actors, country:extra.country,
@@ -3654,6 +3660,7 @@ function recoHaveKeys(id, have){
 function recoIsHave(id, it, set){ const v=recoView(id,it); return set.has(recoNorm(v.key)) || (v.alt?set.has(recoNorm(v.alt)):false) || set.has(recoNorm(v.title)); }
 async function recoAddOne(m, it){
   const id=m.id;
+  { const _v=recoView(id,it); const _probe = id==="movies" ? {orig:_v.key, title:_v.title} : (id==="books" ? {title:_v.key, author:it.author} : {title:_v.key}); if(ndFindDup(id,_probe)){ const _e=new Error("이미 있음"); throw _e; } }
   if(id==="movies"){
     const rec=String(it["추천"]||"");
     const row={ _id:it["원제"], orig:it["원제"], title:(it["한국 개봉명"]||it["원제"]||""), year:it["개봉연도"]||null,
@@ -3679,7 +3686,7 @@ async function openRecoPanel(m){
   let data;
   try{ data=await recoFetch(id); }
   catch(e){ d.innerHTML=`<div class="dhead"><h3>추천 리스트</h3></div><div class="dbody"><div class="banner warn">추천 리스트를 불러오지 못했습니다: ${e.message}</div><button class="btn ghost" id="rcClose" style="margin-top:12px">닫기</button></div>`; const c=$("#rcClose"); if(c)c.onclick=()=>d.close(); return; }
-  const have=(CACHE[id]||loadPersist(id)||[]);
+  const have=(await sheetSrc().list(id).catch(()=>null))||CACHE[id]||loadPersist(id)||[]; CACHE[id]=have;
   const hk=recoHaveKeys(id, have);
   const items=(data.items||[]).map(it=>({ it, v:recoView(id,it), has:recoIsHave(id,it,hk) }));
   const sel=new Set();
