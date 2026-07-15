@@ -155,6 +155,19 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
     border-radius:50%; background:var(--ochre); color:#fff; border:none; font-size:26px; line-height:1;
     box-shadow:0 4px 14px rgba(101,64,32,.35); display:flex; align-items:center; justify-content:center; }
   #addBtn:active{ transform:scale(.94); }
+  #recoBtn{ position:fixed; right:16px; bottom:84px; z-index:45; height:44px; padding:0 16px; border:none; border-radius:22px;
+    background:var(--ink); color:var(--paper); font-family:var(--sans); font-size:13.5px; font-weight:700; cursor:pointer;
+    box-shadow:0 4px 14px rgba(0,0,0,.28); display:flex; align-items:center; gap:6px; }
+  #recoBtn:active{ transform:scale(.96); }
+  .reco-item{ display:flex; gap:10px; align-items:flex-start; padding:10px 8px; border-bottom:1px solid var(--line); cursor:pointer; }
+  .reco-item.on{ background:#FBF3E7; }
+  .reco-item.dim{ opacity:.5; cursor:default; }
+  .reco-cb{ width:20px; height:20px; flex:0 0 auto; margin-top:2px; }
+  .reco-b{ flex:1; min-width:0; }
+  .reco-t{ font-family:var(--serif); font-size:15px; font-weight:700; color:var(--ink); }
+  .reco-m{ font-size:12px; color:var(--ink-soft); margin-top:2px; }
+  .reco-badge{ display:inline-block; font-size:11px; color:var(--accent); border:1px solid var(--line); border-radius:10px; padding:1px 7px; margin-top:4px; }
+  .reco-foot{ position:sticky; bottom:0; background:var(--card); padding:10px 0 4px; display:flex; gap:8px; }
   .totop{ position:fixed; left:18px; bottom:22px; z-index:45; width:46px; height:46px; border-radius:50%; border:1px solid var(--line); background:var(--card); color:var(--ink); font-size:19px; display:flex; align-items:center; justify-content:center; cursor:pointer; box-shadow:0 3px 12px rgba(0,0,0,.10); opacity:0; transform:translateY(10px) scale(.9); pointer-events:none; transition:opacity .22s ease, transform .22s ease; }
   .totop.show{ opacity:1; transform:translateY(0) scale(1); pointer-events:auto; }
   .totop:hover{ border-color:var(--accent); color:var(--accent); }
@@ -477,11 +490,11 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
 <div class="wrap" id="root" data-domain="movies">
   <header class="masthead">
     <div class="mh-row">
-      <button id="brandBtn" type="button" class="brandbtn" aria-label="홈"><!-- Naedogam v137 (정식 카테고리 추가: 약·영양제 卷21 · 건강검진 卷22) -->
+      <button id="brandBtn" type="button" class="brandbtn" aria-label="홈"><!-- Naedogam v138 · 추천담기(A) · (정식 카테고리 추가: 약·영양제 卷21 · 건강검진 卷22) -->
         <svg class="brandmark" width="34" height="30" viewBox="26 28 62 54" aria-hidden="true"><rect x="28" y="40" width="12" height="38" rx="5" fill="#F7F5F0"/><rect x="44" y="30" width="12" height="48" rx="5" fill="#F7F5F0"/><rect x="60" y="32" width="12" height="46" rx="5" fill="#E0483F" transform="rotate(16 66 78)"/></svg>
         <span class="brandwm"><span class="bwm-ko">내도감</span><span class="bwm-en">NAEDOGAM</span></span>
       </button>
-      <span class="mhver">v137</span>
+      <span class="mhver">v138</span>
       <span class="spacer"></span>
       <span class="src-chip" id="srcChip" style="display:none">데모</span>
       <button class="icon-btn" id="searchToggle" type="button" style="display:none">🔍</button>
@@ -505,6 +518,7 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
     <input class="search" id="search" type="search" style="display:none" />
     <select class="search" id="mvselect" style="display:none"></select>
     <button class="icon-btn" id="addBtn" type="button" style="display:none">＋</button>
+    <button id="recoBtn" type="button" style="display:none">🎬 추천 담기</button>
     <button class="totop" id="toTop" type="button" aria-label="맨 위로">↑</button>
     <div class="count" id="count"></div>
     <div class="list" id="list"></div>
@@ -2477,6 +2491,7 @@ async function loadAndRender(){
   const addBtn=$("#addBtn");
   if(m.canAdd){ addBtn.style.display="flex"; addBtn.textContent="＋"; addBtn.title=m.title+" 추가"; }
   else addBtn.style.display="none";
+  const recoBtn=$("#recoBtn"); if(recoBtn){ if(RECO_LISTS[m.id]){ recoBtn.style.display="flex"; recoBtn.onclick=()=>openRecoPanel(m); } else recoBtn.style.display="none"; }
   $("#banner").innerHTML="";
   const did = state.domain;                        // 이 호출이 담당하는 분야(비동기 중 바뀌어도 고정)
   if(!CACHE[did]){                                 // 처음 여는 분야만 실제로 불러온다
@@ -2708,6 +2723,7 @@ function paintMovies(m){
     + (shown.length<total?`<button class="btn ghost" id="moreBtn" style="width:100%;margin-top:10px">더 보기 (${total-shown.length}편)</button>`:"");
   $("#list").querySelectorAll(".card").forEach((b,i)=>{ const r=shown[i]; if(r) b.onclick=()=>openDetail(m, r); });
   { const na=$("#nrAdd"); if(na) na.onclick=()=>{ openAddMovie(); const mq=$("#mq"); if(mq){ mq.value=state.query; mq.dispatchEvent(new Event("input")); } }; }
+  if(total===0 && RECO_LISTS[m.id]){ const _rc=document.createElement("button"); _rc.className="btn"; _rc.style.cssText="width:100%;margin-top:12px"; _rc.textContent="🎬 추천 리스트에서 시작하기"; _rc.onclick=()=>openRecoPanel(m); $("#list").appendChild(_rc); }
   document.querySelectorAll(".mvcard .plink").forEach(el=>el.onclick=e=>{ e.stopPropagation(); openPersonModal(el.dataset.name, el.dataset.role); });
   const more=$("#moreBtn"); if(more) more.onclick=()=>{ state.page++; paintMovies(m); };
   lazyPosters();
@@ -3357,6 +3373,71 @@ async function pickMovie(m){
     const arr=(CACHE.movies||loadPersist("movies")||[]); arr.push(row); CACHE.movies=arr; savePersist("movies", arr);
     $("#add").close(); refreshDomain();
   }catch(e){ const msg=/이미/.test(e.message)?"이미 목록에 있는 영화예요.":("추가 실패: "+e.message); alert(msg); if($("#mres")) $("#mres").innerHTML=""; }
+}
+
+/* ── 추천 담기(A단계): 분야별 정적 JSON을 불러와 체크→일괄 추가 ── */
+const RECO_LISTS = { movies: "reco/movies.json" };
+const RECO_CACHE = {};
+async function recoFetch(id){
+  if(RECO_CACHE[id]) return RECO_CACHE[id];
+  const data = await fetch(RECO_LISTS[id] + "?v=" + Date.now()).then(r=>{ if(!r.ok) throw new Error("HTTP "+r.status); return r.json(); });
+  RECO_CACHE[id]=data; return data;
+}
+async function openRecoPanel(m){
+  const d=$("#add");
+  d.innerHTML=`<div class="dhead"><h3>추천 리스트</h3></div><div class="dbody"><div class="count">불러오는 중…</div></div>`;
+  d.showModal();
+  let data;
+  try{ data=await recoFetch(m.id); }
+  catch(e){ d.innerHTML=`<div class="dhead"><h3>추천 리스트</h3></div><div class="dbody"><div class="banner warn">추천 리스트를 불러오지 못했습니다: ${e.message}</div><button class="btn ghost" id="rcClose" style="margin-top:12px">닫기</button></div>`; const c=$("#rcClose"); if(c)c.onclick=()=>d.close(); return; }
+  const have=(CACHE[m.id]||loadPersist(m.id)||[]);
+  const haveSet=new Set(have.map(x=>String(x._id)));
+  const items=(data.items||[]).map((it,i)=>{ const id=String(it["원제"]||it._id||i); return {it, id, has: haveSet.has(id)}; });
+  const sel=new Set();
+  function render(){
+    const remain=items.filter(o=>!o.has).length;
+    const rows=items.map((o,i)=>{
+      const rec=String(o.it["추천"]||"");
+      const meta=[o.it["개봉연도"], o.it["감독"]].filter(Boolean).join(" · ");
+      const ttl=o.it["한국 개봉명"]||o.it["원제"];
+      if(o.has) return `<div class="reco-item dim"><div class="reco-b"><div class="reco-t">${ttl}</div><div class="reco-m">${meta}</div><span class="reco-badge">담김 ✓</span></div></div>`;
+      const on=sel.has(i);
+      return `<div class="reco-item ${on?"on":""}" data-i="${i}"><input type="checkbox" class="reco-cb" ${on?"checked":""}><div class="reco-b"><div class="reco-t">${ttl}</div><div class="reco-m">${meta}</div>${rec?`<span class="reco-badge">${rec}</span>`:""}</div></div>`;
+    }).join("");
+    d.innerHTML=`<div class="dhead"><h3>${data.title||"추천 리스트"}</h3></div>
+      <div class="dbody" style="padding-bottom:6px">
+      <div class="count" style="margin:0 0 6px">${data.subtitle||""}</div>
+      <button class="btn ghost" id="rcAll" style="width:100%;margin:0 0 8px" ${remain?"":"disabled"}>📥 리스트 통째로 담기 (${remain}개)</button>
+      <div id="rcList" style="max-height:52vh;overflow:auto;margin:0 -4px">${rows}</div>
+      <div class="reco-foot"><button class="btn" id="rcAdd" style="flex:1">선택한 ${sel.size}개 담기</button><button class="btn ghost" id="rcClose">닫기</button></div>
+      </div>`;
+    $("#rcList").querySelectorAll(".reco-item[data-i]").forEach(el=>{ el.onclick=()=>{ const i=+el.dataset.i; if(sel.has(i))sel.delete(i); else sel.add(i); render(); }; });
+    const all=$("#rcAll"); if(all&&remain) all.onclick=()=>{ items.forEach((o,i)=>{ if(!o.has) sel.add(i); }); doAdd(); };
+    const add=$("#rcAdd"); if(add) add.onclick=doAdd;
+    const cl=$("#rcClose"); if(cl) cl.onclick=()=>d.close();
+  }
+  async function doAdd(){
+    const chosen=[...sel].map(i=>items[i]).filter(o=>o&&!o.has);
+    if(!chosen.length){ alert("담을 항목을 선택하세요."); return; }
+    const S=sheetSrc(), tab=S.tabOf("movies");
+    const prog=document.createElement("div"); prog.className="count"; prog.style.margin="8px 0";
+    const body=d.querySelector(".dbody"); if(body) body.appendChild(prog);
+    const aBtn=$("#rcAdd"), allBtn=$("#rcAll"); if(aBtn)aBtn.disabled=true; if(allBtn)allBtn.disabled=true;
+    let added=0, fail=0, n=0; const total=chosen.length;
+    for(const o of chosen){
+      n++; prog.textContent=`담는 중… ${n}/${total}`;
+      const it=o.it, _id=o.id, rec=String(it["추천"]||"");
+      const row={ _id, orig:it["원제"], title:(it["한국 개봉명"]||it["원제"]||""), year:it["개봉연도"]||null,
+        director:it["감독"]||"", actors:it["배우"]||"", country:it["국적"]||"",
+        rating:null, streaming:[], recommend:rec, recommendList:rec.split(/[\/,]+/).map(x=>x.trim()).filter(Boolean),
+        review:"", directSearch:"", watched:"", rewatch:false, pick:false, watchDate:"" };
+      try{ await S.appendRaw(tab, movieKorRow(row)); markPending("movies",_id); const arr=(CACHE.movies||loadPersist("movies")||[]); arr.push(row); CACHE.movies=arr; savePersist("movies",arr); o.has=true; added++; }
+      catch(e){ if(/이미/.test(e.message)){ o.has=true; } else { fail++; } }
+    }
+    d.close(); refreshDomain();
+    setTimeout(()=>alert(`${added}편 담았습니다.${fail?` (${fail}편 실패)`:""}`),120);
+  }
+  render();
 }
 
 async function boot(){
