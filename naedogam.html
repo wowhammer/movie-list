@@ -494,7 +494,7 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
         <svg class="brandmark" width="34" height="30" viewBox="26 28 62 54" aria-hidden="true"><rect x="28" y="40" width="12" height="38" rx="5" fill="#F7F5F0"/><rect x="44" y="30" width="12" height="48" rx="5" fill="#F7F5F0"/><rect x="60" y="32" width="12" height="46" rx="5" fill="#E0483F" transform="rotate(16 66 78)"/></svg>
         <span class="brandwm"><span class="bwm-ko">내도감</span><span class="bwm-en">NAEDOGAM</span></span>
       </button>
-      <span class="mhver">v138</span>
+      <span class="mhver">v139</span>
       <span class="spacer"></span>
       <span class="src-chip" id="srcChip" style="display:none">데모</span>
       <button class="icon-btn" id="searchToggle" type="button" style="display:none">🔍</button>
@@ -3383,6 +3383,7 @@ async function recoFetch(id){
   const data = await fetch(RECO_LISTS[id] + "?v=" + Date.now()).then(r=>{ if(!r.ok) throw new Error("HTTP "+r.status); return r.json(); });
   RECO_CACHE[id]=data; return data;
 }
+function recoNorm(s){ return String(s==null?"":s).normalize("NFD").replace(/[̀-ͯ]/g,"").normalize("NFC").toLowerCase().replace(/[^0-9a-z가-힣]/g,""); }
 async function openRecoPanel(m){
   const d=$("#add");
   d.innerHTML=`<div class="dhead"><h3>추천 리스트</h3></div><div class="dbody"><div class="count">불러오는 중…</div></div>`;
@@ -3391,9 +3392,13 @@ async function openRecoPanel(m){
   try{ data=await recoFetch(m.id); }
   catch(e){ d.innerHTML=`<div class="dhead"><h3>추천 리스트</h3></div><div class="dbody"><div class="banner warn">추천 리스트를 불러오지 못했습니다: ${e.message}</div><button class="btn ghost" id="rcClose" style="margin-top:12px">닫기</button></div>`; const c=$("#rcClose"); if(c)c.onclick=()=>d.close(); return; }
   const have=(CACHE[m.id]||loadPersist(m.id)||[]);
-  const haveSet=new Set(have.map(x=>String(x._id)));
-  const items=(data.items||[]).map((it,i)=>{ const id=String(it["원제"]||it._id||i); return {it, id, has: haveSet.has(id)}; });
+  const haveKeys=new Set();
+  have.forEach(x=>{ [x._id,x.orig,x.title].forEach(v=>{ const n=recoNorm(v); if(n) haveKeys.add(n); }); });
+  const items=(data.items||[]).map((it,i)=>{ const id=String(it["원제"]||it._id||i);
+    const has = haveKeys.has(recoNorm(id)) || haveKeys.has(recoNorm(it["한국 개봉명"]));
+    return {it, id, has}; });
   const sel=new Set();
+  function updateBar(){ const a=$("#rcAdd"); if(a) a.textContent=`선택한 ${sel.size}개 담기`; }
   function render(){
     const remain=items.filter(o=>!o.has).length;
     const rows=items.map((o,i)=>{
@@ -3411,7 +3416,12 @@ async function openRecoPanel(m){
       <div id="rcList" style="max-height:52vh;overflow:auto;margin:0 -4px">${rows}</div>
       <div class="reco-foot"><button class="btn" id="rcAdd" style="flex:1">선택한 ${sel.size}개 담기</button><button class="btn ghost" id="rcClose">닫기</button></div>
       </div>`;
-    $("#rcList").querySelectorAll(".reco-item[data-i]").forEach(el=>{ el.onclick=()=>{ const i=+el.dataset.i; if(sel.has(i))sel.delete(i); else sel.add(i); render(); }; });
+    $("#rcList").querySelectorAll(".reco-item[data-i]").forEach(el=>{ el.onclick=()=>{
+        const i=+el.dataset.i; const cb=el.querySelector(".reco-cb");
+        if(sel.has(i)){ sel.delete(i); el.classList.remove("on"); if(cb)cb.checked=false; }
+        else { sel.add(i); el.classList.add("on"); if(cb)cb.checked=true; }
+        updateBar();
+      }; });
     const all=$("#rcAll"); if(all&&remain) all.onclick=()=>{ items.forEach((o,i)=>{ if(!o.has) sel.add(i); }); doAdd(); };
     const add=$("#rcAdd"); if(add) add.onclick=doAdd;
     const cl=$("#rcClose"); if(cl) cl.onclick=()=>d.close();
@@ -3420,12 +3430,10 @@ async function openRecoPanel(m){
     const chosen=[...sel].map(i=>items[i]).filter(o=>o&&!o.has);
     if(!chosen.length){ alert("담을 항목을 선택하세요."); return; }
     const S=sheetSrc(), tab=S.tabOf("movies");
-    const prog=document.createElement("div"); prog.className="count"; prog.style.margin="8px 0";
-    const body=d.querySelector(".dbody"); if(body) body.appendChild(prog);
-    const aBtn=$("#rcAdd"), allBtn=$("#rcAll"); if(aBtn)aBtn.disabled=true; if(allBtn)allBtn.disabled=true;
+    const aBtn=$("#rcAdd"), allBtn=$("#rcAll"); if(allBtn)allBtn.disabled=true; if(aBtn){ aBtn.disabled=true; aBtn.classList.remove("ghost"); }
     let added=0, fail=0, n=0; const total=chosen.length;
     for(const o of chosen){
-      n++; prog.textContent=`담는 중… ${n}/${total}`;
+      n++; if(aBtn) aBtn.textContent=`담는 중… ${n} / ${total}`;
       const it=o.it, _id=o.id, rec=String(it["추천"]||"");
       const row={ _id, orig:it["원제"], title:(it["한국 개봉명"]||it["원제"]||""), year:it["개봉연도"]||null,
         director:it["감독"]||"", actors:it["배우"]||"", country:it["국적"]||"",
@@ -3434,6 +3442,7 @@ async function openRecoPanel(m){
       try{ await S.appendRaw(tab, movieKorRow(row)); markPending("movies",_id); const arr=(CACHE.movies||loadPersist("movies")||[]); arr.push(row); CACHE.movies=arr; savePersist("movies",arr); o.has=true; added++; }
       catch(e){ if(/이미/.test(e.message)){ o.has=true; } else { fail++; } }
     }
+    if(aBtn) aBtn.textContent=`✓ ${added}편 담음`;
     d.close(); refreshDomain();
     setTimeout(()=>alert(`${added}편 담았습니다.${fail?` (${fail}편 실패)`:""}`),120);
   }
