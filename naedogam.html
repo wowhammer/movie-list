@@ -494,7 +494,7 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
         <svg class="brandmark" width="34" height="30" viewBox="26 28 62 54" aria-hidden="true"><rect x="28" y="40" width="12" height="38" rx="5" fill="#F7F5F0"/><rect x="44" y="30" width="12" height="48" rx="5" fill="#F7F5F0"/><rect x="60" y="32" width="12" height="46" rx="5" fill="#E0483F" transform="rotate(16 66 78)"/></svg>
         <span class="brandwm"><span class="bwm-ko">내도감</span><span class="bwm-en">NAEDOGAM</span></span>
       </button>
-      <span class="mhver">v140</span>
+      <span class="mhver">v141</span>
       <span class="spacer"></span>
       <span class="src-chip" id="srcChip" style="display:none">데모</span>
       <button class="icon-btn" id="searchToggle" type="button" style="display:none">🔍</button>
@@ -3464,7 +3464,7 @@ async function openRecoPanel(m){
     }
     if(aBtn) aBtn.textContent=`✓ ${added}개 담음`;
     d.close(); refreshDomain();
-    setTimeout(()=>alert(`${added}개 담았습니다.${fail?` (${fail}개 실패)`:""}`),120);
+    if(fail) setTimeout(()=>alert(`${added}개 담음 · ${fail}개 실패`),120);   /* 성공 시엔 조용히 닫힘 */
   }
   render();
 }

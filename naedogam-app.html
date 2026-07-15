@@ -485,11 +485,11 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
 <div class="wrap" id="root" data-domain="movies">
   <header class="masthead">
     <div class="mh-row">
-      <button id="brandBtn" type="button" class="brandbtn" aria-label="홈"><!-- Naedogam DEPLOY-build · v2 자동재로그인 (구글 로그인 + 각자 시트 · 범용 분야 · 영화/차계부 제외) -->
+      <button id="brandBtn" type="button" class="brandbtn" aria-label="홈"><!-- Naedogam DEPLOY-build · v141 토큰캐시 (구글 로그인 + 각자 시트 · 범용 분야 · 영화/차계부 제외) -->
         <svg class="brandmark" width="34" height="30" viewBox="26 28 62 54" aria-hidden="true"><rect x="28" y="40" width="12" height="38" rx="5" fill="#F7F5F0"/><rect x="44" y="30" width="12" height="48" rx="5" fill="#F7F5F0"/><rect x="60" y="32" width="12" height="46" rx="5" fill="#E0483F" transform="rotate(16 66 78)"/></svg>
         <span class="brandwm"><span class="bwm-ko">내도감</span><span class="bwm-en">NAEDOGAM</span></span>
       </button>
-      <span class="mhver">배포β</span>
+      <span class="mhver">v141</span>
       <span class="spacer"></span>
       <span class="src-chip" id="srcChip" style="display:none">데모</span>
       <button class="icon-btn" id="searchToggle" type="button" style="display:none">🔍</button>
@@ -1591,17 +1591,17 @@ function openFromSearch(catId, id){
    SheetDataSource와 같은 인터페이스를 구현 → sheetSrc() 자리에 그대로 끼움.
    안전: 탭은 없을 때만 생성, 삭제는 '행' 단위만. 스프레드시트/탭을 지우는 코드는 없음. */
 class GSheetSource {
-  constructor(clientId){ this.clientId=clientId; this.isLive=true; this.label="내 구글시트"; this.token=null; this.ssId=store.getItem("nd.ssId"); this._ensured=new Set(); this._titles=null; this._q=Promise.resolve(); this._ensuring={}; }
+  constructor(clientId){ this.clientId=clientId; this.isLive=true; this.label="내 구글시트"; const _tk=store.getItem("nd.tok"),_te=parseInt(store.getItem("nd.tokExp")||"0",10); this.token=(_tk&&_te>Date.now()+5000)?_tk:null; this.ssId=store.getItem("nd.ssId"); this._ensured=new Set(); this._titles=null; this._q=Promise.resolve(); this._ensuring={}; }
   _flatten(m,r){ const o={_id:sheetCell(r._id)}; (m.fields||[]).forEach(f=>{ o[f.sheet||f.k]=sheetCell(r[f.k]); }); return o; }
   _mut(fn){ const p=this._q.then(fn,fn); this._q=p.then(()=>{},()=>{}); return p; }
   connected(){ return !!this.token && !!this.ssId; }
-  async ensureReady(){ await this._auth(); await this._ensureSpreadsheet(); return true; }
+  async ensureReady(){ if(!this.token) await this._auth(); await this._ensureSpreadsheet(); return true; }
   _authSilent(){ return new Promise((res,rej)=>{
     if(!window.google||!window.google.accounts||!window.google.accounts.oauth2) return rej(new Error("no_gis"));
     let done=false;
     const fin=(fn,arg)=>{ if(done)return; done=true; fn(arg); };
     const tc=google.accounts.oauth2.initTokenClient({ client_id:this.clientId, scope:"https://www.googleapis.com/auth/drive.file", prompt:'',
-      callback:r=>{ if(r&&r.error) return fin(rej,new Error(r.error)); this.token=r.access_token; fin(res); },
+      callback:r=>{ if(r&&r.error) return fin(rej,new Error(r.error)); this.token=r.access_token; try{ store.setItem("nd.tok",r.access_token); store.setItem("nd.tokExp",String(Date.now()+((r.expires_in||3600)*1000)-60000)); }catch(e){} fin(res); },
       error_callback:e=>fin(rej,new Error((e&&e.type)||"silent_failed")) });
     try{ tc.requestAccessToken(); }catch(e){ fin(rej,e); }
     setTimeout(()=>fin(rej,new Error("silent_timeout")),4500);
@@ -1610,12 +1610,13 @@ class GSheetSource {
   _auth(){ return new Promise((res,rej)=>{
     if(!window.google || !window.google.accounts || !window.google.accounts.oauth2) return rej(new Error("구글 로그인 스크립트 미로드(인터넷 확인)"));
     const tc=google.accounts.oauth2.initTokenClient({ client_id:this.clientId, scope:"https://www.googleapis.com/auth/drive.file",
-      callback:r=>{ if(r.error) return rej(new Error("로그인 실패: "+r.error)); this.token=r.access_token; res(); } });
+      callback:r=>{ if(r.error) return rej(new Error("로그인 실패: "+r.error)); this.token=r.access_token; try{ store.setItem("nd.tok",r.access_token); store.setItem("nd.tokExp",String(Date.now()+((r.expires_in||3600)*1000)-60000)); }catch(e){} res(); } });
     tc.requestAccessToken();
   }); }
   async _api(url,opt={}){
     const res=await fetch(url,{...opt,headers:{Authorization:"Bearer "+this.token,"Content-Type":"application/json",...(opt.headers||{})}});
     const t=await res.text(); let b; try{b=JSON.parse(t);}catch(e){b=t;}
+    if(res.status===401){ this.token=null; try{ store.removeItem("nd.tok"); store.removeItem("nd.tokExp"); }catch(e){} }
     if(!res.ok){ const h=res.status===403?" (구글 클라우드 Sheets·Drive 사용설정 확인)":res.status===401?" (다시 연결 필요)":"";
       const msg=(b&&b.error&&b.error.message)?b.error.message:(typeof b==="string"?b.slice(0,200):JSON.stringify(b).slice(0,200));
       const err=new Error("HTTP "+res.status+h+" — "+msg); err.status=res.status; throw err; }
@@ -3608,8 +3609,11 @@ async function boot(){
       gb.onclick=async()=>{ gb.disabled=true; gm.textContent="구글 연결 중… (팝업을 허용해 주세요)";
         try{ await sheetSrc().ensureReady(); await onOk(); }
         catch(e){ gb.disabled=false; gm.textContent="실패: "+((e&&e.message)||e); } };
-      if(sheetSrc().ssId){ gm.textContent="자동 연결 중…"; gb.style.display="none";   /* 반환 사용자: 조용히 재연결 */
-        sheetSrc().ensureReadySilent().then(async()=>{ await onOk(); }).catch(()=>{ gb.style.display=""; gm.textContent=""; }); }
+      const S=sheetSrc();
+      if(S.token){ gm.textContent="자동 연결 중…"; gb.style.display="none";   /* 저장된 유효 토큰 → 로그인 없이 바로 */
+        S.ensureReady().then(onOk).catch(()=>{ S.token=null; try{store.removeItem("nd.tok");}catch(e){} S.ensureReadySilent().then(onOk).catch(()=>{ gb.style.display=""; gm.textContent=""; }); }); }
+      else if(S.ssId){ gm.textContent="자동 연결 중…"; gb.style.display="none";   /* 반환 사용자: 조용히 재연결 */
+        S.ensureReadySilent().then(onOk).catch(()=>{ gb.style.display=""; gm.textContent=""; }); }
     } }
   loadCachedCustomManifests();   // 캐시로 즉시 표시(빠름)
   // 첫 화면은 홈(켜둔 카테고리 카드 격자). 처음엔 비어 있고, 설정에서 카테고리를 켜면 카드가 생김.
