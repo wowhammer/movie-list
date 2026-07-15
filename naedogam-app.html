@@ -508,7 +508,7 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
         <svg class="brandmark" width="34" height="30" viewBox="26 28 62 54" aria-hidden="true"><rect x="28" y="40" width="12" height="38" rx="5" fill="#F7F5F0"/><rect x="44" y="30" width="12" height="48" rx="5" fill="#F7F5F0"/><rect x="60" y="32" width="12" height="46" rx="5" fill="#E0483F" transform="rotate(16 66 78)"/></svg>
         <span class="brandwm"><span class="bwm-ko">내도감</span><span class="bwm-en">NAEDOGAM</span></span>
       </button>
-      <span class="mhver">배포 v148</span>
+      <span class="mhver">배포 v149</span>
       <span class="spacer"></span>
       <span class="src-chip" id="srcChip" style="display:none">데모</span>
       <button class="icon-btn" id="searchToggle" type="button" style="display:none">🔍</button>
@@ -595,7 +595,7 @@ const MANIFESTS = {
         o.watched=code.charAt(0)==='W'?"O":""; o.rewatch=code.charAt(1)==='R';
         const jjim=String(o["찜"]==null?"":o["찜"]).trim().toLowerCase();
         o.pick=(jjim==='true'||jjim==='o'||jjim==='1'||jjim==='찜')?true:(code.charAt(1)==='P');
-        o.rating=(o["TMDB평점"]===""||o["TMDB평점"]==null)?null:(parseFloat(o["TMDB평점"])||null);
+        { const _rt=(o["TMDB평점"]!=null&&o["TMDB평점"]!=="")?o["TMDB평점"]:o["평점"]; o.rating=(_rt==null||_rt==="")?null:(parseFloat(_rt)||null); }
         o.watchDate=String(o["본날"]==null?"":o["본날"]);
         o.directSearch=String(o["직접검색"]==null?"":o["직접검색"]);
         o.streaming=(typeof o.streaming==="string")?o.streaming.split(/[,\/|]+/).map(x=>x.trim()).filter(Boolean):(Array.isArray(o.streaming)?o.streaming:[]);
@@ -620,7 +620,7 @@ const MANIFESTS = {
     card:{ kind:"specimen", thumb:"🎞",
            meta:r=>[r.year, r.director, r.actors].filter(Boolean).join(" · "),
            tags:"streaming",
-           flags:r=>[ r.rating!=null?{t:"★ "+r.rating,cls:"star"}:0,
+           flags:r=>[ r.rating!=null?{t:"TMDB "+r.rating,cls:"star"}:0,
                       r.watched==="O"?{t:"시청",cls:"on"}:0,
                       r.rewatch?{t:"다시볼것",cls:"on"}:0,
                       r.pick?{t:"찜",cls:"on"}:0 ] } },
@@ -686,7 +686,7 @@ const MANIFESTS = {
     card:{ kind:"specimen", thumb:"📖",
            meta:r=>[r.year, r.author, r.genre].filter(Boolean).join(" · "),
            tags:"tags",
-           flags:r=>[ r.rating!=null?{t:"★ "+r.rating,cls:"star"}:0,
+           flags:r=>[ r.rating!=null?{t:"TMDB "+r.rating,cls:"star"}:0,
                       r.status==="읽음"?{t:"읽음",cls:"on"}:0,
                       r.status==="읽는중"?{t:"읽는중",cls:"on"}:0,
                       r.pick?{t:"찜",cls:"on"}:0 ] } },
@@ -3663,8 +3663,9 @@ async function recoAddOne(m, it){
   { const _v=recoView(id,it); const _probe = id==="movies" ? {orig:_v.key, title:_v.title} : (id==="books" ? {title:_v.key, author:it.author} : {title:_v.key}); if(ndFindDup(id,_probe)){ const _e=new Error("이미 있음"); throw _e; } }
   if(id==="movies"){
     const rec=String(it["추천"]||"");
+    let _tmdbR=null; try{ const _rs=await searchMovies(it["원제"]||it["한국 개봉명"]||""); if(_rs&&_rs[0]&&_rs[0].rating!=null&&_rs[0].rating!=="") _tmdbR=_rs[0].rating; }catch(e){}
     const row={ _id:it["원제"], orig:it["원제"], title:(it["한국 개봉명"]||it["원제"]||""), year:it["개봉연도"]||null,
-      director:it["감독"]||"", actors:it["배우"]||"", country:it["국적"]||"", rating:null, streaming:[],
+      director:it["감독"]||"", actors:it["배우"]||"", country:it["국적"]||"", rating:_tmdbR, streaming:[],
       recommend:rec, recommendList:rec.split(/[\/,]+/).map(x=>x.trim()).filter(Boolean), review:"", directSearch:"",
       watched:"", rewatch:false, pick:false, watchDate:"" };
     await sheetSrc().appendRaw(sheetSrc().tabOf("movies"), movieKorRow(row));
@@ -3734,7 +3735,7 @@ async function openRecoPanel(m){
 
 function openAbout(){
   const d=$("#add");
-  const I="var(--ink,#2b2622)", S="var(--ink-soft,#7c736b)", A="var(--accent,#E0483F)", SF="var(--serif,Georgia,serif)";
+  const I="var(--ink,#2b2622)", S="var(--ink-soft,#7c736b)", A="#E0483F", SF="var(--serif,Georgia,serif)";
   const card=(t,b)=>`<div class="ab-card"><b>${t}</b><div>${b}</div></div>`;
   const step=(n,t,b)=>`<div style="display:flex;gap:11px;align-items:flex-start;margin:0 0 13px"><div style="flex:0 0 26px;height:26px;border-radius:50%;background:${A};color:#fff;font-weight:800;font-size:13px;display:flex;align-items:center;justify-content:center">${n}</div><div><div style="font-weight:700;color:${I};font-size:14px;margin-bottom:2px">${t}</div><div style="font-size:12.5px;color:${S};line-height:1.6">${b}</div></div></div>`;
   const chip=(t)=>`<span style="display:inline-block;border:1px solid var(--line,#e7e0d8);border-radius:999px;padding:7px 13px;font-size:12.5px;color:${I};background:var(--card,#fff);margin:0 6px 8px 0">${t}</span>`;
