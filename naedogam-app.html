@@ -508,7 +508,7 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
         <svg class="brandmark" width="34" height="30" viewBox="26 28 62 54" aria-hidden="true"><rect x="28" y="40" width="12" height="38" rx="5" fill="#F7F5F0"/><rect x="44" y="30" width="12" height="48" rx="5" fill="#F7F5F0"/><rect x="60" y="32" width="12" height="46" rx="5" fill="#E0483F" transform="rotate(16 66 78)"/></svg>
         <span class="brandwm"><span class="bwm-ko">내도감</span><span class="bwm-en">NAEDOGAM</span></span>
       </button>
-      <span class="mhver">배포 v145</span>
+      <span class="mhver">배포 v146</span>
       <span class="spacer"></span>
       <span class="src-chip" id="srcChip" style="display:none">데모</span>
       <button class="icon-btn" id="searchToggle" type="button" style="display:none">🔍</button>
@@ -2613,6 +2613,7 @@ function openRecordForm(m, existing, prefill){
     if(m.activity && m.activity.when(row) && !row[m.activity.df]) row[m.activity.df]=todayStr();   // 완료 날짜 기록(폼 경로)
     const btn=$("#rfSave"); btn.textContent="저장 중…"; btn.disabled=true;
     try{
+      if(!existing && !ndConfirmDup(m.id, row)){ btn.textContent="저장"; btn.disabled=false; return; }
       await saveRecord(m, row, existing);
       d.close(); afterSave(m, row);
     }catch(e){ btn.textContent="저장"; btn.disabled=false; alert("저장 실패: "+e.message); }
@@ -3521,6 +3522,7 @@ function addBook(b){
     cover:b.cover, genre:b.genre||[], rating:null,
     status: addStatus==="읽고싶다" ? "" : addStatus,
     pick: addStatus==="읽고싶다" };
+  if(!ndConfirmDup("books", row)) return;
   $("#add").close();
   sheetSrc().upsert("books", row)          // 시트 '도서' 탭에 실제 저장(영구)
     .then(()=>refreshDomain())
@@ -3613,8 +3615,7 @@ async function pickMovie(m){
   const extra = await fetchMovieExtra(m.id);
   const _id=(m.orig||m.kor||'');
   if(!_id){ alert("원제 정보가 없어 추가할 수 없어요."); if($("#mres")) $("#mres").innerHTML=""; return; }
-  const _have=(CACHE.movies||loadPersist("movies")||[]);
-  if(_have.some(x=>String(x._id)===_id || x.orig===_id)){ alert("이미 목록에 있는 영화예요."); if($("#mres")) $("#mres").innerHTML=""; return; }
+  if(!ndConfirmDup("movies", {_id:_id, orig:m.orig, title:(m.kor||m.orig||"")})){ if($("#mres")) $("#mres").innerHTML=""; return; }
   const row={ _id, orig:m.orig, title:(m.kor||m.orig||""), year:m.year,
     director:extra.director, actors:extra.actors, country:extra.country,
     rating:m.rating, streaming:[], recommend:"", recommendList:[], review:"", directSearch:"",
@@ -3631,6 +3632,9 @@ async function pickMovie(m){
 const RECO_LISTS = { movies:"reco/movies.json", books:"reco/books.json", mountains:"reco/mountains.json" };
 const RECO_CACHE = {};
 function recoNorm(s){ return String(s==null?"":s).normalize("NFD").replace(/[̀-ͯ]/g,"").normalize("NFC").toLowerCase().replace(/[^0-9a-z가-힣]/g,""); }
+function ndDupKeys(id,r){ if(!r) return []; if(id==="books") return [recoNorm((r.title||"")+"|"+(r.author||""))].filter(Boolean); let a = id==="movies" ? [r.orig,r._id,r.title] : [r.title,r.name,r._id]; return [...new Set(a.map(recoNorm).filter(Boolean))]; }
+function ndFindDup(id,row){ const ks=ndDupKeys(id,row); if(!ks.length) return null; const rows=(CACHE[id]||loadPersist(id)||[]); return rows.find(x=>{ const xs=ndDupKeys(id,x); return xs.some(k=>ks.indexOf(k)>=0); })||null; }
+function ndConfirmDup(id,row){ const d=ndFindDup(id,row); if(!d) return true; const nm=d.title||d.orig||d._id||"항목"; return confirm('이미 "'+nm+'" 있어요.\n그래도 하나 더 추가할까요?'); }
 async function recoFetch(id){
   if(RECO_CACHE[id]) return RECO_CACHE[id];
   const data = await fetch(RECO_LISTS[id] + "?v=" + Date.now()).then(r=>{ if(!r.ok) throw new Error("HTTP "+r.status); return r.json(); });
