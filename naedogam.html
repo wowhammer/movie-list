@@ -168,6 +168,8 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
   .reco-m{ font-size:12px; color:var(--ink-soft); margin-top:2px; }
   .reco-badge{ display:inline-block; font-size:11px; color:var(--accent); border:1px solid var(--line); border-radius:10px; padding:1px 7px; margin-top:4px; }
   .reco-foot{ position:sticky; bottom:0; background:var(--card); padding:10px 0 4px; display:flex; gap:8px; }
+  .ab-card{ border:1px solid var(--line); border-radius:10px; padding:10px 12px; margin-bottom:8px; font-size:13px; color:var(--ink); }
+  .ab-card>div{ font-size:12.5px; color:var(--ink-soft); margin-top:3px; }
   .totop{ position:fixed; left:18px; bottom:22px; z-index:45; width:46px; height:46px; border-radius:50%; border:1px solid var(--line); background:var(--card); color:var(--ink); font-size:19px; display:flex; align-items:center; justify-content:center; cursor:pointer; box-shadow:0 3px 12px rgba(0,0,0,.10); opacity:0; transform:translateY(10px) scale(.9); pointer-events:none; transition:opacity .22s ease, transform .22s ease; }
   .totop.show{ opacity:1; transform:translateY(0) scale(1); pointer-events:auto; }
   .totop:hover{ border-color:var(--accent); color:var(--accent); }
@@ -494,7 +496,7 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
         <svg class="brandmark" width="34" height="30" viewBox="26 28 62 54" aria-hidden="true"><rect x="28" y="40" width="12" height="38" rx="5" fill="#F7F5F0"/><rect x="44" y="30" width="12" height="48" rx="5" fill="#F7F5F0"/><rect x="60" y="32" width="12" height="46" rx="5" fill="#E0483F" transform="rotate(16 66 78)"/></svg>
         <span class="brandwm"><span class="bwm-ko">내도감</span><span class="bwm-en">NAEDOGAM</span></span>
       </button>
-      <span class="mhver">v141</span>
+      <span class="mhver">v142</span>
       <span class="spacer"></span>
       <span class="src-chip" id="srcChip" style="display:none">데모</span>
       <button class="icon-btn" id="searchToggle" type="button" style="display:none">🔍</button>
@@ -3024,6 +3026,7 @@ function renderSettingsBody(d){
   const arow=id=>{ const m=MANIFESTS[id]; return `<div class="cat-mrow ord-row" data-id="${id}"><span class="ord-handle" aria-label="끌어서 순서 이동">≡</span><span class="mi">${m.icon}</span><span class="mn">${m.title} <span class="mv">${m.vol}</span></span>${_cc(m)}<button class="sw on" data-id="${id}" role="switch" aria-checked="true" type="button"></button></div>`; };
   const irow=id=>{ const m=MANIFESTS[id]; return `<div class="cat-mrow" data-id="${id}"><span class="ord-handle ord-ph">≡</span><span class="mi">${m.icon}</span><span class="mn">${m.title} <span class="mv">${m.vol}</span></span>${_cc(m)}<button class="sw" data-id="${id}" role="switch" aria-checked="false" type="button"></button></div>`; };
   d.innerHTML=`<div class="dhead"><h3>설정</h3></div><div class="dbody set">
+    <button class="btn ghost" type="button" onclick="openAbout()" style="width:100%;margin:0 0 12px">ℹ️ 내도감이란? · 앱 소개</button>
     <h4>카테고리</h4>
     <div class="hint">토글로 켜고 끄고, 왼쪽 <b>≡</b>을 끌어 순서를 바꾸세요. 홈·상단 탭에 바로 반영됩니다. (시트 데이터는 지워지지 않아요)</div>
     <div class="ord-list" id="catList">${act.map(arow).join("")}</div>
@@ -3467,6 +3470,22 @@ async function openRecoPanel(m){
     if(fail) setTimeout(()=>alert(`${added}개 담음 · ${fail}개 실패`),120);   /* 성공 시엔 조용히 닫힘 */
   }
   render();
+}
+
+function openAbout(){
+  const d=$("#add");
+  d.innerHTML=`<div class="dhead"><h3>내도감 소개</h3></div><div class="dbody">
+    <div style="font-family:var(--serif);font-size:18px;font-weight:700;color:var(--ink);margin:2px 0 4px">내가 모은 것들의 도감</div>
+    <div style="font-size:13px;color:var(--ink-soft);line-height:1.6;margin-bottom:14px">영화·책·산·러닝·일기, 그리고 내가 만든 칸까지 — 한 곳에.<br>내 기록은 내 구글드라이브에 영원히, 앱이 사라져도 남습니다.</div>
+    <div class="ab-card">🗄 <b>영원한 내 데이터</b><div>모든 기록은 내 구글시트에. 앱과 무관하게 영구 보존됩니다.</div></div>
+    <div class="ab-card">➕ <b>칸을 내가 만든다</b><div>위스키? 향수? 필요한 분야를 직접 만들어요.</div></div>
+    <div class="ab-card">📚 <b>수집의 재미</b><div>영화·책·산부터 셀러·명언까지, 모으는 맛.</div></div>
+    <div style="font-size:12.5px;color:var(--ink-soft);line-height:1.75;margin-top:12px"><b>작동 방식</b><br>1. 원하는 분야를 켜요<br>2. 기록을 담아요<br>3. 모든 게 내 구글시트에 쌓여 영구 보존돼요.</div>
+    <a href="https://naedogam.com" target="_blank" rel="noopener" style="display:inline-block;margin-top:12px;font-size:12.5px;color:var(--accent)">naedogam.com ↗</a>
+    <button class="btn ghost" id="abClose" type="button" style="width:100%;margin-top:14px">닫기</button>
+  </div>`;
+  d.showModal();
+  const c=$("#abClose"); if(c) c.onclick=()=>d.close();
 }
 
 async function boot(){
