@@ -38,6 +38,7 @@ const CONFIG = {
   APPS_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbyfEqz3U7qircviRqSKx2KrBYSYfjsxjznP9UWN00Z19Y0sUF6uaJXy06OmHaSBpK4/exec',
   APP_NAME: '내도감',
   DEPLOY: true,
+  RECO_SHEET_ID: '',   // 추천리스트 마스터 구글시트 ID(링크공유 뷰어). 비우면 기본 리스트.
   GOOGLE_CLIENT_ID: '555942177698-nutb0d01pr7n6q906oafsevo0m55tobe.apps.googleusercontent.com',
   // 책 검색이 자꾸 막히면(429) 여기에 '구글 북스 키'를 넣으세요. 비워두면 키 없이 동작.
   GOOGLE_BOOKS_KEY: 'AIzaSyDlhk8ALyDYozjN3Snq6dnmj2KWz7gPezI',
@@ -508,7 +509,7 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
         <svg class="brandmark" width="34" height="30" viewBox="26 28 62 54" aria-hidden="true"><rect x="28" y="40" width="12" height="38" rx="5" fill="#F7F5F0"/><rect x="44" y="30" width="12" height="48" rx="5" fill="#F7F5F0"/><rect x="60" y="32" width="12" height="46" rx="5" fill="#E0483F" transform="rotate(16 66 78)"/></svg>
         <span class="brandwm"><span class="bwm-ko">내도감</span><span class="bwm-en">NAEDOGAM</span></span>
       </button>
-      <span class="mhver">배포 v149</span>
+      <span class="mhver">배포 v150</span>
       <span class="spacer"></span>
       <span class="src-chip" id="srcChip" style="display:none">데모</span>
       <button class="icon-btn" id="searchToggle" type="button" style="display:none">🔍</button>
@@ -3680,13 +3681,47 @@ async function recoAddOne(m, it){
   markPending(id, uid);
   const arr=(CACHE[id]||loadPersist(id)||[]); arr.push(row); CACHE[id]=arr; savePersist(id,arr);
 }
+async function gvizFetch(sheetId, tab){
+  const url="https://docs.google.com/spreadsheets/d/"+sheetId+"/gviz/tq?tqx=out:json&sheet="+encodeURIComponent(tab)+"&_="+Date.now();
+  const t=await fetch(url).then(r=>r.text());
+  const j=JSON.parse(t.substring(t.indexOf("{"), t.lastIndexOf("}")+1));
+  const cols=(j.table.cols||[]).map(c=>String(c.label||c.id||"").trim());
+  return (j.table.rows||[]).map(row=>{ const o={}; (row.c||[]).forEach((cell,i)=>{ o[cols[i]]=cell?(cell.v==null?"":cell.v):""; }); return o; });
+}
+const RECO_CAT_KO={movies:"영화",books:"도서",mountains:"등산"};
+async function recoSheetLists(id){
+  const catKo=RECO_CAT_KO[id]||id;
+  const idx=await gvizFetch(CONFIG.RECO_SHEET_ID,"목록");
+  const rows=await gvizFetch(CONFIG.RECO_SHEET_ID,catKo);
+  return idx.filter(r=>(String(r["카테고리"]||"")===catKo||String(r["카테고리"]||"")===id) && String(r["공개"]||"").trim().toUpperCase().indexOf("Y")===0)
+    .map(r=>{ const title=String(r["리스트제목"]||"");
+      const items=rows.filter(x=>String(x["리스트제목"]||"")===title).map(x=>{ const o={}; for(const k in x){ if(k!=="리스트제목") o[k]=x[k]; } return o; });
+      return { title, subtitle:String(r["부제"]||""), items }; })
+    .filter(l=>l.title && l.items.length);
+}
+async function recoLists(id){
+  if(CONFIG.RECO_SHEET_ID){ try{ const ls=await recoSheetLists(id); if(ls&&ls.length) return ls; }catch(e){} }
+  const d=await recoFetch(id); return Array.isArray(d)?d:[d];
+}
+function recoPickList(d, lists, catTitle){
+  return new Promise(res=>{
+    const rows=lists.map((l,i)=>`<div class="reco-item" data-i="${i}" style="cursor:pointer"><div class="reco-b"><div class="reco-t">${l.title}</div><div class="reco-m">${l.subtitle||(l.items.length+"개")}</div></div><span class="reco-badge">${l.items.length}개</span></div>`).join("");
+    d.innerHTML=`<div class="dhead"><h3>${catTitle} · 추천 리스트</h3></div><div class="dbody"><div class="count" style="margin:0 0 8px">담고 싶은 리스트를 고르세요</div><div id="rcPick" style="max-height:60vh;overflow:auto;margin:0 -4px">${rows}</div><button class="btn ghost" id="rcPickClose" style="width:100%;margin-top:12px">닫기</button></div>`;
+    d.querySelectorAll("#rcPick .reco-item").forEach(el=>el.onclick=()=>res(lists[+el.dataset.i]));
+    const c=$("#rcPickClose"); if(c) c.onclick=()=>{ d.close(); res(null); };
+  });
+}
 async function openRecoPanel(m){
   const id=m.id, d=$("#add");
   d.innerHTML=`<div class="dhead"><h3>추천 리스트</h3></div><div class="dbody"><div class="count">불러오는 중…</div></div>`;
   d.showModal();
-  let data;
-  try{ data=await recoFetch(id); }
+  let listsAll;
+  try{ listsAll=await recoLists(id); }
   catch(e){ d.innerHTML=`<div class="dhead"><h3>추천 리스트</h3></div><div class="dbody"><div class="banner warn">추천 리스트를 불러오지 못했습니다: ${e.message}</div><button class="btn ghost" id="rcClose" style="margin-top:12px">닫기</button></div>`; const c=$("#rcClose"); if(c)c.onclick=()=>d.close(); return; }
+  if(!listsAll||!listsAll.length){ d.innerHTML=`<div class="dhead"><h3>추천 리스트</h3></div><div class="dbody"><div class="count">아직 추천 리스트가 없어요.</div><button class="btn ghost" id="rcClose" style="margin-top:12px">닫기</button></div>`; const c=$("#rcClose"); if(c)c.onclick=()=>d.close(); return; }
+  let data;
+  if(listsAll.length>1){ data=await recoPickList(d, listsAll, m.title||"추천"); if(!data){ return; } }
+  else { data=listsAll[0]||{items:[]}; }
   const have=(await sheetSrc().list(id).catch(()=>null))||CACHE[id]||loadPersist(id)||[]; CACHE[id]=have;
   const hk=recoHaveKeys(id, have);
   const items=(data.items||[]).map(it=>({ it, v:recoView(id,it), has:recoIsHave(id,it,hk) }));
