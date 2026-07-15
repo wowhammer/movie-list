@@ -518,7 +518,7 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
     <input class="search" id="search" type="search" style="display:none" />
     <select class="search" id="mvselect" style="display:none"></select>
     <button class="icon-btn" id="addBtn" type="button" style="display:none">＋</button>
-    <button id="recoBtn" type="button" style="display:none">🎬 추천 담기</button>
+    <button id="recoBtn" type="button" style="display:none">✨ 추천 담기</button>
     <button class="totop" id="toTop" type="button" aria-label="맨 위로">↑</button>
     <div class="count" id="count"></div>
     <div class="list" id="list"></div>
@@ -2723,7 +2723,7 @@ function paintMovies(m){
     + (shown.length<total?`<button class="btn ghost" id="moreBtn" style="width:100%;margin-top:10px">더 보기 (${total-shown.length}편)</button>`:"");
   $("#list").querySelectorAll(".card").forEach((b,i)=>{ const r=shown[i]; if(r) b.onclick=()=>openDetail(m, r); });
   { const na=$("#nrAdd"); if(na) na.onclick=()=>{ openAddMovie(); const mq=$("#mq"); if(mq){ mq.value=state.query; mq.dispatchEvent(new Event("input")); } }; }
-  if(total===0 && RECO_LISTS[m.id]){ const _rc=document.createElement("button"); _rc.className="btn"; _rc.style.cssText="width:100%;margin-top:12px"; _rc.textContent="🎬 추천 리스트에서 시작하기"; _rc.onclick=()=>openRecoPanel(m); $("#list").appendChild(_rc); }
+  if(total===0 && RECO_LISTS[m.id]){ const _rc=document.createElement("button"); _rc.className="btn"; _rc.style.cssText="width:100%;margin-top:12px"; _rc.textContent="✨ 추천 리스트에서 시작하기"; _rc.onclick=()=>openRecoPanel(m); $("#list").appendChild(_rc); }
   document.querySelectorAll(".mvcard .plink").forEach(el=>el.onclick=e=>{ e.stopPropagation(); openPersonModal(el.dataset.name, el.dataset.role); });
   const more=$("#moreBtn"); if(more) more.onclick=()=>{ state.page++; paintMovies(m); };
   lazyPosters();
