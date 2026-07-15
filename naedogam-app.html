@@ -63,6 +63,11 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
   }
   *{ box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
   html{ overflow-y:scroll; scrollbar-gutter:stable; }   /* 목록 길이와 무관하게 스크롤바 자리 고정 → 탭 전환 시 가로 안 밀림 */
+  [data-theme="dark"]{
+    --paper:#0e1013; --card:#181a1f; --ink:#e7e8ec; --ink-soft:#9aa0aa;
+    --line:#2a2d34; --line-soft:#20232a; --accent-wash:#12281b; --ochre-wash:#2a220f;
+  }
+  [data-theme="dark"] .sw::after{ background:#d5d8de; }
   body{ margin:0; color:var(--ink); font-family:var(--sans); line-height:1.5; -webkit-font-smoothing:antialiased;
     background-color:var(--paper); }
   .wrap{ max-width:600px; margin:0 auto; padding:0 16px 96px; }
@@ -105,7 +110,7 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
 
   /* 상단 카테고리 탭 → 하단 고정 탭바로 */
   .tabs{ position:sticky; top:0; z-index:30; display:flex; gap:2px; overflow-x:auto; margin:0 0 6px; padding:0;
-    background:#fff; border-bottom:1px solid var(--line); }
+    background:var(--card); border-bottom:1px solid var(--line); }
   .tabs::-webkit-scrollbar{ display:none; }
   .tab{ position:relative; flex:0 0 auto; display:flex; align-items:center; gap:6px; cursor:pointer; background:none; border:none;
     color:var(--ink-soft); padding:11px 15px; font-family:var(--sans); font-size:14px; border-bottom:2.5px solid transparent; margin-bottom:-1.5px; white-space:nowrap; }
@@ -122,7 +127,7 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
   .stat .n{ font-family:var(--sans); font-weight:700; font-size:19px; color:var(--ink); letter-spacing:-.01em; }
   .stat .l{ font-size:11px; color:var(--ink-soft); margin-top:2px; }
   .moodstats{ display:flex; align-items:center; gap:6px; padding:6px 2px 6px; flex-wrap:wrap; }
-  .ms-total,.ms-chip{ display:inline-flex; align-items:center; gap:4px; font-family:var(--sans); font-size:15px; padding:5px 11px; border:1px solid var(--line); border-radius:16px; background:#fff; color:var(--ink-soft); cursor:pointer; line-height:1; }
+  .ms-total,.ms-chip{ display:inline-flex; align-items:center; gap:4px; font-family:var(--sans); font-size:15px; padding:5px 11px; border:1px solid var(--line); border-radius:16px; background:var(--card); color:var(--ink-soft); cursor:pointer; line-height:1; }
   .ms-total b,.ms-chip b{ font-size:12.5px; font-weight:700; color:var(--ink-soft); }
   .ms-total.on,.ms-chip.on{ background:var(--accent-wash); border-color:var(--accent); color:var(--ink); }
   .ms-total.on b,.ms-chip.on b{ color:var(--ink); }
@@ -168,10 +173,10 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
   .chip{ font-family:var(--sans); font-size:12.5px; white-space:nowrap; padding:6px 12px; border-radius:3px; border:1px solid var(--line); background:var(--card); color:var(--ink-soft); cursor:pointer; }
   .chip.on{ background:var(--accent); color:#fff; border-color:var(--accent); }
   .vehseg{ display:flex; gap:6px; width:100%; }
-  .vseg{ flex:1; font-family:var(--sans); font-size:13px; font-weight:600; padding:8px 4px; border-radius:9px; border:1.5px solid var(--line); background:#fff; color:var(--ink-soft); cursor:pointer; white-space:nowrap; }
+  .vseg{ flex:1; font-family:var(--sans); font-size:13px; font-weight:600; padding:8px 4px; border-radius:9px; border:1.5px solid var(--line); background:var(--card); color:var(--ink-soft); cursor:pointer; white-space:nowrap; }
   .vseg.on{ background:var(--ink); color:#fff; border-color:var(--ink); }
   .dv-seg{ display:flex; gap:6px; margin-left:auto; }
-  .dv-btn{ font-family:var(--sans); font-size:12.5px; font-weight:600; padding:6px 12px; border-radius:8px; border:1.5px solid var(--line); background:#fff; color:var(--ink-soft); cursor:pointer; white-space:nowrap; }
+  .dv-btn{ font-family:var(--sans); font-size:12.5px; font-weight:600; padding:6px 12px; border-radius:8px; border:1.5px solid var(--line); background:var(--card); color:var(--ink-soft); cursor:pointer; white-space:nowrap; }
   .dv-btn.on{ background:var(--ink); color:#fff; border-color:var(--ink); }
   .viewbar{ display:flex; gap:5px; justify-content:flex-end; margin:0 0 6px; }
   .viewbar .dv-btn{ padding:4px 10px; font-size:15px; line-height:1; }
@@ -227,7 +232,7 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
   .ord-handle{ cursor:grab; color:var(--sub); font-size:20px; padding:2px 6px 2px 0; line-height:1; user-select:none; touch-action:none; flex:0 0 auto; }
   .ord-handle.ord-ph{ visibility:hidden; }
   .io-row{ display:flex; gap:8px; align-items:center; flex-wrap:wrap; margin:4px 0 6px; }
-  .io-sel{ flex:1 1 130px; min-width:120px; padding:8px 10px; border:1px solid var(--line); border-radius:8px; font-size:14px; background:#fff; color:var(--ink); }
+  .io-sel{ flex:1 1 130px; min-width:120px; padding:8px 10px; border:1px solid var(--line); border-radius:8px; font-size:14px; background:var(--card); color:var(--ink); }
   .rf-imghint{ font-size:12px; color:var(--ink-soft); margin-top:6px; }
   .rf-imgzone .rf-imgprev{ max-width:100%; max-height:170px; border-radius:8px; }
   .rf-imgzone .rf-imgfile{ margin-top:8px; }
@@ -329,9 +334,9 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
   .clx-badge{ display:inline-block; font-size:10px; font-weight:700; color:#fff; padding:1px 7px; border-radius:9px; vertical-align:middle; margin-right:4px; }
   .sortsel{ flex-shrink:0; font-family:var(--mono); font-size:12px; padding:7px 10px; border:1px solid var(--line); border-radius:3px; background:var(--card); color:var(--ink); height:34px; }
 
-  dialog{ border:none; border-radius:16px; padding:0; max-width:460px; width:92%; background:#fff; color:var(--ink); box-shadow:0 12px 44px rgba(0,0,0,.22); }
+  dialog{ border:none; border-radius:16px; padding:0; max-width:460px; width:92%; background:var(--card); color:var(--ink); box-shadow:0 12px 44px rgba(0,0,0,.22); }
   dialog::backdrop{ background:rgba(30,26,20,.5); }
-  .dhead{ padding:16px 18px; border-bottom:1px solid var(--line); position:relative; }
+  .dhead{ padding:14px 18px; border-bottom:1px solid var(--line); position:sticky; top:0; background:var(--card); z-index:6; }
   .dhead h3{ font-family:var(--sans); font-weight:700; margin:0; font-size:19px; padding-right:128px; }
   .dclose-x{ position:absolute; top:11px; right:12px; width:30px; height:30px; display:flex; align-items:center; justify-content:center; border:none; background:transparent; color:var(--ink-soft); font-size:19px; line-height:1; cursor:pointer; border-radius:8px; }
   .dclose-x:hover{ background:var(--line-soft); color:var(--ink); }
@@ -363,7 +368,7 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
   .hs-group{ margin:8px 0; }
   .hs-cat{ font-size:12px; color:var(--ink-soft); font-weight:600; margin:8px 2px 5px; display:flex; gap:6px; align-items:center; }
   .hs-cat span{ color:var(--accent); }
-  .hs-item{ display:flex; flex-direction:column; align-items:flex-start; gap:2px; width:100%; text-align:left; background:#fff; border:1px solid var(--line-soft); border-radius:10px; padding:9px 12px; margin-bottom:5px; cursor:pointer; }
+  .hs-item{ display:flex; flex-direction:column; align-items:flex-start; gap:2px; width:100%; text-align:left; background:var(--card); border:1px solid var(--line-soft); border-radius:10px; padding:9px 12px; margin-bottom:5px; cursor:pointer; }
   .hs-item:hover{ border-color:var(--line); }
   .hs-item b{ font-size:14.5px; color:var(--ink); font-weight:600; }
   .hs-item span{ font-size:12px; color:var(--ink-soft); }
@@ -402,7 +407,7 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
   .cat-mrow .mn{ flex:1; font-size:14.5px; }
   .cat-mrow .mv{ font-family:var(--mono); font-size:9.5px; color:var(--ink-soft); }
   .sw{ width:44px; height:25px; border-radius:13px; border:1px solid var(--line); background:var(--paper); position:relative; cursor:pointer; transition:.15s; flex:none; }
-  .sw::after{ content:""; position:absolute; top:2px; left:2px; width:19px; height:19px; border-radius:50%; background:#fff; border:1px solid var(--line); transition:.15s; }
+  .sw::after{ content:""; position:absolute; top:2px; left:2px; width:19px; height:19px; border-radius:50%; background:var(--card); border:1px solid var(--line); transition:.15s; }
   .sw.on{ background:var(--accent); border-color:var(--accent); }
   .sw.on::after{ left:21px; border-color:var(--accent); }
 
@@ -474,6 +479,7 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
   @media (max-width:430px){ .mh-row{ gap:5px; padding:11px 11px; } .mh-row .icon-btn{ padding:5px 7px; } .bwm-ko{ font-size:18px; } .mhver{ margin-left:1px; } .stat .n{ font-size:15.5px; } .stat .l{ font-size:10px; } }
   @media (prefers-reduced-motion:no-preference){ .card{ transition:border-color .15s ease; } }
 </style>
+<script>try{var _t=localStorage.getItem("app:nd.theme")||localStorage.getItem("nd.theme");if(_t==="dark")document.documentElement.setAttribute("data-theme","dark");}catch(e){}</script>
 </head>
 <body>
 <div class="wrap" id="root" data-domain="movies">
@@ -3207,6 +3213,8 @@ function renderSettingsBody(d){
     <div class="ord-list" id="catList">${act.map(arow).join("")}</div>
     ${inact.length?`<div class="hint" style="margin-top:12px;color:var(--sub)">꺼진 카테고리 · 켜면 홈에 추가</div>${inact.map(irow).join("")}`:""}
     <button class="btn ghost" id="catNew" type="button" style="margin-top:14px">＋ 내 카테고리 만들기</button>
+    <h4>화면</h4>
+    <div class="cat-mrow" style="cursor:default"><span class="mi">🌙</span><span class="mn">다크 모드</span><button class="sw" id="themeSw" role="switch" type="button"></button></div>
     <h4>가져오기 · 내보내기 (CSV)</h4>
     <div class="hint">카테고리를 CSV로 내보내 다른 사람에게 주거나, 받은 CSV를 골라 한꺼번에 등록해요. <b>처음이면 '샘플양식'으로 빈 양식을 받아 채우세요.</b> (사진은 제외 · 등록 항목엔 새 번호 자동 부여)</div>
     <div class="io-row">
@@ -3237,6 +3245,8 @@ function renderSettingsBody(d){
     if(_fi) _fi.onchange=e=>{ const file=e.target.files&&e.target.files[0]; if(!file) return; const rd=new FileReader(); rd.onload=()=>{ const rows=csvToRows(_sel.value, String(rd.result||"")); doImport(_sel.value, rows); _fi.value=""; }; rd.readAsText(file,"utf-8"); }; }
   $("#closeSet").onclick=()=>d.close();
   { const cn=$("#catNew"); if(cn) cn.onclick=()=>openCatBuilder(); }
+  { const tw=$("#themeSw"); if(tw){ const isD=document.documentElement.getAttribute("data-theme")==="dark"; tw.classList.toggle("on",isD); tw.setAttribute("aria-checked",isD);
+    tw.onclick=()=>{ const nd=document.documentElement.getAttribute("data-theme")!=="dark"; if(nd) document.documentElement.setAttribute("data-theme","dark"); else document.documentElement.removeAttribute("data-theme"); store.setItem("nd.theme", nd?"dark":"light"); tw.classList.toggle("on",nd); tw.setAttribute("aria-checked",nd); }; } }
 }
 function wireReorder(box, onCommit){
   let drag=null;
@@ -3266,7 +3276,7 @@ function cbFieldBlock(label,type){
       <input class="cb-flabel" placeholder="칸 이름 (예: 제목, 증류소)" value="${String(label||"").replace(/"/g,"&quot;")}" style="flex:1;min-width:0">
       <select class="cb-ftype" style="flex:0 0 86px">${cbTypeOptions(t)}</select>
       <label class="cb-ftitle-lbl" title="이 칸을 카드 제목으로 사용" style="flex:0 0 auto;display:flex;align-items:center;gap:3px;font-size:11px;color:var(--sub);cursor:pointer;white-space:nowrap"><input type="radio" name="cb_title" class="cb-ftitle" style="margin:0">제목</label>
-      <button type="button" class="cb-fdel" aria-label="칸 삭제" style="flex:0 0 auto;border:1px solid var(--line);background:#fff;border-radius:7px;padding:6px 9px;cursor:pointer">✕</button>
+      <button type="button" class="cb-fdel" aria-label="칸 삭제" style="flex:0 0 auto;border:1px solid var(--line);background:var(--card);border-radius:7px;padding:6px 9px;cursor:pointer">✕</button>
     </div>
     <input class="cb-fopts" placeholder="드롭다운 항목 · 쉼표로 구분 (예: 소장, 오픈)" style="display:${t==="select"?"block":"none"};width:100%;margin-top:6px">
   </div>`;
@@ -3277,14 +3287,14 @@ function openCatBuilder(){
   <div class="dbody">
     <div class="hint">이름과 칸(입력 항목)만 정하면 목록·검색·통계·저장이 자동으로 만들어집니다. 정의는 내 구글시트 <b>${CUSTOM_TAB}</b> 탭에 저장돼요.</div>
     <label style="display:block;margin:14px 0 4px;font-weight:600">템플릿에서 시작 <span style="font-weight:400;color:var(--sub);font-size:12px">· 누르면 자동으로 채워져요</span></label>
-    <div id="cb_tpls" style="display:flex;flex-wrap:wrap;gap:6px">${CAT_TEMPLATES.map((t,i)=>`<button type="button" class="cb-tpl" data-i="${i}" style="border:1px solid var(--line);background:#fff;border-radius:14px;padding:5px 11px;font-size:13px;cursor:pointer;white-space:nowrap">${t.icon} ${t.title}</button>`).join("")}</div>
+    <div id="cb_tpls" style="display:flex;flex-wrap:wrap;gap:6px">${CAT_TEMPLATES.map((t,i)=>`<button type="button" class="cb-tpl" data-i="${i}" style="border:1px solid var(--line);background:var(--card);border-radius:14px;padding:5px 11px;font-size:13px;cursor:pointer;white-space:nowrap">${t.icon} ${t.title}</button>`).join("")}</div>
     <label style="display:block;margin:16px 0 4px;font-weight:600">이름</label>
     <div style="display:flex;gap:8px">
       <div id="cb_iconview" title="아래에서 이모지를 고르세요" aria-label="아이콘 미리보기" style="flex:0 0 46px;display:flex;align-items:center;justify-content:center;font-size:22px;border:1px solid var(--line);border-radius:8px;background:var(--card)">🗂</div>
       <input type="hidden" id="cb_icon" value="🗂">
       <input id="cb_name" placeholder="예: 위스키" style="flex:1;min-width:0;font-size:16px;padding:9px 11px">
     </div>
-    <div style="margin-top:6px">${CAT_EMOJIS.map(e=>`<button type="button" class="cb-emo" data-e="${e}" style="font-size:18px;border:1px solid var(--line);background:#fff;border-radius:8px;padding:3px 7px;margin:0 4px 4px 0;cursor:pointer">${e}</button>`).join("")}</div>
+    <div style="margin-top:6px">${CAT_EMOJIS.map(e=>`<button type="button" class="cb-emo" data-e="${e}" style="font-size:18px;border:1px solid var(--line);background:var(--card);border-radius:8px;padding:3px 7px;margin:0 4px 4px 0;cursor:pointer">${e}</button>`).join("")}</div>
     <label style="display:block;margin:14px 0 2px;font-weight:600">칸(입력 항목)</label>
     <div id="cb_fields"></div>
     <button type="button" id="cb_add" class="btn ghost" style="margin-top:4px">＋ 칸 추가</button>
@@ -3388,7 +3398,7 @@ function openCatEdit(id){
       <input type="hidden" id="ce_icon" value="${String(m.icon||"🗂").replace(/"/g,"&quot;")}">
       <input id="ce_name" value="${String(m.title||"").replace(/"/g,"&quot;")}" style="flex:1;min-width:0;font-size:16px;padding:9px 11px">
     </div>
-    <div style="margin-top:6px">${CAT_EMOJIS.map(e=>`<button type="button" class="ce-emo" data-e="${e}" style="font-size:18px;border:1px solid var(--line);background:#fff;border-radius:8px;padding:3px 7px;margin:0 4px 4px 0;cursor:pointer">${e}</button>`).join("")}</div>
+    <div style="margin-top:6px">${CAT_EMOJIS.map(e=>`<button type="button" class="ce-emo" data-e="${e}" style="font-size:18px;border:1px solid var(--line);background:var(--card);border-radius:8px;padding:3px 7px;margin:0 4px 4px 0;cursor:pointer">${e}</button>`).join("")}</div>
     <div style="display:flex;gap:8px;margin-top:20px">
       <button type="button" id="ce_cancel" class="btn ghost" style="flex:1">취소</button>
       <button type="button" id="ce_save" class="btn" style="flex:2">저장</button>
