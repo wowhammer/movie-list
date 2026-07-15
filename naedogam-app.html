@@ -508,7 +508,7 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
         <svg class="brandmark" width="34" height="30" viewBox="26 28 62 54" aria-hidden="true"><rect x="28" y="40" width="12" height="38" rx="5" fill="#F7F5F0"/><rect x="44" y="30" width="12" height="48" rx="5" fill="#F7F5F0"/><rect x="60" y="32" width="12" height="46" rx="5" fill="#E0483F" transform="rotate(16 66 78)"/></svg>
         <span class="brandwm"><span class="bwm-ko">내도감</span><span class="bwm-en">NAEDOGAM</span></span>
       </button>
-      <span class="mhver">배포 v147</span>
+      <span class="mhver">배포 v148</span>
       <span class="spacer"></span>
       <span class="src-chip" id="srcChip" style="display:none">데모</span>
       <button class="icon-btn" id="searchToggle" type="button" style="display:none">🔍</button>
@@ -3734,18 +3734,60 @@ async function openRecoPanel(m){
 
 function openAbout(){
   const d=$("#add");
-  d.innerHTML=`<div class="dhead"><h3>내도감 소개</h3></div><div class="dbody">
-    <div style="font-family:var(--serif);font-size:18px;font-weight:700;color:var(--ink);margin:2px 0 4px">내가 모은 것들의 도감</div>
-    <div style="font-size:13px;color:var(--ink-soft);line-height:1.6;margin-bottom:14px">영화·책·산·러닝·일기, 그리고 내가 만든 칸까지 — 한 곳에.<br>내 기록은 내 구글드라이브에 영원히, 앱이 사라져도 남습니다.</div>
-    <div class="ab-card">🗄 <b>영원한 내 데이터</b><div>모든 기록은 내 구글시트에. 앱과 무관하게 영구 보존됩니다.</div></div>
-    <div class="ab-card">➕ <b>칸을 내가 만든다</b><div>위스키? 향수? 필요한 분야를 직접 만들어요.</div></div>
-    <div class="ab-card">📚 <b>수집의 재미</b><div>영화·책·산부터 셀러·명언까지, 모으는 맛.</div></div>
-    <div style="font-size:12.5px;color:var(--ink-soft);line-height:1.75;margin-top:12px"><b>작동 방식</b><br>1. 원하는 분야를 켜요<br>2. 기록을 담아요<br>3. 모든 게 내 구글시트에 쌓여 영구 보존돼요.</div>
-    <a href="https://naedogam.com" target="_blank" rel="noopener" style="display:inline-block;margin-top:12px;font-size:12.5px;color:var(--accent)">naedogam.com ↗</a>
-    <button class="btn ghost" id="abClose" type="button" style="width:100%;margin-top:14px">닫기</button>
-  </div>`;
+  const I="var(--ink,#2b2622)", S="var(--ink-soft,#7c736b)", A="var(--accent,#E0483F)", SF="var(--serif,Georgia,serif)";
+  const card=(t,b)=>`<div class="ab-card"><b>${t}</b><div>${b}</div></div>`;
+  const step=(n,t,b)=>`<div style="display:flex;gap:11px;align-items:flex-start;margin:0 0 13px"><div style="flex:0 0 26px;height:26px;border-radius:50%;background:${A};color:#fff;font-weight:800;font-size:13px;display:flex;align-items:center;justify-content:center">${n}</div><div><div style="font-weight:700;color:${I};font-size:14px;margin-bottom:2px">${t}</div><div style="font-size:12.5px;color:${S};line-height:1.6">${b}</div></div></div>`;
+  const chip=(t)=>`<span style="display:inline-block;border:1px solid var(--line,#e7e0d8);border-radius:999px;padding:7px 13px;font-size:12.5px;color:${I};background:var(--card,#fff);margin:0 6px 8px 0">${t}</span>`;
+  const H=(kick,title)=>`<div style="text-align:center;margin:26px 0 12px"><div style="color:${A};font-size:11.5px;font-weight:700;letter-spacing:1px;margin-bottom:5px">${kick}</div><div style="font-family:${SF};font-size:20px;font-weight:800;color:${I};line-height:1.35">${title}</div></div>`;
+  d.innerHTML=`<div class="dhead"><h3>내도감 소개</h3><button class="btn ghost" id="abX" type="button" style="padding:4px 12px">닫기</button></div>
+  <div class="dbody" id="abScroll" style="max-height:74vh;overflow:auto;position:relative;padding-bottom:30px">
+    <div style="text-align:center;padding:8px 0 4px">
+      <div style="font-size:30px;letter-spacing:-3px;color:${I};font-weight:900">❚❚<span style="color:${A}">▍</span></div>
+      <h2 style="font-family:${SF};font-size:26px;font-weight:900;color:${I};margin:14px 0 10px;line-height:1.3">내 삶을 수집하는 도감</h2>
+      <p style="font-size:13px;color:${S};line-height:1.7;margin:0 6px">영화·책·산·러닝·일기, 그리고 <b>내가 만든 칸</b>까지 — 한 곳에.<br>내 기록은 <b>내 구글드라이브에 영원히</b>, 앱이 사라져도 남습니다.</p>
+    </div>
+
+    <div style="margin:24px 0;padding:18px 4px;border-top:1px solid var(--line,#e7e0d8);border-bottom:1px solid var(--line,#e7e0d8);text-align:center">
+      <div style="font-family:${SF};font-size:19px;font-weight:800;color:${I};margin-bottom:8px">기록이 여기저기 흩어져 있죠</div>
+      <div style="font-size:13px;color:${S};line-height:1.7">"영화는 메모앱에, 가계부는 엑셀에, 읽은 책은… 어디 적었더라?"</div>
+      <div style="font-size:14px;color:${A};font-weight:700;margin-top:12px">흩어진 기록은 결국 사라집니다.</div>
+    </div>
+
+    ${H("왜 내도감인가","모으는 즐거움은 그대로,<br>내 데이터는 내 것으로.")}
+    ${card("🗄 영원한 내 데이터","모든 기록은 당신의 구글시트에 쌓입니다. 앱과 무관하게 영구 보존 — 앱이 사라져도 기록은 남습니다.")}
+    ${card("➕ 칸을 내가 만든다","위스키? 향수? 필요한 분야를 30초 만에 직접 만듭니다. 정해진 틀에 나를 맞추지 않아요.")}
+    ${card("📚 수집의 재미","영화·책·산부터 셀러·명언까지. 하나씩 채워가는 도감의 맛, 혼자 즐기기 좋은 것들을 한 곳에.")}
+
+    ${H("작동 방식","딱 3단계. 30초면 시작합니다.")}
+    ${step(1,"구글로 로그인","버튼 한 번. 별도 회원가입도, 비밀번호도 필요 없습니다.")}
+    ${step(2,"내 시트 자동 생성","당신의 구글드라이브에 '내도감 Data' 시트가 자동으로 만들어집니다.")}
+    ${step(3,"바로 기록 시작","모으고 싶은 것을 기록하면, 전부 내 시트에 차곡차곡 쌓입니다.")}
+
+    ${H("무엇이 다른가","메모·엑셀·노션과 이렇게 다릅니다")}
+    <div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:12px">
+      <thead><tr style="color:${S}">
+        <th style="text-align:left;padding:7px 6px;border-bottom:1px solid var(--line,#e7e0d8)"></th>
+        <th style="padding:7px 6px;border-bottom:1px solid var(--line,#e7e0d8);font-weight:600">메모·엑셀</th>
+        <th style="padding:7px 6px;border-bottom:1px solid var(--line,#e7e0d8);font-weight:600">노션</th>
+        <th style="padding:7px 6px;border-bottom:1px solid var(--line,#e7e0d8);font-weight:800;color:${A}">내도감</th></tr></thead>
+      <tbody>
+        <tr><td style="padding:8px 6px;color:${I};font-weight:600">데이터 소유</td><td style="text-align:center;padding:8px 6px;color:${S}">여기저기 흩어짐</td><td style="text-align:center;padding:8px 6px;color:${S}">노션 서버에 종속</td><td style="text-align:center;padding:8px 6px;color:${A};font-weight:700">내 구글드라이브</td></tr>
+        <tr><td style="padding:8px 6px;color:${I};font-weight:600">내 칸 만들기</td><td style="text-align:center;padding:8px 6px;color:${S}">직접 설계</td><td style="text-align:center;padding:8px 6px;color:${S}">복잡함</td><td style="text-align:center;padding:8px 6px;color:${A};font-weight:700">30초</td></tr>
+        <tr><td style="padding:8px 6px;color:${I};font-weight:600">앱이 사라지면</td><td style="text-align:center;padding:8px 6px;color:${S}">기록도 사라짐</td><td style="text-align:center;padding:8px 6px;color:${S}">이전 필요</td><td style="text-align:center;padding:8px 6px;color:${A};font-weight:700">기록은 그대로</td></tr>
+      </tbody></table></div>
+
+    ${H("곧 만나요","빈 도감이 부담스럽다면?")}
+    <div style="text-align:center;font-size:13px;color:${S};line-height:1.7;margin-bottom:12px">추천리스트 받기로 시작하세요. 받자마자 채워지는 도감.</div>
+    <div style="text-align:center">${chip("⛰ 100대 명산")}${chip("🏆 영화제 수상작")}${chip("🍷 추천 와인 리스트")}${chip("📖 올해의 책")}</div>
+
+    <div style="text-align:center;color:${S};font-size:11.5px;margin-top:22px">내도감 · 내 삶을 수집하는 도감</div>
+  </div>
+  <button id="abTop" type="button" title="맨 위로" style="display:none;position:absolute;right:16px;bottom:16px;width:42px;height:42px;border:none;border-radius:50%;background:${A};color:#fff;font-size:20px;box-shadow:0 4px 14px rgba(0,0,0,.22);cursor:pointer;z-index:5">↑</button>`;
   d.showModal();
-  const c=$("#abClose"); if(c) c.onclick=()=>d.close();
+  const sc=$("#abScroll"), top=$("#abTop");
+  if(sc&&top){ sc.addEventListener("scroll",()=>{ top.style.display = sc.scrollTop>180 ? "block" : "none"; });
+    top.onclick=()=>sc.scrollTo({top:0,behavior:"smooth"}); }
+  const x=$("#abX"); if(x) x.onclick=()=>d.close();
 }
 
 async function boot(){
