@@ -2464,6 +2464,7 @@ function openRecordForm(m, existing, prefill){
       <button class="btn" id="rfSave" style="flex:1">저장</button>
     </div></div>`;
   d.showModal();
+  if(m.id==="movies" && CONFIG.DEPLOY) tmdbAttachDeploy(d);
   d.querySelectorAll(".rf-bool").forEach(b=>b.onclick=()=>{ b.classList.toggle("on"); });
   d.querySelectorAll(".rf-seg").forEach(seg=>seg.querySelectorAll(".rf-segbtn").forEach(b=>b.onclick=()=>{ const was=b.classList.contains("on"); seg.querySelectorAll(".rf-segbtn").forEach(x=>x.classList.remove("on")); if(!was) b.classList.add("on"); }));
   d.querySelectorAll(".rf-tiers").forEach(box=>{
@@ -3447,6 +3448,33 @@ async function fetchMovieExtra(id){   // 감독·배우·국적 (두 번째 호�
              actors:(cred.cast||[]).slice(0,4).map(c=>c.name).join(", "),
              country:(det.production_countries||[]).map(c=>c.name).join(", ") };
   }catch(e){ return {director:"",actors:"",country:""}; }
+}
+/* ── 배포용 영화 폼에 TMDB 검색 자동채움 붙이기 ── */
+function tmdbAttachDeploy(d){
+  const body=d.querySelector(".dbody"); if(!body) return;
+  const bar=document.createElement("div"); bar.className="rff-full"; bar.style.cssText="flex:1 1 100%;margin-bottom:12px";
+  bar.innerHTML=`<label>TMDB에서 검색해 자동 채우기 (선택)</label>
+    <input id="tmdbq" placeholder="영화 제목 입력…" autocomplete="off" />
+    <div id="tmdbres" style="margin-top:8px;display:flex;flex-direction:column;gap:6px;max-height:260px;overflow:auto"></div>`;
+  body.insertAdjacentElement("afterbegin", bar);
+  const q=bar.querySelector("#tmdbq"), res=bar.querySelector("#tmdbres"); let timer=null, results=[];
+  q.addEventListener("input",()=>{ clearTimeout(timer); timer=setTimeout(async()=>{
+    if(q.value.trim().length<2){ res.innerHTML=""; return; }
+    res.innerHTML=`<div class="count">검색 중…</div>`;
+    try{ results=await searchMovies(q.value);
+      res.innerHTML = results.length ? results.map((mm,i)=>`<button type="button" class="card" data-i="${i}" style="grid-template-columns:auto 1fr;text-align:left"><span class="thumb">${mm.poster?`<img src="${mm.poster}" alt="">`:"🎞"}</span><span class="body"><h3 style="font-size:14px">${mm.kor}</h3><div class="meta">${[mm.year,mm.orig].filter(Boolean).join(" · ")}</div></span></button>`).join("") : `<div class="count">검색 결과가 없습니다.</div>`;
+      res.querySelectorAll(".card").forEach(b=>b.onclick=()=>fillFromTmdb(d, results[+b.dataset.i], res));
+    }catch(e){ res.innerHTML=`<div class="count">검색 실패: ${e.message}</div>`; }
+  },500); });
+  setTimeout(()=>q.focus(),50);
+}
+async function fillFromTmdb(d, mm, res){
+  res.innerHTML=`<div class="count">정보 불러오는 중…</div>`;
+  const ex=await fetchMovieExtra(mm.id);
+  const setv=(k,v)=>{ const el=d.querySelector(`.rf[data-k="${k}"]`); if(el && v!=null && v!=="") el.value=v; };
+  setv("title", mm.kor); setv("year", mm.year); setv("director", ex.director); setv("actors", ex.actors); setv("country", ex.country);
+  if(mm.poster){ const iv=d.querySelector('.rf-imgval[data-k="cover"]'), ip=d.querySelector('.rf-imgprev[data-k="cover"]'); if(iv) iv.value=mm.poster; if(ip){ ip.src=mm.poster; ip.style.display=""; } }
+  res.innerHTML=`<div class="count">'${mm.kor}' 정보를 채웠어요. 아래에서 확인·수정 후 저장하세요.</div>`;
 }
 let addMovieStatus="없음";
 function openAddMovie(){
