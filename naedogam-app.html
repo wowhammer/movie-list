@@ -508,7 +508,7 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
         <svg class="brandmark" width="34" height="30" viewBox="26 28 62 54" aria-hidden="true"><rect x="28" y="40" width="12" height="38" rx="5" fill="#F7F5F0"/><rect x="44" y="30" width="12" height="48" rx="5" fill="#F7F5F0"/><rect x="60" y="32" width="12" height="46" rx="5" fill="#E0483F" transform="rotate(16 66 78)"/></svg>
         <span class="brandwm"><span class="bwm-ko">내도감</span><span class="bwm-en">NAEDOGAM</span></span>
       </button>
-      <span class="mhver">배포 v143</span>
+      <span class="mhver">배포 v144</span>
       <span class="spacer"></span>
       <span class="src-chip" id="srcChip" style="display:none">데모</span>
       <button class="icon-btn" id="searchToggle" type="button" style="display:none">🔍</button>
@@ -646,7 +646,7 @@ const MANIFESTS = {
              {k:"work",sheet:"작업내용",label:"작업내용",type:"text"},
              {k:"shop",sheet:"정비소",label:"정비소",type:"text"},
              {k:"cost",sheet:"가격",label:"가격(원)",type:"number",money:true},
-             {k:"odo",sheet:"주행거리",label:"주행거리(km)",type:"number",money:true},
+             {k:"odo",sheet:"주행거리",label:"주행거리(km)",type:"number"},
              {k:"memo",sheet:"비고",label:"비고",type:"text"},
              {k:"cover",sheet:"사진",label:"차량 사진",type:"image"} ],
     filterBy:{ field:"car", allLabel:"전체" },
@@ -1170,7 +1170,7 @@ if(typeof CONFIG!=="undefined" && CONFIG.DEPLOY){
              {k:"work",sheet:"작업내용",label:"작업내용",type:"text"},
              {k:"shop",sheet:"정비소",label:"정비소",type:"text"},
              {k:"cost",sheet:"가격",label:"가격(원)",type:"number",money:true},
-             {k:"odo",sheet:"주행거리",label:"주행거리(km)",type:"number",money:true},
+             {k:"odo",sheet:"주행거리",label:"주행거리(km)",type:"number"},
              {k:"memo",sheet:"비고",label:"비고",type:"text"},
              {k:"cover",sheet:"사진",label:"사진",type:"image"} ],
     filterBy:{ field:"car", allLabel:"전체" },
@@ -2753,7 +2753,7 @@ function statSubline(m, rows){   // 통계를 상단 서브라인으로 통일. 
 function paintDomain(m){   // state.rows를 화면에 그림 (데이터 다시 안 받고 재렌더 가능)
   const pk=$("#picker"); pk.style.alignItems=""; pk.style.overflow=""; pk.style.justifyContent="";     // 공유 UI 초기화
   $("#stats").className="stats"; $("#stats").style.display=""; $("#scope").style.flexDirection=""; $("#scope").style.overflow=""; $("#scope").style.justifyContent=""; $("#scope").classList.remove("scopetabs"); $("#count").classList.remove("countrow"); $("#count").style.display="";
-  if(m.id==="movies" && !CONFIG.DEPLOY){ paintMovies(m); return; }
+  if(m.id==="movies"){ paintMovies(m); return; }
   if(m.id==="carlog" && !CONFIG.DEPLOY){ paintCarlog(m); return; }
   $("#scope").style.display="none";
   renderPicker(m);
