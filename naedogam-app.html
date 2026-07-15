@@ -620,7 +620,7 @@ const MANIFESTS = {
              {k:"work",sheet:"작업내용",label:"작업내용",type:"text"},
              {k:"shop",sheet:"정비소",label:"정비소",type:"text"},
              {k:"cost",sheet:"가격",label:"가격(원)",type:"number",money:true},
-             {k:"odo",sheet:"주행거리",label:"주행거리(km)",type:"number"},
+             {k:"odo",sheet:"주행거리",label:"주행거리(km)",type:"number",money:true},
              {k:"memo",sheet:"비고",label:"비고",type:"text"},
              {k:"cover",sheet:"사진",label:"차량 사진",type:"image"} ],
     filterBy:{ field:"car", allLabel:"전체" },
@@ -1108,28 +1108,33 @@ const MANIFESTS = {
 if(typeof CONFIG!=="undefined" && CONFIG.DEPLOY){
   MANIFESTS.movies={ id:"movies", title:"영화", icon:"🎬", vol:"卷1", canAdd:true,
     source:{ type:"sheet", tab:"영화" },
-    fields:[ {k:"title",sheet:"제목",label:"제목",type:"text"},
+    fields:[ {k:"title",sheet:"제목",label:"제목",type:"text",full:true},
              {k:"director",sheet:"감독",label:"감독",type:"text"},
              {k:"actors",sheet:"배우",label:"배우",type:"text"},
              {k:"year",sheet:"개봉연도",label:"개봉연도",type:"number"},
              {k:"country",sheet:"국적",label:"국적",type:"text"},
-             {k:"status",sheet:"시청상태",label:"시청상태",type:"select",options:["","안봄","봤음","다시볼것","찜"]},
+             {k:"watched",sheet:"봤음",label:"봤음",type:"bool"},
+             {k:"rewatch",sheet:"다시볼것",label:"다시볼것",type:"bool"},
+             {k:"pick",sheet:"찜",label:"찜",type:"bool"},
              {k:"rating",sheet:"평점",label:"평점",type:"rating"},
              {k:"streaming",sheet:"스트리밍",label:"스트리밍(쉼표로 여러 개)",type:"tags"},
-             {k:"review",sheet:"메모",label:"메모",type:"textarea"},
+             {k:"recommend",sheet:"추천",label:"추천",type:"text"},
+             {k:"review",sheet:"메모",label:"메모",type:"textarea",full:true},
+             {k:"watchDate",sheet:"본날",label:"본날(봤음이면 자동 오늘)",type:"date"},
              {k:"cover",sheet:"포스터",label:"포스터",type:"image"} ],
-    search:["title","director","actors"],
+    search:["title","director","actors","recommend"],
+    activity:{ df:"watchDate", when:r=>!!r.watched, label:"영화", name:r=>r.title },
     stats:[ {label:"전체",type:"count"},
-            {label:"봤음",type:"countIf",field:"status",eq:"봤음",c:"#16a34a"},
-            {label:"다시볼것",type:"countIf",field:"status",eq:"다시볼것",c:"#b45309"},
-            {label:"찜",type:"countIf",field:"status",eq:"찜",c:"#c2410c"} ],
+            {label:"봤음",type:"countIf",field:"watched",eq:true,c:"#16a34a"},
+            {label:"다시볼것",type:"countIf",field:"rewatch",eq:true,c:"#b45309"},
+            {label:"찜",type:"countIf",field:"pick",eq:true,c:"#c2410c"} ],
     card:{ kind:"specimen", thumb:"🎞",
            meta:r=>[r.year, r.director, r.actors].filter(Boolean).join(" · "),
            tags:"streaming",
            flags:r=>[ (r.rating!=null&&r.rating!=="")?{t:"★ "+r.rating,cls:"star"}:0,
-                      r.status==="봤음"?{t:"봤음",cls:"on"}:0,
-                      r.status==="다시볼것"?{t:"다시볼것",cls:"on"}:0,
-                      r.status==="찜"?{t:"찜",cls:"on"}:0 ] } };
+                      r.watched?{t:"봤음",cls:"on"}:0,
+                      r.rewatch?{t:"다시볼것",cls:"on"}:0,
+                      r.pick?{t:"찜",cls:"on"}:0 ] } };
   MANIFESTS.carlog={ id:"carlog", title:"차계부", icon:"🚗", vol:"卷2", canAdd:true,
     source:{ type:"sheet", tab:"차계부" },
     fields:[ {k:"date",sheet:"날짜",label:"날짜",type:"date",today:true},
@@ -1137,11 +1142,12 @@ if(typeof CONFIG!=="undefined" && CONFIG.DEPLOY){
              {k:"work",sheet:"작업내용",label:"작업내용",type:"text"},
              {k:"shop",sheet:"정비소",label:"정비소",type:"text"},
              {k:"cost",sheet:"가격",label:"가격(원)",type:"number",money:true},
-             {k:"odo",sheet:"주행거리",label:"주행거리(km)",type:"number"},
+             {k:"odo",sheet:"주행거리",label:"주행거리(km)",type:"number",money:true},
              {k:"memo",sheet:"비고",label:"비고",type:"text"},
              {k:"cover",sheet:"사진",label:"사진",type:"image"} ],
     filterBy:{ field:"car", allLabel:"전체" },
     search:["work","shop","car","memo"],
+    activity:{ df:"date", when:r=>true, label:"차계부", name:r=>[r.car,r.work].filter(Boolean).join(" ") },
     stats:[ {label:"기록",type:"count"},
             {label:"총 정비비",type:"sum",field:"cost",unit:"원",c:"#c2410c"} ],
     card:{ kind:"data", title:r=>`${r.date||""}${r.car?" · "+r.car:""}`,
@@ -3121,7 +3127,7 @@ function csvToRows(catId, text){
 function _prog(msg){ let el=document.getElementById("ndProg"); if(msg==null){ if(el) el.remove(); return; } if(!el){ el=document.createElement("div"); el.id="ndProg"; el.style.cssText="position:fixed;inset:0;z-index:300;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.45);color:#fff;font-family:var(--sans);font-size:16px;font-weight:600"; document.body.appendChild(el); } el.textContent=msg; }
 async function doImport(catId, rows){
   const m=MANIFESTS[catId]; if(!m) return;
-  if(catId==="movies"||catId==="carlog"){ alert("이 카테고리는 불러오기가 아직 지원되지 않아요. (샘플·내보내기만 가능)"); return; }
+  if((catId==="movies"||catId==="carlog") && !CONFIG.DEPLOY){ alert("이 카테고리는 불러오기가 아직 지원되지 않아요. (샘플·내보내기만 가능)"); return; }
   if(!rows.length){ alert("불러올 데이터가 없어요. CSV 첫 줄(헤더)이 항목 이름과 맞는지 확인해 주세요."); return; }
   if(!confirm(rows.length+"건을 '"+m.title+"'에 등록할까요?")) return;
   const S=sheetSrc(); let ok=0;
