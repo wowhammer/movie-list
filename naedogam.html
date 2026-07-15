@@ -170,6 +170,10 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
   .reco-foot{ position:sticky; bottom:0; background:var(--card); padding:10px 0 4px; display:flex; gap:8px; }
   .ab-card{ border:1px solid var(--line); border-radius:10px; padding:10px 12px; margin-bottom:8px; font-size:13px; color:var(--ink); }
   .ab-card>div{ font-size:12.5px; color:var(--ink-soft); margin-top:3px; }
+  .set-menu{ display:flex; flex-direction:column; gap:8px; margin:2px 0 16px; }
+  .set-menu-item{ display:flex; align-items:center; justify-content:space-between; width:100%; padding:12px 14px; border:1px solid var(--line); border-radius:10px; background:var(--card); color:var(--ink); font-family:var(--sans); font-size:14px; font-weight:600; cursor:pointer; }
+  .set-menu-item .chev{ color:var(--sub); font-size:18px; line-height:1; }
+  .set-menu-item:active{ background:#f2ede2; }
   .totop{ position:fixed; left:18px; bottom:22px; z-index:45; width:46px; height:46px; border-radius:50%; border:1px solid var(--line); background:var(--card); color:var(--ink); font-size:19px; display:flex; align-items:center; justify-content:center; cursor:pointer; box-shadow:0 3px 12px rgba(0,0,0,.10); opacity:0; transform:translateY(10px) scale(.9); pointer-events:none; transition:opacity .22s ease, transform .22s ease; }
   .totop.show{ opacity:1; transform:translateY(0) scale(1); pointer-events:auto; }
   .totop:hover{ border-color:var(--accent); color:var(--accent); }
@@ -496,7 +500,7 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
         <svg class="brandmark" width="34" height="30" viewBox="26 28 62 54" aria-hidden="true"><rect x="28" y="40" width="12" height="38" rx="5" fill="#F7F5F0"/><rect x="44" y="30" width="12" height="48" rx="5" fill="#F7F5F0"/><rect x="60" y="32" width="12" height="46" rx="5" fill="#E0483F" transform="rotate(16 66 78)"/></svg>
         <span class="brandwm"><span class="bwm-ko">내도감</span><span class="bwm-en">NAEDOGAM</span></span>
       </button>
-      <span class="mhver">v142</span>
+      <span class="mhver">v143</span>
       <span class="spacer"></span>
       <span class="src-chip" id="srcChip" style="display:none">데모</span>
       <button class="icon-btn" id="searchToggle" type="button" style="display:none">🔍</button>
@@ -3026,13 +3030,16 @@ function renderSettingsBody(d){
   const arow=id=>{ const m=MANIFESTS[id]; return `<div class="cat-mrow ord-row" data-id="${id}"><span class="ord-handle" aria-label="끌어서 순서 이동">≡</span><span class="mi">${m.icon}</span><span class="mn">${m.title} <span class="mv">${m.vol}</span></span>${_cc(m)}<button class="sw on" data-id="${id}" role="switch" aria-checked="true" type="button"></button></div>`; };
   const irow=id=>{ const m=MANIFESTS[id]; return `<div class="cat-mrow" data-id="${id}"><span class="ord-handle ord-ph">≡</span><span class="mi">${m.icon}</span><span class="mn">${m.title} <span class="mv">${m.vol}</span></span>${_cc(m)}<button class="sw" data-id="${id}" role="switch" aria-checked="false" type="button"></button></div>`; };
   d.innerHTML=`<div class="dhead"><h3>설정</h3></div><div class="dbody set">
-    <button class="btn ghost" type="button" onclick="openAbout()" style="width:100%;margin:0 0 12px">ℹ️ 내도감이란? · 앱 소개</button>
+    <div class="set-menu">
+      <button class="set-menu-item" type="button" onclick="openAbout()"><span>ℹ️ 앱 소개</span><span class="chev">›</span></button>
+      <button class="set-menu-item" type="button" onclick="(function(){var e=document.getElementById('ioSection'); if(e) e.scrollIntoView({behavior:'smooth',block:'start'});})()"><span>📥 데이터 가져오기·내보내기</span><span class="chev">›</span></button>
+    </div>
     <h4>카테고리</h4>
     <div class="hint">토글로 켜고 끄고, 왼쪽 <b>≡</b>을 끌어 순서를 바꾸세요. 홈·상단 탭에 바로 반영됩니다. (시트 데이터는 지워지지 않아요)</div>
     <div class="ord-list" id="catList">${act.map(arow).join("")}</div>
     ${inact.length?`<div class="hint" style="margin-top:12px;color:var(--sub)">꺼진 카테고리 · 켜면 홈에 추가</div>${inact.map(irow).join("")}`:""}
     <button class="btn ghost" id="catNew" type="button" style="margin-top:14px">＋ 내 카테고리 만들기</button>
-    <h4>가져오기 · 내보내기 (CSV)</h4>
+    <h4 id="ioSection">가져오기 · 내보내기 (CSV)</h4>
     <div class="hint">카테고리를 CSV로 내보내 다른 사람에게 주거나, 받은 CSV를 골라 한꺼번에 등록해요. <b>처음이면 '샘플양식'으로 빈 양식을 받아 채우세요.</b> (사진은 제외 · 등록 항목엔 새 번호 자동 부여)</div>
     <div class="io-row">
       <select id="ioCat" class="io-sel">${getActive().filter(id=>MANIFESTS[id]).map(id=>`<option value="${id}">${MANIFESTS[id].title}</option>`).join("")}</select>
