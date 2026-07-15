@@ -509,7 +509,7 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
         <svg class="brandmark" width="34" height="30" viewBox="26 28 62 54" aria-hidden="true"><rect x="28" y="40" width="12" height="38" rx="5" fill="#F7F5F0"/><rect x="44" y="30" width="12" height="48" rx="5" fill="#F7F5F0"/><rect x="60" y="32" width="12" height="46" rx="5" fill="#E0483F" transform="rotate(16 66 78)"/></svg>
         <span class="brandwm"><span class="bwm-ko">내도감</span><span class="bwm-en">NAEDOGAM</span></span>
       </button>
-      <span class="mhver">배포 v152</span>
+      <span class="mhver">배포 v153</span>
       <span class="spacer"></span>
       <span class="src-chip" id="srcChip" style="display:none">데모</span>
       <button class="icon-btn" id="searchToggle" type="button" style="display:none">🔍</button>
@@ -3665,7 +3665,7 @@ async function recoAddOne(m, it){
   { const _v=recoView(id,it); const _probe = id==="movies" ? {orig:_v.key, title:_v.title} : (id==="books" ? {title:_v.key, author:it.author} : {title:_v.key}); if(ndFindDup(id,_probe)){ const _e=new Error("이미 있음"); throw _e; } }
   if(id==="movies"){
     const rec=String(it["추천"]||"");
-    let _tmdbR=null; try{ const _rs=await searchMovies(it["원제"]||it["한국 개봉명"]||""); if(_rs&&_rs[0]&&_rs[0].rating!=null&&_rs[0].rating!=="") _tmdbR=_rs[0].rating; }catch(e){}
+    let _tmdbR=null;   // 속도: 추천담기 때 항목별 TMDB 검색 제거(상세 열 때 실시간으로 뜸)
     const row={ _id:it["원제"], orig:it["원제"], title:(it["한국 개봉명"]||it["원제"]||""), year:it["개봉연도"]||null,
       director:it["감독"]||"", actors:it["배우"]||"", country:it["국적"]||"", rating:_tmdbR, streaming:[],
       recommend:rec, recommendList:rec.split(/[\/,]+/).map(x=>x.trim()).filter(Boolean), review:"", directSearch:"",
@@ -3736,7 +3736,7 @@ async function openRecoPanel(m){
       const on=sel.has(i);
       return `<div class="reco-item ${on?"on":""}" data-i="${i}"><input type="checkbox" class="reco-cb" ${on?"checked":""}><div class="reco-b"><div class="reco-t">${o.v.title}</div><div class="reco-m">${o.v.sub}</div>${o.v.badge?`<span class="reco-badge">${o.v.badge}</span>`:""}</div></div>`;
     }).join("");
-    d.innerHTML=`<div class="dhead"><h3>${data.title||"추천 리스트"}</h3>${(listsAll&&listsAll.length>1)?'<button class="btn ghost" id="rcBack" type="button" style="padding:4px 10px">← 리스트</button>':''}</div>
+    d.innerHTML=`<div class="dhead" style="display:flex;align-items:center;justify-content:space-between;gap:8px"><h3 style="margin:0">${data.title||"추천 리스트"}</h3>${(listsAll&&listsAll.length>1)?'<button class="btn ghost" id="rcBack" type="button" style="padding:4px 10px;flex:0 0 auto;white-space:nowrap">← 리스트</button>':''}</div>
       <div class="dbody" style="padding-bottom:6px">
       <div class="count" style="margin:0 0 6px">${data.subtitle||""}</div>
       <button class="btn ghost" id="rcAll" style="width:100%;margin:0 0 8px" ${remain?"":"disabled"}>📥 리스트 통째로 담기 (${remain}개)</button>
@@ -3829,9 +3829,11 @@ function openAbout(){
   const x=$("#abX"); if(x) x.onclick=()=>d.close();
 }
 
+function isInAppBrowser(){ const ua=(navigator.userAgent||"").toLowerCase(); return /kakaotalk|instagram|fban|fbav|fb_iab|line\/|naver|whale|daumapps|band|snapchat|musical_ly|tiktok|everytime/.test(ua); }
 async function boot(){
   if(CONFIG.DEPLOY){ const gate=$("#gate"),gb=$("#gateBtn"),gm=$("#gateMsg");
     if(gate){ gate.style.display="flex";
+      if(isInAppBrowser() && gm){ gm.innerHTML='⚠️ 카톡·인스타 등 <b>인앱 브라우저</b>에서는 구글 로그인이 막혀요.<br>오른쪽 위 <b>⋮(또는 공유) → 다른 브라우저로 열기</b>(크롬·사파리)로 열어 주세요.'; gm.style.color='#c2410c'; gm.style.lineHeight='1.6'; }
       const onOk=async()=>{ try{ await loadCustomManifests(); }catch(e){} gate.style.display="none"; if(state.view==="home") renderHome(); else if(state.view==="domain"){ renderTabs(); loadAndRender(); } };
       gb.onclick=async()=>{ gb.disabled=true; gm.textContent="구글 연결 중… (팝업을 허용해 주세요)";
         try{ await sheetSrc().ensureReady(); await onOk(); }
