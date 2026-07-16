@@ -211,6 +211,21 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
   #worldmap{ width:100%; height:56vh; min-height:320px; }
   .wm-legend{ margin:10px 2px 4px; font-size:13px; color:var(--ink-soft); line-height:1.55; }
   .wm-legend b{ color:var(--accent); font-weight:700; }
+  .wm-dot{ display:inline-block; width:10px; height:10px; border-radius:50%; vertical-align:-1px; margin-right:2px; }
+  .wm-done{ background:#E0483F; } .wm-plan{ background:#f0a83a; }
+  #list:has(.tvcard){ display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+  #list .tvcard{ display:block; padding:0; overflow:hidden; border:none; border-radius:14px; background:var(--card); box-shadow:0 1px 4px rgba(0,0,0,.09); text-align:left; cursor:pointer; }
+  .tvcard .tv-cover{ position:relative; width:100%; aspect-ratio:16/10; background:#e9e7df; }
+  .tvcard .tv-cover img{ width:100%; height:100%; object-fit:cover; display:block; }
+  .tvcard .tv-nocover{ display:flex; align-items:center; justify-content:center; height:100%; font-size:34px; opacity:.45; }
+  .tvcard .tv-badge{ position:absolute; top:9px; left:9px; padding:2px 9px; border-radius:20px; font-size:11px; font-weight:700; color:#fff; box-shadow:0 1px 3px rgba(0,0,0,.25); }
+  .tvcard .tv-badge.b-done{ background:#16a34a; } .tvcard .tv-badge.b-plan{ background:#c2410c; } .tvcard .tv-badge.b-pick{ background:#d4a017; }
+  .tvcard .tv-body{ padding:10px 12px 12px; }
+  .tvcard .tv-title{ font-size:15px; font-weight:700; color:var(--ink); margin:0 0 3px; line-height:1.35; word-break:keep-all; }
+  .tvcard .tv-meta{ font-size:12px; color:var(--ink-soft); line-height:1.45; }
+  .tvcard .tv-foot{ display:flex; align-items:center; gap:6px; margin-top:7px; flex-wrap:wrap; }
+  .tvcard .tv-star{ color:#e0a020; font-size:12px; font-weight:700; }
+  .tvcard .tv-spot{ font-size:10.5px; color:var(--ink-soft); background:var(--paper); border:1px solid var(--line); border-radius:9px; padding:1px 7px; }
   .cal-grid.pay .cal-cell{ aspect-ratio:auto; min-height:54px; background:var(--line-soft); padding:16px 3px 4px; box-sizing:border-box; display:flex; flex-direction:column; gap:2px; }
   .cal-grid.pay .cal-cell.has{ background:var(--accent-wash); box-shadow:inset 0 0 0 1px var(--accent); }
   .cal-grid.pay .cal-cell.has .cal-d{ color:var(--ink); text-shadow:none; }
@@ -529,7 +544,7 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
         <svg class="brandmark" width="34" height="30" viewBox="26 28 62 54" aria-hidden="true"><rect x="28" y="40" width="12" height="38" rx="5" fill="#F7F5F0"/><rect x="44" y="30" width="12" height="48" rx="5" fill="#F7F5F0"/><rect x="60" y="32" width="12" height="46" rx="5" fill="#E0483F" transform="rotate(16 66 78)"/></svg>
         <span class="brandwm"><span class="bwm-ko">내도감</span><span class="bwm-en">NAEDOGAM</span></span>
       </button>
-      <span class="mhver">배포 v172</span>
+      <span class="mhver">배포 v173</span>
       <span class="spacer"></span>
       <span class="src-chip" id="srcChip" style="display:none">데모</span>
       <button class="icon-btn" id="searchToggle" type="button" style="display:none">🔍</button>
@@ -2086,8 +2101,13 @@ const TOGGLE_DEFS={
     {label:"또갈것", on:r=>!!r.revisit, ch:r=>({revisit:!r.revisit})},
     {label:"찜",     on:r=>!!r.pick,    ch:r=>({pick:!r.pick})},
   ],
+  travel:[
+    {label:"다녀옴", on:r=>r.status==="다녀옴", ch:r=>({status:r.status==="다녀옴"?"":"다녀옴"})},
+    {label:"예정",   on:r=>r.status==="예정",   ch:r=>({status:r.status==="예정"?"":"예정"})},
+    {label:"찜",     on:r=>r.status==="찜",     ch:r=>({status:r.status==="찜"?"":"찜"})},
+  ],
 };
-const TOGGLE_HIDE={ mountains:["climbed","revisit","pick"] };
+const TOGGLE_HIDE={ mountains:["climbed","revisit","pick"], travel:["status"] };
 function statusBtnsHTML(m, r){
   const defs=TOGGLE_DEFS[m.id]; if(!defs) return "";
   return defs.map((d,i)=>`<button class="btn ${d.on(r)?'':'ghost'}" data-tg="${i}">${d.on(r)?'✓ '+d.label:d.label}</button>`).join("");
@@ -2210,7 +2230,19 @@ function quoteCard(r){
   const tags=tagsArr.map(t=>`<span class="tag">${esc(t)}</span>`).join("");
   return `<button class="card qcard" data-id="${r._id}"><div class="qtext"><span class="qmark">❝</span>${esc(r.title)}</div><div class="qmeta">${r.author?`<span class="qauthor">— ${esc(r.author)}</span>`:""}${tags?`<span class="qtags">${tags}</span>`:""}</div></button>`;
 }
-function renderCard(m, r, no){ if(m.id==="books") return bookCard(r); if(m.id==="quote") return quoteCard(r); const c=m.card;
+function travelCard(r){
+  const esc=x=>String(x==null?"":x).replace(/</g,"&lt;"), eq=x=>String(x==null?"":x).replace(/"/g,"&quot;");
+  const st=r.status; const bcls=st==="다녀옴"?"b-done":st==="예정"?"b-plan":st==="찜"?"b-pick":"";
+  const badge=st?`<span class="tv-badge ${bcls}">${esc(st)}</span>`:"";
+  const cover=r.cover?`<img src="${eq(r.cover)}" alt="" loading="lazy">`:`<div class="tv-nocover">✈</div>`;
+  const ds=r.startDate?String(r.startDate).slice(0,10)+(r.endDate&&r.endDate!==r.startDate?" ~ "+String(r.endDate).slice(0,10):""):"";
+  const meta=[r.place||r.country, ds].filter(Boolean).join(" · ");
+  const star=(r.rating!=null&&r.rating!=="")?`<span class="tv-star">★ ${esc(r.rating)}</span>`:"";
+  const sp=Array.isArray(r.spots)?r.spots:(r.spots==null||r.spots===""?[]:String(r.spots).split(",").map(x=>x.trim()).filter(Boolean));
+  const spots=sp.slice(0,2).map(x=>`<span class="tv-spot">${esc(x)}</span>`).join("");
+  return `<button class="card tvcard" data-id="${r._id}"><div class="tv-cover">${cover}${badge}</div><div class="tv-body"><div class="tv-title">${esc(r.title||r.place||"여행")}</div><div class="tv-meta">${meta||"&nbsp;"}</div>${(star||spots)?`<div class="tv-foot">${star}${spots}</div>`:""}</div></button>`;
+}
+function renderCard(m, r, no){ if(m.id==="books") return bookCard(r); if(m.id==="quote") return quoteCard(r); if(m.id==="travel") return travelCard(r); const c=m.card;
   if(c.kind==="wallet") return walletCard(r);
   if(c.kind==="specimen"){ const meta=c.meta(r);
     const traw=r[c.tags]; const tarr=Array.isArray(traw)?traw:(traw==null||traw===""?[]:String(traw).split(",").map(x=>x.trim()).filter(Boolean));   // 쉼표 문자열도 개별 태그로
@@ -2842,12 +2874,14 @@ function _loadJVM(cb){ if(_jvmReady && typeof jsVectorMap!=="undefined") return 
   s1.onerror=()=>cb("err"); document.head.appendChild(s1);
 }
 function renderTravelMap(m, base){
-  const rows=base.filter(r=>String(r.status||"")!=="찜");
-  const codes=[...new Set(rows.map(r=>_isoOfCountry(r.country)).filter(Boolean))];
-  const names=[...new Set(rows.map(r=>String(r.country||"").trim()).filter(Boolean))];
-  const unknown=names.filter(n=>!_isoOfCountry(n));
+  const all=state.rows;
+  const isoOf=r=>_isoOfCountry(r.country);
+  const done=[...new Set(all.filter(r=>String(r.status||"")==="다녀옴").map(isoOf).filter(Boolean))];
+  const plan=[...new Set(all.filter(r=>String(r.status||"")==="예정").map(isoOf).filter(Boolean))].filter(c=>!done.includes(c));
+  const doneNames=[...new Set(all.filter(r=>String(r.status||"")==="다녀옴").map(r=>String(r.country||"").trim()).filter(Boolean))];
+  const unknown=[...new Set(all.filter(r=>r.status==="다녀옴"||r.status==="예정").map(r=>String(r.country||"").trim()).filter(n=>n&&!_isoOfCountry(n)))];
   const L=$("#list");
-  L.innerHTML=`<div class="wm-wrap"><div id="worldmap"></div></div><div class="wm-legend">🌏 다녀온 나라 <b>${codes.length}</b>곳 · ${names.join(", ")||"국가를 입력하면 지도에 표시돼요"}${unknown.length?`<br><span style="opacity:.7">지도 미매칭: ${unknown.join(", ")} (국가명을 표준 표기로 넣어주세요)</span>`:""}</div>`;
+  L.innerHTML=`<div class="wm-wrap"><div id="worldmap"></div></div><div class="wm-legend"><span class="wm-dot wm-done"></span> 다녀온 나라 <b>${done.length}</b>곳${plan.length?` &nbsp; <span class="wm-dot wm-plan"></span> 예정 ${plan.length}곳`:""}<br>${doneNames.join(", ")||"‘다녀옴’으로 표시된 여행의 국가가 지도에 칠해져요"}${unknown.length?`<br><span style="opacity:.7">지도 미매칭: ${unknown.join(", ")} (국가명을 표준 표기로)</span>`:""}</div>`;
   $("#count").style.display="none";
   _loadJVM(err=>{
     const box=document.getElementById("worldmap"); if(!box) return;
@@ -2857,7 +2891,10 @@ function renderTravelMap(m, base){
       _jvm=new jsVectorMap({ selector:"#worldmap", map:"world", zoomButtons:true, zoomOnScroll:true, backgroundColor:"transparent",
         regionsSelectable:false,
         regionStyle:{ initial:{ fill:"#dcdcd2", stroke:"#ffffff", "stroke-width":0.4 }, hover:{ fill:"#c7c7bb" } } });
-      const paint=()=>{ codes.forEach(c=>{ const p=box.querySelector('[data-code="'+c+'"]'); if(p){ p.setAttribute("fill","#E0483F"); p.style.fill="#E0483F"; } }); };
+      const paint=()=>{
+        done.forEach(c=>{ const p=box.querySelector('[data-code="'+c+'"]'); if(p){ p.setAttribute("fill","#E0483F"); p.style.fill="#E0483F"; } });
+        plan.forEach(c=>{ const p=box.querySelector('[data-code="'+c+'"]'); if(p){ p.setAttribute("fill","#f0a83a"); p.style.fill="#f0a83a"; } });
+      };
       paint(); setTimeout(paint,150); setTimeout(paint,500);
     }catch(e){ box.innerHTML='<div class="count" style="padding:30px 10px">지도 표시 오류.</div>'; console.error(e); }
   });
