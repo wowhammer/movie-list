@@ -226,11 +226,11 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
   .cal-cell.noimg{ background:var(--accent-wash); box-shadow:inset 0 0 0 1px var(--accent); }
   .cal-cell.noimg .cal-d{ color:var(--ink); text-shadow:none; }
   .mv-memo{ font-size:12px; color:#a8894e; line-height:1.45; margin-top:5px; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
-  #list:has(.qcard){ display:grid; grid-template-columns:1fr 1fr; gap:8px; align-items:start; }
+  #list:has(.qcard){ display:flex; flex-direction:column; gap:8px; }
   .qcard{ display:block; text-align:left; background:var(--card); border:1px solid var(--line); border-radius:14px; padding:14px 14px 15px; cursor:pointer; width:100%; }
   .qmark{ font-family:var(--serif); font-size:32px; color:#E0483F; opacity:.45; line-height:.5; display:block; }
-  .qtext{ font-family:var(--serif); font-size:14px; line-height:1.6; color:var(--ink); margin:8px 0 10px; word-break:keep-all; }
-  .qmeta{ display:flex; flex-direction:column; gap:6px; }
+  .qtext{ font-family:var(--serif); font-size:15px; line-height:1.7; color:var(--ink); margin:6px 0 10px; word-break:keep-all; }
+  .qmeta{ display:flex; flex-wrap:wrap; align-items:center; gap:6px 10px; }
   .qauthor{ font-size:12px; color:var(--ink-soft); font-weight:600; }
   .qtags{ display:flex; flex-wrap:wrap; gap:4px; }
   .cal-img{ position:absolute; inset:0; width:100%; height:100%; object-fit:cover; }
@@ -524,7 +524,7 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
         <svg class="brandmark" width="34" height="30" viewBox="26 28 62 54" aria-hidden="true"><rect x="28" y="40" width="12" height="38" rx="5" fill="#F7F5F0"/><rect x="44" y="30" width="12" height="48" rx="5" fill="#F7F5F0"/><rect x="60" y="32" width="12" height="46" rx="5" fill="#E0483F" transform="rotate(16 66 78)"/></svg>
         <span class="brandwm"><span class="bwm-ko">내도감</span><span class="bwm-en">NAEDOGAM</span></span>
       </button>
-      <span class="mhver">배포 v166</span>
+      <span class="mhver">배포 v167</span>
       <span class="spacer"></span>
       <span class="src-chip" id="srcChip" style="display:none">데모</span>
       <button class="icon-btn" id="searchToggle" type="button" style="display:none">🔍</button>
@@ -1812,7 +1812,7 @@ function renderSearch(m){ const L={title:"제목",director:"감독",actors:"배�
 function renderPicker(m){
   const p=$("#picker");
   if(!m.filterBy){ p.style.display="none"; p.innerHTML=""; return; }
-  const vals=[...new Set(state.rows.flatMap(r=>{ const v=r[m.filterBy.field]; return Array.isArray(v)?v.map(x=>String(x).trim()):[String(v||"").trim()]; }).filter(Boolean))];
+  const vals=[...new Set(state.rows.flatMap(r=>{ const v=r[m.filterBy.field]; return Array.isArray(v)?v.map(x=>String(x).trim()):String(v||"").split(",").map(x=>x.trim()); }).filter(Boolean))];
   if(vals.length<2){ p.style.display="none"; p.innerHTML=""; state.pick=""; return; }  // 1개뿐이면 숨김
   p.style.display="flex";
   const opts=[{v:"",label:m.filterBy.allLabel||"전체"}, ...vals.map(v=>({v,label:v}))];
@@ -2832,7 +2832,7 @@ function paintDomain(m){   // state.rows를 화면에 그림 (데이터 다시 �
   renderPicker(m);
   applySearchUI(m);
   let base = state.rows;
-  if(m.filterBy && state.pick) base = base.filter(r=>{ const v=r[m.filterBy.field]; return Array.isArray(v)?v.map(x=>String(x).trim()).includes(state.pick):String(v||"").trim()===state.pick; });
+  if(m.filterBy && state.pick) base = base.filter(r=>{ const v=r[m.filterBy.field]; const _a=Array.isArray(v)?v.map(x=>String(x).trim()):String(v||"").split(",").map(x=>x.trim()); return _a.includes(state.pick); });
   renderStats(m, base);
   setMhSub("");
   if(m.id==="books") renderBookGenres(m);
@@ -3068,7 +3068,7 @@ function carlogCard(r, no){
 function buildWorkChips(base){
   const cnt={};
   base.forEach(r=>String(r.work||"").split(",").forEach(w=>{ const t=w.trim(); if(t) cnt[t]=(cnt[t]||0)+1; }));
-  return Object.keys(cnt).filter(w=>cnt[w]>=2).sort((a,b)=>cnt[b]-cnt[a]);   // 2회 이상만, 빈도순
+  return Object.keys(cnt).filter(w=>cnt[w]>=1).sort((a,b)=>cnt[b]-cnt[a]);   // 모두 표시, 빈도순
 }
 function paintCarlog(m){
   let base = state.rows;
