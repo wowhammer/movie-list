@@ -351,6 +351,12 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
   .dash-legend{ display:flex; flex-wrap:wrap; gap:10px 12px; align-items:center; margin-top:11px; }
   .dash-lg{ font-size:11.5px; color:var(--ink-soft); display:inline-flex; align-items:center; gap:4px; }
   .dash-lg i{ width:9px; height:9px; border-radius:2px; display:inline-block; }
+  .hm-k{ width:11px; height:11px; border-radius:2px; display:inline-block; }
+  .tgbar{ display:flex; align-items:center; gap:8px; margin:5px 0; }
+  .tgbar-l{ width:84px; flex:0 0 auto; font-size:12px; color:var(--ink); text-align:right; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .tgbar-t{ flex:1; height:15px; background:var(--paper); border:1px solid var(--line); border-radius:5px; overflow:hidden; }
+  .tgbar-f{ display:block; height:100%; border-radius:5px 0 0 5px; }
+  .tgbar-n{ flex:0 0 auto; font-size:11px; color:var(--ink-soft); min-width:20px; font-weight:600; }
   .dash-note{ font-size:12.5px; color:var(--ink-soft); margin:2px 0 4px; }
   .cal-grid{ display:grid; grid-template-columns:repeat(7,1fr); gap:4px; margin-top:6px; }
   .cal-h{ text-align:center; font-size:10px; color:var(--ink-soft); padding-bottom:2px; }
@@ -544,7 +550,7 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
         <svg class="brandmark" width="34" height="30" viewBox="26 28 62 54" aria-hidden="true"><rect x="28" y="40" width="12" height="38" rx="5" fill="#F7F5F0"/><rect x="44" y="30" width="12" height="48" rx="5" fill="#F7F5F0"/><rect x="60" y="32" width="12" height="46" rx="5" fill="#E0483F" transform="rotate(16 66 78)"/></svg>
         <span class="brandwm"><span class="bwm-ko">내도감</span><span class="bwm-en">NAEDOGAM</span></span>
       </button>
-      <span class="mhver">배포 v174</span>
+      <span class="mhver">배포 v175</span>
       <span class="spacer"></span>
       <span class="src-chip" id="srcChip" style="display:none">데모</span>
       <button class="icon-btn" id="searchToggle" type="button" style="display:none">🔍</button>
@@ -3289,13 +3295,53 @@ async function openDashboard(){
     if(d.open) renderDash(ids, data);
   }
 }
+function chartYear(ids, ev){   // 최근 1년 · 일별 활동 히트맵(GitHub 스타일)
+  const today=new Date(); today.setHours(0,0,0,0);
+  const dayMap={}; ev.forEach(e=>{ const k=e.t.getFullYear()+"-"+(e.t.getMonth()+1)+"-"+e.t.getDate(); dayMap[k]=(dayMap[k]||0)+1; });
+  const start=new Date(today); start.setDate(start.getDate()-364); start.setDate(start.getDate()-start.getDay());   // 일요일 정렬
+  let max=1; Object.values(dayMap).forEach(v=>{ if(v>max) max=v; });
+  const col4=v=>{ if(!v) return "#e9e7df"; const t=v/max; if(t>0.66) return "#E0483F"; if(t>0.33) return "#ec8a84"; return "#f5cdc9"; };
+  const cell=11, gap=2.6; let rects="", mlab=""; let cur=new Date(start); let ci=0, lastMonth=-1, total=0;
+  while(cur<=today){
+    const cd0=new Date(cur);
+    if(cd0.getMonth()!==lastMonth && cd0.getDate()<=7){ lastMonth=cd0.getMonth(); mlab+=`<text x="${(ci*(cell+gap)).toFixed(1)}" y="8" font-size="9" fill="#999">${cd0.getMonth()+1}월</text>`; }
+    for(let row=0;row<7;row++){ const cd=new Date(cur); cd.setDate(cur.getDate()+row); if(cd>today) continue;
+      const k=cd.getFullYear()+"-"+(cd.getMonth()+1)+"-"+cd.getDate(); const v=dayMap[k]||0; total+=v;
+      rects+=`<rect x="${(ci*(cell+gap)).toFixed(1)}" y="${(14+row*(cell+gap)).toFixed(1)}" width="${cell}" height="${cell}" rx="2" fill="${col4(v)}"><title>${k}: ${v}건</title></rect>`; }
+    cur.setDate(cur.getDate()+7); ci++;
+  }
+  const W=ci*(cell+gap), H=14+7*(cell+gap)+4;
+  const legend=`<div class="dash-legend" style="justify-content:flex-end"><span class="dash-lg">적음</span><span class="hm-k" style="background:#e9e7df"></span><span class="hm-k" style="background:#f5cdc9"></span><span class="hm-k" style="background:#ec8a84"></span><span class="hm-k" style="background:#E0483F"></span><span class="dash-lg">많음</span></div>`;
+  return `<div class="dash-note">최근 1년 · 활동 <b>${total}</b>건</div><div style="overflow-x:auto;-webkit-overflow-scrolling:touch"><svg viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" style="max-width:none;display:block">${mlab}${rects}</svg></div>${legend}`+
+    (total===0?`<div class="dash-names" style="color:var(--ink-soft);text-align:center;margin-top:8px">아직 날짜가 기록된 활동이 없어요</div>`:"");
+}
+function _dashTagField(m){
+  return (m.fields||[]).find(f=>f.type==="tags")
+      || (m.fields||[]).find(f=>["genre","country","director","companion","work","spots","stream","region","author"].includes(f.k))
+      || (m.filterBy?(m.fields||[]).find(f=>f.k===m.filterBy.field):null);
+}
+function chartTags(ids, data){   // 분야별 상위 태그/값 TOP8
+  let html=`<div class="dash-note">분야별 자주 나온 값 TOP</div>`, any=false;
+  ids.forEach(id=>{ const m=MANIFESTS[id]; if(!m) return; const f=_dashTagField(m); if(!f) return;
+    const rows=data[id]||[]; const cnt={};
+    rows.forEach(r=>{ let v=r[f.k]; if(v==null||v==="") return;
+      const arr=Array.isArray(v)?v:String(v).split(",").map(x=>x.trim()).filter(Boolean);
+      arr.forEach(x=>{ if(x) cnt[x]=(cnt[x]||0)+1; }); });
+    const items=Object.entries(cnt).sort((a,b)=>b[1]-a[1]).slice(0,8); if(!items.length) return; any=true;
+    const mx=items[0][1];
+    const bars=items.map(([name,n])=>`<div class="tgbar"><span class="tgbar-l" title="${String(name).replace(/"/g,'&quot;')}">${String(name).replace(/</g,"&lt;")}</span><span class="tgbar-t"><span class="tgbar-f" style="width:${Math.max(6,n/mx*100).toFixed(0)}%;background:${domColor(id)}"></span></span><span class="tgbar-n">${n}</span></div>`).join("");
+    html+=`<div class="dash-dom"><div class="dash-dt">${m.icon} ${m.title} <span style="font-size:11px;color:var(--ink-soft);font-weight:400">· ${f.sheet||f.label||f.k}</span></div>${bars}</div>`;
+  });
+  return html+(any?"":`<div class="dash-names" style="color:var(--ink-soft);text-align:center;margin-top:8px">집계할 태그가 아직 없어요</div>`);
+}
 function renderDash(ids, data){
   const b=$("#dashBody"); if(!b) return;
-  const views=[["summary","요약"],["month","월별"],["calendar","캘린더"],["trend","추이"]];
+  const views=[["summary","요약"],["month","월별"],["calendar","캘린더"],["year","연간"],["tags","태그"],["trend","추이"]];
   const vsel=`<div class="sort-btns" style="margin-bottom:12px">${views.map(([v,l])=>`<button class="sort-btn ${dashView===v?'on':''}" data-dv="${v}">${l}</button>`).join("")}</div>`;
   if(dashView!=="summary"){
     const ev=dashEvents(ids,data);
-    b.innerHTML=vsel + (dashView==="month"?chartMonths(ids,ev):dashView==="calendar"?chartCalendar(ids,ev):chartTrend(ids,ev));
+    const _body=dashView==="month"?chartMonths(ids,ev):dashView==="calendar"?chartCalendar(ids,ev):dashView==="year"?chartYear(ids,ev):dashView==="tags"?chartTags(ids,data):chartTrend(ids,ev);
+    b.innerHTML=vsel + _body;
     b.querySelectorAll("[data-dv]").forEach(x=>x.onclick=()=>{ dashView=x.dataset.dv; renderDash(ids,data); });
     return;
   }
