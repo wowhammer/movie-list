@@ -509,7 +509,7 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
         <svg class="brandmark" width="34" height="30" viewBox="26 28 62 54" aria-hidden="true"><rect x="28" y="40" width="12" height="38" rx="5" fill="#F7F5F0"/><rect x="44" y="30" width="12" height="48" rx="5" fill="#F7F5F0"/><rect x="60" y="32" width="12" height="46" rx="5" fill="#E0483F" transform="rotate(16 66 78)"/></svg>
         <span class="brandwm"><span class="bwm-ko">내도감</span><span class="bwm-en">NAEDOGAM</span></span>
       </button>
-      <span class="mhver">배포 v153</span>
+      <span class="mhver">배포 v154</span>
       <span class="spacer"></span>
       <span class="src-chip" id="srcChip" style="display:none">데모</span>
       <button class="icon-btn" id="searchToggle" type="button" style="display:none">🔍</button>
@@ -613,7 +613,7 @@ const MANIFESTS = {
              {k:"country",sheet:"국적",label:"국적",type:"text"},
              {k:"streaming",sheet:"스트리밍",label:"스트리밍(쉼표로 여러 개)",type:"tags"},
              {k:"recommend",sheet:"추천",label:"추천",type:"text"},
-             {k:"review",sheet:"리뷰",label:"리뷰",type:"text"} ],
+             {k:"review",sheet:"코멘트",label:"코멘트",type:"text"} ],
     stats:[ {label:"전체",type:"count",sf:""},
             {label:"시청완료",type:"countIf",field:"watched",eq:"O",sf:"watched"},
             {label:"다시볼것",type:"countIf",field:"rewatch",eq:true,sf:"rewatch"},
@@ -2239,23 +2239,17 @@ function movieKorRow(r){ r=r||{};
   const code=(r.watched==='O'?'W':'X')+(r.rewatch?'R':'O');
   const rec=Array.isArray(r.recommendList)&&r.recommendList.length ? r.recommendList.join(" / ") : (r.recommend==null?"":String(r.recommend));
   return {
-    "_id": r.orig==null?"":String(r.orig),
     "원제": r.orig==null?"":String(r.orig),
-    "제목": r.title==null?"":String(r.title),
     "한국 개봉명": r.title==null?"":String(r.title),
     "개봉연도": r.year==null?"":String(r.year),
-    "시청상태": code==='XO'?'':code,
     "시청여부": code==='XO'?'':code,
     "감독": r.director==null?"":String(r.director),
     "배우": r.actors==null?"":String(r.actors),
     "스트리밍": Array.isArray(r.streaming)?r.streaming.join(", "):(r.streaming==null?"":String(r.streaming)),
-    "직접검색": r.directSearch==null?"":String(r.directSearch),
     "추천": rec,
     "국적": r.country==null?"":String(r.country),
     "평점": r.rating==null?"":String(r.rating),
-    "TMDB평점": r.rating==null?"":String(r.rating),
-    "메모": r.review==null?"":String(r.review),
-    "리뷰": r.review==null?"":String(r.review),
+    "코멘트": r.review==null?"":String(r.review),
     "찜": r.pick?'true':'',
     "본날": r.watchDate==null?"":String(r.watchDate)
   };
@@ -2308,7 +2302,7 @@ function personSpan(str, role){    // "왕가위, 장만옥" → 각 이름 클�
 async function toggleMovieDeploy(m, r, key){
   r[key]=!r[key];
   if(key==="watched" && r.watched && !r.watchDate) r.watchDate=todayStr();
-  try{ await sheetSrc().update(m.id, r._id, r); }
+  try{ await sheetSrc().updateRaw(sheetSrc().tabOf("movies"), r.orig||r._id, movieKorRow(r), "원제"); }
   catch(e){ r[key]=!r[key]; alert("저장 실패: "+e.message); return; }
   const arr=CACHE[m.id]; if(arr){ const it=arr.find(x=>String(x._id)===String(r._id)); if(it){ it[key]=r[key]; it.watchDate=r.watchDate; } savePersist(m.id, arr); }
   if(state.domain===m.id) paintDomain(m);
@@ -2330,7 +2324,7 @@ async function openMovieDetailDeploy(m, r){
       </div>
     </div>
     <div class="mvover" id="mvOver">줄거리 불러오는 중…</div>
-    ${r.review?`<div class="mvreview"><b>📝 내 메모</b><br>${String(r.review).replace(/</g,"&lt;")}</div>`:""}
+    ${r.review?`<div class="mvreview"><b>📝 내 코멘트</b><br>${String(r.review).replace(/</g,"&lt;")}</div>`:""}
     <div class="mvlinks">
       <a class="btn ghost" id="lnkTMDB" target="_blank" rel="noopener">🎬 TMDB</a>
       <a class="btn ghost" target="_blank" rel="noopener" href="https://pedia.watcha.com/ko/search?query=${encodeURIComponent(r.title||"")}">🍿 왓챠</a>
@@ -2371,7 +2365,7 @@ async function openMovieDetail(m, r){
       </div>
     </div>
     <div class="mvover" id="mvOver">줄거리 불러오는 중…</div>
-    ${r.review?`<div class="mvreview"><b>📝 내 리뷰</b><br>${r.review}</div>`:""}
+    ${r.review?`<div class="mvreview"><b>📝 내 코멘트</b><br>${r.review}</div>`:""}
     <div class="mvlinks">
       <a class="btn ghost" id="lnkTMDB" target="_blank" rel="noopener">🎬 TMDB</a>
       <a class="btn ghost" target="_blank" rel="noopener" href="https://pedia.watcha.com/ko/search?query=${encodeURIComponent(r.title||"")}">🍿 왓챠</a>
@@ -2635,6 +2629,18 @@ function openRecordForm(m, existing, prefill){
       _sb.onclick=()=>{ const iss=(d.querySelector('.rf[data-k="issuer"]')||{}).value||""; const nm=(d.querySelector('.rf[data-k="name"]')||{}).value||""; window.open("https://search.naver.com/search.naver?query="+encodeURIComponent((iss+" "+nm+" 카드 혜택").trim()),"_blank"); }; }
   }
   if(m.id==="carlog"){
+    const _workEl=d.querySelector('.rf[data-k="work"]');
+    if(_workEl && !d.querySelector("#carWorkChips")){
+      const _chips=document.createElement("div"); _chips.id="carWorkChips";
+      _chips.style.cssText="display:flex;flex-wrap:wrap;gap:6px;margin:6px 0 2px";
+      ["엔진오일","타이어","브레이크패드","에어컨필터","배터리","정기점검","주유","세차","주차","통행료","보험","소모품"].forEach(t=>{
+        const b=document.createElement("button"); b.type="button"; b.textContent=t;
+        b.style.cssText="font:inherit;font-size:12px;padding:4px 10px;border:1px solid var(--line);border-radius:14px;background:var(--card);color:var(--ink-soft);cursor:pointer";
+        b.onclick=()=>{ _workEl.value=t; _workEl.dispatchEvent(new Event("input",{bubbles:true})); _workEl.focus(); };
+        _chips.appendChild(b);
+      });
+      _workEl.parentNode.insertBefore(_chips, _workEl.nextSibling);
+    }
     const _iz=d.querySelector('.rf-imgzone[data-k="cover"]');
     if(_iz && !d.querySelector("#carAllCover")){ const _wrap=document.createElement("label"); _wrap.className="rff";
       _wrap.style.cssText="display:flex;align-items:flex-start;gap:8px;margin-top:7px;font-size:13px;color:var(--ink-soft)";
@@ -2656,11 +2662,14 @@ function openRecordForm(m, existing, prefill){
 }
 /* 저장을 분야에 맞는 통로로 보냄 (영화=기존 수정통로 / 차계부=nd문(ID) / 도서·명산·러닝=nd문(_id)) */
 async function saveRecord(m, row, existing){
-  if(m.id==="movies" && !CONFIG.DEPLOY){                       // 영화 정보수정: MOVIE 탭, 원제 기준(전체 행 재작성)
+  if(m.id==="movies"){                                        // 영화 저장: 원제 기준 전체 행(개인·배포 공통)
     const base=(CACHE.movies||[]).find(x=>String(x._id)===String((existing&&existing._id)||row._id)) || existing || {};
     const merged=Object.assign({}, base, row);
+    merged.orig = merged.orig || merged._id || row._id || merged.title;
     merged.recommendList=String(merged.recommend==null?"":merged.recommend).split(/[\/,]+/).map(x=>x.trim()).filter(Boolean);
-    return sheetSrc().updateRaw(sheetSrc().tabOf("movies"), (existing&&existing.orig)||merged.orig||merged._id, movieKorRow(merged), "원제");
+    const _mtab=sheetSrc().tabOf("movies");
+    if(existing) return sheetSrc().updateRaw(_mtab, (existing&&existing.orig)||merged.orig||merged._id, movieKorRow(merged), "원제");
+    return sheetSrc().appendRaw(_mtab, movieKorRow(merged));
   }
   if(m.id==="carlog" && !CONFIG.DEPLOY){                        // 차계부: 차계부/CARLOG 탭, _id 또는 ID 자동감지
     const S=sheetSrc(), tab=S.tabOf("carlog"), idk=S.idkeyOf("carlog");
