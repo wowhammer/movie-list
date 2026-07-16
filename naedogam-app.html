@@ -529,7 +529,7 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
         <svg class="brandmark" width="34" height="30" viewBox="26 28 62 54" aria-hidden="true"><rect x="28" y="40" width="12" height="38" rx="5" fill="#F7F5F0"/><rect x="44" y="30" width="12" height="48" rx="5" fill="#F7F5F0"/><rect x="60" y="32" width="12" height="46" rx="5" fill="#E0483F" transform="rotate(16 66 78)"/></svg>
         <span class="brandwm"><span class="bwm-ko">내도감</span><span class="bwm-en">NAEDOGAM</span></span>
       </button>
-      <span class="mhver">배포 v171</span>
+      <span class="mhver">배포 v172</span>
       <span class="spacer"></span>
       <span class="src-chip" id="srcChip" style="display:none">데모</span>
       <button class="icon-btn" id="searchToggle" type="button" style="display:none">🔍</button>
@@ -2836,8 +2836,8 @@ const COUNTRY_ISO={"한국":"KR","대한민국":"KR","코리아":"KR","일본":"
 function _isoOfCountry(name){ if(name==null) return null; let s=String(name).trim(); if(!s) return null; if(/^[A-Za-z]{2}$/.test(s)) return s.toUpperCase(); s=s.replace(/\s+/g,""); return COUNTRY_ISO[s]||null; }
 let _jvm=null, _jvmReady=false;
 function _loadJVM(cb){ if(_jvmReady && typeof jsVectorMap!=="undefined") return cb();
-  if(!document.getElementById("jvm-css")){ const l=document.createElement("link"); l.id="jvm-css"; l.rel="stylesheet"; l.href="https://cdnjs.cloudflare.com/ajax/libs/jsvectormap/1.5.3/jsvectormap.min.css"; document.head.appendChild(l); }
-  const s1=document.createElement("script"); s1.src="https://cdnjs.cloudflare.com/ajax/libs/jsvectormap/1.5.3/jsvectormap.min.js";
+  if(!document.getElementById("jvm-css")){ const l=document.createElement("link"); l.id="jvm-css"; l.rel="stylesheet"; l.href="https://cdnjs.cloudflare.com/ajax/libs/jsvectormap/1.5.3/css/jsvectormap.min.css"; document.head.appendChild(l); }
+  const s1=document.createElement("script"); s1.src="https://cdnjs.cloudflare.com/ajax/libs/jsvectormap/1.5.3/js/jsvectormap.min.js";
   s1.onload=()=>{ const s2=document.createElement("script"); s2.src="https://cdnjs.cloudflare.com/ajax/libs/jsvectormap/1.5.3/maps/world.js"; s2.onload=()=>{ _jvmReady=true; cb(); }; s2.onerror=()=>cb("err"); document.head.appendChild(s2); };
   s1.onerror=()=>cb("err"); document.head.appendChild(s1);
 }
@@ -2853,12 +2853,12 @@ function renderTravelMap(m, base){
     const box=document.getElementById("worldmap"); if(!box) return;
     if(err||typeof jsVectorMap==="undefined"){ box.innerHTML='<div class="count" style="padding:30px 10px">지도를 불러오지 못했어요(인터넷 연결 확인).</div>'; return; }
     try{ if(_jvm){ _jvm.destroy(); _jvm=null; } }catch(_){}
-    const vals=Object.fromEntries(codes.map(c=>[c,"#E0483F"]));
     try{
       _jvm=new jsVectorMap({ selector:"#worldmap", map:"world", zoomButtons:true, zoomOnScroll:true, backgroundColor:"transparent",
-        regionStyle:{ initial:{ fill:"#dcdcd2", stroke:"#ffffff", strokeWidth:0.4 }, hover:{ fill:"#c7c7bb" } },
         regionsSelectable:false,
-        series:{ regions:[{ attribute:"fill", values:vals }] } });
+        regionStyle:{ initial:{ fill:"#dcdcd2", stroke:"#ffffff", "stroke-width":0.4 }, hover:{ fill:"#c7c7bb" } } });
+      const paint=()=>{ codes.forEach(c=>{ const p=box.querySelector('[data-code="'+c+'"]'); if(p){ p.setAttribute("fill","#E0483F"); p.style.fill="#E0483F"; } }); };
+      paint(); setTimeout(paint,150); setTimeout(paint,500);
     }catch(e){ box.innerHTML='<div class="count" style="padding:30px 10px">지도 표시 오류.</div>'; console.error(e); }
   });
 }
