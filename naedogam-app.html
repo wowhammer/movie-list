@@ -227,12 +227,13 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
   .cal-cell.noimg .cal-d{ color:var(--ink); text-shadow:none; }
   .mv-memo{ font-size:12px; color:#a8894e; line-height:1.45; margin-top:5px; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
   #list:has(.qcard){ display:flex; flex-direction:column; gap:8px; }
-  .qcard{ display:block; text-align:left; background:var(--card); border:1px solid var(--line); border-radius:14px; padding:14px 14px 15px; cursor:pointer; width:100%; }
+  #list .qcard{ display:flex; flex-direction:column; align-items:stretch; text-align:left; background:var(--card); border:1px solid var(--line); border-radius:14px; padding:14px 14px 15px; cursor:pointer; width:100%; }
   .qmark{ font-family:var(--serif); font-size:20px; color:#E0483F; opacity:.5; margin-right:5px; vertical-align:-2px; }
-  .qtext{ font-family:var(--serif); font-size:15px; line-height:1.75; color:var(--ink); margin:0 0 10px; word-break:keep-all; }
-  .qmeta{ display:flex; flex-wrap:wrap; align-items:center; gap:6px 10px; padding-top:8px; border-top:1px solid var(--line); }
+  .qtext{ font-family:var(--serif); font-size:15px; line-height:1.75; color:var(--ink); margin:0 0 10px; width:100%; word-break:keep-all; }
+  .qmeta{ display:flex; flex-wrap:wrap; align-items:center; gap:6px 10px; width:100%; padding-top:8px; border-top:1px solid var(--line); }
   .qauthor{ font-size:12px; color:var(--ink-soft); font-weight:600; }
   .qtags{ display:flex; flex-wrap:wrap; gap:4px; }
+  .dlink{ color:var(--accent); text-decoration:none; font-weight:600; border-bottom:1px solid var(--accent); padding-bottom:1px; }
   .cal-img{ position:absolute; inset:0; width:100%; height:100%; object-fit:cover; }
   .cal-dot{ position:absolute; bottom:6px; left:50%; transform:translateX(-50%); width:6px; height:6px; border-radius:50%; background:var(--accent); }
   .dnav{ position:fixed; top:50%; transform:translateY(-50%); z-index:6; width:42px; height:42px; border-radius:50%; border:none; background:rgba(20,20,22,.5); color:#fff; font-size:26px; line-height:1; cursor:pointer; display:flex; align-items:center; justify-content:center; box-shadow:0 2px 8px rgba(0,0,0,.3); }
@@ -524,7 +525,7 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
         <svg class="brandmark" width="34" height="30" viewBox="26 28 62 54" aria-hidden="true"><rect x="28" y="40" width="12" height="38" rx="5" fill="#F7F5F0"/><rect x="44" y="30" width="12" height="48" rx="5" fill="#F7F5F0"/><rect x="60" y="32" width="12" height="46" rx="5" fill="#E0483F" transform="rotate(16 66 78)"/></svg>
         <span class="brandwm"><span class="bwm-ko">내도감</span><span class="bwm-en">NAEDOGAM</span></span>
       </button>
-      <span class="mhver">배포 v168</span>
+      <span class="mhver">배포 v169</span>
       <span class="spacer"></span>
       <span class="src-chip" id="srcChip" style="display:none">데모</span>
       <button class="icon-btn" id="searchToggle" type="button" style="display:none">🔍</button>
@@ -2239,6 +2240,7 @@ function openDetail(m, r){ _navSet(m, r);
       return arr.map(t=>{ const mn=String(t.min==null?"":t.min).trim(); const bl=String(t.benefits||"").split(/\n+/).map(x=>x.trim()).filter(Boolean);
         return `<div class="drow"><span class="k">${mn?mn+"만원↑":"기본"}</span><span>${bl.map(b=>String(b).replace(/</g,"&lt;")).join("<br>")||"—"}</span></div>`; }).join(""); }
     if(FT[k]==="date"){ return `<div class="drow"><span class="k">${LBL[k]||k}</span><span>${_isoOf(v)||(v==null||v===""?"—":v)}</span></div>`; }
+    if((k==="link"||k==="url"||/^https?:\/\//i.test(String(v)))&&v!=null&&v!==""){ const _u=(/^https?:\/\//i.test(String(v))?String(v):"https://"+String(v)).replace(/"/g,"&quot;"); return `<div class="drow"><span class="k">${LBL[k]||k}</span><span><a class="dlink" href="${_u}" target="_blank" rel="noopener">🔗 열기</a></span></div>`; }
     return `<div class="drow"><span class="k">${LBL[k]||k}</span><span>${Array.isArray(v)?v.join(", "):v===null?"—":v===true?"예":v===false?"아니오":(typeof v==="number"&&k!=="year"&&!/연도/.test(LBL[k]||"")?v.toLocaleString():v)}</span></div>`; }).join("");
   const mapLinks = (m.id==="mountains") ? `<div class="mvlinks"><a class="btn ghost" target="_blank" rel="noopener" href="https://map.naver.com/p/search/${encodeURIComponent(r.title||"")}"><img class="lnkico" src="https://www.google.com/s2/favicons?domain=map.naver.com&sz=64" onerror="this.remove()">네이버지도</a><a class="btn ghost" target="_blank" rel="noopener" href="https://www.google.com/maps/search/${encodeURIComponent((r.title||"")+" "+(r.region||""))}"><img class="lnkico" src="https://www.google.com/s2/favicons?domain=google.com&sz=64" onerror="this.remove()">구글지도</a></div>` : "";
   const editable = m.source?.type==="sheet" || m.id==="carlog";
