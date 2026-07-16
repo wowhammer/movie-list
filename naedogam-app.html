@@ -230,7 +230,7 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
   #list .abcard{ display:block; padding:0; border:none; background:none; box-shadow:none; text-align:left; cursor:pointer; }
   .abcard .ab-cover{ position:relative; width:100%; aspect-ratio:1/1; border-radius:8px; overflow:hidden; background:#e9e7df; box-shadow:0 2px 7px rgba(0,0,0,.16); }
   .abcard .ab-cover img{ width:100%; height:100%; object-fit:cover; display:block; }
-  .abcard .ab-nocover{ display:flex; align-items:center; justify-content:center; height:100%; font-size:30px; opacity:.4; }
+  .abcard .ab-nocover{ display:flex; align-items:center; justify-content:center; text-align:center; height:100%; padding:10px; font-size:12px; font-weight:700; line-height:1.35; color:#fff; background:linear-gradient(135deg,#6b6b78,#3f3f46); word-break:keep-all; overflow:hidden; }
   .abcard .ab-badge{ position:absolute; top:6px; right:6px; font-size:9.5px; font-weight:700; padding:1px 6px; border-radius:10px; color:#fff; }
   .ab-badge.a-own{ background:#16a34a; } .ab-badge.a-wish{ background:#c2410c; }
   .abcard .ab-t{ font-size:12px; font-weight:700; color:var(--ink); margin:6px 1px 0; line-height:1.3; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
@@ -238,15 +238,21 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
   .abcard .ab-star{ color:#e0a020; font-weight:700; }
   #list:has(.sccard){ display:flex; flex-direction:column; gap:12px; }
   #list .sccard{ display:block; padding:0; border:none; overflow:hidden; border-radius:14px; background:var(--card); box-shadow:0 1px 4px rgba(0,0,0,.09); text-align:left; cursor:pointer; }
-  .sccard .sc-cover{ position:relative; width:100%; aspect-ratio:16/9; background:#e9e7df; }
+  .sccard .sc-cover{ position:relative; width:100%; aspect-ratio:16/10; background:#e9e7df; }
   .sccard .sc-cover img{ width:100%; height:100%; object-fit:cover; display:block; }
-  .sccard .sc-nocover{ display:flex; align-items:center; justify-content:center; height:100%; font-size:32px; opacity:.4; }
-  .sccard .sc-src{ position:absolute; top:10px; left:10px; font-size:11px; font-weight:700; color:#fff; background:rgba(0,0,0,.6); padding:2px 9px; border-radius:20px; }
-  .sccard .sc-body{ padding:11px 14px 13px; }
-  .sccard .sc-title{ font-size:15px; font-weight:700; color:var(--ink); line-height:1.42; word-break:keep-all; }
-  .sccard .sc-tags{ display:flex; flex-wrap:wrap; gap:5px; margin-top:8px; }
-  .sccard .sc-tag{ font-size:11px; color:var(--accent); background:var(--accent-wash); border-radius:9px; padding:1px 8px; }
-  .sccard .sc-date{ font-size:11px; color:var(--ink-soft); margin-top:7px; }
+  .sccard .sc-src{ position:absolute; top:10px; left:10px; font-size:11px; font-weight:700; color:#fff; background:rgba(0,0,0,.55); padding:3px 10px; border-radius:20px; }
+  .sccard .sc-body{ padding:12px 15px 14px; }
+  .sccard .sc-title{ font-size:15.5px; font-weight:700; color:var(--ink); line-height:1.42; word-break:keep-all; }
+  .sccard .sc-tags{ display:flex; flex-wrap:wrap; gap:5px; margin-top:9px; }
+  .sccard .sc-tag{ font-size:11px; color:var(--accent); background:var(--accent-wash); border-radius:9px; padding:2px 9px; }
+  .sccard .sc-date{ font-size:11px; color:var(--ink-soft); margin-top:8px; }
+  #list .sccard.sc-text{ padding:14px 16px 15px; border-left:4px solid var(--accent); }
+  .sccard.sc-text .sc-topline{ display:flex; align-items:center; gap:8px; margin-bottom:7px; }
+  .sccard.sc-text .sc-srcchip{ font-size:10.5px; font-weight:700; color:var(--accent); background:var(--accent-wash); padding:2px 9px; border-radius:20px; }
+  .sccard.sc-text .sc-date{ margin-top:0; }
+  .sccard.sc-text .sc-title{ font-size:16px; }
+  .sccard.sc-text .sc-content{ margin-top:8px; font-size:13px; line-height:1.6; color:var(--ink-soft); display:-webkit-box; -webkit-line-clamp:4; -webkit-box-orient:vertical; overflow:hidden; white-space:pre-wrap; word-break:break-word; }
+  .sccard.sc-text .sc-tags{ margin-top:10px; }
   .cal-grid.pay .cal-cell{ aspect-ratio:auto; min-height:54px; background:var(--line-soft); padding:16px 3px 4px; box-sizing:border-box; display:flex; flex-direction:column; gap:2px; }
   .cal-grid.pay .cal-cell.has{ background:var(--accent-wash); box-shadow:inset 0 0 0 1px var(--accent); }
   .cal-grid.pay .cal-cell.has .cal-d{ color:var(--ink); text-shadow:none; }
@@ -571,7 +577,7 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
         <svg class="brandmark" width="34" height="30" viewBox="26 28 62 54" aria-hidden="true"><rect x="28" y="40" width="12" height="38" rx="5" fill="#F7F5F0"/><rect x="44" y="30" width="12" height="48" rx="5" fill="#F7F5F0"/><rect x="60" y="32" width="12" height="46" rx="5" fill="#E0483F" transform="rotate(16 66 78)"/></svg>
         <span class="brandwm"><span class="bwm-ko">내도감</span><span class="bwm-en">NAEDOGAM</span></span>
       </button>
-      <span class="mhver">배포 v176</span>
+      <span class="mhver">배포 v177</span>
       <span class="spacer"></span>
       <span class="src-chip" id="srcChip" style="display:none">데모</span>
       <button class="icon-btn" id="searchToggle" type="button" style="display:none">🔍</button>
@@ -2271,19 +2277,27 @@ function travelCard(r){
 }
 function albumCard(r){
   const esc=x=>String(x==null?"":x).replace(/</g,"&lt;"), eq=x=>String(x==null?"":x).replace(/"/g,"&quot;");
-  const cov=r.cover?`<img src="${eq(r.cover)}" alt="" loading="lazy">`:`<div class="ab-nocover">💿</div>`;
+  const cov=r.cover?`<img src="${eq(r.cover)}" alt="" loading="lazy">`:`<div class="ab-nocover">${esc(r.title||"💿")}</div>`;
   const st=r.status; const b=st==="소장"?`<span class="ab-badge a-own">소장</span>`:st==="위시"?`<span class="ab-badge a-wish">위시</span>`:"";
   const star=(r.rating!=null&&r.rating!=="")?` <span class="ab-star">★${esc(r.rating)}</span>`:"";
   return `<button class="card abcard" data-id="${r._id}"><div class="ab-cover">${cov}${b}</div><div class="ab-t">${esc(r.title||"앨범")}</div><div class="ab-a">${esc(r.artist||"")}${star}</div></button>`;
 }
 function scrapCard(r){
   const esc=x=>String(x==null?"":x).replace(/</g,"&lt;"), eq=x=>String(x==null?"":x).replace(/"/g,"&quot;");
-  const cov=r.cover?`<img src="${eq(r.cover)}" alt="" loading="lazy">`:`<div class="sc-nocover">🔖</div>`;
-  const src=r.source?`<span class="sc-src">${esc(r.source)}</span>`:"";
   const ta=Array.isArray(r.tags)?r.tags:(r.tags==null||r.tags===""?[]:String(r.tags).split(",").map(x=>x.trim()).filter(Boolean));
   const tags=ta.slice(0,4).map(t=>`<span class="sc-tag">${esc(t)}</span>`).join("");
+  const tagsHtml=tags?`<div class="sc-tags">${tags}</div>`:"";
   const dt=r.date?(_isoOf(r.date)||String(r.date).slice(0,10)):"";
-  return `<button class="card sccard" data-id="${r._id}"><div class="sc-cover">${cov}${src}</div><div class="sc-body"><div class="sc-title">${esc(r.title||"스크랩")}</div>${tags?`<div class="sc-tags">${tags}</div>`:""}${dt?`<div class="sc-date">${dt}</div>`:""}</div></button>`;
+  const dtHtml=dt?`<span class="sc-date">${dt}</span>`:"";
+  const title=esc(r.title||"스크랩");
+  if(r.cover){   // 사진 있으면 → 사진 먼저(카드뉴스)
+    return `<button class="card sccard sc-has" data-id="${r._id}"><div class="sc-cover"><img src="${eq(r.cover)}" alt="" loading="lazy">${r.source?`<span class="sc-src">${esc(r.source)}</span>`:""}</div><div class="sc-body"><div class="sc-title">${title}</div>${tagsHtml}${dt?`<div class="sc-date">${dt}</div>`:""}</div></button>`;
+  }
+  // 사진 없으면 → 내용 중심 텍스트 카드(빈 상자 X)
+  const body=String(r.content||"").trim();
+  const content=body?`<div class="sc-content">${esc(body)}</div>`:"";
+  const chip=r.source?`<span class="sc-srcchip">${esc(r.source)}</span>`:"";
+  return `<button class="card sccard sc-text" data-id="${r._id}">${(chip||dtHtml)?`<div class="sc-topline">${chip}${dtHtml}</div>`:""}<div class="sc-title">${title}</div>${content}${tagsHtml}</button>`;
 }
 function renderCard(m, r, no){ if(m.id==="books") return bookCard(r); if(m.id==="quote") return quoteCard(r); if(m.id==="travel") return travelCard(r); if(m.id==="albums") return albumCard(r); if(m.id==="scrap") return scrapCard(r); const c=m.card;
   if(c.kind==="wallet") return walletCard(r);
