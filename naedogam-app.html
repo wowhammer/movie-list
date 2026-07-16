@@ -544,7 +544,7 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
         <svg class="brandmark" width="34" height="30" viewBox="26 28 62 54" aria-hidden="true"><rect x="28" y="40" width="12" height="38" rx="5" fill="#F7F5F0"/><rect x="44" y="30" width="12" height="48" rx="5" fill="#F7F5F0"/><rect x="60" y="32" width="12" height="46" rx="5" fill="#E0483F" transform="rotate(16 66 78)"/></svg>
         <span class="brandwm"><span class="bwm-ko">내도감</span><span class="bwm-en">NAEDOGAM</span></span>
       </button>
-      <span class="mhver">배포 v173</span>
+      <span class="mhver">배포 v174</span>
       <span class="spacer"></span>
       <span class="src-chip" id="srcChip" style="display:none">데모</span>
       <button class="icon-btn" id="searchToggle" type="button" style="display:none">🔍</button>
@@ -2865,6 +2865,7 @@ function statSubline(m, rows){   // 통계를 상단 서브라인으로 통일. 
 }
 /* ── 여행 세계지도 (jsVectorMap, cdnjs 지연로딩) ── */
 const COUNTRY_ISO={"한국":"KR","대한민국":"KR","코리아":"KR","일본":"JP","재팬":"JP","중국":"CN","대만":"TW","타이완":"TW","홍콩":"HK","마카오":"MO","미국":"US","하와이":"US","괌":"GU","사이판":"MP","캐나다":"CA","멕시코":"MX","영국":"GB","잉글랜드":"GB","프랑스":"FR","독일":"DE","이탈리아":"IT","스페인":"ES","포르투갈":"PT","네덜란드":"NL","벨기에":"BE","스위스":"CH","오스트리아":"AT","체코":"CZ","헝가리":"HU","폴란드":"PL","그리스":"GR","터키":"TR","튀르키예":"TR","러시아":"RU","스웨덴":"SE","노르웨이":"NO","덴마크":"DK","핀란드":"FI","아일랜드":"IE","아이슬란드":"IS","크로아티아":"HR","슬로베니아":"SI","슬로바키아":"SK","루마니아":"RO","불가리아":"BG","우크라이나":"UA","태국":"TH","타이":"TH","베트남":"VN","필리핀":"PH","인도네시아":"ID","발리":"ID","말레이시아":"MY","싱가포르":"SG","캄보디아":"KH","라오스":"LA","미얀마":"MM","브루나이":"BN","인도":"IN","네팔":"NP","스리랑카":"LK","몽골":"MN","카자흐스탄":"KZ","우즈베키스탄":"UZ","아랍에미리트":"AE","UAE":"AE","두바이":"AE","카타르":"QA","사우디아라비아":"SA","사우디":"SA","오만":"OM","요르단":"JO","이스라엘":"IL","이란":"IR","이집트":"EG","모로코":"MA","튀니지":"TN","남아프리카공화국":"ZA","남아공":"ZA","케냐":"KE","탄자니아":"TZ","에티오피아":"ET","호주":"AU","오스트레일리아":"AU","뉴질랜드":"NZ","피지":"FJ","브라질":"BR","아르헨티나":"AR","페루":"PE","칠레":"CL","콜롬비아":"CO","볼리비아":"BO","우루과이":"UY","쿠바":"CU","코스타리카":"CR"};
+const COUNTRY_COORDS={KR:[37.57,126.98],JP:[35.68,139.69],CN:[39.90,116.40],TW:[25.03,121.56],HK:[22.32,114.17],MO:[22.20,113.54],US:[38.9,-98.0],CA:[45.42,-75.70],MX:[19.43,-99.13],GB:[51.51,-0.13],FR:[48.85,2.35],DE:[52.52,13.40],IT:[41.90,12.50],ES:[40.42,-3.70],PT:[38.72,-9.13],NL:[52.37,4.90],BE:[50.85,4.35],CH:[46.95,7.44],AT:[48.21,16.37],CZ:[50.08,14.44],HU:[47.50,19.04],PL:[52.23,21.01],GR:[37.98,23.73],TR:[39.93,32.86],RU:[55.75,37.62],SE:[59.33,18.07],NO:[59.91,10.75],DK:[55.68,12.57],FI:[60.17,24.94],IE:[53.35,-6.26],IS:[64.15,-21.94],HR:[45.81,15.98],SI:[46.05,14.51],SK:[48.15,17.11],RO:[44.43,26.10],BG:[42.70,23.32],UA:[50.45,30.52],TH:[13.76,100.50],VN:[21.03,105.85],PH:[14.60,120.98],ID:[-6.21,106.85],MY:[3.14,101.69],SG:[1.35,103.82],KH:[11.56,104.92],LA:[17.97,102.63],MM:[16.87,96.20],BN:[4.90,114.94],IN:[28.61,77.21],NP:[27.72,85.32],LK:[6.93,79.85],MN:[47.89,106.91],KZ:[51.16,71.47],UZ:[41.30,69.24],AE:[24.47,54.37],QA:[25.29,51.53],SA:[24.71,46.68],OM:[23.59,58.41],JO:[31.95,35.93],IL:[31.77,35.21],IR:[35.69,51.39],EG:[30.04,31.24],MA:[33.97,-6.85],TN:[36.81,10.18],ZA:[-25.75,28.19],KE:[-1.29,36.82],TZ:[-6.79,39.21],ET:[9.03,38.74],AU:[-33.87,151.21],NZ:[-41.29,174.78],FJ:[-18.14,178.44],BR:[-15.79,-47.88],AR:[-34.60,-58.38],PE:[-12.05,-77.04],CL:[-33.45,-70.67],CO:[4.71,-74.07],BO:[-16.5,-68.15],UY:[-34.90,-56.16],CU:[23.11,-82.37],CR:[9.93,-84.08],GU:[13.44,144.79],MP:[15.21,145.75]};
 function _isoOfCountry(name){ if(name==null) return null; let s=String(name).trim(); if(!s) return null; if(/^[A-Za-z]{2}$/.test(s)) return s.toUpperCase(); s=s.replace(/\s+/g,""); return COUNTRY_ISO[s]||null; }
 let _jvm=null, _jvmReady=false;
 function _loadJVM(cb){ if(_jvmReady && typeof jsVectorMap!=="undefined") return cb();
@@ -2878,10 +2879,14 @@ function renderTravelMap(m, base){
   const isoOf=r=>_isoOfCountry(r.country);
   const done=[...new Set(all.filter(r=>String(r.status||"")==="다녀옴").map(isoOf).filter(Boolean))];
   const plan=[...new Set(all.filter(r=>String(r.status||"")==="예정").map(isoOf).filter(Boolean))].filter(c=>!done.includes(c));
+  const isoName={}; all.forEach(r=>{ const iso=isoOf(r); if(iso&&!isoName[iso]) isoName[iso]=String(r.country||"").trim(); });
   const doneNames=[...new Set(all.filter(r=>String(r.status||"")==="다녀옴").map(r=>String(r.country||"").trim()).filter(Boolean))];
   const unknown=[...new Set(all.filter(r=>r.status==="다녀옴"||r.status==="예정").map(r=>String(r.country||"").trim()).filter(n=>n&&!_isoOfCountry(n)))];
+  const markers=[];
+  done.forEach(iso=>{ const co=COUNTRY_COORDS[iso]; if(co) markers.push({name:isoName[iso]||iso, coords:co, style:{fill:"#E0483F"}}); });
+  plan.forEach(iso=>{ const co=COUNTRY_COORDS[iso]; if(co) markers.push({name:isoName[iso]||iso, coords:co, style:{fill:"#f0a83a"}}); });
   const L=$("#list");
-  L.innerHTML=`<div class="wm-wrap"><div id="worldmap"></div></div><div class="wm-legend"><span class="wm-dot wm-done"></span> 다녀온 나라 <b>${done.length}</b>곳${plan.length?` &nbsp; <span class="wm-dot wm-plan"></span> 예정 ${plan.length}곳`:""}<br>${doneNames.join(", ")||"‘다녀옴’으로 표시된 여행의 국가가 지도에 칠해져요"}${unknown.length?`<br><span style="opacity:.7">지도 미매칭: ${unknown.join(", ")} (국가명을 표준 표기로)</span>`:""}</div>`;
+  L.innerHTML=`<div class="wm-wrap"><div id="worldmap"></div></div><div class="wm-legend"><span class="wm-dot wm-done"></span> 다녀온 나라 <b>${done.length}</b>곳${plan.length?` &nbsp; <span class="wm-dot wm-plan"></span> 예정 ${plan.length}곳`:""}<br>${doneNames.join(", ")||"‘다녀옴’으로 표시된 여행의 국가에 핀이 찍혀요"}${unknown.length?`<br><span style="opacity:.7">지도 미매칭: ${unknown.join(", ")} (국가명을 표준 표기로)</span>`:""}</div>`;
   $("#count").style.display="none";
   _loadJVM(err=>{
     const box=document.getElementById("worldmap"); if(!box) return;
@@ -2890,12 +2895,10 @@ function renderTravelMap(m, base){
     try{
       _jvm=new jsVectorMap({ selector:"#worldmap", map:"world", zoomButtons:true, zoomOnScroll:true, backgroundColor:"transparent",
         regionsSelectable:false,
-        regionStyle:{ initial:{ fill:"#dcdcd2", stroke:"#ffffff", "stroke-width":0.4 }, hover:{ fill:"#c7c7bb" } } });
-      const paint=()=>{
-        done.forEach(c=>{ const p=box.querySelector('[data-code="'+c+'"]'); if(p){ p.setAttribute("fill","#E0483F"); p.style.fill="#E0483F"; } });
-        plan.forEach(c=>{ const p=box.querySelector('[data-code="'+c+'"]'); if(p){ p.setAttribute("fill","#f0a83a"); p.style.fill="#f0a83a"; } });
-      };
-      paint(); setTimeout(paint,150); setTimeout(paint,500);
+        regionStyle:{ initial:{ fill:"#dcdcd2", stroke:"#ffffff", "stroke-width":0.4 }, hover:{ fill:"#d0d0c6" } },
+        markers:markers,
+        markerStyle:{ initial:{ fill:"#E0483F", stroke:"#ffffff", "stroke-width":1.6, r:6.5 }, hover:{ r:9, "fill-opacity":1 } },
+        markerLabelStyle:{ initial:{ fontFamily:"inherit", fontSize:11, fill:"#3a3a3a" } } });
     }catch(e){ box.innerHTML='<div class="count" style="padding:30px 10px">지도 표시 오류.</div>'; console.error(e); }
   });
 }
