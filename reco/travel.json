@@ -1,0 +1,33 @@
+{
+  "category": "travel",
+  "listId": "travel-must-24",
+  "title": "가고 싶은 여행지 24",
+  "subtitle": "국내외 대표 여행지 모음",
+  "version": "2026-07-16",
+  "items": [
+    { "title": "제주도", "place": "제주", "country": "한국", "spots": "성산일출봉, 한라산, 우도, 협재해변", "recommend": "국내 대표" },
+    { "title": "경주", "place": "경주", "country": "한국", "spots": "불국사, 석굴암, 첨성대, 대릉원", "recommend": "역사 여행" },
+    { "title": "부산", "place": "부산", "country": "한국", "spots": "해운대, 감천문화마을, 광안리, 자갈치시장", "recommend": "국내 대표" },
+    { "title": "강릉", "place": "강릉", "country": "한국", "spots": "경포대, 안목해변, 오죽헌", "recommend": "국내 인기" },
+    { "title": "전주", "place": "전주", "country": "한국", "spots": "한옥마을, 경기전, 전동성당", "recommend": "국내 인기" },
+    { "title": "여수", "place": "여수", "country": "한국", "spots": "여수밤바다, 오동도, 돌산대교", "recommend": "국내 인기" },
+    { "title": "안동", "place": "안동", "country": "한국", "spots": "하회마을, 도산서원, 월영교", "recommend": "역사 여행" },
+    { "title": "통영", "place": "통영", "country": "한국", "spots": "동피랑, 케이블카, 한려수도", "recommend": "국내 인기" },
+    { "title": "서울", "place": "서울", "country": "한국", "spots": "경복궁, 북촌한옥마을, 남산타워, 인사동", "recommend": "국내 대표" },
+    { "title": "교토", "place": "교토", "country": "일본", "spots": "후시미이나리, 기요미즈데라, 아라시야마", "recommend": "해외 인기" },
+    { "title": "도쿄", "place": "도쿄", "country": "일본", "spots": "시부야, 아사쿠사, 신주쿠, 디즈니", "recommend": "해외 인기" },
+    { "title": "오사카", "place": "오사카", "country": "일본", "spots": "도톤보리, 오사카성, 유니버설스튜디오", "recommend": "해외 인기" },
+    { "title": "파리", "place": "파리", "country": "프랑스", "spots": "에펠탑, 루브르, 몽마르트, 개선문", "recommend": "해외 대표" },
+    { "title": "로마", "place": "로마", "country": "이탈리아", "spots": "콜로세움, 바티칸, 트레비분수", "recommend": "해외 대표" },
+    { "title": "바르셀로나", "place": "바르셀로나", "country": "스페인", "spots": "사그라다파밀리아, 구엘공원, 람블라스", "recommend": "해외 인기" },
+    { "title": "뉴욕", "place": "뉴욕", "country": "미국", "spots": "타임스스퀘어, 센트럴파크, 자유의여신상", "recommend": "해외 대표" },
+    { "title": "방콕", "place": "방콕", "country": "태국", "spots": "왓포, 카오산로드, 짜뚜짝시장", "recommend": "해외 인기" },
+    { "title": "다낭", "place": "다낭", "country": "베트남", "spots": "바나힐, 미케비치, 호이안", "recommend": "해외 인기" },
+    { "title": "발리", "place": "발리", "country": "인도네시아", "spots": "우붓, 꾸따비치, 따나롯 사원", "recommend": "해외 인기" },
+    { "title": "싱가포르", "place": "싱가포르", "country": "싱가포르", "spots": "마리나베이샌즈, 가든스바이더베이, 센토사", "recommend": "해외 인기" },
+    { "title": "이스탄불", "place": "이스탄불", "country": "튀르키예", "spots": "블루모스크, 아야소피아, 그랜드바자르", "recommend": "해외 인기" },
+    { "title": "프라하", "place": "프라하", "country": "체코", "spots": "카를교, 프라하성, 구시가 광장", "recommend": "해외 인기" },
+    { "title": "인터라켄", "place": "인터라켄", "country": "스위스", "spots": "융프라우, 하더쿨름, 브리엔츠 호수", "recommend": "해외 인기" },
+    { "title": "타이베이", "place": "타이베이", "country": "대만", "spots": "지우펀, 스린야시장, 타이베이101", "recommend": "해외 인기" }
+  ]
+}

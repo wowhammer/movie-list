@@ -1,0 +1,29 @@
+{
+  "category": "cellar",
+  "listId": "cellar-icons-20",
+  "title": "한 번쯤 마셔볼 와인·위스키 20",
+  "subtitle": "입문부터 컬렉션까지 대표 라인업",
+  "version": "2026-07-16",
+  "items": [
+    { "title": "샤또 마고", "kind": "와인", "origin": "프랑스 보르도", "variety": "카베르네 소비뇽 블렌드", "pairing": "스테이크" },
+    { "title": "오퍼스 원", "kind": "와인", "origin": "미국 나파밸리", "variety": "카베르네 블렌드", "pairing": "양갈비" },
+    { "title": "사시카이아", "kind": "와인", "origin": "이탈리아 토스카나", "variety": "카베르네·메를로", "pairing": "소고기" },
+    { "title": "클라우디 베이 소비뇽 블랑", "kind": "와인", "origin": "뉴질랜드 말버러", "variety": "소비뇽 블랑", "pairing": "해산물" },
+    { "title": "돔 페리뇽", "kind": "와인", "origin": "프랑스 샹파뉴", "variety": "샴페인", "pairing": "축하·전채" },
+    { "title": "펜폴즈 그랜지", "kind": "와인", "origin": "호주", "variety": "쉬라즈", "pairing": "바비큐" },
+    { "title": "티냐넬로", "kind": "와인", "origin": "이탈리아 토스카나", "variety": "산지오베제 블렌드", "pairing": "파스타" },
+    { "title": "케이머스 카베르네", "kind": "와인", "origin": "미국 나파밸리", "variety": "카베르네 소비뇽", "pairing": "스테이크" },
+    { "title": "맥캘란 12년 셰리 오크", "kind": "위스키", "origin": "스코틀랜드 스페이사이드", "variety": "셰리 캐스크", "pairing": "다크초콜릿" },
+    { "title": "글렌피딕 12년", "kind": "위스키", "origin": "스코틀랜드 스페이사이드", "variety": "아메리칸·유러피언 오크", "pairing": "견과류" },
+    { "title": "라가불린 16년", "kind": "위스키", "origin": "스코틀랜드 아일라", "variety": "피트", "pairing": "훈제연어" },
+    { "title": "아드벡 10년", "kind": "위스키", "origin": "스코틀랜드 아일라", "variety": "피트", "pairing": "블루치즈" },
+    { "title": "발베니 더블우드 12년", "kind": "위스키", "origin": "스코틀랜드 스페이사이드", "variety": "셰리·버번 캐스크", "pairing": "말린 과일" },
+    { "title": "야마자키 12년", "kind": "위스키", "origin": "일본", "variety": "미즈나라 오크", "pairing": "화과자" },
+    { "title": "히비키 하모니", "kind": "위스키", "origin": "일본", "variety": "블렌디드", "pairing": "스시" },
+    { "title": "조니워커 블루라벨", "kind": "위스키", "origin": "스코틀랜드", "variety": "블렌디드", "pairing": "육포" },
+    { "title": "메이커스 마크", "kind": "위스키", "origin": "미국 켄터키", "variety": "밀드 버번", "pairing": "바비큐" },
+    { "title": "부커스", "kind": "위스키", "origin": "미국 켄터키", "variety": "배럴프루프 버번", "pairing": "스테이크" },
+    { "title": "헨드릭스 진", "kind": "기타", "origin": "스코틀랜드", "variety": "오이·장미 보태니컬", "pairing": "토닉" },
+    { "title": "돈 훌리오 1942", "kind": "기타", "origin": "멕시코", "variety": "아녜호 데킬라", "pairing": "라임·타코" }
+  ]
+}
