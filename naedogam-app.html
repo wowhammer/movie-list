@@ -514,7 +514,7 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
         <svg class="brandmark" width="34" height="30" viewBox="26 28 62 54" aria-hidden="true"><rect x="28" y="40" width="12" height="38" rx="5" fill="#F7F5F0"/><rect x="44" y="30" width="12" height="48" rx="5" fill="#F7F5F0"/><rect x="60" y="32" width="12" height="46" rx="5" fill="#E0483F" transform="rotate(16 66 78)"/></svg>
         <span class="brandwm"><span class="bwm-ko">내도감</span><span class="bwm-en">NAEDOGAM</span></span>
       </button>
-      <span class="mhver">배포 v161</span>
+      <span class="mhver">배포 v163</span>
       <span class="spacer"></span>
       <span class="src-chip" id="srcChip" style="display:none">데모</span>
       <button class="icon-btn" id="searchToggle" type="button" style="display:none">🔍</button>
@@ -2124,7 +2124,7 @@ async function openBookDetail(m, r){
     <div class="dfoot" style="flex-wrap:wrap">
       <div class="statusbtns" style="display:flex;gap:6px;flex-wrap:wrap;width:100%">${statusBtnsHTML(m,r)}</div>
     </div>`;
-  d.showModal();
+  if(!d.open) d.showModal();
   wireStatusBtns(m, r, d);
   { const _sb=$("#bkStars"); if(_sb && _sb.querySelector(".rf-stars-fg")) wireStarWidget(_sb, (r.rating||0), $("#bkStarsNum"), async v=>{
       const old=r.rating; r.rating=v;
@@ -2207,13 +2207,7 @@ function renderCard(m, r, no){ if(m.id==="books") return bookCard(r); const c=m.
 function _navSet(m,r){ const i=NAV_LIST.findIndex(x=>String(x._id)===String(r._id)); NAV_CUR={m, idx:i}; requestAnimationFrame(_mountDetailNav); }
 function _mountDetailNav(){ const d=$("#detail"); if(!d.open||!NAV_CUR) return; d.querySelectorAll(".dnav").forEach(x=>x.remove());
   const m=NAV_CUR.m, idx=NAV_CUR.idx; if(idx<0||NAV_LIST.length<2) return;
-  const dk=(m.fields||[]).some(f=>f.type==="date")?calDateKey(m):null;
-  let leftI, rightI;
-  if(dk){ const cur=_isoOf(NAV_LIST[idx][dk])||""; let older=null, newer=null;
-    NAV_LIST.forEach((r,i)=>{ if(i===idx) return; const dd=_isoOf(r[dk])||""; if(!dd) return;
-      if(dd<cur){ if(!older||dd>older.d) older={i,d:dd}; } else if(dd>cur){ if(!newer||dd<newer.d) newer={i,d:dd}; } });
-    leftI=older?older.i:-1; rightI=newer?newer.i:-1;
-  } else { leftI=idx>0?idx-1:-1; rightI=idx<NAV_LIST.length-1?idx+1:-1; }
+  let leftI=idx>0?idx-1:-1, rightI=idx<NAV_LIST.length-1?idx+1:-1;   // 목록 표시 순서대로 이전/다음
   const mk=(dir,ti)=>{ const b=document.createElement("button"); b.className="dnav dnav-"+dir; b.type="button"; b.textContent=dir==="prev"?"‹":"›"; b.disabled=ti<0;
     b.onclick=e=>{ e.stopPropagation(); if(ti>=0) openDetail(m, NAV_LIST[ti]); }; return b; };
   d.appendChild(mk("prev", leftI)); d.appendChild(mk("next", rightI)); }
@@ -2250,7 +2244,7 @@ function openDetail(m, r){ _navSet(m, r);
   }
   const _cf=(m.fields||[]).find(f=>f.type==="image"); const coverImg=(_cf&&r[_cf.k])?`<div class="det-cover"><img src="${String(r[_cf.k]).replace(/"/g,'&quot;')}" alt=""></div>`:"";
   const d=$("#detail"); d.innerHTML=`<div class="dhead"><h3>${(m.id==="cards"||m.id==="insurance")?((r.issuer?String(r.issuer).replace(/</g,"&lt;")+" · ":"")+String(r.name||"카드").replace(/</g,"&lt;")):(m.id==="subs"?String(r.name||"구독").replace(/</g,"&lt;"):(m.card.kind==="specimen"?r.title:((m.card&&m.card.title)?m.card.title(r):((_isoOf(r.date)||r.date||"")+(r.car?" · "+r.car:"")))))}</h3><div class="dh-actions"><button class="dh-btn" id="dEdit">수정</button><button class="dh-btn dh-del" id="dDel">삭제</button><button class="dclose-x" onclick="this.closest('dialog').close()" aria-label="닫기">✕</button></div></div><div class="dbody">${coverImg}${rows}</div>${mapLinks}${m.id==="cards"?`<div class="mvlinks">${r.link?`<a class="btn ghost" target="_blank" rel="noopener" href="${(/^https?:\/\//i.test(String(r.link))?String(r.link):"https://"+String(r.link)).replace(/"/g,"&quot;")}">🔗 상세 링크</a>`:""}<a class="btn ghost" target="_blank" rel="noopener" href="https://search.naver.com/search.naver?query=${encodeURIComponent(((r.issuer||"")+" "+(r.name||"")+" 카드 혜택").trim())}">🔍 혜택 검색</a></div>`:""}${foot}`;
-  d.showModal();
+  if(!d.open) d.showModal();
   if(isMovie){
     $("#mW").onclick=()=>toggleMovie(r,'W'); $("#mR").onclick=()=>toggleMovie(r,'R'); $("#mP").onclick=()=>toggleMovie(r,'P');
     $("#dEdit").onclick=()=>{ d.close(); openRecordForm(m, r); };
@@ -2382,7 +2376,7 @@ async function openMovieDetailDeploy(m, r){
       <button class="btn ${r.rewatch?'':'ghost'}" id="mR">${r.rewatch?'✓ 다시볼것':'다시볼것'}</button>
       <button class="btn ${r.pick?'':'ghost'}" id="mP">${r.pick?'✓ 찜':'찜'}</button>
     </div>`;
-  d.showModal();
+  if(!d.open) d.showModal();
   $("#mW").onclick=()=>toggleMovieDeploy(m,r,"watched");
   $("#mR").onclick=()=>toggleMovieDeploy(m,r,"rewatch");
   $("#mP").onclick=()=>toggleMovieDeploy(m,r,"pick");
@@ -2425,7 +2419,7 @@ async function openMovieDetail(m, r){
       <button class="btn ${r.rewatch?'':'ghost'}" id="mR">다시볼것</button>
       <button class="btn ${r.pick?'':'ghost'}" id="mP">찜</button>
     </div>`;
-  d.showModal();
+  if(!d.open) d.showModal();
   $("#mW").onclick=()=>toggleMovie(r,'W'); $("#mR").onclick=()=>toggleMovie(r,'R'); $("#mP").onclick=()=>toggleMovie(r,'P');
   $("#dEdit").onclick=()=>{ d.close(); openRecordForm(m, r); };
   $("#dDel").onclick=()=>deleteRecord(m, r);
@@ -2458,7 +2452,7 @@ async function openPersonModal(name, role){
   const d=$("#person");
   d.innerHTML=`<div class="dhead" style="display:flex;align-items:center;gap:10px"><h3 style="margin:0">${name}</h3><button class="pclose" onclick="this.closest('dialog').close()">✕</button></div>
     <div class="dbody" id="personBody"><div class="count">불러오는 중…</div></div>`;
-  d.showModal();
+  if(!d.open) d.showModal();
   const p=await fetchPerson(name);
   const body=$("#personBody"); if(!body) return;
   if(!p.found){ body.innerHTML=`<div class="count">앱에서 인물 정보를 못 찾았어요.</div>
@@ -2604,7 +2598,7 @@ function openRecordForm(m, existing, prefill){
     <div class="rff-full" style="display:flex;gap:8px;margin-top:18px;flex:1 1 100%">
       <button class="btn" id="rfSave" style="flex:1">저장</button>
     </div></div>`;
-  d.showModal();
+  if(!d.open) d.showModal();
   if(m.id==="movies" && CONFIG.DEPLOY) tmdbAttachDeploy(d);
   d.querySelectorAll(".rf-bool").forEach(b=>b.onclick=()=>{ b.classList.toggle("on"); });
   d.querySelectorAll(".rf-seg").forEach(seg=>seg.querySelectorAll(".rf-segbtn").forEach(b=>b.onclick=()=>{ const was=b.classList.contains("on"); seg.querySelectorAll(".rf-segbtn").forEach(x=>x.classList.remove("on")); if(!was) b.classList.add("on"); }));
@@ -2908,7 +2902,7 @@ function openRecModal(key){
       <p class="rec-desc">${info.desc}</p>
       <a class="rec-link" href="${info.url}" target="_blank" rel="noopener" onclick="event.stopPropagation()">공식 사이트 바로가기 →</a>
     </div>`;
-  d.showModal();
+  if(!d.open) d.showModal();
 }
 
 function movieCard(r, no){
@@ -3181,7 +3175,7 @@ function chartTrend(ids, ev){     // 최근 10주 · 주별 합산 추이
 async function openDashboard(){
   const d=$("#dash");
   d.innerHTML=`<div class="dhead" style="display:flex;align-items:center;gap:10px"><h3 style="margin:0">📊 통계</h3><button class="pclose" onclick="this.closest('dialog').close()">✕</button></div><div class="dbody" id="dashBody"><div class="count">불러오는 중…</div></div>`;
-  d.showModal();
+  if(!d.open) d.showModal();
   const ids=getActive().filter(id=>MANIFESTS[id]);
   const data={};
   const build=(id,raw)=>{ const m=MANIFESTS[id]; data[id]=applyComputed(m,(raw||[]).map(r=>({_id:r._id||crypto.randomUUID(),...r}))); };
@@ -3435,7 +3429,7 @@ function openCatBuilder(){
   d.querySelectorAll(".cb-emo").forEach(b=>b.onclick=()=>{ d.querySelector("#cb_icon").value=b.dataset.e; d.querySelector("#cb_iconview").textContent=b.dataset.e; });
   d.querySelector("#cb_cancel").onclick=()=>d.close();
   d.querySelector("#cb_make").onclick=()=>saveCustomCategory(d);
-  d.showModal();
+  if(!d.open) d.showModal();
 }
 /* 같은 이름 탭에 '다른 구조'의 데이터가 이미 있으면 '이름 (2)' 식으로 비켜서 만든다(데이터 꼬임 방지). */
 async function freeTabName(name, fields){
@@ -3514,7 +3508,7 @@ function openCatEdit(id){
   d.querySelectorAll(".ce-emo").forEach(b=>b.onclick=()=>{ d.querySelector("#ce_icon").value=b.dataset.e; d.querySelector("#ce_iconview").textContent=b.dataset.e; });
   d.querySelector("#ce_cancel").onclick=()=>d.close();
   d.querySelector("#ce_save").onclick=()=>saveCatEdit(d, id);
-  d.showModal();
+  if(!d.open) d.showModal();
 }
 async function saveCatEdit(d, id){
   const msg=d.querySelector("#ce_msg"); const setMsg=(t,err)=>{ msg.textContent=t; msg.style.color=err?"#dc2626":"var(--sub)"; };
@@ -3564,7 +3558,7 @@ function openAddBook(){
     <input id="bq" placeholder="책 제목 입력…" autocomplete="off" />
     <div id="bres" style="margin-top:12px;display:flex;flex-direction:column;gap:8px;max-height:340px;overflow:auto"></div>
     </div>`;
-  d.showModal();
+  if(!d.open) d.showModal();
   d.querySelectorAll(".st").forEach(b=>b.onclick=()=>{ addStatus=b.dataset.s;
     d.querySelectorAll(".st").forEach(x=>x.classList.toggle("on",x.dataset.s===addStatus)); });
   { const _ac=$("#addClose"); if(_ac) _ac.onclick=()=>d.close(); }
@@ -3657,7 +3651,7 @@ function openAddMovie(){
     <input id="mq" placeholder="영화 제목 입력…" autocomplete="off" />
     <div id="mres" style="margin-top:12px;display:flex;flex-direction:column;gap:8px;max-height:340px;overflow:auto"></div>
     </div>`;
-  d.showModal();
+  if(!d.open) d.showModal();
   d.querySelectorAll(".st").forEach(b=>b.onclick=()=>{ addMovieStatus=b.dataset.s;
     d.querySelectorAll(".st").forEach(x=>x.classList.toggle("on",x.dataset.s===addMovieStatus)); });
   { const _ac=$("#addClose"); if(_ac) _ac.onclick=()=>d.close(); }
@@ -3698,7 +3692,7 @@ async function pickMovie(m){
   }catch(e){ const msg=/이미/.test(e.message)?"이미 목록에 있는 영화예요.":("추가 실패: "+e.message); alert(msg); if($("#mres")) $("#mres").innerHTML=""; }
 }
 
-const RECO_LISTS = { movies:"reco/movies.json", books:"reco/books.json", mountains:"reco/mountains.json" };
+const RECO_LISTS = { movies:"reco/movies.json", books:"reco/books.json", mountains:"reco/mountains.json", travel:"reco/travel.json", cellar:"reco/cellar.json", quote:"reco/quote.json", culture:"reco/culture.json", food:"reco/food.json" };
 const RECO_CACHE = {};
 function recoNorm(s){ return String(s==null?"":s).normalize("NFD").replace(/[̀-ͯ]/g,"").normalize("NFC").toLowerCase().replace(/[^0-9a-z가-힣]/g,""); }
 function ndDupKeys(id,r){ if(!r) return []; if(id==="books") return [recoNorm((r.title||"")+"|"+(r.author||""))].filter(Boolean); let a = id==="movies" ? [r.orig,r._id,r.title] : [r.title,r.name,r._id]; return [...new Set(a.map(recoNorm).filter(Boolean))]; }
@@ -3713,6 +3707,11 @@ function recoView(id, it){
   if(id==="movies") return { key:String(it["원제"]||""), alt:it["한국 개봉명"], title:(it["한국 개봉명"]||it["원제"]||""), sub:[it["개봉연도"], it["감독"]].filter(Boolean).join(" · "), badge:String(it["추천"]||"") };
   if(id==="books") return { key:String(it.title||""), alt:it.author, title:it.title||"", sub:[it.author, it.year].filter(Boolean).join(" · "), badge:String(it.recommend||"") };
   if(id==="mountains") return { key:String(it.title||""), alt:"", title:it.title||"", sub:[it.region, it.height?it.height+"m":""].filter(Boolean).join(" · "), badge:String(it.tags||"") };
+  if(id==="travel") return { key:String(it.title||""), alt:it.place, title:it.title||"", sub:[it.place, it.country].filter(Boolean).join(" · "), badge:String(it.recommend||"") };
+  if(id==="cellar") return { key:String(it.title||""), alt:it.origin, title:it.title||"", sub:[it.kind, it.origin].filter(Boolean).join(" · "), badge:String(it.variety||"") };
+  if(id==="quote") return { key:String(it.title||""), alt:it.author, title:it.title||"", sub:String(it.author||""), badge:String((it.tags||"").split(",")[0]||"") };
+  if(id==="culture") return { key:String(it.title||""), alt:it.place, title:it.title||"", sub:[it.kind, it.place].filter(Boolean).join(" · "), badge:String((it.artists||"").split(",")[0]||"") };
+  if(id==="food") return { key:String(it.title||""), alt:it.place, title:it.title||"", sub:[it.kind, it.place].filter(Boolean).join(" · "), badge:String(it.menu||"") };
   return { key:String(it.title||it._id||""), alt:"", title:(it.title||""), sub:"", badge:"" };
 }
 function recoHaveKeys(id, have){
@@ -3723,7 +3722,14 @@ function recoHaveKeys(id, have){
 function recoIsHave(id, it, set){ const v=recoView(id,it); return set.has(recoNorm(v.key)) || (v.alt?set.has(recoNorm(v.alt)):false) || set.has(recoNorm(v.title)); }
 function recoBuildRow(m, it){
   const id=m.id;
-  { const _v=recoView(id,it); const _probe = id==="movies" ? {orig:_v.key, title:_v.title} : (id==="books" ? {title:_v.key, author:it.author} : {title:_v.key}); if(ndFindDup(id,_probe)){ throw new Error("이미 있음"); } }
+  { const _v=recoView(id,it); const _probe = id==="movies" ? {orig:_v.key, title:_v.title} : (id==="books" ? {title:_v.key, author:it.author} : {title:_v.key});
+    const _dup=ndFindDup(id,_probe);
+    if(_dup){ const _newRec=String((id==="movies"?it["추천"]:(it["추천"]||it.recommend||""))||"");
+      const _sp=x=>String(x||"").split(/[\/,]+/).map(y=>y.trim()).filter(Boolean);
+      const _cur=_sp(_dup.recommend), _mg=[..._cur];
+      _sp(_newRec).forEach(x=>{ if(!_cur.some(c=>c.toLowerCase()===x.toLowerCase())) _mg.push(x); });
+      if(_mg.length>_cur.length){ const _u=Object.assign({}, _dup, {recommend:_mg.join(" / ")}); _u.recommendList=_mg; return {_mergeRec:_u}; }
+      throw new Error("이미 있음"); } }
   if(id==="movies"){
     const rec=String(it["추천"]||"");   // 속도: 담을 땐 TMDB 미검색(rating=null), 상세 열 때 TMDB평점 자동 저장
     return { _id:it["원제"], orig:it["원제"], title:(it["한국 개봉명"]||it["원제"]||""), year:it["개봉연도"]||null,
@@ -3738,6 +3744,7 @@ function recoBuildRow(m, it){
 }
 async function recoAddOne(m, it){
   const row=recoBuildRow(m, it); if(!row) return;
+  if(row._mergeRec){ const u=row._mergeRec; await sheetSrc().update(m.id, u._id, u); const arr=(CACHE[m.id]||loadPersist(m.id)||[]); const ex=arr.find(x=>String(x._id)===String(u._id)); if(ex){ ex.recommend=u.recommend; ex.recommendList=u.recommendList; } CACHE[m.id]=arr; savePersist(m.id,arr); return; }
   await sheetSrc().upsert(m.id, row);
   markPending(m.id, row._id);
   const arr=(CACHE[m.id]||loadPersist(m.id)||[]); arr.push(row); CACHE[m.id]=arr; savePersist(m.id,arr);
@@ -3776,7 +3783,7 @@ function recoPickList(d, lists, catTitle){
 async function openRecoPanel(m){
   const id=m.id, d=$("#add");
   d.innerHTML=`<div class="dhead"><h3>추천 리스트</h3></div><div class="dbody"><div class="count">불러오는 중…</div></div>`;
-  d.showModal();
+  if(!d.open) d.showModal();
   let listsAll;
   try{ listsAll=await recoLists(id); }
   catch(e){ d.innerHTML=`<div class="dhead"><h3>추천 리스트</h3></div><div class="dbody"><div class="banner warn">추천 리스트를 불러오지 못했습니다: ${e.message}</div><button class="btn ghost" id="rcClose" style="margin-top:12px">닫기</button></div>`; const c=$("#rcClose"); if(c)c.onclick=()=>d.close(); return; }
@@ -3818,25 +3825,29 @@ async function openRecoPanel(m){
     const chosen=[...sel].map(i=>items[i]).filter(o=>o&&!o.has);
     if(!chosen.length){ alert("담을 항목을 선택하세요."); return; }
     const aBtn=$("#rcAdd"), allBtn=$("#rcAll"); if(allBtn)allBtn.disabled=true; if(aBtn){ aBtn.disabled=true; aBtn.classList.remove("ghost"); }
-    let added=0, fail=0, authErr=false; const total=chosen.length;
+    let added=0, merged=0, fail=0, authErr=false; const total=chosen.length;
     if(aBtn) aBtn.textContent=`담는 중… (${total}편)`;
-    const S=sheetSrc(); const built=[];
+    const S=sheetSrc(); const built=[], merges=[];
     for(const o of chosen){
-      try{ const row=recoBuildRow(m, o.it); if(row) built.push({o,row}); else o.has=true; }
+      try{ const row=recoBuildRow(m, o.it); if(!row){ o.has=true; } else if(row._mergeRec){ merges.push({o,u:row._mergeRec}); } else built.push({o,row}); }
       catch(e){ const em=(e&&e.message)||""; if(/이미/.test(em)){ o.has=true; } else { fail++; } }
     }
+    const arr=(CACHE[m.id]||loadPersist(m.id)||[]);
     if(built.length){
       try{
         if(S.upsertMany) await S.upsertMany(m.id, built.map(b=>b.row));
         else { for(const b of built) await S.upsert(m.id, b.row); }
-        const arr=(CACHE[m.id]||loadPersist(m.id)||[]);
         for(const b of built){ b.o.has=true; added++; markPending(m.id, b.row._id); arr.push(b.row); }
-        CACHE[m.id]=arr; savePersist(m.id, arr);
       }catch(e){ const em=(e&&e.message)||""; fail+=built.length; if(/401|다시 연결|연결 필요|authentication|credential/i.test(em)) authErr=true; }
     }
-    if(aBtn) aBtn.textContent=`✓ ${added}개 담음`;
+    for(const mg of merges){
+      try{ await S.update(m.id, mg.u._id, mg.u); const ex=arr.find(x=>String(x._id)===String(mg.u._id)); if(ex){ ex.recommend=mg.u.recommend; ex.recommendList=mg.u.recommendList; } mg.o.has=true; merged++; }
+      catch(e){ fail++; }
+    }
+    CACHE[m.id]=arr; savePersist(m.id, arr);
+    if(aBtn) aBtn.textContent=`✓ ${added+merged}개 담음`;
     d.close(); refreshDomain();
-    if(fail) setTimeout(()=>alert(authErr ? `로그인이 만료됐어요. 화면을 새로고침(재연결)한 뒤 다시 담아 주세요.\n(${added}개 담음 · ${fail}개 실패)` : `${added}개 담음 · ${fail}개 실패`),120);   /* 성공 시엔 조용히 닫힘 */
+    if(fail) setTimeout(()=>alert(authErr ? `로그인이 만료됐어요. 화면을 새로고침(재연결)한 뒤 다시 담아 주세요.\n(${added}개 담음 · ${fail}개 실패)` : `${added}개 담음${merged?` · ${merged}개 추천병합`:""} · ${fail}개 실패`),120);   /* 성공 시엔 조용히 닫힘 */
   }
   render();
 }
@@ -3892,7 +3903,7 @@ function openAbout(){
     <div style="text-align:center;color:${S};font-size:11.5px;margin-top:22px">내도감 · 내 삶을 수집하는 도감</div>
   </div>
   <button id="abTop" type="button" title="맨 위로" style="display:none;position:absolute;right:16px;bottom:16px;width:42px;height:42px;border:none;border-radius:50%;background:${A};color:#fff;font-size:20px;box-shadow:0 4px 14px rgba(0,0,0,.22);cursor:pointer;z-index:5">↑</button>`;
-  d.showModal();
+  if(!d.open) d.showModal();
   const sc=$("#abScroll"), top=$("#abTop");
   if(sc&&top){ sc.addEventListener("scroll",()=>{ top.style.display = sc.scrollTop>180 ? "block" : "none"; });
     top.onclick=()=>sc.scrollTo({top:0,behavior:"smooth"}); }
