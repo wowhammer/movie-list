@@ -514,7 +514,7 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
         <svg class="brandmark" width="34" height="30" viewBox="26 28 62 54" aria-hidden="true"><rect x="28" y="40" width="12" height="38" rx="5" fill="#F7F5F0"/><rect x="44" y="30" width="12" height="48" rx="5" fill="#F7F5F0"/><rect x="60" y="32" width="12" height="46" rx="5" fill="#E0483F" transform="rotate(16 66 78)"/></svg>
         <span class="brandwm"><span class="bwm-ko">내도감</span><span class="bwm-en">NAEDOGAM</span></span>
       </button>
-      <span class="mhver">배포 v159</span>
+      <span class="mhver">배포 v160</span>
       <span class="spacer"></span>
       <span class="src-chip" id="srcChip" style="display:none">데모</span>
       <button class="icon-btn" id="searchToggle" type="button" style="display:none">🔍</button>
@@ -3323,6 +3323,8 @@ function renderSettingsBody(d){
     </div>
     <h4>구글 계정 · 개인 설정</h4>
     <div class="hint">모든 데이터는 내 구글시트 하나에 탭으로 모입니다. 남에게 배포할 때 쓰는 '구글 로그인'은 다음 단계에서 붙입니다.</div>
+    <button class="btn ghost" id="relinkSheet" type="button" style="margin-top:12px">🔗 시트 다시 연결 (다른 기기와 맞추기)</button>
+    <div class="hint" style="margin-top:6px">PC와 모바일에서 데이터가 다르게 보이면 눌러, 내 드라이브의 같은 '내도감 Data' 시트로 다시 연결합니다.</div>
     <button class="btn ghost" id="closeSet" style="margin-top:22px">닫기</button>
   </div>`;
   d.querySelectorAll(".sw").forEach(sw=>sw.onclick=()=>{
@@ -3341,6 +3343,7 @@ function renderSettingsBody(d){
     if(_im) _im.onclick=()=>{ if(_fi) _fi.click(); };
     if(_fi) _fi.onchange=e=>{ const file=e.target.files&&e.target.files[0]; if(!file) return; const rd=new FileReader(); rd.onload=()=>{ const rows=csvToRows(_sel.value, String(rd.result||"")); doImport(_sel.value, rows); _fi.value=""; }; rd.readAsText(file,"utf-8"); }; }
   $("#closeSet").onclick=()=>d.close();
+  { const rb=$("#relinkSheet"); if(rb) rb.onclick=()=>{ if(confirm("이 기기를 내 드라이브의 '내도감 Data' 시트로 다시 연결할까요?\n저장된 연결 주소를 지우고 기존 시트를 다시 찾습니다.")){ try{ store.removeItem("nd.ssId"); }catch(e){} location.reload(); } }; }
   { const cn=$("#catNew"); if(cn) cn.onclick=()=>openCatBuilder(); }
   { const tw=$("#themeSw"); if(tw){ const isD=document.documentElement.getAttribute("data-theme")==="dark"; tw.classList.toggle("on",isD); tw.setAttribute("aria-checked",isD);
     tw.onclick=()=>{ const nd=document.documentElement.getAttribute("data-theme")!=="dark"; if(nd) document.documentElement.setAttribute("data-theme","dark"); else document.documentElement.removeAttribute("data-theme"); store.setItem("nd.theme", nd?"dark":"light"); tw.classList.toggle("on",nd); tw.setAttribute("aria-checked",nd); }; } }
