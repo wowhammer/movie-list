@@ -509,7 +509,7 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
         <svg class="brandmark" width="34" height="30" viewBox="26 28 62 54" aria-hidden="true"><rect x="28" y="40" width="12" height="38" rx="5" fill="#F7F5F0"/><rect x="44" y="30" width="12" height="48" rx="5" fill="#F7F5F0"/><rect x="60" y="32" width="12" height="46" rx="5" fill="#E0483F" transform="rotate(16 66 78)"/></svg>
         <span class="brandwm"><span class="bwm-ko">내도감</span><span class="bwm-en">NAEDOGAM</span></span>
       </button>
-      <span class="mhver">배포 v154</span>
+      <span class="mhver">배포 v155</span>
       <span class="spacer"></span>
       <span class="src-chip" id="srcChip" style="display:none">데모</span>
       <button class="icon-btn" id="searchToggle" type="button" style="display:none">🔍</button>
@@ -1147,7 +1147,7 @@ if(typeof CONFIG!=="undefined" && CONFIG.DEPLOY){
              {k:"tmdbRating",sheet:"TMDB평점",label:"TMDB 평점(자동)",type:"number"},
              {k:"streaming",sheet:"스트리밍",label:"스트리밍(쉼표로 여러 개)",type:"tags"},
              {k:"recommend",sheet:"추천",label:"추천",type:"text"},
-             {k:"review",sheet:"메모",label:"메모",type:"textarea",full:true},
+             {k:"review",sheet:"코멘트",label:"코멘트",type:"textarea",full:true},
              {k:"watchDate",sheet:"본날",label:"본날(봤음이면 자동 오늘)",type:"date"},
              {k:"cover",sheet:"포스터",label:"포스터",type:"image"} ],
     search:["title","director","actors","recommend"],
@@ -1667,6 +1667,12 @@ class GSheetSource {
   async _appendObj(tab,obj,header){ await this._ensureTab(tab, (header&&header.length)?header:Object.keys(obj));
     const vals=await this._getValues(tab); const head=(vals&&vals[0]&&vals[0].length)?vals[0]:(header||Object.keys(obj));
     const line=head.map(h=>{ const v=obj[h]; return v==null?"":String(v); }); return this._appendLine(tab,line); }
+  async _appendObjs(tab,objs,header){ if(!objs||!objs.length) return {ok:true};
+    await this._ensureTab(tab, (header&&header.length)?header:Object.keys(objs[0]));
+    const vals=await this._getValues(tab); const head=(vals&&vals[0]&&vals[0].length)?vals[0]:(header||Object.keys(objs[0]));
+    const lines=objs.map(ob=>head.map(h=>{ const v=ob[h]; return v==null?"":String(v); }));
+    return this._mut(()=>this._api("https://sheets.googleapis.com/v4/spreadsheets/"+this.ssId+"/values/"+this._rng(tab,"A1")+":append?valueInputOption=RAW&insertDataOption=INSERT_ROWS",{method:"POST",body:JSON.stringify({values:lines})})); }
+  async upsertMany(id,rows){ const m=MANIFESTS[id]; return this._appendObjs(m.source.tab, rows.map(r=>this._flatten(m,r)), ndHeaders(m)); }
   async _updateObj(tab,idKey,id,obj){ const vals=await this._getValues(tab); if(!vals||!vals.length) return {error:"탭 비어있음"};
     const head=vals[0]; let ic=head.indexOf(idKey); if(ic===-1) ic=0;
     for(let i=1;i<vals.length;i++){ if(String(vals[i][ic])===String(id)){ const row=vals[i].slice(); while(row.length<head.length) row.push("");
@@ -2302,7 +2308,7 @@ function personSpan(str, role){    // "왕가위, 장만옥" → 각 이름 클�
 async function toggleMovieDeploy(m, r, key){
   r[key]=!r[key];
   if(key==="watched" && r.watched && !r.watchDate) r.watchDate=todayStr();
-  try{ await sheetSrc().updateRaw(sheetSrc().tabOf("movies"), r.orig||r._id, movieKorRow(r), "원제"); }
+  try{ await sheetSrc().update(m.id, r._id, r); }
   catch(e){ r[key]=!r[key]; alert("저장 실패: "+e.message); return; }
   const arr=CACHE[m.id]; if(arr){ const it=arr.find(x=>String(x._id)===String(r._id)); if(it){ it[key]=r[key]; it.watchDate=r.watchDate; } savePersist(m.id, arr); }
   if(state.domain===m.id) paintDomain(m);
@@ -2343,6 +2349,8 @@ async function openMovieDetailDeploy(m, r){
   $("#dDel").onclick=()=>deleteRecord(m, r);
   d.querySelectorAll(".plink").forEach(el=>el.onclick=e=>{ e.stopPropagation(); openPersonModal(el.dataset.name, el.dataset.role); });
   try{ const info=await fetchMovieInfo(r.title, r.title, r.year);
+    if(info && info.rating && info.rating!=="-" && (r.tmdbRating==null||r.tmdbRating==="")){ r.tmdbRating=info.rating; if(r.rating==null||r.rating==="") r.rating=info.rating;
+      try{ await sheetSrc().update(m.id, r._id, r); const _a=CACHE[m.id]; if(_a){ const _it=_a.find(x=>String(x._id)===String(r._id)); if(_it){ _it.tmdbRating=r.tmdbRating; _it.rating=r.rating; } savePersist(m.id,_a); } }catch(_e){} }
     if($("#mvPoster")&&info.poster&&!r.cover) $("#mvPoster").innerHTML=`<img src="${info.poster}" alt="">`;
     if($("#mvOver")) $("#mvOver").textContent=info.overview||"줄거리 정보 없음";
     const lnk=$("#lnkTMDB"); if(lnk) lnk.href= info.tmdbId?`https://www.themoviedb.org/movie/${info.tmdbId}`:`https://www.themoviedb.org/search?query=${encodeURIComponent(r.title||"")}`;
@@ -2662,14 +2670,11 @@ function openRecordForm(m, existing, prefill){
 }
 /* 저장을 분야에 맞는 통로로 보냄 (영화=기존 수정통로 / 차계부=nd문(ID) / 도서·명산·러닝=nd문(_id)) */
 async function saveRecord(m, row, existing){
-  if(m.id==="movies"){                                        // 영화 저장: 원제 기준 전체 행(개인·배포 공통)
+  if(m.id==="movies" && !CONFIG.DEPLOY){                       // 영화 정보수정: MOVIE 탭, 원제 기준(전체 행 재작성)
     const base=(CACHE.movies||[]).find(x=>String(x._id)===String((existing&&existing._id)||row._id)) || existing || {};
     const merged=Object.assign({}, base, row);
-    merged.orig = merged.orig || merged._id || row._id || merged.title;
     merged.recommendList=String(merged.recommend==null?"":merged.recommend).split(/[\/,]+/).map(x=>x.trim()).filter(Boolean);
-    const _mtab=sheetSrc().tabOf("movies");
-    if(existing) return sheetSrc().updateRaw(_mtab, (existing&&existing.orig)||merged.orig||merged._id, movieKorRow(merged), "원제");
-    return sheetSrc().appendRaw(_mtab, movieKorRow(merged));
+    return sheetSrc().updateRaw(sheetSrc().tabOf("movies"), (existing&&existing.orig)||merged.orig||merged._id, movieKorRow(merged), "원제");
   }
   if(m.id==="carlog" && !CONFIG.DEPLOY){                        // 차계부: 차계부/CARLOG 탭, _id 또는 ID 자동감지
     const S=sheetSrc(), tab=S.tabOf("carlog"), idk=S.idkeyOf("carlog");
@@ -3639,7 +3644,7 @@ async function pickMovie(m){
     watched: code.charAt(0)==='W'?"O":"", rewatch: code.charAt(1)==='R', pick: code.charAt(1)==='P',
     watchDate: code.charAt(0)==='W'?todayStr():"" };
   try{
-    await sheetSrc().appendRaw(sheetSrc().tabOf("movies"), movieKorRow(row));
+    await sheetSrc().upsert("movies", row);
     markPending("movies", _id);
     const arr=(CACHE.movies||loadPersist("movies")||[]); arr.push(row); CACHE.movies=arr; savePersist("movies", arr);
     $("#add").close(); refreshDomain();
@@ -3669,27 +3674,26 @@ function recoHaveKeys(id, have){
   return set;
 }
 function recoIsHave(id, it, set){ const v=recoView(id,it); return set.has(recoNorm(v.key)) || (v.alt?set.has(recoNorm(v.alt)):false) || set.has(recoNorm(v.title)); }
-async function recoAddOne(m, it){
+function recoBuildRow(m, it){
   const id=m.id;
-  { const _v=recoView(id,it); const _probe = id==="movies" ? {orig:_v.key, title:_v.title} : (id==="books" ? {title:_v.key, author:it.author} : {title:_v.key}); if(ndFindDup(id,_probe)){ const _e=new Error("이미 있음"); throw _e; } }
+  { const _v=recoView(id,it); const _probe = id==="movies" ? {orig:_v.key, title:_v.title} : (id==="books" ? {title:_v.key, author:it.author} : {title:_v.key}); if(ndFindDup(id,_probe)){ throw new Error("이미 있음"); } }
   if(id==="movies"){
-    const rec=String(it["추천"]||"");
-    let _tmdbR=null;   // 속도: 추천담기 때 항목별 TMDB 검색 제거(상세 열 때 실시간으로 뜸)
-    const row={ _id:it["원제"], orig:it["원제"], title:(it["한국 개봉명"]||it["원제"]||""), year:it["개봉연도"]||null,
-      director:it["감독"]||"", actors:it["배우"]||"", country:it["국적"]||"", rating:_tmdbR, streaming:[],
+    const rec=String(it["추천"]||"");   // 속도: 담을 땐 TMDB 미검색(rating=null), 상세 열 때 TMDB평점 자동 저장
+    return { _id:it["원제"], orig:it["원제"], title:(it["한국 개봉명"]||it["원제"]||""), year:it["개봉연도"]||null,
+      director:it["감독"]||"", actors:it["배우"]||"", country:it["국적"]||"", rating:null, streaming:[],
       recommend:rec, recommendList:rec.split(/[\/,]+/).map(x=>x.trim()).filter(Boolean), review:"", directSearch:"",
       watched:"", rewatch:false, pick:false, watchDate:"" };
-    await sheetSrc().appendRaw(sheetSrc().tabOf("movies"), movieKorRow(row));
-    markPending("movies", row._id);
-    const arr=(CACHE.movies||loadPersist("movies")||[]); arr.push(row); CACHE.movies=arr; savePersist("movies",arr);
-    return;
   }
   const uid=(window.crypto&&crypto.randomUUID)?crypto.randomUUID():(String(Date.now())+Math.random().toString(16).slice(2));
   const row={ _id:uid };
   (m.fields||[]).forEach(f=>{ if(it[f.k]!==undefined && it[f.k]!==null) row[f.k]=it[f.k]; });
-  await sheetSrc().upsert(id, row);
-  markPending(id, uid);
-  const arr=(CACHE[id]||loadPersist(id)||[]); arr.push(row); CACHE[id]=arr; savePersist(id,arr);
+  return row;
+}
+async function recoAddOne(m, it){
+  const row=recoBuildRow(m, it); if(!row) return;
+  await sheetSrc().upsert(m.id, row);
+  markPending(m.id, row._id);
+  const arr=(CACHE[m.id]||loadPersist(m.id)||[]); arr.push(row); CACHE[m.id]=arr; savePersist(m.id,arr);
 }
 function gisReady(ms){ return new Promise((res,rej)=>{ const t0=Date.now(); (function chk(){ if(window.google&&window.google.accounts&&window.google.accounts.oauth2) return res(true); if(Date.now()-t0>(ms||9000)) return rej(new Error("gis_timeout")); setTimeout(chk,150); })(); }); }
 async function gvizFetch(sheetId, tab){
@@ -3767,11 +3771,21 @@ async function openRecoPanel(m){
     const chosen=[...sel].map(i=>items[i]).filter(o=>o&&!o.has);
     if(!chosen.length){ alert("담을 항목을 선택하세요."); return; }
     const aBtn=$("#rcAdd"), allBtn=$("#rcAll"); if(allBtn)allBtn.disabled=true; if(aBtn){ aBtn.disabled=true; aBtn.classList.remove("ghost"); }
-    let added=0, fail=0, n=0, authErr=false; const total=chosen.length;
+    let added=0, fail=0, authErr=false; const total=chosen.length;
+    if(aBtn) aBtn.textContent=`담는 중… (${total}편)`;
+    const S=sheetSrc(); const built=[];
     for(const o of chosen){
-      n++; if(aBtn) aBtn.textContent=`담는 중… ${n} / ${total}`;
-      try{ await recoAddOne(m, o.it); o.has=true; added++; }
-      catch(e){ const em=(e&&e.message)||""; if(/이미/.test(em)){ o.has=true; } else { fail++; if(/401|다시 연결|연결 필요|authentication|credential/i.test(em)) authErr=true; } }
+      try{ const row=recoBuildRow(m, o.it); if(row) built.push({o,row}); else o.has=true; }
+      catch(e){ const em=(e&&e.message)||""; if(/이미/.test(em)){ o.has=true; } else { fail++; } }
+    }
+    if(built.length){
+      try{
+        if(S.upsertMany) await S.upsertMany(m.id, built.map(b=>b.row));
+        else { for(const b of built) await S.upsert(m.id, b.row); }
+        const arr=(CACHE[m.id]||loadPersist(m.id)||[]);
+        for(const b of built){ b.o.has=true; added++; markPending(m.id, b.row._id); arr.push(b.row); }
+        CACHE[m.id]=arr; savePersist(m.id, arr);
+      }catch(e){ const em=(e&&e.message)||""; fail+=built.length; if(/401|다시 연결|연결 필요|authentication|credential/i.test(em)) authErr=true; }
     }
     if(aBtn) aBtn.textContent=`✓ ${added}개 담음`;
     d.close(); refreshDomain();
