@@ -577,7 +577,7 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
         <svg class="brandmark" width="34" height="30" viewBox="26 28 62 54" aria-hidden="true"><rect x="28" y="40" width="12" height="38" rx="5" fill="#F7F5F0"/><rect x="44" y="30" width="12" height="48" rx="5" fill="#F7F5F0"/><rect x="60" y="32" width="12" height="46" rx="5" fill="#E0483F" transform="rotate(16 66 78)"/></svg>
         <span class="brandwm"><span class="bwm-ko">내도감</span><span class="bwm-en">NAEDOGAM</span></span>
       </button>
-      <span class="mhver">배포 v178</span>
+      <span class="mhver">배포 v179</span>
       <span class="spacer"></span>
       <span class="src-chip" id="srcChip" style="display:none">데모</span>
       <button class="icon-btn" id="searchToggle" type="button" style="display:none">🔍</button>
@@ -3960,14 +3960,16 @@ async function gvizFetch(sheetId, tab){
   const cols=(j.table.cols||[]).map(c=>String(c.label||c.id||"").trim());
   return (j.table.rows||[]).map(row=>{ const o={}; (row.c||[]).forEach((cell,i)=>{ o[cols[i]]=cell?(cell.v==null?"":cell.v):""; }); return o; });
 }
-const RECO_CAT_KO={movies:"영화",books:"도서",mountains:"등산"};
+const RECO_CAT_KO={movies:"영화",books:"도서",mountains:"등산",travel:"여행",cellar:"셀러",quote:"명언",culture:"공연전시",food:"맛집",albums:"음반"};
+const RECO_SHEET_MAP={ quote:{"문구":"title","출처":"author","태그":"tags"}, travel:{"제목":"title","여행지":"place","국가":"country","명소":"spots","추천":"recommend"}, cellar:{"이름":"title","종류":"kind","생산지":"origin","품종":"variety","페어링":"pairing"}, culture:{"제목":"title","종류":"kind","장소":"place","출연":"artists"}, food:{"이름":"title","종류":"kind","장소":"place","추천메뉴":"menu"}, albums:{"앨범":"title","아티스트":"artist","발매연도":"year","장르":"genre"} };
 async function recoSheetLists(id){
   const catKo=RECO_CAT_KO[id]||id;
   const idx=await gvizFetch(CONFIG.RECO_SHEET_ID,"목록");
   const rows=await gvizFetch(CONFIG.RECO_SHEET_ID,catKo);
   return idx.filter(r=>(String(r["카테고리"]||"")===catKo||String(r["카테고리"]||"")===id) && String(r["공개"]||"").trim().toUpperCase().indexOf("Y")===0)
     .map(r=>{ const title=String(r["리스트제목"]||"");
-      const items=rows.filter(x=>String(x["리스트제목"]||"")===title).map(x=>{ const o={}; for(const k in x){ if(k!=="리스트제목") o[k]=x[k]; } return o; });
+      const _map=RECO_SHEET_MAP[id]||{};
+      const items=rows.filter(x=>String(x["리스트제목"]||"")===title).map(x=>{ const o={}; for(const k in x){ if(k==="리스트제목") continue; const _kk=_map[k]||k; o[_kk]=x[k]; } return o; });
       return { title, subtitle:String(r["부제"]||""), items }; })
     .filter(l=>l.title && l.items.length);
 }
