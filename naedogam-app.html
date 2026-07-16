@@ -509,7 +509,7 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
         <svg class="brandmark" width="34" height="30" viewBox="26 28 62 54" aria-hidden="true"><rect x="28" y="40" width="12" height="38" rx="5" fill="#F7F5F0"/><rect x="44" y="30" width="12" height="48" rx="5" fill="#F7F5F0"/><rect x="60" y="32" width="12" height="46" rx="5" fill="#E0483F" transform="rotate(16 66 78)"/></svg>
         <span class="brandwm"><span class="bwm-ko">내도감</span><span class="bwm-en">NAEDOGAM</span></span>
       </button>
-      <span class="mhver">배포 v155</span>
+      <span class="mhver">배포 v156</span>
       <span class="spacer"></span>
       <span class="src-chip" id="srcChip" style="display:none">데모</span>
       <button class="icon-btn" id="searchToggle" type="button" style="display:none">🔍</button>
@@ -1148,8 +1148,7 @@ if(typeof CONFIG!=="undefined" && CONFIG.DEPLOY){
              {k:"streaming",sheet:"스트리밍",label:"스트리밍(쉼표로 여러 개)",type:"tags"},
              {k:"recommend",sheet:"추천",label:"추천",type:"text"},
              {k:"review",sheet:"코멘트",label:"코멘트",type:"textarea",full:true},
-             {k:"watchDate",sheet:"본날",label:"본날(봤음이면 자동 오늘)",type:"date"},
-             {k:"cover",sheet:"포스터",label:"포스터",type:"image"} ],
+             {k:"watchDate",sheet:"본날",label:"본날(봤음이면 자동 오늘)",type:"date"} ],
     search:["title","director","actors","recommend"],
     activity:{ df:"watchDate", when:r=>!!r.watched, label:"영화", name:r=>r.title },
     stats:[ {label:"전체",type:"count"},
@@ -1673,6 +1672,17 @@ class GSheetSource {
     const lines=objs.map(ob=>head.map(h=>{ const v=ob[h]; return v==null?"":String(v); }));
     return this._mut(()=>this._api("https://sheets.googleapis.com/v4/spreadsheets/"+this.ssId+"/values/"+this._rng(tab,"A1")+":append?valueInputOption=RAW&insertDataOption=INSERT_ROWS",{method:"POST",body:JSON.stringify({values:lines})})); }
   async upsertMany(id,rows){ const m=MANIFESTS[id]; return this._appendObjs(m.source.tab, rows.map(r=>this._flatten(m,r)), ndHeaders(m)); }
+  async fillRatings(id,updates){   // [{_id,rating,tmdbRating}] → 평점/TMDB평점 칸만 일괄 기록(1회 호출)
+    if(!updates||!updates.length) return {ok:true};
+    const m=MANIFESTS[id]; const tab=m.source.tab; const vals=await this._getValues(tab); if(!vals||!vals.length) return {ok:true};
+    const head=vals[0]; const idc=head.indexOf("_id")>=0?head.indexOf("_id"):0; const pc=head.indexOf("평점"), tc=head.indexOf("TMDB평점");
+    if(pc<0 && tc<0) return {ok:true};
+    const map={}; updates.forEach(u=>{ map[String(u._id)]=u; }); const L=c=>String.fromCharCode(65+c); const data=[];
+    for(let i=1;i<vals.length;i++){ const u=map[String(vals[i][idc])]; if(!u) continue; const rn=i+1;
+      if(pc>=0 && u.rating!=null && u.rating!=="") data.push({range:"'"+tab+"'!"+L(pc)+rn, values:[[String(u.rating)]]});
+      if(tc>=0 && u.tmdbRating!=null && u.tmdbRating!=="") data.push({range:"'"+tab+"'!"+L(tc)+rn, values:[[String(u.tmdbRating)]]}); }
+    if(!data.length) return {ok:true};
+    return this._mut(()=>this._api("https://sheets.googleapis.com/v4/spreadsheets/"+this.ssId+"/values:batchUpdate",{method:"POST",body:JSON.stringify({valueInputOption:"RAW",data})})); }
   async _updateObj(tab,idKey,id,obj){ const vals=await this._getValues(tab); if(!vals||!vals.length) return {error:"탭 비어있음"};
     const head=vals[0]; let ic=head.indexOf(idKey); if(ic===-1) ic=0;
     for(let i=1;i<vals.length;i++){ if(String(vals[i][ic])===String(id)){ const row=vals[i].slice(); while(row.length<head.length) row.push("");
@@ -2299,6 +2309,25 @@ async function fetchMovieInfo(orig, kor, year){
   }catch(e){ movieInfoCache[key]={ poster:null, overview:"불러오기 실패", rating:"-", tmdbId:null }; }
   return movieInfoCache[key];
 }
+let _ratingFillRunning=false;
+async function autofillMovieRatings(){
+  if(typeof CONFIG==="undefined" || !CONFIG.DEPLOY || _ratingFillRunning) return;
+  const arr=CACHE.movies; if(!arr||!arr.length) return;
+  const miss=r=>(r.rating==null||r.rating==="")&&(r.tmdbRating==null||r.tmdbRating==="")&&(r.title||r.orig);
+  const todo=arr.filter(miss).slice(0,60); if(!todo.length) return;
+  _ratingFillRunning=true; const done=[];
+  try{
+    for(const r of todo){
+      try{ const info=await fetchMovieInfo(r.orig||r.title, r.title, r.year);
+        if(info && info.rating && info.rating!=="-"){ r.tmdbRating=info.rating; if(r.rating==null||r.rating==="") r.rating=info.rating; done.push({_id:r._id, rating:r.rating, tmdbRating:r.tmdbRating}); } }catch(e){}
+      await new Promise(res=>setTimeout(res,250));
+    }
+    if(done.length){ try{ savePersist("movies",arr); }catch(e){}
+      try{ const S=sheetSrc(); if(S.fillRatings) await S.fillRatings("movies", done); }catch(e){}
+      try{ if(state.domain==="movies") paintDomain(MANIFESTS.movies); }catch(e){} }
+  }finally{ _ratingFillRunning=false; }
+  if(arr.filter(miss).length) setTimeout(autofillMovieRatings,600);
+}
 function personSpan(str, role){    // "왕가위, 장만옥" → 각 이름 클릭 가능
   if(!str) return "";
   return String(str).split(/[,，]/).map(s=>s.trim()).filter(Boolean)
@@ -2918,6 +2947,7 @@ function movieSearch(rows, scope, q, sel){
 }
 function paintMovies(m){
   renderStats(m, state.rows);
+  try{ if(CONFIG.DEPLOY) setTimeout(autofillMovieRatings,300); }catch(e){}
   setMhSub("");
   const scope=state.searchScope||"title";
   const sc=$("#scope"); sc.style.display="flex"; sc.style.flexDirection="row"; sc.classList.add("scopetabs");     // 검색 범위 탭(밑줄·균등)
