@@ -525,7 +525,7 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
         <svg class="brandmark" width="34" height="30" viewBox="26 28 62 54" aria-hidden="true"><rect x="28" y="40" width="12" height="38" rx="5" fill="#F7F5F0"/><rect x="44" y="30" width="12" height="48" rx="5" fill="#F7F5F0"/><rect x="60" y="32" width="12" height="46" rx="5" fill="#E0483F" transform="rotate(16 66 78)"/></svg>
         <span class="brandwm"><span class="bwm-ko">내도감</span><span class="bwm-en">NAEDOGAM</span></span>
       </button>
-      <span class="mhver">배포 v169</span>
+      <span class="mhver">배포 v170</span>
       <span class="spacer"></span>
       <span class="src-chip" id="srcChip" style="display:none">데모</span>
       <button class="icon-btn" id="searchToggle" type="button" style="display:none">🔍</button>
@@ -3378,7 +3378,7 @@ function renderSettingsBody(d){
 function wireReorder(box, onCommit){
   let drag=null;
   box.querySelectorAll(".ord-handle").forEach(h=>{
-    h.addEventListener("pointerdown", e=>{ e.preventDefault(); drag=h.closest(".ord-row"); if(!drag) return; drag.classList.add("dragging"); try{ h.setPointerCapture(e.pointerId); }catch(_){}} );
+    h.addEventListener("pointerdown", e=>{ e.preventDefault(); drag=h.closest(".ord-row"); if(!drag) return; drag.classList.add("dragging"); try{ box.setPointerCapture(e.pointerId); }catch(_){}} );   // 캡처는 안 움직이는 box에 → 행 재배치 중 lostpointercapture로 끊기지 않음(여러 칸 연속 이동)
   });
   const move=e=>{ if(!drag) return; e.preventDefault(); const y=e.clientY;
     const after=[...box.querySelectorAll(".ord-row:not(.dragging)")].find(sib=>{ const r=sib.getBoundingClientRect(); return y < r.top + r.height/2; });
