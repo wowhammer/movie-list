@@ -17,23 +17,19 @@
   .tab{ border:1px solid var(--line); background:var(--card); color:var(--ink-soft); padding:7px 13px; border-radius:20px; cursor:pointer; font-size:13px; font-weight:600; }
   .tab.on{ background:var(--ink); border-color:var(--ink); color:#fff; }
   .tab .c{ opacity:.7; font-size:11px; margin-left:4px; }
-  .metabar{ display:flex; gap:10px; flex-wrap:wrap; align-items:flex-end; background:var(--card); border:1px solid var(--line); border-radius:12px; padding:12px 14px; margin-bottom:12px; }
-  .fld{ display:flex; flex-direction:column; gap:3px; flex:1; min-width:180px; }
-  .fld label{ font-size:11px; color:var(--ink-soft); font-weight:700; }
-  .fld input{ border:1px solid var(--line); border-radius:8px; padding:7px 9px; font-size:13px; font-family:inherit; background:#fff; color:var(--ink); }
+  .metabar{ display:flex; gap:10px 16px; flex-wrap:wrap; align-items:center; background:var(--card); border:1px solid var(--line); border-radius:12px; padding:12px 14px; margin-bottom:12px; }
+  .metabar .mt{ font-size:15px; font-weight:800; }
+  .metabar .ms{ font-size:12.5px; color:var(--ink-soft); }
+  .metabar .pill{ font-size:11px; font-weight:700; color:#16a34a; background:#eaf7ee; border-radius:20px; padding:2px 9px; }
+  .metabar select{ border:1px solid var(--line); border-radius:8px; padding:6px 9px; font-family:inherit; font-size:13px; background:#fff; color:var(--ink); }
   .tablewrap{ overflow-x:auto; border:1px solid var(--line); border-radius:12px; background:var(--card); }
   table{ border-collapse:collapse; width:100%; min-width:640px; }
-  th,td{ border-bottom:1px solid var(--line); padding:6px 8px; text-align:left; vertical-align:middle; }
-  th{ font-size:11px; color:var(--ink-soft); font-weight:800; background:#faf8f4; position:sticky; top:0; white-space:nowrap; }
+  th,td{ border-bottom:1px solid var(--line); padding:8px 10px; text-align:left; vertical-align:top; font-size:13px; }
+  th{ font-size:11px; color:var(--ink-soft); font-weight:800; background:#faf8f4; white-space:nowrap; }
   td.idx{ color:var(--ink-soft); font-family:var(--mono); font-size:11px; width:30px; text-align:center; }
-  td input{ width:100%; border:1px solid transparent; border-radius:6px; padding:6px 7px; font-size:13px; font-family:inherit; background:transparent; color:var(--ink); }
-  td input:focus{ border-color:var(--accent); background:#fff; outline:none; }
-  td.act{ white-space:nowrap; width:96px; text-align:right; }
-  .mini{ border:1px solid var(--line); background:#fff; color:var(--ink-soft); border-radius:6px; width:26px; height:26px; cursor:pointer; font-size:13px; line-height:1; padding:0; margin-left:2px; }
-  .mini:hover{ border-color:var(--accent); color:var(--accent); }
-  .mini.del:hover{ border-color:var(--accent); color:#fff; background:var(--accent); }
+  tr:last-child td{ border-bottom:none; }
   .toolbar{ display:flex; gap:8px; flex-wrap:wrap; align-items:center; margin:12px 0; }
-  .btn{ border:1px solid var(--accent); background:var(--accent); color:#fff; padding:9px 15px; border-radius:9px; cursor:pointer; font-size:13.5px; font-weight:700; font-family:inherit; }
+  .btn{ border:1px solid var(--accent); background:var(--accent); color:#fff; padding:9px 15px; border-radius:9px; cursor:pointer; font-size:13.5px; font-weight:700; font-family:inherit; text-decoration:none; display:inline-block; }
   .btn.ghost{ background:#fff; color:var(--ink); border-color:var(--line); }
   .btn.ghost:hover{ border-color:var(--accent); color:var(--accent); }
   .count{ color:var(--ink-soft); font-size:12.5px; margin-left:auto; }
@@ -54,16 +50,16 @@
 <body>
 <div class="wrap">
   <header class="top"><h1>내도감 추천리스트 <span class="badge">관리자 CMS</span></h1></header>
-  <div class="sub">각 카테고리 추천리스트를 표로 편집 → <b>JSON 복사/다운로드</b> → GitHub <code>reco/</code> 폴더에 올리면 앱에 반영됩니다. (편집은 브라우저에만 저장, 서버 자동저장 아님)</div>
+  <div class="sub"><b>구글시트가 원본입니다.</b> 편집은 시트에서 하면 앱과 이 화면에 자동 반영됩니다. 이 화면은 시트를 그대로 보여주고, 필요하면 JSON 백업을 내보냅니다.</div>
 
   <div class="tabs" id="tabs"></div>
-  <div id="panel"><div class="loading">불러오는 중…</div></div>
+  <div id="panel"><div class="loading">시트에서 불러오는 중…</div></div>
 
   <div class="note">
-    <b>반영 방법</b><br>
-    1) 편집 후 <b>📋 JSON 복사</b> 또는 <b>⬇ 다운로드</b> →
-    2) <code>github.com/wowhammer/movie-list/upload/main/reco</code> 에서 파일 업로드(같은 이름=덮어쓰기) →
-    3) 커밋하면 15~30초 뒤 앱 반영. 각 카테고리 파일명은 표 상단에 표시됩니다.
+    <b>구조</b> — 앱·이 화면 모두 마스터 시트를 읽습니다. 편집·추가·삭제는 <b>구글시트에서</b> 하세요.<br>
+    · 새 항목: 각 분야 탭에 행을 추가(같은 <code>리스트제목</code>끼리 한 리스트) →<br>
+    · 새 리스트: <code>목록</code> 탭에 한 줄 추가(<code>공개=Y</code>).<br>
+    · <b>JSON 백업</b>은 시트를 못 읽을 때 앱이 쓰는 예비 파일입니다. 크게 바꾼 뒤엔 한 번 내보내 <code>reco/</code>에 올려두면 안전합니다.
   </div>
 </div>
 
@@ -76,99 +72,123 @@
 <div class="toast" id="toast"></div>
 
 <script>
-const BASE = "reco/";   // 같은 사이트(GitHub Pages)에서 상대경로로 로드
+const SHEET_ID="1p6Ruym5USMG4pa5AgcAspPXvGkRhNHYfLOPhurbmfp8";
+const SHEET_URL="https://docs.google.com/spreadsheets/d/"+SHEET_ID+"/edit";
+const MAP={
+  quote:{"문구":"title","출처":"author","태그":"tags"},
+  travel:{"제목":"title","여행지":"place","국가":"country","명소":"spots","추천":"recommend"},
+  cellar:{"이름":"title","종류":"kind","생산지":"origin","품종":"variety","페어링":"pairing"},
+  culture:{"제목":"title","종류":"kind","장소":"place","출연":"artists"},
+  food:{"이름":"title","종류":"kind","장소":"place","추천메뉴":"menu"},
+  albums:{"앨범":"title","아티스트":"artist","발매연도":"year","장르":"genre"}
+};
 const SCHEMA = {
-  movies:  { file:"movies.json",   ko:"영화",     cols:["원제","한국 개봉명","개봉연도","감독","배우","국적","추천"], num:["개봉연도"], labels:{} },
-  books:   { file:"books.json",    ko:"도서",     cols:["title","author","year","genre","recommend"], num:["year"], labels:{title:"제목",author:"저자",year:"연도",genre:"장르",recommend:"추천"} },
-  mountains:{file:"mountains.json",ko:"등산",     cols:["title","height","region","tags"], num:["height"], labels:{title:"이름",height:"높이(m)",region:"지역",tags:"태그(쉼표)"} },
-  travel:  { file:"travel.json",   ko:"여행",     cols:["title","place","country","spots","recommend"], num:[], labels:{title:"제목",place:"여행지",country:"국가",spots:"명소(쉼표)",recommend:"추천"} },
-  cellar:  { file:"cellar.json",   ko:"셀러",     cols:["title","kind","origin","variety","pairing"], num:[], labels:{title:"이름",kind:"종류",origin:"생산지",variety:"품종",pairing:"페어링"} },
-  quote:   { file:"quote.json",    ko:"명언",     cols:["title","author","tags"], num:[], labels:{title:"명언",author:"출처",tags:"태그(쉼표)"} },
-  culture: { file:"culture.json",  ko:"공연·전시",cols:["title","kind","place","artists"], num:[], labels:{title:"제목",kind:"종류",place:"장소",artists:"작가·작품"} },
-  food:    { file:"food.json",     ko:"맛집",     cols:["title","kind","place","menu"], num:[], labels:{title:"상호",kind:"종류",place:"위치",menu:"메뉴"} },
-  albums:  { file:"albums.json",   ko:"음반",     cols:["title","artist","year","genre"], num:["year"], labels:{title:"앨범",artist:"아티스트",year:"연도",genre:"장르"} }
+  movies:  { tab:"영화", ko:"영화",     cols:["원제","한국 개봉명","개봉연도","감독","배우","국적","추천"], num:["개봉연도"], labels:{} },
+  books:   { tab:"도서", ko:"도서",     cols:["title","author","year","genre","recommend"], num:["year"], labels:{title:"제목",author:"저자",year:"연도",genre:"장르",recommend:"추천"} },
+  mountains:{tab:"등산", ko:"등산",     cols:["title","height","region","tags"], num:["height"], labels:{title:"이름",height:"높이(m)",region:"지역",tags:"태그"} },
+  travel:  { tab:"여행", ko:"여행",     cols:["title","place","country","spots","recommend"], num:[], labels:{title:"제목",place:"여행지",country:"국가",spots:"명소",recommend:"추천"} },
+  cellar:  { tab:"셀러", ko:"셀러",     cols:["title","kind","origin","variety","pairing"], num:[], labels:{title:"이름",kind:"종류",origin:"생산지",variety:"품종",pairing:"페어링"} },
+  quote:   { tab:"명언", ko:"명언",     cols:["title","author","tags"], num:[], labels:{title:"명언",author:"출처",tags:"태그"} },
+  culture: { tab:"공연전시", ko:"공연·전시", cols:["title","kind","place","artists"], num:[], labels:{title:"제목",kind:"종류",place:"장소",artists:"작가·작품"} },
+  food:    { tab:"맛집", ko:"맛집",     cols:["title","kind","place","menu"], num:[], labels:{title:"상호",kind:"종류",place:"위치",menu:"메뉴"} },
+  albums:  { tab:"음반", ko:"음반",     cols:["title","artist","year","genre"], num:["year"], labels:{title:"앨범",artist:"아티스트",year:"연도",genre:"장르"} }
 };
 const ORDER = ["movies","books","mountains","travel","cellar","quote","culture","food","albums"];
-const STORE = {};   // cat -> {meta:{category,listId,title,subtitle,version}, items:[...]}
-let cur = "movies";
+const STORE = {};
+let INDEX = null;
+let cur = "movies", curList = 0;
 
 const $ = s => document.querySelector(s);
 function toast(t){ const el=$("#toast"); el.textContent=t; el.classList.add("show"); clearTimeout(el._t); el._t=setTimeout(()=>el.classList.remove("show"),1600); }
 
-async function loadCat(cat, force){
-  if(STORE[cat] && !force) return STORE[cat];
-  const sc=SCHEMA[cat];
-  try{
-    const d=await fetch(BASE+sc.file+"?cb="+Date.now()).then(r=>{ if(!r.ok) throw new Error("HTTP "+r.status); return r.json(); });
-    STORE[cat]={ meta:{ category:d.category||sc.ko, listId:d.listId||(cat+"-list"), title:d.title||"", subtitle:d.subtitle||"", version:d.version||1 }, items:Array.isArray(d.items)?d.items.map(x=>Object.assign({},x)):[] };
-  }catch(e){
-    STORE[cat]={ meta:{ category:sc.ko, listId:cat+"-list", title:"", subtitle:"", version:1 }, items:[], _err:e.message };
-  }
+async function gviz(tab){
+  const url="https://docs.google.com/spreadsheets/d/"+SHEET_ID+"/gviz/tq?tqx=out:json&headers=1&sheet="+encodeURIComponent(tab)+"&_="+Date.now();
+  const t=await fetch(url).then(r=>{ if(!r.ok) throw new Error("HTTP "+r.status); return r.text(); });
+  const j=JSON.parse(t.substring(t.indexOf("{"), t.lastIndexOf("}")+1));
+  const cols=(j.table.cols||[]).map(c=>String(c.label||"").trim());
+  return (j.table.rows||[]).map(r=>{ const o={}; (r.c||[]).forEach((c,i)=>{ o[cols[i]]=c?(c.v==null?"":c.v):""; }); return o; });
+}
+async function loadIndex(){ if(INDEX) return INDEX; try{ INDEX=await gviz("목록"); }catch(e){ INDEX=[]; } return INDEX; }
+
+async function loadCat(cat){
+  if(STORE[cat]) return STORE[cat];
+  const sc=SCHEMA[cat], mp=MAP[cat]||{};
+  const idx=await loadIndex();
+  let rows;
+  try{ rows=await gviz(sc.tab); }catch(e){ STORE[cat]={ lists:[], _err:e.message }; return STORE[cat]; }
+  const order=[]; const byTitle={};
+  rows.forEach(x=>{ const lt=String(x["리스트제목"]||"").trim(); if(!lt) return;
+    if(!byTitle[lt]){ byTitle[lt]=[]; order.push(lt); }
+    const o={}; for(const k in x){ if(k==="리스트제목") continue; o[mp[k]||k]=x[k]; } byTitle[lt].push(o);
+  });
+  const lists=order.map(lt=>{ const meta=idx.find(r=>String(r["리스트제목"]||"")===lt && (String(r["카테고리"]||"")===sc.tab||String(r["카테고리"]||"")===sc.ko));
+    return { title:lt, subtitle:meta?String(meta["부제"]||""):"", pub:meta?String(meta["공개"]||"").toUpperCase().startsWith("Y"):false, items:byTitle[lt] }; });
+  STORE[cat]={ lists };
   return STORE[cat];
 }
 
 function renderTabs(){
   $("#tabs").innerHTML = ORDER.map(c=>{
-    const n = STORE[c] ? STORE[c].items.length : "";
+    const st=STORE[c]; const n = st ? st.lists.reduce((a,l)=>a+l.items.length,0) : "";
     return `<button class="tab ${c===cur?'on':''}" data-c="${c}">${SCHEMA[c].ko}${n!==""?`<span class="c">${n}</span>`:""}</button>`;
   }).join("");
-  $("#tabs").querySelectorAll("[data-c]").forEach(b=>b.onclick=()=>{ cur=b.dataset.c; show(); });
+  $("#tabs").querySelectorAll("[data-c]").forEach(b=>b.onclick=()=>{ cur=b.dataset.c; curList=0; show(); });
 }
 
 async function show(){
   renderTabs();
-  const p=$("#panel"); p.innerHTML=`<div class="loading">불러오는 중…</div>`;
+  const p=$("#panel"); p.innerHTML=`<div class="loading">시트에서 불러오는 중…</div>`;
   const sc=SCHEMA[cur]; const st=await loadCat(cur);
   renderTabs();
-  const m=st.meta, items=st.items;
-  const th = `<th class="idx">#</th>` + sc.cols.map(c=>`<th>${sc.labels[c]||c}</th>`).join("") + `<th class="act">순서·삭제</th>`;
-  const rows = items.map((it,i)=>{
-    const tds = sc.cols.map(c=>`<td><input data-i="${i}" data-c="${c}" value="${String(it[c]==null?"":it[c]).replace(/"/g,'&quot;')}" ${sc.num.includes(c)?'inputmode="numeric"':''}></td>`).join("");
-    return `<tr><td class="idx">${i+1}</td>${tds}<td class="act"><button class="mini" data-up="${i}" title="위로">↑</button><button class="mini" data-dn="${i}" title="아래로">↓</button><button class="mini del" data-del="${i}" title="삭제">✕</button></td></tr>`;
+  if(st._err){ p.innerHTML=`<div class="note" style="border-left-color:#c2410c">시트를 불러오지 못했어요(${st._err}).</div>`; return; }
+  if(!st.lists.length){ p.innerHTML=`<div class="note">이 분야 탭에 데이터가 없어요. 구글시트 <b>${sc.tab}</b> 탭에 항목을 추가하세요. <a class="btn" style="margin-left:8px" href="${SHEET_URL}" target="_blank">🔗 구글시트 열기</a></div>`; return; }
+  if(curList>=st.lists.length) curList=0;
+  const list=st.lists[curList];
+  const listSel = st.lists.length>1
+    ? `<select id="listSel">${st.lists.map((l,i)=>`<option value="${i}" ${i===curList?"selected":""}>${l.title} (${l.items.length})</option>`).join("")}</select>`
+    : "";
+  const th = `<th class="idx">#</th>` + sc.cols.map(c=>`<th>${sc.labels[c]||c}</th>`).join("");
+  const rows = list.items.map((it,i)=>{
+    const tds = sc.cols.map(c=>`<td>${String(it[c]==null?"":it[c]).replace(/</g,"&lt;")}</td>`).join("");
+    return `<tr><td class="idx">${i+1}</td>${tds}</tr>`;
   }).join("");
   p.innerHTML = `
     <div class="metabar">
-      <div class="fld" style="flex:0 0 130px;min-width:120px"><label>파일</label><input value="reco/${sc.file}" readonly style="color:var(--ink-soft)"></div>
-      <div class="fld"><label>리스트 제목</label><input id="mTitle" value="${String(m.title).replace(/"/g,'&quot;')}"></div>
-      <div class="fld" style="flex:2"><label>부제(설명)</label><input id="mSub" value="${String(m.subtitle).replace(/"/g,'&quot;')}"></div>
+      <span class="mt">${list.title}</span>
+      ${list.pub?'<span class="pill">공개 Y</span>':'<span class="pill" style="color:#c2410c;background:#fdeee6">비공개</span>'}
+      ${list.subtitle?`<span class="ms">${list.subtitle.replace(/</g,"&lt;")}</span>`:""}
+      ${listSel?`<span style="margin-left:auto"></span>${listSel}`:""}
     </div>
-    ${st._err?`<div class="note" style="border-left-color:#c2410c">현재 파일을 불러오지 못했어요(${st._err}). 새 리스트로 시작합니다.</div>`:""}
-    <div class="tablewrap"><table><thead><tr>${th}</tr></thead><tbody id="tbody">${rows||`<tr><td colspan="${sc.cols.length+2}" style="text-align:center;color:var(--ink-soft);padding:24px">항목이 없습니다. ＋ 항목 추가로 시작하세요.</td></tr>`}</tbody></table></div>
+    <div class="tablewrap"><table><thead><tr>${th}</tr></thead><tbody>${rows}</tbody></table></div>
     <div class="toolbar">
-      <button class="btn ghost" id="addRow">＋ 항목 추가</button>
-      <button class="btn ghost" id="reload">↻ 원본 다시 불러오기</button>
-      <button class="btn" id="showJson">📋 JSON 복사·다운로드</button>
-      <span class="count" id="cnt">${items.length}개 항목</span>
+      <a class="btn" href="${SHEET_URL}" target="_blank">🔗 구글시트에서 편집</a>
+      <button class="btn ghost" id="reload">↻ 새로고침</button>
+      <button class="btn ghost" id="showJson">📋 JSON 백업 내보내기</button>
+      <span class="count">${list.items.length}개 항목 · 시트 원본</span>
     </div>`;
-  // wire
-  $("#mTitle").oninput = e=>{ m.title=e.target.value; };
-  $("#mSub").oninput = e=>{ m.subtitle=e.target.value; };
-  p.querySelectorAll("#tbody input[data-i]").forEach(inp=>inp.oninput=()=>{ items[+inp.dataset.i][inp.dataset.c]=inp.value; });
-  p.querySelectorAll("[data-up]").forEach(b=>b.onclick=()=>{ const i=+b.dataset.up; if(i>0){ [items[i-1],items[i]]=[items[i],items[i-1]]; show(); } });
-  p.querySelectorAll("[data-dn]").forEach(b=>b.onclick=()=>{ const i=+b.dataset.dn; if(i<items.length-1){ [items[i+1],items[i]]=[items[i],items[i+1]]; show(); } });
-  p.querySelectorAll("[data-del]").forEach(b=>b.onclick=()=>{ const i=+b.dataset.del; if(confirm("이 항목을 삭제할까요?")){ items.splice(i,1); show(); } });
-  $("#addRow").onclick=()=>{ const o={}; sc.cols.forEach(c=>o[c]=""); items.push(o); show(); setTimeout(()=>{ const inp=document.querySelector(`#tbody tr:last-child input`); if(inp) inp.focus(); },30); };
-  $("#reload").onclick=async()=>{ if(confirm("편집한 내용을 버리고 서버 원본을 다시 불러올까요?")){ await loadCat(cur,true); show(); } };
-  $("#showJson").onclick=()=>openJson();
+  const ls=$("#listSel"); if(ls) ls.onchange=()=>{ curList=+ls.value; show(); };
+  $("#reload").onclick=async()=>{ delete STORE[cur]; INDEX=null; show(); };
+  $("#showJson").onclick=()=>openJson(list);
 }
 
-function buildJSON(cat){
-  const sc=SCHEMA[cat], st=STORE[cat], m=st.meta;
-  const items = st.items
-    .filter(it=> String(it[sc.cols[0]]||"").trim() !== "")   // 첫 칸(제목) 빈 행 제외
+function buildJSON(cat, list){
+  const sc=SCHEMA[cat];
+  const items = list.items
+    .filter(it=> String(it[sc.cols[0]]||"").trim() !== "")
     .map(it=>{ const o={}; sc.cols.forEach(c=>{ let v=it[c]; if(v==null) v="";
         if(sc.num.includes(c)){ const s=String(v).trim(); o[c]= s===""?"" : (isNaN(Number(s))? s : Number(s)); }
         else o[c]=String(v); }); return o; });
-  return { category:m.category, listId:m.listId, title:m.title, subtitle:m.subtitle, version:m.version, items };
+  const slug = cat + "-" + (curList+1);
+  return { category:sc.ko, listId:slug, title:list.title, subtitle:list.subtitle, version:1, items };
 }
-function openJson(){
-  const obj=buildJSON(cur);
+function openJson(list){
+  const obj=buildJSON(cur, list);
   const txt=JSON.stringify(obj,null,2);
-  $("#jsonTitle").textContent = `reco/${SCHEMA[cur].file} · ${obj.items.length}개 항목`;
+  $("#jsonTitle").textContent = `reco/${cur}.json · ${obj.items.length}개 항목`;
   $("#jsonText").value=txt;
   $("#jsonDlg").showModal();
   $("#jsonCopy").onclick=async()=>{ try{ await navigator.clipboard.writeText(txt); toast("복사했어요"); }catch(e){ $("#jsonText").select(); document.execCommand("copy"); toast("복사했어요"); } };
-  $("#jsonDl").onclick=()=>{ const blob=new Blob([txt],{type:"application/json"}); const a=document.createElement("a"); a.href=URL.createObjectURL(blob); a.download=SCHEMA[cur].file; document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(a.href),1500); toast("다운로드"); };
+  $("#jsonDl").onclick=()=>{ const blob=new Blob([txt],{type:"application/json"}); const a=document.createElement("a"); a.href=URL.createObjectURL(blob); a.download=cur+".json"; document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(a.href),1500); toast("다운로드"); };
   $("#jsonClose").onclick=()=>$("#jsonDlg").close();
 }
 
