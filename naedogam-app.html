@@ -301,7 +301,9 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
   .rec-sub{ font-family:var(--mono); font-size:12px; color:var(--ink-soft); margin-top:3px; }
   .rec-desc{ font-size:13.5px; line-height:1.7; color:var(--ink); margin:0; }
   .rec-link{ font-family:var(--mono); font-size:12px; color:var(--ink-soft); text-decoration:none; text-align:center; border-top:1px solid var(--line); padding-top:12px; margin-top:4px; }
-  .wb{ font-family:var(--sans); font-size:10px; padding:1px 6px; border-radius:6px; font-weight:600; margin-left:4px; vertical-align:middle; white-space:nowrap; }
+  .wb{ font-family:var(--sans); font-size:10px; padding:1px 6px; border-radius:6px; font-weight:600; margin-left:7px; vertical-align:middle; white-space:nowrap; }
+  .titleflags{ margin-left:6px; white-space:nowrap; }
+  .titleflags .flag{ vertical-align:middle; }
   .wb-W{ background:#dcfce7; color:#16a34a; }
   .wb-R{ background:#fef9c3; color:#b45309; }
   .wb-P{ background:#ffedd5; color:#c2410c; }
@@ -357,7 +359,7 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
   .clx-badge{ display:inline-block; font-size:10px; font-weight:700; color:#fff; padding:1px 7px; border-radius:9px; vertical-align:middle; margin-right:4px; }
   .sortsel{ flex-shrink:0; font-family:var(--mono); font-size:12px; padding:7px 10px; border:1px solid var(--line); border-radius:3px; background:var(--card); color:var(--ink); height:34px; }
 
-  dialog{ border:none; border-radius:16px; padding:0; max-width:460px; width:92%; background:var(--card); color:var(--ink); box-shadow:0 12px 44px rgba(0,0,0,.22); }
+  dialog{ border:none; border-radius:16px; padding:0; max-width:460px; width:92%; max-height:92vh; overflow:auto; background:var(--card); color:var(--ink); box-shadow:0 12px 44px rgba(0,0,0,.22); }
   dialog::backdrop{ background:rgba(30,26,20,.5); }
   .dhead{ padding:14px 18px; border-bottom:1px solid var(--line); position:sticky; top:0; background:var(--card); z-index:6; }
   .dhead h3{ font-family:var(--sans); font-weight:700; margin:0; font-size:19px; padding-right:128px; }
@@ -512,7 +514,7 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
         <svg class="brandmark" width="34" height="30" viewBox="26 28 62 54" aria-hidden="true"><rect x="28" y="40" width="12" height="38" rx="5" fill="#F7F5F0"/><rect x="44" y="30" width="12" height="48" rx="5" fill="#F7F5F0"/><rect x="60" y="32" width="12" height="46" rx="5" fill="#E0483F" transform="rotate(16 66 78)"/></svg>
         <span class="brandwm"><span class="bwm-ko">내도감</span><span class="bwm-en">NAEDOGAM</span></span>
       </button>
-      <span class="mhver">배포 v157</span>
+      <span class="mhver">배포 v158</span>
       <span class="spacer"></span>
       <span class="src-chip" id="srcChip" style="display:none">데모</span>
       <button class="icon-btn" id="searchToggle" type="button" style="display:none">🔍</button>
@@ -1649,6 +1651,9 @@ class GSheetSource {
   }
   _rng(tab,a1){ return encodeURIComponent("'"+tab+"'!"+a1); }
   async _ensureSpreadsheet(){ if(this.ssId) return;
+    try{ const _q=encodeURIComponent("mimeType='application/vnd.google-apps.spreadsheet' and name='내도감 Data' and trashed=false");
+      const _f=await this._api("https://www.googleapis.com/drive/v3/files?spaces=drive&orderBy=createdTime&pageSize=5&fields=files(id)&q="+_q);
+      if(_f && _f.files && _f.files.length){ this.ssId=_f.files[0].id; store.setItem("nd.ssId",this.ssId); this._titles=null; return; } }catch(e){}
     const d=await this._api("https://sheets.googleapis.com/v4/spreadsheets",{method:"POST", body:JSON.stringify({properties:{title:"내도감 Data"}})});
     this.ssId=d.spreadsheetId; store.setItem("nd.ssId",this.ssId); this._titles=null; }
   async _tabTitles(force){ if(this._titles && !force) return this._titles;
@@ -2188,7 +2193,7 @@ function renderCard(m, r, no){ if(m.id==="books") return bookCard(r); const c=m.
     const _cov=r.cover||r._cover;
     const _memo=(c.memo&&r[c.memo])?`<div class="cmemo">${String(r[c.memo]).replace(/</g,"&lt;")}</div>`:"";
     return `<button class="card catcard" data-id="${r._id}"><span class="thumb">${_cov?`<img src="${_cov}" alt="">`:c.thumb}</span>
-      <span class="body"><h3>${r.title}</h3><div class="meta">${meta}</div>${_memo}${(flags||tags)?`<div class="cbadges">${flags}${tags}</div>`:""}</span></button>`; }
+      <span class="body"><h3>${r.title}${flags?` <span class="titleflags">${flags}</span>`:""}</h3><div class="meta">${meta}</div>${_memo}${tags?`<div class="cbadges">${tags}</div>`:""}</span></button>`; }
   const _kvcol=["#b45309","#0891b2","#16a34a","#9333ea","#dc2626","#0ea5e9"];
   const kv=c.kv.map((col,ci)=>{ const v=r[col.f]; if(v==null||v==="") return ""; const s=(typeof v==="number"?fmt(v):v)+(col.u?` ${col.u}`:"");
     const _cs=m.custom?` style="color:${_kvcol[ci%_kvcol.length]}"`:"";
@@ -2903,7 +2908,7 @@ function openRecModal(key){
 }
 
 function movieCard(r, no){
-  const wb = (r.watched==="O"?`<span class="wb wb-W">시청</span>`:"")
+  const wb = ((r.watched==="O"||r.watched===true)?`<span class="wb wb-W">시청</span>`:"")
     + (r.rewatch?`<span class="wb wb-R">다시볼것</span>`:"")
     + (r.pick?`<span class="wb wb-P">찜</span>`:"");
   const yc = [r.year, r.country, (r.rating!=null&&r.rating!==""?("⭐"+r.rating):"")].filter(Boolean).join(" · ");
@@ -2912,7 +2917,8 @@ function movieCard(r, no){
   const act = actorFirst ? personSpan(actorFirst,"actor") : "";
   const sub = (dir||act) ? dir + (dir&&act?` <span style="color:#ddd">/</span> `:"") + act : "";
   const stream=(r.streaming||[]).map(t=>{ const x=SC[t]||{bg:'#f0f0f0',c:'#666'}; return `<span class="sbadge" style="background:${x.bg};color:${x.c}">${t}</span>`; }).join("");
-  const rec=(r.recommendList||[]).map(t=>{
+  const _recArr=(r.recommendList&&r.recommendList.length)?r.recommendList:String(r.recommend||"").split(/[\/,]+/).map(x=>x.trim()).filter(Boolean);
+  const rec=_recArr.map(t=>{
     const key=Object.keys(REC_INFO).find(k=>t.includes(k));
     return key ? `<span class="rbadge clk" onclick="event.stopPropagation();openRecModal('${key}')">${t}</span>`
                : `<span class="rbadge">${t}</span>`;
