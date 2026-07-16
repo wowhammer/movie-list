@@ -220,6 +220,9 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
   .cal-cell .cal-d{ position:absolute; top:3px; left:5px; font-size:11px; color:var(--ink-soft); z-index:2; }
   .cal-cell.has{ cursor:pointer; }
   .cal-cell.has .cal-d{ color:#fff; text-shadow:0 1px 2px rgba(0,0,0,.6); }
+  .cal-cell.noimg{ background:var(--accent-wash); box-shadow:inset 0 0 0 1px var(--accent); }
+  .cal-cell.noimg .cal-d{ color:var(--ink); text-shadow:none; }
+  .mv-memo{ font-size:12px; color:var(--ink-soft); line-height:1.45; margin-top:5px; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
   .cal-img{ position:absolute; inset:0; width:100%; height:100%; object-fit:cover; }
   .cal-dot{ position:absolute; bottom:6px; left:50%; transform:translateX(-50%); width:6px; height:6px; border-radius:50%; background:var(--accent); }
   .dnav{ position:fixed; top:50%; transform:translateY(-50%); z-index:6; width:42px; height:42px; border-radius:50%; border:none; background:rgba(20,20,22,.5); color:#fff; font-size:26px; line-height:1; cursor:pointer; display:flex; align-items:center; justify-content:center; box-shadow:0 2px 8px rgba(0,0,0,.3); }
@@ -509,7 +512,7 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
         <svg class="brandmark" width="34" height="30" viewBox="26 28 62 54" aria-hidden="true"><rect x="28" y="40" width="12" height="38" rx="5" fill="#F7F5F0"/><rect x="44" y="30" width="12" height="48" rx="5" fill="#F7F5F0"/><rect x="60" y="32" width="12" height="46" rx="5" fill="#E0483F" transform="rotate(16 66 78)"/></svg>
         <span class="brandwm"><span class="bwm-ko">내도감</span><span class="bwm-en">NAEDOGAM</span></span>
       </button>
-      <span class="mhver">배포 v156</span>
+      <span class="mhver">배포 v157</span>
       <span class="spacer"></span>
       <span class="src-chip" id="srcChip" style="display:none">데모</span>
       <button class="icon-btn" id="searchToggle" type="button" style="display:none">🔍</button>
@@ -1896,7 +1899,7 @@ function renderDiaryCalendar(m, rows){
     for(let d=1;d<=days;d++){
       const iso=y+"-"+String(mo+1).padStart(2,"0")+"-"+String(d).padStart(2,"0");
       const r=byDay[iso]; const cov=r&&(r.cover||r._cover);
-      cells.push(`<div class="cal-cell ${r?'has':''}" data-d="${iso}" ${r?`data-id="${String(r._id).replace(/"/g,'&quot;')}"`:''}><span class="cal-d">${d}</span>${cov?`<img class="cal-img" src="${String(cov).replace(/"/g,'&quot;')}" alt="">`:(r?'<span class="cal-dot"></span>':"")}</div>`);
+      cells.push(`<div class="cal-cell ${r?(cov?'has':'has noimg'):''}" data-d="${iso}" ${r?`data-id="${String(r._id).replace(/"/g,'&quot;')}"`:''}><span class="cal-d">${d}</span>${cov?`<img class="cal-img" src="${String(cov).replace(/"/g,'&quot;')}" alt="">`:""}</div>`);
     }
   }
   const dow=["일","월","화","수","목","금","토"];
@@ -2923,6 +2926,7 @@ function movieCard(r, no){
       ${sub?`<div class="mv-sub">${sub}</div>`:""}
       ${stream?`<div class="mvbadges">${stream}</div>`:""}
       ${rec?`<div class="mvbadges">${rec}</div>`:""}
+      ${(r.review&&String(r.review).trim())?`<div class="mv-memo">📝 ${String(r.review).replace(/</g,"&lt;")}</div>`:""}
     </div>
   </div>`;
 }
@@ -2972,10 +2976,10 @@ function paintMovies(m){
   const sort=state.sort||"default", asc=state.sortAsc;
   if(sort==="rating") rows=[...rows].sort((a,b)=>{const d=(parseFloat(a.rating)||0)-(parseFloat(b.rating)||0); return asc?d:-d;});
   else if(sort==="year") rows=[...rows].sort((a,b)=>{const d=(a.year||0)-(b.year||0); return asc?d:-d;});
-  else if(sort==="rec") rows=[...rows].sort((a,b)=>{const d=((a.recommendList||[]).length)-((b.recommendList||[]).length); return asc?d:-d;});
+  else if(sort==="title") rows=[...rows].sort((a,b)=>{const d=String(a.title||"").localeCompare(String(b.title||""),"ko"); return asc?-d:d;});
 
   const total=rows.length, shown=rows.slice(0,(state.page+1)*MOVIE_PER); NAV_LIST=shown;
-  const sorts=[["default","기본"],["rating","평점"],["year","연도"],["rec","추천"]];
+  const sorts=[["default","기본"],["rating","평점"],["year","연도"],["title","제목"]];
   const sortBtns=sorts.map(([v,l])=>{ const on=(state.sort||"default")===v;
     const arrow=v==="default"?"":(on?(state.sortAsc?"↑":"↓"):"↓");
     return `<button class="sort-btn ${on?'on':''}" data-s="${v}">${l}${arrow}</button>`; }).join("");
@@ -3540,17 +3544,17 @@ async function searchBooks(q){
 let addStatus="읽고싶다";
 function openAddBook(){
   const d=$("#add"); const statuses=["읽음","읽는중","읽고싶다"];
-  d.innerHTML=`<div class="dhead"><h3>책 추가</h3></div><div class="dbody set">
+  d.innerHTML=`<div class="dhead"><h3>책 추가</h3><button class="dclose-x" onclick="this.closest('dialog').close()" aria-label="닫기">✕</button></div><div class="dbody set">
     <label style="margin-top:0">이 책의 상태</label>
     <div style="display:flex;gap:6px">${statuses.map(s=>`<button class="btn ghost st ${s===addStatus?'on':''}" data-s="${s}">${s}</button>`).join("")}</div>
     <label>제목으로 검색</label>
     <input id="bq" placeholder="책 제목 입력…" autocomplete="off" />
     <div id="bres" style="margin-top:12px;display:flex;flex-direction:column;gap:8px;max-height:340px;overflow:auto"></div>
-    <button class="btn ghost" id="addClose" style="margin-top:14px">닫기</button></div>`;
+    </div>`;
   d.showModal();
   d.querySelectorAll(".st").forEach(b=>b.onclick=()=>{ addStatus=b.dataset.s;
     d.querySelectorAll(".st").forEach(x=>x.classList.toggle("on",x.dataset.s===addStatus)); });
-  $("#addClose").onclick=()=>d.close();
+  { const _ac=$("#addClose"); if(_ac) _ac.onclick=()=>d.close(); }
   const bq=$("#bq"), bres=$("#bres"); let timer=null, results=[];
   bq.addEventListener("input",()=>{ clearTimeout(timer); timer=setTimeout(async()=>{
     if(bq.value.trim().length<2){ bres.innerHTML=""; return; }   // 2글자부터 검색(호출 줄이기)
@@ -3633,17 +3637,17 @@ async function fillFromTmdb(d, mm, res){
 let addMovieStatus="없음";
 function openAddMovie(){
   const d=$("#add"); const statuses=["봤음","찜","없음"];
-  d.innerHTML=`<div class="dhead"><h3>영화 추가</h3></div><div class="dbody set">
+  d.innerHTML=`<div class="dhead"><h3>영화 추가</h3><button class="dclose-x" onclick="this.closest('dialog').close()" aria-label="닫기">✕</button></div><div class="dbody set">
     <label style="margin-top:0">추가할 때 상태</label>
     <div style="display:flex;gap:6px">${statuses.map(s=>`<button class="btn ghost st ${s===addMovieStatus?'on':''}" data-s="${s}">${s}</button>`).join("")}</div>
     <label>제목으로 검색 (TMDB)</label>
     <input id="mq" placeholder="영화 제목 입력…" autocomplete="off" />
     <div id="mres" style="margin-top:12px;display:flex;flex-direction:column;gap:8px;max-height:340px;overflow:auto"></div>
-    <button class="btn ghost" id="addClose" style="margin-top:14px">닫기</button></div>`;
+    </div>`;
   d.showModal();
   d.querySelectorAll(".st").forEach(b=>b.onclick=()=>{ addMovieStatus=b.dataset.s;
     d.querySelectorAll(".st").forEach(x=>x.classList.toggle("on",x.dataset.s===addMovieStatus)); });
-  $("#addClose").onclick=()=>d.close();
+  { const _ac=$("#addClose"); if(_ac) _ac.onclick=()=>d.close(); }
   const mq=$("#mq"), mres=$("#mres"); let timer=null, results=[];
   mq.addEventListener("input",()=>{ clearTimeout(timer); timer=setTimeout(async()=>{
     if(mq.value.trim().length<2){ mres.innerHTML=""; return; }
@@ -3779,12 +3783,12 @@ async function openRecoPanel(m){
       const on=sel.has(i);
       return `<div class="reco-item ${on?"on":""}" data-i="${i}"><input type="checkbox" class="reco-cb" ${on?"checked":""}><div class="reco-b"><div class="reco-t">${o.v.title}</div><div class="reco-m">${o.v.sub}</div>${o.v.badge?`<span class="reco-badge">${o.v.badge}</span>`:""}</div></div>`;
     }).join("");
-    d.innerHTML=`<div class="dhead" style="display:flex;align-items:center;justify-content:space-between;gap:8px"><h3 style="margin:0">${data.title||"추천 리스트"}</h3>${(listsAll&&listsAll.length>1)?'<button class="btn ghost" id="rcBack" type="button" style="padding:4px 10px;flex:0 0 auto;white-space:nowrap">← 리스트</button>':''}</div>
+    d.innerHTML=`<div class="dhead" style="display:flex;align-items:center;justify-content:space-between;gap:8px"><h3 style="margin:0">${data.title||"추천 리스트"}</h3>${(listsAll&&listsAll.length>1)?'<button class="btn ghost" id="rcBack" type="button" style="padding:4px 10px;flex:0 0 auto;white-space:nowrap">← 리스트</button>':''}<button class="dclose-x" onclick="this.closest('dialog').close()" aria-label="닫기">✕</button></div>
       <div class="dbody" style="padding-bottom:6px">
       <div class="count" style="margin:0 0 6px">${data.subtitle||""}</div>
       <button class="btn ghost" id="rcAll" style="width:100%;margin:0 0 8px" ${remain?"":"disabled"}>📥 리스트 통째로 담기 (${remain}개)</button>
       <div id="rcList" style="max-height:52vh;overflow:auto;margin:0 -4px">${rows}</div>
-      <div class="reco-foot"><button class="btn" id="rcAdd" style="flex:1">선택한 ${sel.size}개 담기</button><button class="btn ghost" id="rcClose">닫기</button></div>
+      <div class="reco-foot"><button class="btn" id="rcAdd" style="flex:1">선택한 ${sel.size}개 담기</button></div>
       </div>`;
     $("#rcList").querySelectorAll(".reco-item[data-i]").forEach(el=>{ el.onclick=()=>{
         const i=+el.dataset.i; const cb=el.querySelector(".reco-cb");
