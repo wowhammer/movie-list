@@ -577,7 +577,7 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
         <svg class="brandmark" width="34" height="30" viewBox="26 28 62 54" aria-hidden="true"><rect x="28" y="40" width="12" height="38" rx="5" fill="#F7F5F0"/><rect x="44" y="30" width="12" height="48" rx="5" fill="#F7F5F0"/><rect x="60" y="32" width="12" height="46" rx="5" fill="#E0483F" transform="rotate(16 66 78)"/></svg>
         <span class="brandwm"><span class="bwm-ko">내도감</span><span class="bwm-en">NAEDOGAM</span></span>
       </button>
-      <span class="mhver">배포 v179</span>
+      <span class="mhver">배포 v180</span>
       <span class="spacer"></span>
       <span class="src-chip" id="srcChip" style="display:none">데모</span>
       <button class="icon-btn" id="searchToggle" type="button" style="display:none">🔍</button>
@@ -4201,6 +4201,44 @@ const SAMPLE = {
 ["detail","person","settings","rec","dash","catbuilder","catedit"].forEach(id=>{ const dg=document.getElementById(id);
   if(dg) dg.addEventListener("click",e=>{ if(e.target===dg) dg.close(); }); });
 boot();
+</script>
+
+<!-- 내도감 뒤로가기(Android 백버튼) 처리 v180 -->
+<script>
+(function(){
+  if(window.__ndBackGuard) return; window.__ndBackGuard=true;
+  var busy=false, trap=false;
+  function anyDialog(){ return document.querySelector('dialog[open]'); }
+  function domainOpen(){ var d=document.getElementById('domainView'); return !!(d && getComputedStyle(d).display!=='none'); }
+  function depth(){ if(anyDialog()) return 2; if(domainOpen()) return 1; return 0; }
+  function pushGuard(){ history.pushState({ndTrap:1}, ''); trap=true; }
+  function sync(){
+    if(busy) return;
+    var deep = depth()>0;
+    if(deep && !trap){ pushGuard(); }
+    else if(!deep && trap){
+      if(history.state && history.state.ndTrap){ busy=true; trap=false; history.back(); setTimeout(function(){busy=false;},60); }
+      else { trap=false; }
+    }
+  }
+  window.addEventListener('popstate', function(){
+    busy=true; trap=false;
+    var d=depth();
+    if(d===2){
+      var dl=document.querySelectorAll('dialog[open]');
+      var top=dl[dl.length-1]; if(top){ try{ top.close(); }catch(e){} }
+      setTimeout(function(){ if(depth()>0){ pushGuard(); } busy=false; }, 0);
+    } else if(d===1){
+      try{ if(typeof goHome==='function') goHome(); }catch(e){}
+      setTimeout(function(){ busy=false; }, 0);
+    } else { busy=false; }
+  });
+  var mo=new MutationObserver(function(){ sync(); });
+  try{ mo.observe(document.documentElement,{subtree:true,attributes:true,childList:true,attributeFilter:['open','style','class']}); }catch(e){}
+  setInterval(sync, 500);
+  document.addEventListener('DOMContentLoaded', sync);
+  setTimeout(sync, 300);
+})();
 </script>
 </body>
 </html>
