@@ -577,7 +577,7 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
         <svg class="brandmark" width="34" height="30" viewBox="26 28 62 54" aria-hidden="true"><rect x="28" y="40" width="12" height="38" rx="5" fill="#F7F5F0"/><rect x="44" y="30" width="12" height="48" rx="5" fill="#F7F5F0"/><rect x="60" y="32" width="12" height="46" rx="5" fill="#E0483F" transform="rotate(16 66 78)"/></svg>
         <span class="brandwm"><span class="bwm-ko">내도감</span><span class="bwm-en">NAEDOGAM</span></span>
       </button>
-      <span class="mhver">배포 v177</span>
+      <span class="mhver">배포 v178</span>
       <span class="spacer"></span>
       <span class="src-chip" id="srcChip" style="display:none">데모</span>
       <button class="icon-btn" id="searchToggle" type="button" style="display:none">🔍</button>
@@ -1132,7 +1132,7 @@ const MANIFESTS = {
              {k:"date",sheet:"날짜",label:"스크랩한 날",type:"date",today:true},
              {k:"cover",sheet:"사진",label:"사진·썸네일",type:"image"} ],
     search:["title","content","tags","source"],
-    filterBy:{ field:"tags", allLabel:"전체" },
+    filterBy:{ field:"tags", allLabel:"전체", always:true },
     newestFirst:true,
     stats:[ {label:"전체",type:"count"} ],
     card:{ kind:"specimen", thumb:"🔖", memo:"content", tags:"tags",
@@ -1866,7 +1866,7 @@ function renderPicker(m){
   const p=$("#picker");
   if(!m.filterBy){ p.style.display="none"; p.innerHTML=""; return; }
   const vals=[...new Set(state.rows.flatMap(r=>{ const v=r[m.filterBy.field]; return Array.isArray(v)?v.map(x=>String(x).trim()):String(v||"").split(",").map(x=>x.trim()); }).filter(Boolean))];
-  if(vals.length<2){ p.style.display="none"; p.innerHTML=""; state.pick=""; return; }  // 1개뿐이면 숨김
+  if(vals.length < (m.filterBy.always?1:2)){ p.style.display="none"; p.innerHTML=""; state.pick=""; return; }  // 보통 2개↑일 때 표시(always면 1개도)
   p.style.display="flex";
   const opts=[{v:"",label:m.filterBy.allLabel||"전체"}, ...vals.map(v=>({v,label:v}))];
   p.innerHTML=opts.map(o=>`<button class="chip ${o.v===state.pick?'on':''}" data-v="${o.v}">${o.label}</button>`).join("");
@@ -3894,7 +3894,7 @@ async function pickMovie(m){
   }catch(e){ const msg=/이미/.test(e.message)?"이미 목록에 있는 영화예요.":("추가 실패: "+e.message); alert(msg); if($("#mres")) $("#mres").innerHTML=""; }
 }
 
-const RECO_LISTS = { movies:"reco/movies.json", books:"reco/books.json", mountains:"reco/mountains.json", travel:"reco/travel.json", cellar:"reco/cellar.json", quote:"reco/quote.json", culture:"reco/culture.json", food:"reco/food.json" };
+const RECO_LISTS = { movies:"reco/movies.json", books:"reco/books.json", mountains:"reco/mountains.json", travel:"reco/travel.json", cellar:"reco/cellar.json", quote:"reco/quote.json", culture:"reco/culture.json", food:"reco/food.json", albums:"reco/albums.json" };
 const RECO_CACHE = {};
 function recoNorm(s){ return String(s==null?"":s).normalize("NFD").replace(/[̀-ͯ]/g,"").normalize("NFC").toLowerCase().replace(/[^0-9a-z가-힣]/g,""); }
 function ndDupKeys(id,r){ if(!r) return []; if(id==="books") return [recoNorm((r.title||"")+"|"+(r.author||""))].filter(Boolean); let a = id==="movies" ? [r.orig,r._id,r.title] : [r.title,r.name,r._id]; return [...new Set(a.map(recoNorm).filter(Boolean))]; }
@@ -3914,6 +3914,7 @@ function recoView(id, it){
   if(id==="quote") return { key:String(it.title||""), alt:it.author, title:it.title||"", sub:String(it.author||""), badge:String((it.tags||"").split(",")[0]||"") };
   if(id==="culture") return { key:String(it.title||""), alt:it.place, title:it.title||"", sub:[it.kind, it.place].filter(Boolean).join(" · "), badge:String((it.artists||"").split(",")[0]||"") };
   if(id==="food") return { key:String(it.title||""), alt:it.place, title:it.title||"", sub:[it.kind, it.place].filter(Boolean).join(" · "), badge:String(it.menu||"") };
+  if(id==="albums") return { key:String(it.title||""), alt:it.artist, title:it.title||"", sub:[it.artist, it.year, it.genre].filter(Boolean).join(" · "), badge:String(it.genre||"") };
   return { key:String(it.title||it._id||""), alt:"", title:(it.title||""), sub:"", badge:"" };
 }
 function recoHaveKeys(id, have){
