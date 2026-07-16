@@ -514,7 +514,7 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
         <svg class="brandmark" width="34" height="30" viewBox="26 28 62 54" aria-hidden="true"><rect x="28" y="40" width="12" height="38" rx="5" fill="#F7F5F0"/><rect x="44" y="30" width="12" height="48" rx="5" fill="#F7F5F0"/><rect x="60" y="32" width="12" height="46" rx="5" fill="#E0483F" transform="rotate(16 66 78)"/></svg>
         <span class="brandwm"><span class="bwm-ko">내도감</span><span class="bwm-en">NAEDOGAM</span></span>
       </button>
-      <span class="mhver">배포 v158</span>
+      <span class="mhver">배포 v159</span>
       <span class="spacer"></span>
       <span class="src-chip" id="srcChip" style="display:none">데모</span>
       <button class="icon-btn" id="searchToggle" type="button" style="display:none">🔍</button>
@@ -1148,7 +1148,7 @@ if(typeof CONFIG!=="undefined" && CONFIG.DEPLOY){
              {k:"watched",sheet:"봤음",label:"봤음",type:"bool"},
              {k:"rewatch",sheet:"다시볼것",label:"다시볼것",type:"bool"},
              {k:"pick",sheet:"찜",label:"찜",type:"bool"},
-             {k:"rating",sheet:"평점",label:"평점",type:"rating"},
+             {k:"rating",sheet:"평점",label:"내 평점(선택)",type:"rating"},
              {k:"tmdbRating",sheet:"TMDB평점",label:"TMDB 평점(자동)",type:"number"},
              {k:"streaming",sheet:"스트리밍",label:"스트리밍(쉼표로 여러 개)",type:"tags"},
              {k:"recommend",sheet:"추천",label:"추천",type:"text"},
@@ -1569,9 +1569,7 @@ function renderHome(){
     const _arr = CACHE[m.id] || loadPersist(m.id); const cnt = _arr ? `${fmt(_arr.length)}건` : "";
     const ic = ND_ICONS[m.id] ? _ics(ND_ICONS[m.id]) : `<span style="font-size:24px">${m.icon}</span>`;
     return `<button class="cat-card" data-id="${m.id}"><span class="ci" style="color:${ND_COLORS[m.id]||'var(--ink)'}">${ic}</span><span class="cn">${m.title}</span><span class="cc" data-cnt="${m.id}">${cnt}</span></button>`;
-  }).join("")+`</div>`
-  +`<div class="home-soon-h">준비중 · 앞으로 추가할 것들</div>`
-  +`<div class="home-grid">`+HOME_SOON.map(x=>`<button class="cat-card soon" type="button"><span class="ci">${_ics(x.d)}</span><span class="cn">${x.t}</span><span class="cc">준비중</span></button>`).join("")+`</div>`;
+  }).join("")+`</div>`;
   home.querySelectorAll(".cat-card[data-id]").forEach(b=>b.onclick=()=>openDomain(b.dataset.id));
   { const _hs=$("#homeSearch"); if(_hs){ let _t=null; _hs.addEventListener("input",()=>{ clearTimeout(_t); _t=setTimeout(()=>runHomeSearch(_hs.value),200); }); } }
   active.forEach(m=>{ if(CACHE[m.id]||loadPersist(m.id)) return; try{ sourceFor(m).list(m.id).then(rows=>{ CACHE[m.id]=rows; savePersist(m.id,rows); const el=home.querySelector(`.cc[data-cnt="${m.id}"]`); if(el) el.textContent=`${fmt(rows.length)}건`; }).catch(()=>{}); }catch(e){} });
@@ -2327,7 +2325,7 @@ async function autofillMovieRatings(){
   try{
     for(const r of todo){
       try{ const info=await fetchMovieInfo(r.orig||r.title, r.title, r.year);
-        if(info && info.rating && info.rating!=="-"){ r.tmdbRating=info.rating; if(r.rating==null||r.rating==="") r.rating=info.rating; done.push({_id:r._id, rating:r.rating, tmdbRating:r.tmdbRating}); } }catch(e){}
+        if(info && info.rating && info.rating!=="-"){ r.tmdbRating=info.rating; done.push({_id:r._id, tmdbRating:r.tmdbRating}); } }catch(e){}
       await new Promise(res=>setTimeout(res,250));
     }
     if(done.length){ try{ savePersist("movies",arr); }catch(e){}
@@ -2355,7 +2353,7 @@ async function openMovieDetailDeploy(m, r){
   const d=$("#detail");
   const people=[personSpan(r.director,"director"), personSpan(r.actors,"actor")].filter(Boolean).join(' <span style="color:var(--line)">/</span> ');
   const stream=(r.streaming||[]).map(t=>`<span class="tag">${t}</span>`).join("");
-  const metaBits=[r.year, r.country, (r.rating!=null&&r.rating!==""?("⭐ "+r.rating):""), (r.tmdbRating?("TMDB "+r.tmdbRating):"")].filter(Boolean).join(" · ");
+  const metaBits=[r.year, r.country, (r.tmdbRating?("⭐"+r.tmdbRating):""), (r.rating!=null&&r.rating!==""?("내 ★"+r.rating):"")].filter(Boolean).join(" · ");
   d.innerHTML=`<div class="dhead"><h3>${r.title||"(제목 없음)"}</h3><div class="dh-actions"><button class="dh-btn" id="dEdit">수정</button><button class="dh-btn dh-del" id="dDel">삭제</button><button class="dclose-x" onclick="this.closest('dialog').close()" aria-label="닫기">✕</button></div></div>
     <div class="mvtop">
       <div class="mvposter" id="mvPoster">${r.cover?`<img src="${String(r.cover).replace(/"/g,'&quot;')}" alt="">`:"🎬"}</div>
@@ -2386,8 +2384,8 @@ async function openMovieDetailDeploy(m, r){
   $("#dDel").onclick=()=>deleteRecord(m, r);
   d.querySelectorAll(".plink").forEach(el=>el.onclick=e=>{ e.stopPropagation(); openPersonModal(el.dataset.name, el.dataset.role); });
   try{ const info=await fetchMovieInfo(r.title, r.title, r.year);
-    if(info && info.rating && info.rating!=="-" && (r.tmdbRating==null||r.tmdbRating==="")){ r.tmdbRating=info.rating; if(r.rating==null||r.rating==="") r.rating=info.rating;
-      try{ await sheetSrc().update(m.id, r._id, r); const _a=CACHE[m.id]; if(_a){ const _it=_a.find(x=>String(x._id)===String(r._id)); if(_it){ _it.tmdbRating=r.tmdbRating; _it.rating=r.rating; } savePersist(m.id,_a); } }catch(_e){} }
+    if(info && info.rating && info.rating!=="-" && (r.tmdbRating==null||r.tmdbRating==="")){ r.tmdbRating=info.rating;
+      try{ await sheetSrc().update(m.id, r._id, r); const _a=CACHE[m.id]; if(_a){ const _it=_a.find(x=>String(x._id)===String(r._id)); if(_it){ _it.tmdbRating=r.tmdbRating; } savePersist(m.id,_a); } }catch(_e){} }
     if($("#mvPoster")&&info.poster&&!r.cover) $("#mvPoster").innerHTML=`<img src="${info.poster}" alt="">`;
     if($("#mvOver")) $("#mvOver").textContent=info.overview||"줄거리 정보 없음";
     const lnk=$("#lnkTMDB"); if(lnk) lnk.href= info.tmdbId?`https://www.themoviedb.org/movie/${info.tmdbId}`:`https://www.themoviedb.org/search?query=${encodeURIComponent(r.title||"")}`;
@@ -2911,7 +2909,7 @@ function movieCard(r, no){
   const wb = ((r.watched==="O"||r.watched===true)?`<span class="wb wb-W">시청</span>`:"")
     + (r.rewatch?`<span class="wb wb-R">다시볼것</span>`:"")
     + (r.pick?`<span class="wb wb-P">찜</span>`:"");
-  const yc = [r.year, r.country, (r.rating!=null&&r.rating!==""?("⭐"+r.rating):"")].filter(Boolean).join(" · ");
+  const yc = [r.year, r.country, (r.tmdbRating!=null&&r.tmdbRating!==""?("⭐"+r.tmdbRating):""), (r.rating!=null&&r.rating!==""?("내 ★"+r.rating):"")].filter(Boolean).join(" · ");
   const dir = personSpan(r.director,"director");
   const actorFirst = (r.actors||"").split(/[,，]/)[0].trim();
   const act = actorFirst ? personSpan(actorFirst,"actor") : "";
@@ -3302,7 +3300,7 @@ function renderSettingsBody(d){
   const _cc=m=>m.custom?`<button class="cat-edit" data-id="${m.id}" title="수정" type="button" style="background:none;border:none;cursor:pointer;font-size:13px;opacity:.6;padding:2px 5px">✏</button><button class="cat-del" data-id="${m.id}" title="삭제" type="button" style="background:none;border:none;cursor:pointer;font-size:13px;opacity:.6;padding:2px 5px">🗑</button>`:"";
   const arow=id=>{ const m=MANIFESTS[id]; return `<div class="cat-mrow ord-row" data-id="${id}"><span class="ord-handle" aria-label="끌어서 순서 이동">≡</span><span class="mi">${m.icon}</span><span class="mn">${m.title} <span class="mv">${m.vol}</span></span>${_cc(m)}<button class="sw on" data-id="${id}" role="switch" aria-checked="true" type="button"></button></div>`; };
   const irow=id=>{ const m=MANIFESTS[id]; return `<div class="cat-mrow" data-id="${id}"><span class="ord-handle ord-ph">≡</span><span class="mi">${m.icon}</span><span class="mn">${m.title} <span class="mv">${m.vol}</span></span>${_cc(m)}<button class="sw" data-id="${id}" role="switch" aria-checked="false" type="button"></button></div>`; };
-  d.innerHTML=`<div class="dhead"><h3>설정</h3></div><div class="dbody set">
+  d.innerHTML=`<div class="dhead"><h3>설정</h3><button class="dclose-x" onclick="this.closest('dialog').close()" aria-label="닫기">✕</button></div><div class="dbody set">
     <div class="set-menu">
       <button class="set-menu-item" type="button" onclick="openAbout()"><span>ℹ️ 앱 소개</span><span class="chev">›</span></button>
       <button class="set-menu-item" type="button" onclick="(function(){var e=document.getElementById('ioSection'); if(e) e.scrollIntoView({behavior:'smooth',block:'start'});})()"><span>📥 데이터 가져오기·내보내기</span><span class="chev">›</span></button>
@@ -3382,7 +3380,7 @@ function cbFieldBlock(label,type){
 }
 function openCatBuilder(){
   const d=$("#catbuilder");
-  d.innerHTML=`<div class="dhead"><h3>내 카테고리 만들기</h3></div>
+  d.innerHTML=`<div class="dhead"><h3>내 카테고리 만들기</h3><button class="dclose-x" onclick="this.closest('dialog').close()" aria-label="닫기">✕</button></div>
   <div class="dbody">
     <div class="hint">이름과 칸(입력 항목)만 정하면 목록·검색·통계·저장이 자동으로 만들어집니다. 정의는 내 구글시트 <b>${CUSTOM_TAB}</b> 탭에 저장돼요.</div>
     <label style="display:block;margin:14px 0 4px;font-weight:600">템플릿에서 시작 <span style="font-weight:400;color:var(--sub);font-size:12px">· 누르면 자동으로 채워져요</span></label>
@@ -3488,7 +3486,7 @@ async function deleteCustomCategory(id){
 function openCatEdit(id){
   const m=MANIFESTS[id]; if(!m||!m.custom) return;
   const d=$("#catedit");
-  d.innerHTML=`<div class="dhead"><h3>카테고리 수정</h3></div>
+  d.innerHTML=`<div class="dhead"><h3>카테고리 수정</h3><button class="dclose-x" onclick="this.closest('dialog').close()" aria-label="닫기">✕</button></div>
   <div class="dbody">
     <div class="hint">이름과 아이콘을 바꿉니다. 칸(입력 항목) 구조는 여기서 못 바꿔요 — 바꾸려면 삭제 후 새로 만들어 주세요.</div>
     <label style="display:block;margin:12px 0 4px;font-weight:600">이름</label>
