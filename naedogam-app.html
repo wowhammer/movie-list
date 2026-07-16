@@ -514,7 +514,7 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
         <svg class="brandmark" width="34" height="30" viewBox="26 28 62 54" aria-hidden="true"><rect x="28" y="40" width="12" height="38" rx="5" fill="#F7F5F0"/><rect x="44" y="30" width="12" height="48" rx="5" fill="#F7F5F0"/><rect x="60" y="32" width="12" height="46" rx="5" fill="#E0483F" transform="rotate(16 66 78)"/></svg>
         <span class="brandwm"><span class="bwm-ko">내도감</span><span class="bwm-en">NAEDOGAM</span></span>
       </button>
-      <span class="mhver">배포 v160</span>
+      <span class="mhver">배포 v161</span>
       <span class="spacer"></span>
       <span class="src-chip" id="srcChip" style="display:none">데모</span>
       <button class="icon-btn" id="searchToggle" type="button" style="display:none">🔍</button>
@@ -1650,8 +1650,14 @@ class GSheetSource {
   _rng(tab,a1){ return encodeURIComponent("'"+tab+"'!"+a1); }
   async _ensureSpreadsheet(){ if(this.ssId) return;
     try{ const _q=encodeURIComponent("mimeType='application/vnd.google-apps.spreadsheet' and name='내도감 Data' and trashed=false");
-      const _f=await this._api("https://www.googleapis.com/drive/v3/files?spaces=drive&orderBy=createdTime&pageSize=5&fields=files(id)&q="+_q);
-      if(_f && _f.files && _f.files.length){ this.ssId=_f.files[0].id; store.setItem("nd.ssId",this.ssId); this._titles=null; return; } }catch(e){}
+      const _f=await this._api("https://www.googleapis.com/drive/v3/files?spaces=drive&orderBy=createdTime&pageSize=20&fields=files(id)&q="+_q);
+      const _files=(_f&&_f.files)||[];
+      if(_files.length===1){ this.ssId=_files[0].id; store.setItem("nd.ssId",this.ssId); this._titles=null; return; }
+      if(_files.length>1){ let _best=_files[0].id, _bn=-1;   // 사본이 여러 개면 데이터가 가장 많은 것을 고른다(빈 사본 회피)
+        for(const _fl of _files){ let _n=0;
+          for(const _tb of ["영화","도서","등산","러닝","일기"]){ try{ const _d=await this._api("https://sheets.googleapis.com/v4/spreadsheets/"+_fl.id+"/values/"+encodeURIComponent("'"+_tb+"'!A2:A")); _n+=((_d.values||[]).length); }catch(e){} }
+          if(_n>_bn){ _bn=_n; _best=_fl.id; } }
+        this.ssId=_best; store.setItem("nd.ssId",this.ssId); this._titles=null; return; } }catch(e){}
     const d=await this._api("https://sheets.googleapis.com/v4/spreadsheets",{method:"POST", body:JSON.stringify({properties:{title:"내도감 Data"}})});
     this.ssId=d.spreadsheetId; store.setItem("nd.ssId",this.ssId); this._titles=null; }
   async _tabTitles(force){ if(this._titles && !force) return this._titles;
