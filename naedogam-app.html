@@ -574,10 +574,10 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
   <header class="masthead">
     <div class="mh-row">
       <button id="brandBtn" type="button" class="brandbtn" aria-label="홈"><!-- Naedogam DEPLOY-build · v141 토큰캐시 (구글 로그인 + 각자 시트 · 범용 분야 · 영화/차계부 제외) -->
-        <svg class="brandmark" width="34" height="30" viewBox="26 28 62 54" aria-hidden="true"><rect x="28" y="40" width="12" height="38" rx="5" fill="#F7F5F0"/><rect x="44" y="30" width="12" height="48" rx="5" fill="#F7F5F0"/><rect x="60" y="32" width="12" height="46" rx="5" fill="#E0483F" transform="rotate(16 66 78)"/></svg>
+        <svg class="brandmark" width="40" height="30" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#F7F5F0"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#F7F5F0"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#F7F5F0"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#F7F5F0"/></svg>
         <span class="brandwm"><span class="bwm-ko">내도감</span><span class="bwm-en">NAEDOGAM</span></span>
       </button>
-      <span class="mhver">배포 v186</span>
+      <span class="mhver">배포 v187</span>
       <span class="spacer"></span>
       <span class="src-chip" id="srcChip" style="display:none">데모</span>
       <button class="icon-btn" id="searchToggle" type="button" style="display:none">🔍</button>
@@ -1832,18 +1832,8 @@ function renderTabs(){ const tw=$("#tabs"); tw.innerHTML=getActive().map(id=>{ c
   const _sel=tw.querySelector('.tab[aria-selected="true"]'); if(_sel){ tw.scrollLeft=Math.max(0,_sel.offsetLeft-(tw.clientWidth-_sel.offsetWidth)/2); } }
 function renderStats(m, rows){
   const isMovie = m.id==="movies" && !CONFIG.DEPLOY;
-  if(m.statStyle==="mood"){
-    const total=calcStat(m.stats[0], rows);
-    const moods=m.stats.slice(1).map(x=>({e:x.label, eq:x.eq, lab:(x.eq||x.label), n:calcStat(x,rows)}));
-    $("#stats").className="stats moodsel";
-    const _mo=(v,txt,sel)=>'<option value="'+String(v||'').replace(/"/g,'&quot;')+'"'+(sel?' selected':'')+'>'+txt+'</option>';
-    let _h='<select id="moodSel" class="mood-select">'+_mo("","기분 전체 ("+fmt(total)+")",!diaryMood);
-    moods.forEach(x=>{ _h+=_mo(x.eq, x.lab+" ("+fmt(x.n)+")", diaryMood===x.eq); });
-    _h+='</select>';
-    $("#stats").innerHTML=_h;
-    $("#moodSel").onchange=function(){ diaryMood=this.value; if(diaryView==='cal'&&diaryMood) diaryView='list'; state.page=0; paintDomain(m); };
-    return;
-  }
+  if(m.statStyle==="mood"){ $("#stats").style.display="none"; $("#stats").innerHTML=""; return; }
+  $("#stats").style.display="";
   $("#stats").className="stats";
   $("#stats").innerHTML=m.stats.map((s,idx)=>{ let n=calcStat(s,rows);
     if(s.type==="sum"||s.type==="avgComputed"||s.type==="max") n=fmt(n)+(s.unit?` ${s.unit}`:"");
@@ -1927,10 +1917,16 @@ function rowTags(r){ const t=r.tags; return Array.isArray(t)?t:(t==null||t===""?
 function renderDiaryTags(m){
   const sc = $("#scope");
   const all = [...new Set(state.rows.flatMap(rowTags))].sort((a,b)=>a.localeCompare(b,"ko"));
-  if(!all.length){ sc.style.display="none"; sc.innerHTML=""; return; }
-  sc.style.display="flex"; sc.style.flexDirection="row";
-  sc.innerHTML=`<select id="tagSel" class="mood-select"><option value=""${diaryTag===""?" selected":""}>태그 전체</option>`+all.map(g=>`<option value="${g.replace(/"/g,"&quot;")}"${diaryTag===g?" selected":""}>#${g}</option>`).join("")+`</select>`;
-  const _ts=sc.querySelector("#tagSel"); if(_ts) _ts.onchange=function(){ diaryTag=this.value; if(diaryView==="cal"&&diaryTag) diaryView="list"; state.page=0; paintDomain(m); };
+  sc.style.display="flex"; sc.style.flexDirection="row"; sc.style.flexWrap="wrap"; sc.style.alignItems="center"; sc.style.gap="7px";
+  const st = m.stats||[]; const total = calcStat(st[0], state.rows);
+  let mo = "<option value=\"\""+(diaryMood===""?" selected":"")+">\uae30\ubd84 \uc804\uccb4 ("+fmt(total)+")</option>";
+  st.slice(1).forEach(function(x){ const eq=x.eq||x.label; const n=calcStat(x, state.rows); mo += "<option value=\""+String(eq).replace(/"/g,"&quot;")+"\""+(diaryMood===eq?" selected":"")+">"+(x.eq||x.label)+" ("+fmt(n)+")</option>"; });
+  let html = "<select id=\"moodSel\" class=\"mood-select\">"+mo+"</select>";
+  html += "<button class=\"chip "+(diaryTag===""?"on":"")+"\" data-dt2=\"\">\uc804\uccb4</button>";
+  all.forEach(function(g){ html += "<button class=\"chip "+(diaryTag===g?"on":"")+"\" data-dt2=\""+g.replace(/"/g,"&quot;")+"\">"+g+"</button>"; });
+  sc.innerHTML = html;
+  const _ms = sc.querySelector("#moodSel"); if(_ms) _ms.onchange=function(){ diaryMood=this.value; if(diaryView==="cal"&&diaryMood) diaryView="list"; state.page=0; paintDomain(m); };
+  sc.querySelectorAll("[data-dt2]").forEach(function(b){ b.onclick=function(){ diaryTag=b.dataset.dt2; if(diaryView==="cal"&&diaryTag) diaryView="list"; state.page=0; paintDomain(m); }; });
 }
 function renderDiaryViewToggle(m){
   const p=$("#picker"); p.style.display="flex"; p.style.overflow="visible"; p.style.alignItems="center"; p.style.cursor="default";
