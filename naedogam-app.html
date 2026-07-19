@@ -577,7 +577,7 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
         <svg class="brandmark" width="40" height="30" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#F7F5F0"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#F7F5F0"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#F7F5F0"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#F7F5F0"/></svg>
         <span class="brandwm"><span class="bwm-ko">내도감</span><span class="bwm-en">NAEDOGAM</span></span>
       </button>
-      <span class="mhver">배포 v189</span>
+      <span class="mhver">배포 v190</span>
       <span class="spacer"></span>
       <span class="src-chip" id="srcChip" style="display:none">데모</span>
       <button class="icon-btn" id="searchToggle" type="button" style="display:none">🔍</button>
@@ -1917,7 +1917,7 @@ function rowTags(r){ const t=r.tags; return Array.isArray(t)?t:(t==null||t===""?
 function renderDiaryTags(m){
   const sc = $("#scope");
   const all = [...new Set(state.rows.flatMap(rowTags))].sort((a,b)=>a.localeCompare(b,"ko"));
-  sc.style.display="flex"; sc.style.flexDirection="row"; sc.style.flexWrap="wrap"; sc.style.alignItems="center"; sc.style.gap="7px";
+  sc.style.display="flex"; sc.style.flexDirection="row"; sc.style.flexWrap="nowrap"; sc.style.alignItems="center"; sc.style.gap="7px";
   const st = m.stats||[]; const total = calcStat(st[0], state.rows);
   let mo = "<option value=\"\""+(diaryMood===""?" selected":"")+">\uae30\ubd84 \uc804\uccb4 ("+fmt(total)+")</option>";
   st.slice(1).forEach(function(x){ const eq=x.eq||x.label; const n=calcStat(x, state.rows); mo += "<option value=\""+String(eq).replace(/"/g,"&quot;")+"\""+(diaryMood===eq?" selected":"")+">"+(x.eq||x.label)+" ("+fmt(n)+")</option>"; });
