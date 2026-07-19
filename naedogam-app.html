@@ -577,7 +577,7 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
         <svg class="brandmark" width="34" height="30" viewBox="26 28 62 54" aria-hidden="true"><rect x="28" y="40" width="12" height="38" rx="5" fill="#F7F5F0"/><rect x="44" y="30" width="12" height="48" rx="5" fill="#F7F5F0"/><rect x="60" y="32" width="12" height="46" rx="5" fill="#E0483F" transform="rotate(16 66 78)"/></svg>
         <span class="brandwm"><span class="bwm-ko">내도감</span><span class="bwm-en">NAEDOGAM</span></span>
       </button>
-      <span class="mhver">배포 v182</span>
+      <span class="mhver">배포 v183</span>
       <span class="spacer"></span>
       <span class="src-chip" id="srcChip" style="display:none">데모</span>
       <button class="icon-btn" id="searchToggle" type="button" style="display:none">🔍</button>
@@ -2457,7 +2457,7 @@ function personSpan(str, role){    // "왕가위, 장만옥" → 각 이름 클�
     .map(n=>`<span class="plink" data-name="${n.replace(/"/g,'&quot;')}" data-role="${role}">${n}</span>`).join(", ");
 }
 /* ── 배포용 영화 리치 상세(개인앱과 동일 레이아웃, 표준 필드+일반 저장) ── */
-async function myStarsHTML(val){
+function myStarsHTML(val){
   var v=parseFloat(val)||0; var h='<span class="mystars">';
   for(var i=1;i<=5;i++){ var pct=v>=i?100:(v>=i-0.5?50:0);
     h+='<span class="ms-star"><span class="ms-base">\u2606</span><span class="ms-fill" style="width:'+pct+'%">\u2605</span><span class="ms-hit ms-l" data-val="'+(i-0.5)+'"></span><span class="ms-hit ms-r" data-val="'+i+'"></span></span>'; }
@@ -2472,7 +2472,7 @@ async function setMovieRatingDeploy(m, r, val){
   if(state.domain===m.id) paintDomain(m);
   openMovieDetailDeploy(m, r);
 }
-function toggleMovieDeploy(m, r, key){
+async function toggleMovieDeploy(m, r, key){
   r[key]=!r[key];
   if(key==="watched" && r.watched && !r.watchDate) r.watchDate=todayStr();
   try{ await sheetSrc().update(m.id, r._id, r); }
