@@ -577,7 +577,7 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
         <svg class="brandmark" width="40" height="30" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#F7F5F0"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#F7F5F0"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#F7F5F0"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#F7F5F0"/></svg>
         <span class="brandwm"><span class="bwm-ko">내도감</span><span class="bwm-en">NAEDOGAM</span></span>
       </button>
-      <span class="mhver">v195</span>
+      <span class="mhver">v196</span>
       <span class="spacer"></span>
       <span class="src-chip" id="srcChip" style="display:none">데모</span>
       <button class="icon-btn" id="searchToggle" type="button" style="display:none">🔍</button>
@@ -1915,6 +1915,22 @@ function renderScopeSort(m){   // 러닝·일기: 정렬칩 줄(다른 탭의 �
   sc.querySelectorAll("[data-dt2]").forEach(b=>b.onclick=()=>{ diaryTag=b.dataset.dt2; if(diaryView==='cal'&&diaryTag) diaryView='list'; state.page=0; paintDomain(m); });
 }
 function rowTags(r){ const t=r.tags; return Array.isArray(t)?t:(t==null||t===""?[]:String(t).split(",").map(s=>s.trim()).filter(Boolean)); }
+var NDTAGCATS={quote:"tags",scrap:"tags",travel:"country"};
+var ndCatTag="", ndCatTagFor="";
+function ndTagVals(r,k){ var v=r[k]; if(Array.isArray(v)) return v.map(function(x){return String(x).trim();}).filter(Boolean); return String(v||"").split(",").map(function(x){return x.trim();}).filter(Boolean); }
+function renderCatTags(m){
+  var k=NDTAGCATS[m.id]; var sc=document.getElementById("scope"); if(!sc) return;
+  if(ndCatTagFor!==m.id){ ndCatTag=""; ndCatTagFor=m.id; }
+  var seen={}, all=[];
+  state.rows.forEach(function(r){ ndTagVals(r,k).forEach(function(g){ if(!seen[g]){ seen[g]=1; all.push(g); } }); });
+  all.sort(function(a,b){ return a.localeCompare(b,"ko"); });
+  if(!all.length){ sc.style.display="none"; return; }
+  sc.style.display=""; sc.style.flexWrap="nowrap";
+  var html='<button class="chip '+(ndCatTag===""?"on":"")+'" data-ct="">전체</button>';
+  all.forEach(function(g){ html+='<button class="chip '+(ndCatTag===g?"on":"")+'" data-ct="'+g.replace(/"/g,"&quot;")+'">'+g+'</button>'; });
+  sc.innerHTML=html;
+  sc.querySelectorAll("[data-ct]").forEach(function(b){ b.onclick=function(){ ndCatTag=b.dataset.ct; state.page=0; paintDomain(m); }; });
+}
 function renderDiaryTags(m){
   const sc = $("#scope");
   const all = [...new Set(state.rows.flatMap(rowTags))].sort((a,b)=>a.localeCompare(b,"ko"));
@@ -3045,10 +3061,10 @@ function paintDomain(m){   // state.rows를 화면에 그림 (데이터 다시 �
   if(m.id==="books") renderBookGenres(m);
   if(m.id==="mountains") renderMtnRegions(m);
   if(m.scopeSort) renderScopeSort(m);
-  if(m.id==="diary") renderDiaryTags(m);
+  if(m.id==="diary") renderDiaryTags(m); if(NDTAGCATS[m.id]) renderCatTags(m);
   if(m.id==="travel" && diaryView==="map"){ $("#count").style.display="none"; renderTravelMap(m, base); _mountViewToggle(m); return; }
   if(hasCal(m) && diaryView==="cal"){ $("#count").style.display="none"; renderDiaryCalendar(m, base); _mountViewToggle(m); return; }
-  let listBase = applyStatFilter(m, base);
+  let listBase = applyStatFilter(m, base); if(NDTAGCATS[m.id] && ndCatTag) listBase = listBase.filter(function(r){ return ndTagVals(r,NDTAGCATS[m.id]).indexOf(ndCatTag)>=0; });
   if(m.id==="books" && bookGenreFilter) listBase = listBase.filter(r=>bookGenresOf(r).includes(bookGenreFilter));
   if(m.id==="mountains" && mtnRegion) listBase = listBase.filter(r=>mtnRegionMatch(r, mtnRegion));
   if(m.id==="diary" && diaryTag) listBase = listBase.filter(r=>rowTags(r).includes(diaryTag));
@@ -4312,6 +4328,10 @@ boot();
 })();
 </script>
 <style id="ndui181">
+#list .qcard{ padding:16px; gap:15px; }
+#list .sccard.sc-text{ padding:16px; gap:15px; }
+.sccard .sc-body{ padding:14px 16px 16px; }
+
 #root[data-domain="diary"] .stats.moodsel{ display:flex; justify-content:flex-start; padding:8px 2px 6px; }
 #root[data-domain="diary"] .mood-select{ font-family:var(--sans); font-size:14px; padding:6px 12px; border:1px solid var(--line-soft); border-radius:999px; background:var(--card); color:var(--ink); }
 .catcard .body{ min-height:64px; }
