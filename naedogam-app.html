@@ -577,7 +577,7 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
         <svg class="brandmark" width="34" height="30" viewBox="26 28 62 54" aria-hidden="true"><rect x="28" y="40" width="12" height="38" rx="5" fill="#F7F5F0"/><rect x="44" y="30" width="12" height="48" rx="5" fill="#F7F5F0"/><rect x="60" y="32" width="12" height="46" rx="5" fill="#E0483F" transform="rotate(16 66 78)"/></svg>
         <span class="brandwm"><span class="bwm-ko">내도감</span><span class="bwm-en">NAEDOGAM</span></span>
       </button>
-      <span class="mhver">배포 v180</span>
+      <span class="mhver">배포 v181</span>
       <span class="spacer"></span>
       <span class="src-chip" id="srcChip" style="display:none">데모</span>
       <button class="icon-btn" id="searchToggle" type="button" style="display:none">🔍</button>
@@ -1834,10 +1834,14 @@ function renderStats(m, rows){
   const isMovie = m.id==="movies" && !CONFIG.DEPLOY;
   if(m.statStyle==="mood"){
     const total=calcStat(m.stats[0], rows);
-    const moods=m.stats.slice(1).map(x=>({e:x.label, eq:x.eq, n:calcStat(x,rows)}));
-    $("#stats").className="stats moodstats";
-    $("#stats").innerHTML=`<button class="ms-total ${!diaryMood?'on':''}" type="button" data-mood=""><b>${fmt(total)}</b> 전체</button>`+moods.map(x=>`<button class="ms-chip ${diaryMood===x.eq?'on':''}" type="button" data-mood="${String(x.eq||'').replace(/"/g,'&quot;')}"><span class="ms-emo">${x.e}</span><b>${fmt(x.n)}</b></button>`).join("");
-    $("#stats").querySelectorAll("[data-mood]").forEach(b=>b.onclick=()=>{ diaryMood=b.dataset.mood; if(diaryView==='cal'&&diaryMood) diaryView='list'; state.page=0; paintDomain(m); });
+    const moods=m.stats.slice(1).map(x=>({e:x.label, eq:x.eq, lab:(x.eq||x.label), n:calcStat(x,rows)}));
+    $("#stats").className="stats moodsel";
+    const _mo=(v,txt,sel)=>'<option value="'+String(v||'').replace(/"/g,'&quot;')+'"'+(sel?' selected':'')+'>'+txt+'</option>';
+    let _h='<select id="moodSel" class="mood-select">'+_mo("","전체 ("+fmt(total)+")",!diaryMood);
+    moods.forEach(x=>{ _h+=_mo(x.eq, x.lab+" ("+fmt(x.n)+")", diaryMood===x.eq); });
+    _h+='</select>';
+    $("#stats").innerHTML=_h;
+    $("#moodSel").onchange=function(){ diaryMood=this.value; if(diaryView==='cal'&&diaryMood) diaryView='list'; state.page=0; paintDomain(m); };
     return;
   }
   $("#stats").className="stats";
@@ -4240,5 +4244,12 @@ boot();
   setTimeout(sync, 300);
 })();
 </script>
+<style id="ndui181">
+#root[data-domain="diary"] .stats.moodsel{ display:flex; justify-content:flex-start; padding:8px 2px 6px; }
+#root[data-domain="diary"] .mood-select{ font-family:var(--sans); font-size:14px; padding:6px 12px; border:1px solid var(--line-soft); border-radius:999px; background:var(--card); color:var(--ink); }
+#root[data-domain="diary"] .card .body{ min-height:64px; }
+#root[data-domain="diary"] .card .body .kv{ display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
+#root[data-domain="diary"] .card .body .meta{ display:-webkit-box; -webkit-line-clamp:1; -webkit-box-orient:vertical; overflow:hidden; }
+</style>
 </body>
 </html>
