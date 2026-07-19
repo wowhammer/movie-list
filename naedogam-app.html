@@ -577,7 +577,7 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
         <svg class="brandmark" width="34" height="30" viewBox="26 28 62 54" aria-hidden="true"><rect x="28" y="40" width="12" height="38" rx="5" fill="#F7F5F0"/><rect x="44" y="30" width="12" height="48" rx="5" fill="#F7F5F0"/><rect x="60" y="32" width="12" height="46" rx="5" fill="#E0483F" transform="rotate(16 66 78)"/></svg>
         <span class="brandwm"><span class="bwm-ko">내도감</span><span class="bwm-en">NAEDOGAM</span></span>
       </button>
-      <span class="mhver">배포 v183</span>
+      <span class="mhver">배포 v184</span>
       <span class="spacer"></span>
       <span class="src-chip" id="srcChip" style="display:none">데모</span>
       <button class="icon-btn" id="searchToggle" type="button" style="display:none">🔍</button>
@@ -2459,9 +2459,9 @@ function personSpan(str, role){    // "왕가위, 장만옥" → 각 이름 클�
 /* ── 배포용 영화 리치 상세(개인앱과 동일 레이아웃, 표준 필드+일반 저장) ── */
 function myStarsHTML(val){
   var v=parseFloat(val)||0; var h='<span class="mystars">';
-  for(var i=1;i<=5;i++){ var pct=v>=i?100:(v>=i-0.5?50:0);
-    h+='<span class="ms-star"><span class="ms-base">\u2606</span><span class="ms-fill" style="width:'+pct+'%">\u2605</span><span class="ms-hit ms-l" data-val="'+(i-0.5)+'"></span><span class="ms-hit ms-r" data-val="'+i+'"></span></span>'; }
-  h+='<span class="ms-num">'+(v?('\u2605 '+v):'\ubbf8\uc815')+'</span><button type="button" class="ms-clear" data-val="0">\uc9c0\uc6c0</button></span>';
+  for(var i=1;i<=5;i++){ var pct=v>=2*i?100:(v>=2*i-1?50:0);
+    h+='<span class="ms-star"><span class="ms-base">☆</span><span class="ms-fill" style="width:'+pct+'%">★</span><span class="ms-hit ms-l" data-val="'+(2*i-1)+'"></span><span class="ms-hit ms-r" data-val="'+(2*i)+'"></span></span>'; }
+  h+='<span class="ms-num">'+(v?('★ '+v+'/10'):'미정')+'</span><button type="button" class="ms-clear" data-val="0">지움</button></span>';
   return h;
 }
 async function setMovieRatingDeploy(m, r, val){
@@ -2496,6 +2496,7 @@ async function openMovieDetailDeploy(m, r){
         ${r.recommend?`<div class="tags" style="margin-top:6px"><span class="tag rec">${r.recommend}</span></div>`:""}
       </div>
     </div>
+    <div class="drate"><span class="drate-l">내 별점</span> ${myStarsHTML(r.rating)}</div>
     <div class="mvover" id="mvOver">줄거리 불러오는 중…</div>
     ${r.review?`<div class="mvreview"><b>📝 내 코멘트</b><br>${String(r.review).replace(/</g,"&lt;")}</div>`:""}
     <div class="mvlinks">
@@ -2503,7 +2504,6 @@ async function openMovieDetailDeploy(m, r){
       <a class="btn ghost" target="_blank" rel="noopener" href="https://pedia.watcha.com/ko/search?query=${encodeURIComponent(r.title||"")}">🍿 왓챠</a>
       <a class="btn ghost" target="_blank" rel="noopener" href="https://search.naver.com/search.naver?query=${encodeURIComponent((r.title||"")+" 영화")}">🔍 네이버</a>
     </div>
-    <div class="drate"><span class="drate-l">\ub0b4 \ubcc4\uc810</span> ${myStarsHTML(r.rating)}</div>
     <div class="dfoot">
       <button class="btn ${r.watched?'':'ghost'}" id="mW">${r.watched?'✓ 봤음':'봤음'}</button>
       <button class="btn ${r.rewatch?'':'ghost'}" id="mR">${r.rewatch?'✓ 다시볼것':'다시볼것'}</button>
