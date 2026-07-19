@@ -577,7 +577,7 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
         <svg class="brandmark" width="40" height="30" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#F7F5F0"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#F7F5F0"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#F7F5F0"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#F7F5F0"/></svg>
         <span class="brandwm"><span class="bwm-ko">내도감</span><span class="bwm-en">NAEDOGAM</span></span>
       </button>
-      <span class="mhver">배포 v190</span>
+      <span class="mhver">배포 v191</span>
       <span class="spacer"></span>
       <span class="src-chip" id="srcChip" style="display:none">데모</span>
       <button class="icon-btn" id="searchToggle" type="button" style="display:none">🔍</button>
@@ -4270,14 +4270,14 @@ boot();
 <style id="ndui181">
 #root[data-domain="diary"] .stats.moodsel{ display:flex; justify-content:flex-start; padding:8px 2px 6px; }
 #root[data-domain="diary"] .mood-select{ font-family:var(--sans); font-size:14px; padding:6px 12px; border:1px solid var(--line-soft); border-radius:999px; background:var(--card); color:var(--ink); }
-#root[data-domain="diary"] .card .body{ min-height:64px; }
-#root[data-domain="diary"] .card .body .kv{ display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
-#root[data-domain="diary"] .card .body .meta{ display:-webkit-box; -webkit-line-clamp:1; -webkit-box-orient:vertical; overflow:hidden; }
+.catcard .body{ min-height:64px; }
+.catcard .body .kv{ display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
+.catcard .body .meta{ display:-webkit-box; -webkit-line-clamp:1; -webkit-box-orient:vertical; overflow:hidden; }
 
-#root[data-domain="diary"] .card{ grid-template-columns:54px 1fr auto; align-items:start; gap:13px; }
-#root[data-domain="diary"] .card .thumb{ width:54px !important; min-width:54px; max-width:54px; height:68px !important; flex:none; border-radius:8px; overflow:hidden; display:flex; align-items:center; justify-content:center; }
-#root[data-domain="diary"] .card .thumb img{ width:100% !important; height:100% !important; object-fit:cover; }
-#root[data-domain="diary"] .card .body{ min-height:68px; }
+.catcard{ grid-template-columns:54px 1fr auto; align-items:start; gap:13px; }
+.catcard .thumb{ width:54px !important; min-width:54px; max-width:54px; height:68px !important; flex:none; border-radius:8px; overflow:hidden; display:flex; align-items:center; justify-content:center; }
+.catcard .thumb img{ width:100% !important; height:100% !important; object-fit:cover; }
+.catcard .body{ min-height:68px; }
 </style>
 <style id="ndstars182">
 .drate{ display:flex; align-items:center; gap:8px; padding:4px 2px 2px; }
