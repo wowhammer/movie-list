@@ -577,7 +577,7 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
         <svg class="brandmark" width="40" height="30" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#F7F5F0"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#F7F5F0"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#F7F5F0"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#F7F5F0"/></svg>
         <span class="brandwm"><span class="bwm-ko">내도감</span><span class="bwm-en">NAEDOGAM</span></span>
       </button>
-      <span class="mhver">배포 v191</span>
+      <span class="mhver">v192</span>
       <span class="spacer"></span>
       <span class="src-chip" id="srcChip" style="display:none">데모</span>
       <button class="icon-btn" id="searchToggle" type="button" style="display:none">🔍</button>
@@ -4278,6 +4278,13 @@ boot();
 .catcard .thumb{ width:54px !important; min-width:54px; max-width:54px; height:68px !important; flex:none; border-radius:8px; overflow:hidden; display:flex; align-items:center; justify-content:center; }
 .catcard .thumb img{ width:100% !important; height:100% !important; object-fit:cover; }
 .catcard .body{ min-height:68px; }
+
+.catcard{ padding:16px; border-radius:14px; grid-template-columns:62px 1fr auto; gap:15px; }
+.catcard .thumb{ width:62px !important; min-width:62px; max-width:62px; height:78px !important; border-radius:10px; }
+.catcard .body{ min-height:78px; }
+.catcard .body h3{ font-size:17px; letter-spacing:-0.01em; }
+.catcard .body .meta{ font-size:13px; }
+.catcard .body .meta + .meta{ margin-top:9px; padding-top:9px; border-top:0.5px solid var(--line-soft); font-size:12px; }
 </style>
 <style id="ndstars182">
 .drate{ display:flex; align-items:center; gap:8px; padding:4px 2px 2px; }
