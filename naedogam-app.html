@@ -577,7 +577,7 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
         <svg class="brandmark" width="40" height="30" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#F7F5F0"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#F7F5F0"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#F7F5F0"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#F7F5F0"/></svg>
         <span class="brandwm"><span class="bwm-ko">내도감</span><span class="bwm-en">NAEDOGAM</span></span>
       </button>
-      <span class="mhver">v193</span>
+      <span class="mhver">v194</span>
       <span class="spacer"></span>
       <span class="src-chip" id="srcChip" style="display:none">데모</span>
       <button class="icon-btn" id="searchToggle" type="button" style="display:none">🔍</button>
@@ -2316,7 +2316,50 @@ function renderCard(m, r, no){ if(m.id==="books") return bookCard(r); if(m.id===
     return `<span><i class="kvk"${_cs}>${col.k}</i> <b>${s}</b></span>`; }).filter(Boolean).join("");
   return `<button class="card catcard" data-id="${r._id}"><span class="thumb">${(r.cover||r._cover)?`<img src="${r.cover||r._cover}" alt="">`:(c.thumb||"🧾")}</span>
     <span class="body"><h3 style="font-size:15px">${c.title(r)}</h3><div class="kv">${kv}</div>${(()=>{ const cut=t=>t.slice(0,70).replace(/</g,"&lt;")+(t.length>70?"…":""); if(m.id==="diary"){ const a=[]; if(r.content) a.push(`<div class="meta" style="margin-top:5px">${cut(String(r.content))}</div>`); if(r.nddaily) a.push(`<div class="meta" style="margin-top:4px;opacity:.85">🗓 ${cut(String(r.nddaily).replace(/\n+/g," · "))}</div>`); return a.join(""); } const e=r.memo||r.content||r.nddaily; return e?`<div class="meta" style="margin-top:5px">${cut(String(e))}</div>`:""; })()}</span></button>`; }
-function _navSet(m,r){ const i=NAV_LIST.findIndex(x=>String(x._id)===String(r._id)); NAV_CUR={m, idx:i}; requestAnimationFrame(_mountDetailNav); }
+async function ndPhotoSearch(q){
+  var out=[];
+  try{
+    var s=await fetch("https://en.wikipedia.org/w/api.php?action=query&generator=search&gsrsearch="+encodeURIComponent(q)+"&gsrlimit=6&prop=pageimages&piprop=thumbnail&pithumbsize=400&format=json&origin=*").then(function(r){return r.json();});
+    var pages=(s.query&&s.query.pages)||{};
+    Object.keys(pages).forEach(function(k){ var pg=pages[k]; if(pg.thumbnail&&pg.thumbnail.source) out.push({t:pg.title,u:pg.thumbnail.source}); });
+  }catch(e){}
+  return out;
+}
+function ndPhotoPick(m, r){
+  var old=document.getElementById("ndPhotoDlg"); if(old) old.remove();
+  var dlg=document.createElement("dialog"); dlg.id="ndPhotoDlg";
+  dlg.style.cssText="border:none;border-radius:14px;padding:0;max-width:420px;width:92%;background:var(--card,#fff)";
+  dlg.innerHTML='<div style="padding:16px"><div style="display:flex;gap:8px;margin-bottom:8px"><input id="ndPQ" style="flex:1;padding:9px 12px;border:1px solid var(--line-soft,#ddd);border-radius:8px;font-size:14px"><button id="ndPGo" class="btn">\uac80\uc0c9</button><button id="ndPX" class="btn ghost">\ub2eb\uae30</button></div><div style="font-size:12px;color:var(--ink-soft,#888);margin-bottom:10px">\uc601\ubb38\uba85\uc73c\ub85c \uac80\uc0c9\ud558\uba74 \uc798 \ub098\uc635\ub2c8\ub2e4 (\uc608: Chateau Margaux)</div><div id="ndPRes" style="display:grid;grid-template-columns:1fr 1fr;gap:10px"></div></div>';
+  document.body.appendChild(dlg); dlg.showModal();
+  var q=dlg.querySelector("#ndPQ"); q.value=(r.title||"");
+  dlg.querySelector("#ndPX").onclick=function(){ dlg.close(); };
+  async function run(){
+    var res=dlg.querySelector("#ndPRes"); res.innerHTML='<div style="grid-column:1/-1;color:var(--ink-soft,#888);font-size:13px">\ucc3e\ub294 \uc911...</div>';
+    var list=await ndPhotoSearch(q.value);
+    if(!list.length){ res.innerHTML='<div style="grid-column:1/-1;color:var(--ink-soft,#888);font-size:13px">\uacb0\uacfc \uc5c6\uc74c \u2014 \uc601\ubb38\uba85\uc73c\ub85c \ubc14\uafd4\ubcf4\uc138\uc694.</div>'; return; }
+    res.innerHTML=list.map(function(x,i){ return '<button data-i="'+i+'" style="border:1px solid var(--line-soft,#eee);border-radius:10px;padding:6px;background:var(--card,#fff);text-align:left;cursor:pointer"><img src="'+x.u+'" style="width:100%;height:110px;object-fit:cover;border-radius:6px"><div style="font-size:11px;color:var(--ink-soft,#555);margin-top:4px">'+x.t+'</div></button>'; }).join("");
+    res.querySelectorAll("[data-i]").forEach(function(b){ b.onclick=async function(){
+      var pick=list[+b.dataset.i]; var prev=r.cover; r.cover=pick.u;
+      try{ await sheetSrc().update(m.id, r._id, r); var arr=CACHE[m.id]; if(arr){ var it=arr.find(function(x){return String(x._id)===String(r._id);}); if(it) it.cover=pick.u; savePersist(m.id,arr); } if(state.domain===m.id) paintDomain(m); dlg.close(); }
+      catch(e){ r.cover=prev; alert("\uc800\uc7a5 \uc2e4\ud328: "+e.message); }
+    }; });
+  }
+  dlg.querySelector("#ndPGo").onclick=run; run();
+}
+function ndAddPhotoBtn(m, r){
+  try{
+    if(!m||!r) return;
+    var hasCover=(m.fields||[]).some(function(f){ return f.k==="cover"; });
+    if(!hasCover) return;
+    var d=document.getElementById("detail"); if(!d||!d.open) return;
+    var acts=d.querySelector(".dh-actions"); if(!acts) return;
+    if(acts.querySelector("#dPhoto")) return;
+    var b=document.createElement("button"); b.id="dPhoto"; b.className="dh-btn"; b.type="button"; b.textContent="\uc0ac\uc9c4";
+    b.onclick=function(){ ndPhotoPick(m, r); };
+    acts.insertBefore(b, acts.firstChild);
+  }catch(e){}
+}
+function _navSet(m,r){ try{ setTimeout(function(){ ndAddPhotoBtn(m, r); }, 0); }catch(e){} const i=NAV_LIST.findIndex(x=>String(x._id)===String(r._id)); NAV_CUR={m, idx:i}; requestAnimationFrame(_mountDetailNav); }
 function _mountDetailNav(){ const d=$("#detail"); if(!d.open||!NAV_CUR) return; d.querySelectorAll(".dnav").forEach(x=>x.remove());
   const m=NAV_CUR.m, idx=NAV_CUR.idx; if(idx<0||NAV_LIST.length<2) return;
   let leftI=idx>0?idx-1:-1, rightI=idx<NAV_LIST.length-1?idx+1:-1;   // 목록 표시 순서대로 이전/다음
