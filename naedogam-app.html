@@ -577,7 +577,7 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
         <svg class="brandmark" width="34" height="30" viewBox="26 28 62 54" aria-hidden="true"><rect x="28" y="40" width="12" height="38" rx="5" fill="#F7F5F0"/><rect x="44" y="30" width="12" height="48" rx="5" fill="#F7F5F0"/><rect x="60" y="32" width="12" height="46" rx="5" fill="#E0483F" transform="rotate(16 66 78)"/></svg>
         <span class="brandwm"><span class="bwm-ko">내도감</span><span class="bwm-en">NAEDOGAM</span></span>
       </button>
-      <span class="mhver">배포 v185</span>
+      <span class="mhver">배포 v186</span>
       <span class="spacer"></span>
       <span class="src-chip" id="srcChip" style="display:none">데모</span>
       <button class="icon-btn" id="searchToggle" type="button" style="display:none">🔍</button>
@@ -1837,7 +1837,7 @@ function renderStats(m, rows){
     const moods=m.stats.slice(1).map(x=>({e:x.label, eq:x.eq, lab:(x.eq||x.label), n:calcStat(x,rows)}));
     $("#stats").className="stats moodsel";
     const _mo=(v,txt,sel)=>'<option value="'+String(v||'').replace(/"/g,'&quot;')+'"'+(sel?' selected':'')+'>'+txt+'</option>';
-    let _h='<select id="moodSel" class="mood-select">'+_mo("","전체 ("+fmt(total)+")",!diaryMood);
+    let _h='<select id="moodSel" class="mood-select">'+_mo("","기분 전체 ("+fmt(total)+")",!diaryMood);
     moods.forEach(x=>{ _h+=_mo(x.eq, x.lab+" ("+fmt(x.n)+")", diaryMood===x.eq); });
     _h+='</select>';
     $("#stats").innerHTML=_h;
@@ -1925,12 +1925,12 @@ function renderScopeSort(m){   // 러닝·일기: 정렬칩 줄(다른 탭의 �
 }
 function rowTags(r){ const t=r.tags; return Array.isArray(t)?t:(t==null||t===""?[]:String(t).split(",").map(s=>s.trim()).filter(Boolean)); }
 function renderDiaryTags(m){
-  const sc=$("#scope");
-  const all=[...new Set(state.rows.flatMap(rowTags))].sort((a,b)=>a.localeCompare(b,"ko"));
+  const sc = $("#scope");
+  const all = [...new Set(state.rows.flatMap(rowTags))].sort((a,b)=>a.localeCompare(b,"ko"));
   if(!all.length){ sc.style.display="none"; sc.innerHTML=""; return; }
   sc.style.display="flex"; sc.style.flexDirection="row";
-  sc.innerHTML=`<button class="chip ${diaryTag===''?'on':''}" data-dt2="">전체</button>`+all.map(g=>`<button class="chip ${diaryTag===g?'on':''}" data-dt2="${g.replace(/"/g,'&quot;')}">${g}</button>`).join("");
-  sc.querySelectorAll("[data-dt2]").forEach(b=>b.onclick=()=>{ diaryTag=b.dataset.dt2; if(diaryView==='cal'&&diaryTag) diaryView='list'; state.page=0; paintDomain(m); });
+  sc.innerHTML=`<select id="tagSel" class="mood-select"><option value=""${diaryTag===""?" selected":""}>태그 전체</option>`+all.map(g=>`<option value="${g.replace(/"/g,"&quot;")}"${diaryTag===g?" selected":""}>#${g}</option>`).join("")+`</select>`;
+  const _ts=sc.querySelector("#tagSel"); if(_ts) _ts.onchange=function(){ diaryTag=this.value; if(diaryView==="cal"&&diaryTag) diaryView="list"; state.page=0; paintDomain(m); };
 }
 function renderDiaryViewToggle(m){
   const p=$("#picker"); p.style.display="flex"; p.style.overflow="visible"; p.style.alignItems="center"; p.style.cursor="default";
