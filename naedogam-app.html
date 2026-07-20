@@ -573,14 +573,14 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
   @media (prefers-reduced-motion:no-preference){ .card{ transition:border-color .15s ease; } }
 
 /* ── 내 결산(Wrapped) ── */
-.wrapDlg{border:none;padding:0;margin:0;max-width:100vw;width:100vw;height:100vh;max-height:100vh;background:#0d0a1f;color:#f4f1ff}
+.wrapDlg{border:none;padding:0;margin:auto;max-width:480px;width:92%;height:auto;max-height:88vh;border-radius:20px;overflow:hidden;background:#0d0a1f;color:#f4f1ff;box-shadow:0 16px 50px rgba(0,0,0,.4)}
 .wrapDlg::backdrop{background:rgba(0,0,0,.6)}
 .wtop{position:sticky;top:0;z-index:5;display:flex;justify-content:space-between;align-items:center;padding:12px 16px;background:rgba(13,10,31,.92)}
 .wclose,.wsave{border:none;border-radius:999px;font-size:13px;font-weight:700;padding:9px 15px;cursor:pointer}
 .wclose{background:rgba(255,255,255,.1);color:#f4f1ff}
 .wsave{background:linear-gradient(100deg,#ffd66b,#ff6fae);color:#2a1150}
-.wscroll{overflow-y:auto;height:calc(100vh - 58px);display:flex;justify-content:center;padding:12px 12px 50px}
-.wcard{width:100%;max-width:560px;background:radial-gradient(120% 70% at 50% -8%,#3a1d6e 0%,#1b1140 46%,#0d0a1f 100%);border-radius:22px;padding:0 22px;overflow:hidden;height:max-content}
+.wscroll{overflow-y:auto;max-height:calc(88vh - 52px);display:flex;justify-content:center;padding:6px 12px 30px}
+.wcard{width:100%;max-width:520px;background:transparent;border-radius:0;padding:0 20px;overflow:hidden;height:max-content}
 .wloading{padding:80px 20px;text-align:center;color:#b9b2e0;font-size:15px;line-height:1.6}
 .wsec{padding:18px 0;border-bottom:1px solid rgba(255,255,255,.06)}
 .whead,.wfoot{border-bottom:none}
@@ -663,23 +663,8 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
 .mbHd{font-size:13px;color:#b9b2e0}
 .mbHt{font-size:14px;font-weight:800}
 
-
-/* ── 홈 리디자인 (목업2 다크) ── */
-:root{ --cat-collect:#7048e8; --cat-active:#2f9e44; --cat-record:#0891b2; --cat-manage:#b45309; }
-[data-theme="dark"]{ --cat-collect:#B8B7FF; --cat-active:#9CCC7A; --cat-record:#7ED2C6; --cat-manage:#FFC857; --paper:#0B0B0D; --card:#17181D; --ink:#E6E7EB; --ink-soft:#A3A7B3; --line:#262830; }
-.home-grid{ gap:10px; margin-top:16px; }
-.cat-card{ border-radius:16px; padding:14px 13px 13px; gap:9px; min-height:98px; transition:border-color .15s ease, transform .1s ease, background .15s ease; }
-.cat-card:active{ transform:translateY(1px); }
-[data-theme="dark"] .cat-card{ background:linear-gradient(180deg,#181a20,#141519); }
-[data-theme="dark"] .cat-card:hover{ border-color:#3A3F48; }
-.ci{ height:28px; line-height:0; }
-.ci-svg{ width:28px; height:28px; }
-.cat-card .cn{ font-size:15px; font-weight:600; color:var(--ink); letter-spacing:.1px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-.cat-card .cc{ font-size:12px; color:var(--ink-soft); font-family:var(--sans); margin-top:auto; }
-.cvol{ position:absolute; top:11px; right:12px; font-family:var(--mono); font-size:10px; color:var(--ink-soft); opacity:.55; letter-spacing:.03em; }
-
 </style>
-<script>try{var _t=localStorage.getItem("app:nd.theme")||localStorage.getItem("nd.theme");if(_t!=="light")document.documentElement.setAttribute("data-theme","dark");}catch(e){}</script>
+<script>try{var _t=localStorage.getItem("app:nd.theme")||localStorage.getItem("nd.theme");if(_t==="dark")document.documentElement.setAttribute("data-theme","dark");}catch(e){}</script>
 </head>
 <body>
 <div class="wrap" id="root" data-domain="movies">
@@ -689,7 +674,7 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
         <svg class="brandmark" width="40" height="30" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#F7F5F0"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#F7F5F0"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#F7F5F0"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#F7F5F0"/></svg>
         <span class="brandwm"><span class="bwm-ko">내도감</span><span class="bwm-en">NAEDOGAM</span></span>
       </button>
-      <span class="mhver">v227</span>
+      <span class="mhver">v228</span>
       <span class="spacer"></span>
       <span class="src-chip" id="srcChip" style="display:none">데모</span>
       <button class="icon-btn" id="searchToggle" type="button" style="display:none">🔍</button>
@@ -1736,10 +1721,10 @@ function renderHome(){
     $("#emptyAdd").onclick=openSettings; return;
   }
   const _ics=d=>`<svg class="ci-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="${d}"/></svg>`;
-  home.innerHTML=`<div class="home-search-wrap"><input class="home-search" id="homeSearch" type="search" placeholder="🔍 전체 검색 — 제목·이름" autocomplete="off"></div><div id="homeSearchRes" style="display:none"></div><div class="home-grid">`+active.map((m,_vi)=>{
+  home.innerHTML=`<div class="home-search-wrap"><input class="home-search" id="homeSearch" type="search" placeholder="🔍 전체 검색 — 제목·이름" autocomplete="off"></div><div id="homeSearchRes" style="display:none"></div><div class="home-grid">`+active.map(m=>{
     const _arr = CACHE[m.id] || loadPersist(m.id); const cnt = _arr ? `${fmt(_arr.length)}건` : "";
     const ic = ND_ICONS[m.id] ? _ics(ND_ICONS[m.id]) : `<span style="font-size:24px">${m.icon}</span>`;
-    return `<button class="cat-card${(_arr&&_arr.length===0)?' cat-card-zero':''}" data-id="${m.id}"><span class="cvol">卷 ${String(_vi+1).padStart(2,"0")}</span><span class="ci" style="color:var(--cat-${CAT_TYPE[m.id]||'collect'})">${ic}</span><span class="cn">${m.title}</span><span class="cc" data-cnt="${m.id}">${cnt}</span></button>`;
+    return `<button class="cat-card${(_arr&&_arr.length===0)?' cat-card-zero':''}" data-id="${m.id}"><span class="ci" style="color:${ND_COLORS[m.id]||'var(--ink)'}">${ic}</span><span class="cn">${m.title}</span><span class="cc" data-cnt="${m.id}">${cnt}</span></button>`;
   }).join("")+`</div>`;
   home.querySelectorAll(".cat-card[data-id]").forEach(b=>b.onclick=()=>openDomain(b.dataset.id));
   { const _hs=$("#homeSearch"); if(_hs){ let _t=null; _hs.addEventListener("input",()=>{ clearTimeout(_t); _t=setTimeout(()=>runHomeSearch(_hs.value),200); }); } }
@@ -1930,7 +1915,6 @@ const ND_ICONS={
   travel:'M22 2L11 13 M22 2l-7 20l-4 -9l-9 -4z'
 };
 const ND_COLORS={ movies:'#e8590c', books:'#2f9e44', mountains:'#2b8a3e', running:'#1c7ed6', carlog:'#e67700', diary:'#7048e8', subs:'#0ca678', travel:'#f08c00', cards:'#4263eb', culture:'#c2255c', food:'#d9480f', albums:'#9c36b5', wish:'#e64980', bucket:'#f59f00', quote:'#5c7cfa', pet:'#12b886', gift:'#f06595', insurance:'#3b5bdb', scrap:'#f76707', cellar:'#a61e4d' };
-var CAT_TYPE={movies:'collect',books:'collect',albums:'collect',quote:'collect',culture:'collect',cellar:'collect',wish:'collect',scrap:'collect',mountains:'active',running:'active',travel:'active',food:'active',bucket:'active',diary:'record',gift:'record',pet:'record',carlog:'manage',subs:'manage',cards:'manage',insurance:'manage'};
 const HOME_SOON=[
   {t:"운동/건강", d:'M2 12h4l2 5l4 -12l2 7h6'}
 ];
@@ -3707,10 +3691,11 @@ function mbtiHistoryHTML(){
 var MBTI_TAB="성격유형", MBTI_HEAD=["_id","측정일","유형","별칭","축상세"];
 async function mbtiSheetSave(res){
   try{ var src=sheetSrc(); if(!src||typeof src._appendObj!=="function") return false;
+    if(typeof src.ensureReady==="function"){ try{ await src.ensureReady(); }catch(_e){} }
     var uid=(window.crypto&&crypto.randomUUID)?crypto.randomUUID():String(Date.now())+Math.random().toString(16).slice(2);
     var obj={_id:uid, "측정일":res.date||"", "유형":res.type||"", "별칭":res.nick||"", "축상세":JSON.stringify(res.axes||{})};
     await src._appendObj(MBTI_TAB, obj, MBTI_HEAD); return true;
-  }catch(e){ return false; }
+  }catch(e){ try{ console.warn("MBTI 시트저장 실패:", e&&e.message||e); }catch(_){} return false; }
 }
 async function mbtiSheetLoad(){
   try{ var src=sheetSrc(); if(!src||typeof src._rowsOf!=="function") return null;
@@ -3784,7 +3769,8 @@ function mbtiShowResult(res, isSaved){
    +'<div class="wsec" style="display:flex;gap:10px;border-bottom:none">'
     +(isSaved?'<button class="wclose mbBtn" id="mbRetry" style="flex:1;padding:13px">다시 측정</button><button class="wsave mbBtn" id="mbShare" style="flex:1;padding:13px">📷 이미지 저장</button>'
              :'<button class="wclose mbBtn" id="mbRetry" style="flex:1;padding:13px">다시 하기</button><button class="wsave mbBtn" id="mbSave" style="flex:1;padding:13px">저장하기</button>')
-    +'</div>';
+    +'</div>'
+    +'<div id="mbSyncMsg" class="wcap" style="text-align:center;padding:0 18px 16px">'+(isSaved?'☁️ 구글시트에 저장됨 (기기간 공유)':'')+'</div>';
   var rt=document.getElementById("mbRetry"); if(rt) rt.onclick=function(){ mbtiRun(); };
   var sv=document.getElementById("mbSave"); if(sv) sv.onclick=function(){ mbtiSave(res); };
   var sh=document.getElementById("mbShare"); if(sh) sh.onclick=function(){ _wCardExport("mbtiCard","내도감_MBTI.png", sh); };
@@ -3796,7 +3782,7 @@ function mbtiSave(res){
     cur.latest=res; cur.history=(cur.history||[]); cur.history.unshift(res); if(cur.history.length>30) cur.history=cur.history.slice(0,30);
     store.setItem("nd.mbti", JSON.stringify(cur));
     window._mbtiLatest=res;
-    mbtiSheetSave(res).catch(function(){});
+    mbtiSheetSave(res).then(function(ok){ try{ var el=document.getElementById("mbSyncMsg"); if(el) el.textContent= ok?"☁️ 구글시트에 저장됨 (기기간 공유)":"⚠️ 시트 저장 실패 — 로그인 상태 확인"; }catch(_){} }).catch(function(){});
     mbtiShowResult(res, true);
     try{ if(typeof toast==="function") toast("저장됨 · 구글시트에 기록(기기간 공유)"); }catch(e){}
   }catch(e){ alert("저장 실패: "+(e&&e.message||e)); }
