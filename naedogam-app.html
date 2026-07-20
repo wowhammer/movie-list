@@ -75,7 +75,7 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
 
   /* 마스트헤드(압축·상단 고정) */
   .masthead{ background:transparent; padding:0 0 6px; border-bottom:none; }
-  .wrap{ max-width:600px; margin:0 auto; padding:0 16px 40px; }
+  .wrap{ max-width:600px; margin:0 auto; padding:0 16px calc(100px + env(safe-area-inset-bottom)); }
   .mh-row{ display:flex; align-items:center; gap:7px; background:#18181B; border-radius:14px; margin:9px 0 0; padding:12px 14px; }
   .brandbtn{ display:flex; align-items:center; gap:9px; background:none; border:none; padding:0; cursor:pointer; }
   .brandmark{ display:block; flex-shrink:0; }
@@ -682,7 +682,7 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
         <svg class="brandmark" width="40" height="30" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#F7F5F0"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#F7F5F0"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#F7F5F0"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#F7F5F0"/></svg>
         <span class="brandwm"><span class="bwm-ko">내도감</span><span class="bwm-en">NAEDOGAM</span></span>
       </button>
-      <span class="mhver">v235</span>
+      <span class="mhver">v236</span>
       <span class="spacer"></span>
       <span class="src-chip" id="srcChip" style="display:none">데모</span>
       <button class="icon-btn" id="searchToggle" type="button" style="display:none">🔍</button>
