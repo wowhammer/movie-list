@@ -580,7 +580,7 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
         <svg class="brandmark" width="40" height="30" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#F7F5F0"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#F7F5F0"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#F7F5F0"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#F7F5F0"/></svg>
         <span class="brandwm"><span class="bwm-ko">내도감</span><span class="bwm-en">NAEDOGAM</span></span>
       </button>
-      <span class="mhver">v209</span>
+      <span class="mhver">v210</span>
       <span class="spacer"></span>
       <span class="src-chip" id="srcChip" style="display:none">데모</span>
       <button class="icon-btn" id="searchToggle" type="button" style="display:none">🔍</button>
@@ -1930,7 +1930,7 @@ function bookRecBadges(r, cls){
 }
 function bookGenresOf(r){ return (Array.isArray(r.genre)?r.genre:(r.genre==null||r.genre===""?[]:[r.genre])).map(g=>String(g).trim()).filter(Boolean); }
 function renderBookGenres(m){
-  const genres=[...new Set(state.rows.flatMap(bookGenresOf))].sort((a,b)=>a.localeCompare(b,"ko"));
+  const srcRows=state.recPick?state.rows.filter(function(r){return String(r.recommend||"").split(/[,\/]+/).map(function(x){return x.trim();}).indexOf(state.recPick)>=0;}):state.rows; const genres=[...new Set(srcRows.flatMap(bookGenresOf))].sort((a,b)=>a.localeCompare(b,"ko")); if(bookGenreFilter && genres.indexOf(bookGenreFilter)<0) bookGenreFilter="";
   const sc=$("#scope");
   if(!genres.length){ sc.style.display="none"; sc.innerHTML=""; return; }
   sc.style.display="flex"; sc.style.flexDirection="row";
@@ -1962,9 +1962,9 @@ function renderCatTags(m){
   var k=NDTAGCATS[m.id]; var sc=document.getElementById("scope"); if(!sc) return;
   if(ndCatTagFor!==m.id){ ndCatTag=""; ndCatTagFor=m.id; }
   var seen={}, all=[];
-  state.rows.forEach(function(r){ ndTagVals(r,k).forEach(function(g){ if(!seen[g]){ seen[g]=1; all.push(g); } }); });
+  var srcRows=state.recPick?state.rows.filter(function(r){return String(r.recommend||"").split(/[,\/]+/).map(function(x){return x.trim();}).indexOf(state.recPick)>=0;}):state.rows; srcRows.forEach(function(r){ ndTagVals(r,k).forEach(function(g){ if(!seen[g]){ seen[g]=1; all.push(g); } }); });
   all.sort(function(a,b){ return a.localeCompare(b,"ko"); });
-  if(!all.length){ sc.style.display="none"; return; }
+  if(ndCatTag && all.indexOf(ndCatTag)<0) ndCatTag=""; if(!all.length){ sc.style.display="none"; return; }
   sc.style.display=""; sc.style.flexWrap="nowrap";
   var html='<button class="chip '+(ndCatTag===""?"on":"")+'" data-ct="">전체</button>';
   all.forEach(function(g){ html+='<button class="chip '+(ndCatTag===g?"on":"")+'" data-ct="'+g.replace(/"/g,"&quot;")+'">'+g+'</button>'; });
