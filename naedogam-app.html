@@ -578,7 +578,7 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
         <svg class="brandmark" width="40" height="30" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#F7F5F0"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#F7F5F0"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#F7F5F0"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#F7F5F0"/></svg>
         <span class="brandwm"><span class="bwm-ko">내도감</span><span class="bwm-en">NAEDOGAM</span></span>
       </button>
-      <span class="mhver">v204</span>
+      <span class="mhver">v205</span>
       <span class="spacer"></span>
       <span class="src-chip" id="srcChip" style="display:none">데모</span>
       <button class="icon-btn" id="searchToggle" type="button" style="display:none">🔍</button>
@@ -2530,7 +2530,7 @@ function myStarsHTML(val){
   var v=parseFloat(val)||0; var h='<span class="mystars">';
   for(var i=1;i<=5;i++){ var pct=v>=2*i?100:(v>=2*i-1?50:0);
     h+='<span class="ms-star"><span class="ms-base">☆</span><span class="ms-fill" style="width:'+pct+'%">★</span><span class="ms-hit ms-l" data-val="'+(2*i-1)+'"></span><span class="ms-hit ms-r" data-val="'+(2*i)+'"></span></span>'; }
-  h+='<span class="ms-num">'+(v?('★ '+v+'/10'):'미정')+'</span><button type="button" class="ms-clear" data-val="0">지움</button></span>';
+  h+='<span class="ms-num">'+(v?('★ '+v+'/10'):'미정')+'</span><button type="button" class="ms-clear" data-val="0" title="지움">✕</button></span>';
   return h;
 }
 async function setMovieRatingDeploy(m, r, val){
@@ -2763,6 +2763,8 @@ async function fillDiaryLog(d, silent){
   if(!add.length){ if(!silent) alert("이미 다 들어가 있어요."); return; }
   contEl.value = cur ? (cur.replace(/\s+$/,"")+"\n"+add.join("\n")) : add.join("\n");
 }
+function ndFL(f){ var l=String((f&&f.label)||""); var m=l.match(/^(.*?)\s*\(예:[^)]*\)\s*$/); return m?m[1]:l; }
+function ndFP(f){ if(f&&f.ph) return String(f.ph).replace(/"/g,""); var l=String((f&&f.label)||""); var m=l.match(/\(예:\s*([^)]*)\)/); return m?String(m[1]||"").replace(/"/g,"").trim():""; }
 function openRecordForm(m, existing, prefill){
   const d=$("#add"); const isEdit=!!existing; const fields=(m.fields||[]).filter(f=>!f.hideForm);
   const _cell=f=>{
@@ -2770,30 +2772,30 @@ function openRecordForm(m, existing, prefill){
     if(f.type==="bool")
       return `<button type="button" class="btn ghost rf-bool ${val?'on':''}" data-k="${f.k}" style="margin-top:6px;margin-right:6px">${f.sheet||f.label}</button>`;
     if(f.type==="select")
-      return `<label>${f.label}</label><select class="rf" data-k="${f.k}" data-type="select">${(f.options||[]).map(o=>`<option value="${o}" ${String(val||'')===o?'selected':''}>${o||'(없음)'}</option>`).join("")}</select>`;
+      return `<label>${ndFL(f)}</label><select class="rf" data-k="${f.k}" data-type="select">${(f.options||[]).map(o=>`<option value="${o}" ${String(val||'')===o?'selected':''}>${o||'(없음)'}</option>`).join("")}</select>`;
     if(f.type==="cardsel"){ const cache=(CACHE.cards&&CACHE.cards.length?CACHE.cards:(loadPersist("cards")||[])); const names=cache.map(c=>c.name).filter(Boolean);
       const opts=["", ...names, "기타"]; const cur=String(val||""); if(cur&&!opts.includes(cur)) opts.splice(1,0,cur);
-      return `<label>${f.label}</label><select class="rf" data-k="${f.k}" data-type="select">${opts.map(o=>`<option value="${String(o).replace(/"/g,'&quot;')}" ${cur===o?'selected':''}>${o||'(선택)'}</option>`).join("")}</select>`; }
-    if(f.type==="image"){ const cur=String(val||""); return `<label>${f.label}</label><div class="rf-imgzone" data-k="${f.k}"><img class="rf-imgprev" data-k="${f.k}" src="${cur.replace(/"/g,'&quot;')}" style="${cur?'':'display:none'}"><div class="rf-imghint">이미지를 끌어다 놓거나 클릭해서 선택</div><input type="hidden" class="rf-imgval" data-k="${f.k}" value="${cur.replace(/"/g,'&quot;')}"><input type="file" accept="image/*" class="rf-imgfile" data-k="${f.k}"></div>`; }
+      return `<label>${ndFL(f)}</label><select class="rf" data-k="${f.k}" data-type="select">${opts.map(o=>`<option value="${String(o).replace(/"/g,'&quot;')}" ${cur===o?'selected':''}>${o||'(선택)'}</option>`).join("")}</select>`; }
+    if(f.type==="image"){ const cur=String(val||""); return `<label>${ndFL(f)}</label><div class="rf-imgzone" data-k="${f.k}"><img class="rf-imgprev" data-k="${f.k}" src="${cur.replace(/"/g,'&quot;')}" style="${cur?'':'display:none'}"><div class="rf-imghint">이미지를 끌어다 놓거나 클릭해서 선택</div><input type="hidden" class="rf-imgval" data-k="${f.k}" value="${cur.replace(/"/g,'&quot;')}"><input type="file" accept="image/*" class="rf-imgfile" data-k="${f.k}"></div>`; }
     if(f.type==="date"){ let dv=""; const raw=(val==null?"":String(val)).trim();
       if(raw){ const pd=parseDate(raw); if(pd) dv=pd.getFullYear()+"-"+String(pd.getMonth()+1).padStart(2,"0")+"-"+String(pd.getDate()).padStart(2,"0"); }
       else if(prefill && prefill[f.k]) dv=prefill[f.k];
       else if(f.today && !isEdit) dv=todayStr();
-      return `<label>${f.label}</label><input type="date" class="rf" data-k="${f.k}" data-type="date" value="${dv}">`; }
-    if(f.type==="textarea"){ const tv=(val==null?"":String(val)).replace(/&/g,'&amp;').replace(/</g,'&lt;'); return `<label>${f.label}</label><textarea class="rf" data-k="${f.k}" data-type="text" rows="${f.rows||5}" style="width:100%;font-family:inherit;font-size:15px;padding:9px 11px;border:1px solid var(--line);border-radius:9px;box-sizing:border-box;resize:vertical" autocomplete="off">${tv}</textarea>`; }
-    if(f.type==="rating"){ const rv=(val==null||val==='')?'':val; return `<div class="rf-ratewrap" data-k="${f.k}"><label>${f.label}</label><div class="rf-starbox" data-k="${f.k}"><input type="hidden" class="rf" data-k="${f.k}" data-type="number" value="${rv}">${starBarHTML(rv===''?0:parseFloat(rv))}<span class="rf-star-num"></span><button type="button" class="rf-star-clr">✕</button></div><div class="rf-ratehint" style="display:none;font-size:12.5px;color:var(--sub);margin-top:5px">‘읽음’ 상태로 표시하면 내 평점을 매길 수 있어요</div></div>`; }
-    if(f.type==="seg") return `<label>${f.label}</label><div class="rf-seg" data-k="${f.k}">${(f.options||[]).map(o=>`<button type="button" class="btn ghost rf-segbtn ${String(val||'')===o?'on':''}" data-v="${o}">${o}</button>`).join("")}</div>`;
+      return `<label>${ndFL(f)}</label><input type="date" class="rf" data-k="${f.k}" data-type="date" value="${dv}">`; }
+    if(f.type==="textarea"){ const tv=(val==null?"":String(val)).replace(/&/g,'&amp;').replace(/</g,'&lt;'); return `<label>${ndFL(f)}</label><textarea class="rf" data-k="${f.k}" data-type="text" rows="${f.rows||5}" style="width:100%;font-family:inherit;font-size:15px;padding:9px 11px;border:1px solid var(--line);border-radius:9px;box-sizing:border-box;resize:vertical" autocomplete="off">${tv}</textarea>`; }
+    if(f.type==="rating"){ const rv=(val==null||val==='')?'':val; return `<div class="rf-ratewrap" data-k="${f.k}"><label>${ndFL(f)}</label><div class="rf-starbox" data-k="${f.k}"><input type="hidden" class="rf" data-k="${f.k}" data-type="number" value="${rv}">${starBarHTML(rv===''?0:parseFloat(rv))}<span class="rf-star-num"></span><button type="button" class="rf-star-clr">✕</button></div><div class="rf-ratehint" style="display:none;font-size:12.5px;color:var(--sub);margin-top:5px">‘읽음’ 상태로 표시하면 내 평점을 매길 수 있어요</div></div>`; }
+    if(f.type==="seg") return `<label>${ndFL(f)}</label><div class="rf-seg" data-k="${f.k}">${(f.options||[]).map(o=>`<button type="button" class="btn ghost rf-segbtn ${String(val||'')===o?'on':''}" data-v="${o}">${o}</button>`).join("")}</div>`;
     if(f.type==="tiers"){
       let raw=val; if((raw==null||raw==="") && existing && f.legacyKey) raw=existing[f.legacyKey];
       let arr=[]; try{ arr=JSON.parse(raw||"[]"); if(!Array.isArray(arr)) arr=[]; }catch(e){ if(raw) arr=[{min:"",benefits:String(raw)}]; }
       if(!arr.length) arr=[{min:"",benefits:""}];
       const esc2=x=>String(x==null?"":x).replace(/&/g,'&amp;').replace(/</g,'&lt;');
       const rowH=t=>`<div class="tier-row"><div class="tier-min"><input type="number" inputmode="numeric" class="tier-min-in" value="${String(t.min==null?'':t.min).replace(/"/g,'&quot;')}" placeholder="30"><span class="tier-min-suf">만원↑</span></div><textarea class="tier-ben" rows="3" placeholder="혜택 (줄바꿈으로 여러 개)">${esc2(t.benefits)}</textarea><button type="button" class="tier-del" title="이 구간 삭제">✕</button></div>`;
-      return `<label>${f.label}</label><div class="rf-tiers" data-k="${f.k}">${arr.map(rowH).join("")}</div><button type="button" class="tier-add" data-k="${f.k}">＋ 실적 구간 추가</button>`;
+      return `<label>${ndFL(f)}</label><div class="rf-tiers" data-k="${f.k}">${arr.map(rowH).join("")}</div><button type="button" class="tier-add" data-k="${f.k}">＋ 실적 구간 추가</button>`;
     }
-    if(f.money||f.comma){ const nz=(val==null||val===""||isNaN(Number(val)))?"":Number(val).toLocaleString(); return `<label>${f.label}</label><input class="rf" data-k="${f.k}" data-type="money" inputmode="numeric" value="${nz}" autocomplete="off" />`; }
+    if(f.money||f.comma){ const nz=(val==null||val===""||isNaN(Number(val)))?"":Number(val).toLocaleString(); return `<label>${ndFL(f)}</label><input class="rf" data-k="${f.k}" data-type="money" inputmode="numeric" value="${nz}" autocomplete="off" />`; }
     const v = (f.type==="tags" && Array.isArray(val)) ? val.join(", ") : (val==null?"":val);
-    return `<label>${f.label}</label><input class="rf" data-k="${f.k}" data-type="${f.type}" value="${String(v).replace(/"/g,'&quot;')}" autocomplete="off" />`;
+    return `<label>${ndFL(f)}</label><input class="rf" data-k="${f.k}" data-type="${f.type}" value="${String(v).replace(/"/g,'&quot;')}" placeholder="${ndFP(f)}" autocomplete="off" />`;
   };
   const _wcls=f=> f.third?"rff-third":f.full?"rff-full":(f.half?"rff-half":(f.type==="bool"?"rff-bool":((f.type==="textarea"||f.type==="image"||f.type==="rating"||f.type==="seg")?"rff-full":"rff-half")));
   const body=fields.map(f=>`<div class="rff ${_wcls(f)}">${_cell(f)}</div>`).join("");
@@ -4100,7 +4102,7 @@ async function openRecoPanel(m){
     const rows=items.map((o,i)=>{
       if(o.has && !o.merge) return `<div class="reco-item dim"><div class="reco-b"><div class="reco-t">${o.v.title}</div><div class="reco-m">${o.v.sub}</div><span class="reco-badge">담김 ✓</span></div></div>`;
       const on=sel.has(i);
-      return `<div class="reco-item ${on?"on":""}" data-i="${i}"><input type="checkbox" class="reco-cb" ${on?"checked":""}><div class="reco-b"><div class="reco-t">${o.v.title}</div><div class="reco-m">${o.merge?"이미 담김 · 추천 출처 추가":o.v.sub}</div>${o.merge?`<span class="reco-badge" style="background:#e0f2fe;color:#0369a1">＋추천 ${o.it["추천"]||o.it.recommend||o.it.__list||o.v.badge}</span>`:(o.v.badge?`<span class="reco-badge">${o.v.badge}</span>`:"")}</div></div>`;
+      return `<div class="reco-item ${on?"on":""}" data-i="${i}"><input type="checkbox" class="reco-cb" ${on?"checked":""}><div class="reco-b"><div class="reco-t">${o.v.title}</div><div class="reco-m">${o.merge?"이미 담김 · 추천 출처 추가":o.v.sub}</div>${o.merge?`<span class="reco-badge" style="background:#e0f2fe;color:#0369a1">＋추천 ${o.it["추천"]||o.it.recommend||o.it.__list||o.v.badge}</span>`:""}</div></div>`;
     }).join("");
     d.innerHTML=`<div class="dhead" style="display:flex;align-items:center;justify-content:space-between;gap:8px"><h3 style="margin:0">${data.title||"추천 리스트"}</h3>${(listsAll&&listsAll.length>1)?'<button class="btn ghost" id="rcBack" type="button" style="padding:4px 10px;flex:0 0 auto;white-space:nowrap">← 리스트</button>':''}<button class="dclose-x" onclick="this.closest('dialog').close()" aria-label="닫기">✕</button></div>
       <div class="dbody" style="padding-bottom:6px">
