@@ -163,7 +163,7 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
     border-radius:50%; background:var(--ochre); color:#fff; border:none; font-size:26px; line-height:1;
     box-shadow:0 4px 14px rgba(101,64,32,.35); display:flex; align-items:center; justify-content:center; }
   #addBtn:active{ transform:scale(.94); }
-  #recoBtn{ position:fixed; right:16px; bottom:84px; z-index:45; height:44px; padding:0 16px; border:none; border-radius:22px;
+  #recoBtn{ position:fixed; right:16px; bottom:calc(148px + env(safe-area-inset-bottom)); z-index:45; height:44px; padding:0 16px; border:none; border-radius:22px;
     background:var(--ink); color:var(--paper); font-family:var(--sans); font-size:13.5px; font-weight:700; cursor:pointer;
     box-shadow:0 4px 14px rgba(0,0,0,.28); display:flex; align-items:center; gap:6px; }
   #recoBtn:active{ transform:scale(.96); }
@@ -682,7 +682,7 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
         <svg class="brandmark" width="40" height="30" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#F7F5F0"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#F7F5F0"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#F7F5F0"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#F7F5F0"/></svg>
         <span class="brandwm"><span class="bwm-ko">내도감</span><span class="bwm-en">NAEDOGAM</span></span>
       </button>
-      <span class="mhver">v236</span>
+      <span class="mhver">v237</span>
       <span class="spacer"></span>
       <span class="src-chip" id="srcChip" style="display:none">데모</span>
       <button class="icon-btn" id="searchToggle" type="button" style="display:none">🔍</button>
