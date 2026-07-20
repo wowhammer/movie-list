@@ -577,7 +577,7 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
         <svg class="brandmark" width="40" height="30" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#F7F5F0"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#F7F5F0"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#F7F5F0"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#F7F5F0"/></svg>
         <span class="brandwm"><span class="bwm-ko">내도감</span><span class="bwm-en">NAEDOGAM</span></span>
       </button>
-      <span class="mhver">v199</span>
+      <span class="mhver">v200</span>
       <span class="spacer"></span>
       <span class="src-chip" id="srcChip" style="display:none">데모</span>
       <button class="icon-btn" id="searchToggle" type="button" style="display:none">🔍</button>
@@ -2156,8 +2156,15 @@ const TOGGLE_DEFS={
     {label:"예정",   on:r=>r.status==="예정",   ch:r=>({status:r.status==="예정"?"":"예정"})},
     {label:"찜",     on:r=>r.status==="찜",     ch:r=>({status:r.status==="찜"?"":"찜"})},
   ],
+  subs:[ {label:"구독중", on:r=>r.status==="구독중", ch:r=>({status:r.status==="구독중"?"":"구독중"})}, {label:"해지", on:r=>r.status==="해지", ch:r=>({status:r.status==="해지"?"":"해지"})} ],
+  culture:[ {label:"다녀옴", on:r=>r.status==="다녀옴", ch:r=>({status:r.status==="다녀옴"?"":"다녀옴"})}, {label:"예정", on:r=>r.status==="예정", ch:r=>({status:r.status==="예정"?"":"예정"})}, {label:"찜", on:r=>r.status==="찜", ch:r=>({status:r.status==="찜"?"":"찜"})} ],
+  food:[ {label:"다녀옴", on:r=>r.status==="다녀옴", ch:r=>({status:r.status==="다녀옴"?"":"다녀옴"})}, {label:"가볼곳", on:r=>r.status==="가볼곳", ch:r=>({status:r.status==="가볼곳"?"":"가볼곳"})}, {label:"찜", on:r=>r.status==="찜", ch:r=>({status:r.status==="찜"?"":"찜"})} ],
+  albums:[ {label:"소장", on:r=>r.status==="소장", ch:r=>({status:r.status==="소장"?"":"소장"})}, {label:"위시", on:r=>r.status==="위시", ch:r=>({status:r.status==="위시"?"":"위시"})} ],
+  wish:[ {label:"사고싶음", on:r=>r.status==="사고싶음", ch:r=>({status:r.status==="사고싶음"?"":"사고싶음"})}, {label:"구매함", on:r=>r.status==="구매함", ch:r=>({status:r.status==="구매함"?"":"구매함"})}, {label:"보류", on:r=>r.status==="보류", ch:r=>({status:r.status==="보류"?"":"보류"})} ],
+  bucket:[ {label:"하는중", on:r=>r.status==="하는중", ch:r=>({status:r.status==="하는중"?"":"하는중"})}, {label:"달성", on:r=>r.status==="달성", ch:r=>({status:r.status==="달성"?"":"달성"})}, {label:"보류", on:r=>r.status==="보류", ch:r=>({status:r.status==="보류"?"":"보류"})} ],
+  cellar:[ {label:"소장", on:r=>r.status==="소장", ch:r=>({status:r.status==="소장"?"":"소장"})}, {label:"마심", on:r=>r.status==="마심", ch:r=>({status:r.status==="마심"?"":"마심"})}, {label:"위시", on:r=>r.status==="위시", ch:r=>({status:r.status==="위시"?"":"위시"})} ],
 };
-const TOGGLE_HIDE={ mountains:["climbed","revisit","pick"], travel:["status"] };
+const TOGGLE_HIDE={ mountains:["climbed","revisit","pick"], travel:["status"], subs:["status"], culture:["status"], food:["status"], albums:["status"], wish:["status"], bucket:["status"], cellar:["status"] };
 function statusBtnsHTML(m, r){
   const defs=TOGGLE_DEFS[m.id]; if(!defs) return "";
   return defs.map((d,i)=>`<button class="btn ${d.on(r)?'':'ghost'}" data-tg="${i}">${d.on(r)?'✓ '+d.label:d.label}</button>`).join("");
