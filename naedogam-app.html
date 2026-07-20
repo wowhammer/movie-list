@@ -618,6 +618,30 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
 .wfoot{text-align:center;padding:26px 0 8px;color:#b9b2e0;font-size:11px}
 .wfoot b{color:#ffd66b}
 
+
+/* ── MBTI 진단 ── */
+.mbTitle{font-size:14px;font-weight:800;color:#fff}
+.mbHead{padding:22px 0 10px}
+.mbProg{height:8px;border-radius:99px;background:rgba(255,255,255,.1);overflow:hidden}
+.mbProg i{display:block;height:100%;background:linear-gradient(90deg,#ffd66b,#ff6fae);transition:width .25s}
+.mbCount{font-size:12px;color:#b9b2e0;text-align:right;margin-top:8px;font-weight:700}
+.mbQwrap{padding:8px 0 30px}
+.mbQ{font-size:15px;color:#ffd66b;font-weight:800;margin-bottom:16px}
+.mbOpt{display:block;width:100%;text-align:left;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);color:#f4f1ff;border-radius:16px;padding:17px 16px;font-size:15px;line-height:1.45;margin-bottom:12px;cursor:pointer;transition:.15s}
+.mbOpt:hover,.mbOpt:active{background:linear-gradient(135deg,rgba(124,92,255,.35),rgba(255,111,174,.22));border-color:rgba(255,255,255,.3)}
+.mbBack{background:none;border:none;color:#b9b2e0;font-size:13px;margin-top:6px;cursor:pointer}
+.mbType{font-size:52px;font-weight:900;letter-spacing:.04em;color:#fff;margin:8px 0 2px}
+.mbNick{font-size:20px;font-weight:800;color:#ffd66b}
+.mbAxis{margin-bottom:16px}
+.mbAxL{display:flex;justify-content:space-between;font-size:13px;margin-bottom:6px;color:#8f88b8;font-weight:700}
+.mbAxL b{font-weight:700}.mbAxL b.on{color:#fff}
+.mbBar{height:12px;border-radius:99px;background:rgba(255,111,174,.25);overflow:hidden}
+.mbBar i{display:block;height:100%;background:linear-gradient(90deg,#7c5cff,#ffd66b);border-radius:99px}
+.mbAxP{font-size:12px;color:#cfc8f0;text-align:center;margin-top:5px;font-weight:700}
+.wmbti{display:flex;align-items:baseline;gap:12px}
+.wmbtiT{font-size:34px;font-weight:900;color:#fff;letter-spacing:.04em}
+.wmbtiN{font-size:15px;font-weight:800;color:#ffd66b}
+
 </style>
 <script>try{var _t=localStorage.getItem("app:nd.theme")||localStorage.getItem("nd.theme");if(_t==="dark")document.documentElement.setAttribute("data-theme","dark");}catch(e){}</script>
 </head>
@@ -629,11 +653,12 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
         <svg class="brandmark" width="40" height="30" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#F7F5F0"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#F7F5F0"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#F7F5F0"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#F7F5F0"/></svg>
         <span class="brandwm"><span class="bwm-ko">내도감</span><span class="bwm-en">NAEDOGAM</span></span>
       </button>
-      <span class="mhver">v222</span>
+      <span class="mhver">v223</span>
       <span class="spacer"></span>
       <span class="src-chip" id="srcChip" style="display:none">데모</span>
       <button class="icon-btn" id="searchToggle" type="button" style="display:none">🔍</button>
       <button class="icon-btn" id="syncBtn" type="button" title="동기화" aria-label="동기화">↻</button>
+      <button class="icon-btn" id="mbtiBtn" type="button">🧠 MBTI</button>
       <button class="icon-btn" id="wrapBtn" type="button">🎊 결산</button>
       <button class="icon-btn" id="dashBtn" type="button">📊 통계</button>
       <button class="icon-btn" id="setBtn" type="button">⚙ 설정</button>
@@ -3551,6 +3576,164 @@ function chartTrend(ids, ev){     // 최근 10주 · 주별 합산 추이
   const total=counts.reduce((a,b)=>a+b,0);
   return `<div class="dash-note">최근 10주 · 총 ${total}건</div><svg viewBox="0 0 ${W} ${H}" width="100%" style="display:block"><path d="${area}" fill="var(--accent-wash)" stroke="none"/><path d="${line}" fill="none" stroke="#16a34a" stroke-width="2"/>${dots}${labs}</svg>`;
 }
+/* ── 성격유형(MBTI) 상세 진단 : 48문항 + 축별 강도 + 저장 + 결산연동 ── */
+var MBTI_Q=[
+ {ax:"EI",a:"주말엔 사람들과 어울리며 에너지를 얻는다",ap:"E",b:"주말엔 혼자 조용히 쉬며 충전한다",bp:"I"},
+ {ax:"EI",a:"처음 만난 자리에서 내가 먼저 말을 건다",ap:"E",b:"상대가 말 걸기를 기다리는 편이다",bp:"I"},
+ {ax:"EI",a:"생각은 말하면서 정리되는 편이다",ap:"E",b:"혼자 정리한 뒤에 말하는 편이다",bp:"I"},
+ {ax:"EI",a:"긴 모임 뒤에 오히려 더 신이 난다",ap:"E",b:"긴 모임 뒤엔 진이 빠져 혼자 있고 싶다",bp:"I"},
+ {ax:"EI",a:"넓고 다양한 인간관계를 즐긴다",ap:"E",b:"깊고 소수인 관계를 선호한다",bp:"I"},
+ {ax:"EI",a:"즉석 만남·전화가 반갑다",ap:"E",b:"즉석 만남·전화가 다소 부담스럽다",bp:"I"},
+ {ax:"EI",a:"새 환경에 금방 어울린다",ap:"E",b:"새 환경 적응에 시간이 걸린다",bp:"I"},
+ {ax:"EI",a:"관심의 중심에 서는 게 즐겁다",ap:"E",b:"주목받는 게 불편하다",bp:"I"},
+ {ax:"EI",a:"아이디어는 떠들면서 발전시킨다",ap:"E",b:"아이디어는 혼자 곱씹으며 발전시킨다",bp:"I"},
+ {ax:"EI",a:"쉴 땐 밖으로 나가는 편이다",ap:"E",b:"쉴 땐 집에 머무는 편이다",bp:"I"},
+ {ax:"EI",a:"침묵이 흐르면 채우고 싶어진다",ap:"E",b:"침묵이 흘러도 편안하다",bp:"I"},
+ {ax:"EI",a:"나를 아는 사람이 넓게 많다",ap:"E",b:"아는 사람은 적지만 깊다",bp:"I"},
+ {ax:"SN",a:"현실과 사실에 먼저 집중한다",ap:"S",b:"가능성과 의미에 먼저 끌린다",bp:"N"},
+ {ax:"SN",a:"설명은 구체적 예시로 하는 게 좋다",ap:"S",b:"설명은 큰 그림·비유로 하는 게 좋다",bp:"N"},
+ {ax:"SN",a:"관심은 '지금 여기'에 있다",ap:"S",b:"관심은 미래·상상에 있다",bp:"N"},
+ {ax:"SN",a:"검증된 방식으로 일하는 게 편하다",ap:"S",b:"새로운 방식을 시도하는 게 즐겁다",bp:"N"},
+ {ax:"SN",a:"디테일을 잘 챙긴다",ap:"S",b:"전체 맥락을 잘 본다",bp:"N"},
+ {ax:"SN",a:"실용적이라는 말을 듣는다",ap:"S",b:"이론적·공상적이라는 말을 듣는다",bp:"N"},
+ {ax:"SN",a:"기억은 사실 위주로 남는다",ap:"S",b:"기억은 인상·느낌 위주로 남는다",bp:"N"},
+ {ax:"SN",a:"변화보다 안정이 좋다",ap:"S",b:"안정보다 새로움이 좋다",bp:"N"},
+ {ax:"SN",a:"단계별 구체적 지시가 편하다",ap:"S",b:"방향만 주면 알아서 하는 게 편하다",bp:"N"},
+ {ax:"SN",a:"오감으로 경험하는 걸 믿는다",ap:"S",b:"패턴과 연결을 읽는 걸 믿는다",bp:"N"},
+ {ax:"SN",a:"현재의 만족이 중요하다",ap:"S",b:"미래의 잠재력이 중요하다",bp:"N"},
+ {ax:"SN",a:"관찰이 강점이다",ap:"S",b:"통찰이 강점이다",bp:"N"},
+ {ax:"TF",a:"결정은 논리·객관을 기준으로 한다",ap:"T",b:"결정은 사람·가치를 기준으로 한다",bp:"F"},
+ {ax:"TF",a:"갈등에선 옳고 그름을 먼저 본다",ap:"T",b:"갈등에선 관계·감정을 먼저 본다",bp:"F"},
+ {ax:"TF",a:"솔직한 지적이 도움이라 생각한다",ap:"T",b:"배려하는 말이 먼저라 생각한다",bp:"F"},
+ {ax:"TF",a:"평가는 기준·원칙으로 한다",ap:"T",b:"평가는 상황·마음을 살펴서 한다",bp:"F"},
+ {ax:"TF",a:"분석이 자연스럽다",ap:"T",b:"공감이 자연스럽다",bp:"F"},
+ {ax:"TF",a:"비판을 담담히 받는 편이다",ap:"T",b:"비판에 마음이 쓰이는 편이다",bp:"F"},
+ {ax:"TF",a:"도움 요청엔 해결책부터 준다",ap:"T",b:"도움 요청엔 공감부터 한다",bp:"F"},
+ {ax:"TF",a:"냉철하다는 말을 듣는다",ap:"T",b:"따뜻하다는 말을 듣는다",bp:"F"},
+ {ax:"TF",a:"규칙은 일관되게 지켜야 한다",ap:"T",b:"상황에 따라 정상참작할 수 있다",bp:"F"},
+ {ax:"TF",a:"진실이 아파도 말하는 편이다",ap:"T",b:"배려해서 말을 조절하는 편이다",bp:"F"},
+ {ax:"TF",a:"성취가 더 중요하다",ap:"T",b:"화합이 더 중요하다",bp:"F"},
+ {ax:"TF",a:"토론·논쟁이 즐겁다",ap:"T",b:"토론·논쟁이 피곤하다",bp:"F"},
+ {ax:"JP",a:"계획을 세우고 그대로 움직인다",ap:"J",b:"상황에 따라 유연하게 움직인다",bp:"P"},
+ {ax:"JP",a:"일은 미리미리 해둔다",ap:"J",b:"일은 마감에 몰아서 하는 편이다",bp:"P"},
+ {ax:"JP",a:"여행은 짜인 일정이 좋다",ap:"J",b:"여행은 즉흥이 좋다",bp:"P"},
+ {ax:"JP",a:"공간은 정돈돼 있어야 편하다",ap:"J",b:"좀 어수선해도 크게 신경 안 쓴다",bp:"P"},
+ {ax:"JP",a:"결정은 빨리 확정하는 게 좋다",ap:"J",b:"선택지는 열어두는 게 좋다",bp:"P"},
+ {ax:"JP",a:"마감·약속을 꼭 지킨다",ap:"J",b:"마감·약속에 다소 유연하다",bp:"P"},
+ {ax:"JP",a:"규칙적인 루틴이 편하다",ap:"J",b:"자유로운 흐름이 편하다",bp:"P"},
+ {ax:"JP",a:"할 일 목록을 만들고 지운다",ap:"J",b:"할 일 목록을 잘 안 쓴다",bp:"P"},
+ {ax:"JP",a:"변수가 생기면 스트레스를 받는다",ap:"J",b:"변수가 생기면 오히려 흥미롭다",bp:"P"},
+ {ax:"JP",a:"마무리에 강하다",ap:"J",b:"시작·발산에 강하다",bp:"P"},
+ {ax:"JP",a:"예측 가능한 게 좋다",ap:"J",b:"뜻밖의 전개가 재밌다",bp:"P"},
+ {ax:"JP",a:"선택지는 좁혀서 결정한다",ap:"J",b:"선택지는 넓게 열어둔다",bp:"P"}
+];
+var MBTI_INFO={
+ INTJ:["전략가","큰 그림을 그리고 조용히 밀어붙이는 설계자"],
+ INTP:["논리술사","끝없이 파고드는 아이디어 탐구자"],
+ ENTJ:["통솔자","목표를 향해 사람과 판을 이끄는 지휘관"],
+ ENTP:["변론가","가능성을 즐기는 재기발랄한 도전자"],
+ INFJ:["옹호자","조용하지만 깊은 신념의 이상주의자"],
+ INFP:["중재자","가치와 의미를 좇는 따뜻한 몽상가"],
+ ENFJ:["선도자","사람을 끌어올리는 카리스마 리더"],
+ ENFP:["활동가","호기심과 열정으로 반짝이는 자유혼"],
+ ISTJ:["현실주의자","묵묵히 원칙을 지키는 신뢰의 표본"],
+ ISFJ:["수호자","조용히 곁을 지키는 헌신의 사람"],
+ ESTJ:["경영자","질서와 실행으로 굴러가게 만드는 관리자"],
+ ESFJ:["집정관","분위기를 살피고 챙기는 사교의 중심"],
+ ISTP:["장인","손과 머리로 문제를 푸는 실전형"],
+ ISFP:["모험가","감각으로 삶을 즐기는 온화한 예술가"],
+ ESTP:["사업가","지금 이 순간에 뛰어드는 행동파"],
+ ESFP:["연예인","어디서든 빛나는 흥과 에너지의 사람"]
+};
+function _mbtiSaved(){ try{ var raw=store.getItem("nd.mbti"); return raw?JSON.parse(raw):null; }catch(e){ return null; } }
+function _mbtiEsc(x){ return String(x==null?"":x).replace(/&/g,"&amp;").replace(/</g,"&lt;"); }
+function _mbtiDate(){ var d=new Date(); return d.getFullYear()+"."+String(d.getMonth()+1).padStart(2,"0")+"."+String(d.getDate()).padStart(2,"0"); }
+function openMbti(){
+  var old=document.getElementById("mbtiDlg"); if(old) old.remove();
+  var dlg=document.createElement("dialog"); dlg.id="mbtiDlg"; dlg.className="wrapDlg";
+  dlg.innerHTML='<div class="wtop"><button class="wclose" onclick="this.closest(\'dialog\').close()">✕ 닫기</button><span class="mbTitle">🧠 성격유형</span><span style="width:56px"></span></div><div class="wscroll"><div class="wcard" id="mbtiCard"></div></div>';
+  document.body.appendChild(dlg); dlg.showModal();
+  var saved=_mbtiSaved();
+  if(saved && saved.latest) mbtiShowResult(saved.latest, true);
+  else mbtiIntro();
+}
+function mbtiIntro(){
+  var c=document.getElementById("mbtiCard"); if(!c) return;
+  c.innerHTML='<div class="wsec whead"><div class="wlogo">내도감 · INSIGHT</div><div class="wtitle">성격유형 진단</div><div class="wdate">48문항 · 약 3분 · 축별 강도까지</div></div>'
+   +'<div class="wsec" style="text-align:center"><div class="wem" style="font-size:44px">🧠</div><p class="wpp" style="margin-top:10px">두 문장 중 <b>더 나에 가까운 쪽</b>을 고르면 됩니다.<br>정답은 없어요. 떠오르는 대로 편하게.</p>'
+   +'<button class="wsave mbStart" id="mbGo" style="margin-top:20px;width:100%;padding:14px">시작하기 →</button></div>';
+  document.getElementById("mbGo").onclick=function(){ mbtiRun(); };
+}
+function mbtiRun(){
+  var state={i:0, ans:[]};
+  var c=document.getElementById("mbtiCard");
+  function draw(){
+    var q=MBTI_Q[state.i]; var n=MBTI_Q.length; var pct=Math.round(state.i/n*100);
+    c.innerHTML='<div class="mbHead"><div class="mbProg"><i style="width:'+pct+'%"></i></div><div class="mbCount">'+(state.i+1)+' / '+n+'</div></div>'
+     +'<div class="mbQwrap"><div class="mbQ">Q'+(state.i+1)+'.</div>'
+     +'<button class="mbOpt" data-p="'+q.ap+'">'+_mbtiEsc(q.a)+'</button>'
+     +'<button class="mbOpt" data-p="'+q.bp+'">'+_mbtiEsc(q.b)+'</button>'
+     +(state.i>0?'<button class="mbBack" id="mbBack">← 이전</button>':'')+'</div>';
+    c.querySelectorAll(".mbOpt").forEach(function(b){ b.onclick=function(){ state.ans[state.i]=b.dataset.p; state.i++; if(state.i>=n) mbtiScore(state.ans); else draw(); }; });
+    var bk=document.getElementById("mbBack"); if(bk) bk.onclick=function(){ state.i--; draw(); };
+  }
+  draw();
+}
+function mbtiScore(ans){
+  var cnt={E:0,I:0,S:0,N:0,T:0,F:0,J:0,P:0};
+  ans.forEach(function(p){ if(p in cnt) cnt[p]++; });
+  function axis(a,b){ var t=cnt[a]+cnt[b]||1; var win=cnt[a]>=cnt[b]?a:b; var wv=Math.max(cnt[a],cnt[b]); return {letter:win, pct:Math.round(wv/t*100), a:a, b:b, av:cnt[a], bv:cnt[b]}; }
+  var ei=axis("E","I"), sn=axis("S","N"), tf=axis("T","F"), jp=axis("J","P");
+  var type=ei.letter+sn.letter+tf.letter+jp.letter;
+  var res={type:type, nick:(MBTI_INFO[type]||["",""])[0], desc:(MBTI_INFO[type]||["",""])[1],
+    axes:{EI:ei,SN:sn,TF:tf,JP:jp}, date:_mbtiDate()};
+  mbtiShowResult(res, false);
+}
+function mbtiBar(ax, leftL, rightL){
+  var leftWin = ax.letter===ax.a;
+  var lp = leftWin?ax.pct:100-ax.pct;
+  return '<div class="mbAxis"><div class="mbAxL"><b class="'+(leftWin?'on':'')+'">'+leftL+'</b><b class="'+(!leftWin?'on':'')+'">'+rightL+'</b></div>'
+    +'<div class="mbBar"><i style="width:'+lp+'%"></i></div>'
+    +'<div class="mbAxP">'+(leftWin?leftL:rightL)+' '+ax.pct+'%</div></div>';
+}
+function mbtiShowResult(res, isSaved){
+  var c=document.getElementById("mbtiCard"); if(!c) return;
+  var A=res.axes;
+  c.innerHTML='<div class="wsec whead"><div class="wlogo">내도감 · 성격유형</div>'
+    +'<div class="mbType">'+res.type+'</div><div class="mbNick">'+_mbtiEsc(res.nick)+'</div>'
+    +'<div class="wdate" style="margin-top:6px">'+_mbtiEsc(res.desc)+'</div></div>'
+   +'<div class="wsec"><div class="wh2">📊 축별 강도</div>'
+    +mbtiBar(A.EI,"외향 E","내향 I")+mbtiBar(A.SN,"감각 S","직관 N")+mbtiBar(A.TF,"사고 T","감정 F")+mbtiBar(A.JP,"판단 J","인식 P")+'</div>'
+   +'<div class="wsec"><div class="winsight">이 결과는 <b>지금의 나</b>예요. 몇 달 뒤 다시 재보면 변화가 보입니다. 저장해두면 <b>결산</b>에도 함께 나와요.</div></div>'
+   +'<div class="wsec" style="display:flex;gap:10px;border-bottom:none">'
+    +(isSaved?'<button class="wclose mbBtn" id="mbRetry" style="flex:1;padding:13px">다시 측정</button><button class="wsave mbBtn" id="mbShare" style="flex:1;padding:13px">📷 이미지 저장</button>'
+             :'<button class="wclose mbBtn" id="mbRetry" style="flex:1;padding:13px">다시 하기</button><button class="wsave mbBtn" id="mbSave" style="flex:1;padding:13px">저장하기</button>')
+    +'</div>';
+  var rt=document.getElementById("mbRetry"); if(rt) rt.onclick=function(){ mbtiRun(); };
+  var sv=document.getElementById("mbSave"); if(sv) sv.onclick=function(){ mbtiSave(res); };
+  var sh=document.getElementById("mbShare"); if(sh) sh.onclick=function(){ _wCardExport("mbtiCard","내도감_MBTI.png", sh); };
+}
+function mbtiSave(res){
+  try{
+    var cur=_mbtiSaved()||{history:[]};
+    cur.latest=res; cur.history=(cur.history||[]); cur.history.unshift({type:res.type,date:res.date}); if(cur.history.length>20) cur.history=cur.history.slice(0,20);
+    store.setItem("nd.mbti", JSON.stringify(cur));
+    window._mbtiLatest=res;
+    mbtiShowResult(res, true);
+    try{ if(typeof toast==="function") toast("저장됐어요 · 결산에도 반영됩니다"); }catch(e){}
+  }catch(e){ alert("저장 실패: "+(e&&e.message||e)); }
+}
+/* 공용 카드 이미지 저장(결산 export 재사용) */
+function _wCardExport(cardId, filename, btn){
+  var card=document.getElementById(cardId); if(!card) return;
+  var t0=btn?btn.textContent:""; if(btn){ btn.disabled=true; btn.textContent="만드는 중…"; }
+  _wLoadH2C(function(){
+    html2canvas(card,{backgroundColor:"#0d0a1f",scale:2,useCORS:true,logging:false}).then(function(canvas){
+      canvas.toBlob(function(blob){ var url=URL.createObjectURL(blob); var a=document.createElement("a"); a.href=url; a.download=filename; document.body.appendChild(a); a.click(); a.remove(); setTimeout(function(){URL.revokeObjectURL(url);},2000); if(btn){btn.disabled=false;btn.textContent=t0;} },"image/png");
+    }).catch(function(e){ alert("이미지 저장 실패: "+(e&&e.message||e)); if(btn){btn.disabled=false;btn.textContent=t0;} });
+  });
+}
+
 /* ── 내 결산 (Wrapped) : 실시간 생성 + 이미지 저장 ───────────────── */
 function _wTruthy(v){ return v===true||v==="TRUE"||v==="true"||v==="O"||v==="Y"||v==="예"||v===1||v==="1"; }
 function _wEsc(x){ return String(x==null?"":x).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
@@ -3610,6 +3793,7 @@ function wrapCardHTML(S){
   sec.push('<div class="wsec whead"><div class="wlogo">내도감 · MY LIFE DOGAM</div><div class="wtitle">나의 결산</div><div class="wdate">'+_wToday()+' 기준</div></div>');
   // 페르소나
   sec.push('<div class="wsec"><div class="wpersona"><div class="wem">'+p.em+'</div><div class="wph">당신은<br>“'+p.t+'”</div><div class="wpp">'+p.p+'</div></div></div>');
+  var _mb=_mbtiSaved(); if(_mb&&_mb.latest){ sec.push('<div class="wsec"><div class="wh2">🧠 나의 성격유형</div><div class="wmbti"><div class="wmbtiT">'+_mb.latest.type+'</div><div class="wmbtiN">'+_wEsc(_mb.latest.nick)+'</div></div></div>'); }
   // 총 수집 + 경험
   sec.push('<div class="wsec"><div class="wkick">TOTAL COLLECTED</div><div class="wbig">'+S.total+'<small>개 수집</small></div>'
     +'<div class="wgrid"><div class="wstat wacc"><div class="wn">'+S.experienced+'</div><div class="wl">실제로 경험함</div></div>'
@@ -4508,6 +4692,7 @@ $("#setBtn").addEventListener("click",openSettings);
 $("#syncBtn").addEventListener("click",syncNow);
 $("#dashBtn").addEventListener("click",openDashboard);
   var _wb=document.getElementById("wrapBtn"); if(_wb) _wb.addEventListener("click",openWrapped);
+  var _mbb=document.getElementById("mbtiBtn"); if(_mbb) _mbb.addEventListener("click",openMbti);
 $("#addBtn").addEventListener("click",()=>{ const m=MANIFESTS[state.domain]; if(!m?.canAdd) return;
   if(state.domain==="movies" && !CONFIG.DEPLOY) openAddMovie();
   else if(state.domain==="books") openAddBook();
