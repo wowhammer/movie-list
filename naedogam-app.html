@@ -581,7 +581,7 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
         <svg class="brandmark" width="40" height="30" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#F7F5F0"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#F7F5F0"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#F7F5F0"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#F7F5F0"/></svg>
         <span class="brandwm"><span class="bwm-ko">내도감</span><span class="bwm-en">NAEDOGAM</span></span>
       </button>
-      <span class="mhver">v211</span>
+      <span class="mhver">v212</span>
       <span class="spacer"></span>
       <span class="src-chip" id="srcChip" style="display:none">데모</span>
       <button class="icon-btn" id="searchToggle" type="button" style="display:none">🔍</button>
@@ -743,7 +743,7 @@ const MANIFESTS = {
              {k:"pick",sheet:"찜",label:"읽고싶다(찜)",type:"bool"},
              {k:"reread",sheet:"다시",label:"다시읽을것",type:"bool"},
              {k:"owned",sheet:"소장",label:"소장",type:"bool"},
-             {k:"recommend",sheet:"추천",label:"추천(카탈로그 · /로 구분)",type:"text"},
+             {k:"recommend",sheet:"출처",label:"출처",type:"text",hideForm:true},{k:"mynote",sheet:"추천",label:"추천",type:"text"},
              {k:"publisher",sheet:"출판사",label:"출판사",type:"text"},
              {k:"year",sheet:"출판연도",label:"출판연도",type:"number"},
              {k:"genre",sheet:"장르",label:"장르(쉼표로 여러 개)",type:"tags"},
@@ -880,7 +880,7 @@ const MANIFESTS = {
              {k:"rating",sheet:"만족도",label:"만족도(별점)",type:"rating"},
              {k:"status",sheet:"상태",label:"상태",type:"seg",options:["다녀옴","예정","찜"]},
              {k:"spots",sheet:"명소",label:"가본 곳·명소(쉼표로 여러 개)",type:"tags"},
-             {k:"recommend",sheet:"추천",label:"추천(누구·어디서)",type:"text"},
+             {k:"recommend",sheet:"출처",label:"출처",type:"text",hideForm:true},{k:"mynote",sheet:"추천",label:"추천",type:"text"},
              {k:"content",sheet:"내용",label:"내용",type:"textarea"},
              {k:"cover",sheet:"사진",label:"사진",type:"image"} ],
     shareFields:["title","place","country"],
@@ -936,7 +936,7 @@ const MANIFESTS = {
              {k:"rating",sheet:"만족도",label:"만족도(별점)",type:"rating"},
              {k:"status",sheet:"상태",label:"상태",type:"seg",options:["다녀옴","예정","찜"]},
              {k:"artists",sheet:"출연",label:"출연·작가(쉼표로 여러 개)",type:"tags"},
-             {k:"content",sheet:"관람평",label:"관람평",type:"textarea"},
+             {k:"content",sheet:"관람평",label:"관람평",type:"textarea"},{k:"recommend",sheet:"출처",label:"출처",type:"text",hideForm:true},{k:"mynote",sheet:"추천",label:"추천",type:"text"},
              {k:"cover",sheet:"사진",label:"사진",type:"image"} ],
     search:["title","place","artists","content","companion"],
     filterBy:{ field:"kind", allLabel:"전체" },
@@ -965,7 +965,7 @@ const MANIFESTS = {
              {k:"price",sheet:"가격대",label:"가격대(1인 원)",type:"number",money:true},
              {k:"rating",sheet:"만족도",label:"만족도(별점)",type:"rating"},
              {k:"status",sheet:"상태",label:"상태",type:"seg",options:["다녀옴","가볼곳","찜"]},
-             {k:"content",sheet:"메모",label:"메모·후기",type:"textarea"},
+             {k:"content",sheet:"메모",label:"메모·후기",type:"textarea"},{k:"recommend",sheet:"출처",label:"출처",type:"text",hideForm:true},{k:"mynote",sheet:"추천",label:"추천",type:"text"},
              {k:"cover",sheet:"사진",label:"사진",type:"image"} ],
     shareFields:["title","kind","place"],
     search:["title","place","menu","content","companion"],
@@ -991,7 +991,7 @@ const MANIFESTS = {
              {k:"format",sheet:"포맷",label:"포맷",type:"select",options:["LP","CD","카세트","디지털"]},
              {k:"rating",sheet:"별점",label:"별점",type:"rating"},
              {k:"status",sheet:"상태",label:"상태",type:"seg",options:["소장","위시"]},
-             {k:"content",sheet:"한줄평",label:"한줄평",type:"textarea"},
+             {k:"content",sheet:"한줄평",label:"한줄평",type:"textarea"},{k:"recommend",sheet:"출처",label:"출처",type:"text",hideForm:true},{k:"mynote",sheet:"추천",label:"추천",type:"text"},
              {k:"cover",sheet:"표지",label:"표지",type:"image"} ],
     search:["title","artist","genre","content"],
     filterBy:{ field:"genre", allLabel:"전체" },
@@ -1150,7 +1150,7 @@ const MANIFESTS = {
              {k:"origin",sheet:"생산지",label:"생산지·와이너리·증류소",type:"text"},
              {k:"year",sheet:"빈티지",label:"빈티지/연도(예: 2018 · NV · 12년)",type:"text"},
              {k:"variety",sheet:"품종",label:"품종·캐스크(예: 카베르네 / 셰리캐스크)",type:"text"},
-             {k:"abv",sheet:"도수",label:"도수(%)",type:"number",third:true},{k:"price",sheet:"가격",label:"가격(원)",type:"number",money:true,third:true},{k:"pairing",sheet:"페어링",label:"어울리는 음식",type:"text",third:true},{k:"recommend",sheet:"추천",label:"추천",type:"text",full:true},{k:"rating",sheet:"별점",label:"별점",type:"rating"},{k:"status",sheet:"상태",label:"상태",type:"seg",options:["소장","마심","위시"]},{k:"note",sheet:"맛향",label:"맛·향 메모",type:"textarea"},{k:"cover",sheet:"사진",label:"사진",type:"image"} ],
+             {k:"abv",sheet:"도수",label:"도수(%)",type:"number",third:true},{k:"price",sheet:"가격",label:"가격(원)",type:"number",money:true,third:true},{k:"pairing",sheet:"페어링",label:"어울리는 음식",type:"text",third:true},{k:"recommend",sheet:"출처",label:"출처",type:"text",hideForm:true},{k:"mynote",sheet:"추천",label:"추천",type:"text"},{k:"rating",sheet:"별점",label:"별점",type:"rating"},{k:"status",sheet:"상태",label:"상태",type:"seg",options:["소장","마심","위시"]},{k:"note",sheet:"맛향",label:"맛·향 메모",type:"textarea"},{k:"cover",sheet:"사진",label:"사진",type:"image"} ],
     search:["title","origin","variety","note","kind"],
     filterBy:{ field:"kind", allLabel:"전체" },
     newestFirst:true,
@@ -1409,7 +1409,7 @@ class SheetDataSource {
     const inv=ndInv(m); const clean=m.source&&m.source.clean;
     return raw.map(row=>{ const o={}; for(const kh in row){ const ek=inv[ndNorm(kh)]||kh; const val=coerce(row[kh]);
       if(o[ek]===undefined || o[ek]===null || o[ek]==="") o[ek]=val;   // 중복 열: 첫 비어있지않은 값 우선
-    } return clean?clean(o):o; }).filter(Boolean);
+    } var _oo=clean?clean(o):o; if(_oo && (m.id==="books"||m.id==="travel"||m.id==="cellar") && !_oo.recommend && _oo.mynote){ _oo.recommend=_oo.mynote; _oo.mynote=""; } return _oo; }).filter(Boolean);
   }
   async readTab(tab){ const res=await fetch(this.url+"?nd=1&action=read&tab="+encodeURIComponent(tab)); if(!res.ok) return []; let j; try{ j=await res.json(); }catch(e){ return []; } if(j&&j.error) return []; return Array.isArray(j)?j:[]; }
   tabOf(id){ return this._tab[id] || (MANIFESTS[id] && MANIFESTS[id].source.tab); }
@@ -1774,7 +1774,7 @@ class GSheetSource {
   async readTab(tab){ const {rows}=await this._rowsOf(tab); return rows; }
   async list(id){ const m=MANIFESTS[id]; await this.ensure(m); const {rows}=await this._rowsOf(m.source.tab);
     const inv=ndInv(m); const clean=m.source&&m.source.clean;
-    return rows.map(row=>{ const o={}; for(const kh in row){ const ek=inv[ndNorm(kh)]||kh; const val=coerce(row[kh]); if(o[ek]===undefined||o[ek]===null||o[ek]==="") o[ek]=val; } return clean?clean(o):o; }).filter(Boolean); }
+    return rows.map(row=>{ const o={}; for(const kh in row){ const ek=inv[ndNorm(kh)]||kh; const val=coerce(row[kh]); if(o[ek]===undefined||o[ek]===null||o[ek]==="") o[ek]=val; } var _oo=clean?clean(o):o; if(_oo && (m.id==="books"||m.id==="travel"||m.id==="cellar") && !_oo.recommend && _oo.mynote){ _oo.recommend=_oo.mynote; _oo.mynote=""; } return _oo; }).filter(Boolean); }
   async upsert(id,row){ const m=MANIFESTS[id]; return this._appendObj(m.source.tab, this._flatten(m,row), ndHeaders(m)); }
   async update(id,rowId,row){ const m=MANIFESTS[id]; return this._updateObj(m.source.tab,"_id",rowId,this._flatten(m,row)); }
   async remove(id,rowId){ const m=MANIFESTS[id]; return this._deleteRow(m.source.tab,"_id",rowId); }
