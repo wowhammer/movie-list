@@ -581,7 +581,7 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
         <svg class="brandmark" width="40" height="30" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#F7F5F0"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#F7F5F0"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#F7F5F0"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#F7F5F0"/></svg>
         <span class="brandwm"><span class="bwm-ko">내도감</span><span class="bwm-en">NAEDOGAM</span></span>
       </button>
-      <span class="mhver">v217</span>
+      <span class="mhver">v218</span>
       <span class="spacer"></span>
       <span class="src-chip" id="srcChip" style="display:none">데모</span>
       <button class="icon-btn" id="searchToggle" type="button" style="display:none">🔍</button>
@@ -2284,7 +2284,7 @@ async function openBookDetail(m, r){
     </div>
     ${String(r.review||"").trim()?`<div class="mvreview"><b>📝 서평/메모</b><br>${r.review}</div>`:""}
     <div class="mvover" id="bkOver">책 소개 불러오는 중…</div>
-    ${rec?`<div class="tags" style="margin:0 18px 8px">${rec}</div>`:""}
+    ${(rec||r.source)?`<div class="tags" style="margin:0 18px 8px">${rec}${r.source?`<span class="tag" style="opacity:.72">📍 ${String(r.source).replace(/</g,"&lt;")}</span>`:""}</div>`:""}
     <div class="bkmeta2">${[r.publisher,r.year].filter(Boolean).join(" · ")}<span id="bkExtra"></span></div>
     ${genre?`<div class="tags" style="margin:3px 18px 12px">${genre}</div>`:""}
     <div class="mvlinks">
@@ -2374,14 +2374,14 @@ function travelCard(r){
   const star=(r.rating!=null&&r.rating!=="")?`<span class="tv-star">★ ${esc(r.rating)}</span>`:"";
   const sp=Array.isArray(r.spots)?r.spots:(r.spots==null||r.spots===""?[]:String(r.spots).split(",").map(x=>x.trim()).filter(Boolean));
   const spots=sp.slice(0,2).map(x=>`<span class="tv-spot">${esc(x)}</span>`).join("");
-  return `<button class="card tvcard" data-id="${r._id}"><div class="tv-cover">${cover}${badge}</div><div class="tv-body"><div class="tv-title">${esc(r.title||r.place||"여행")}</div><div class="tv-meta">${meta||"&nbsp;"}</div>${(star||spots)?`<div class="tv-foot">${star}${spots}</div>`:""}</div></button>`;
+  return `<button class="card tvcard" data-id="${r._id}"><div class="tv-cover">${cover}${badge}</div><div class="tv-body"><div class="tv-title">${esc(r.title||r.place||"여행")}</div><div class="tv-meta">${meta||"&nbsp;"}</div>${(star||spots||recMiniHTML(r))?`<div class="tv-foot">${star}${spots}${recMiniHTML(r)}</div>`:""}</div></button>`;
 }
 function albumCard(r){
   const esc=x=>String(x==null?"":x).replace(/</g,"&lt;"), eq=x=>String(x==null?"":x).replace(/"/g,"&quot;");
   const cov=r.cover?`<img src="${eq(r.cover)}" alt="" loading="lazy">`:`<div class="ab-nocover">${esc(r.title||"💿")}</div>`;
   const st=r.status; const b=st==="소장"?`<span class="ab-badge a-own">소장</span>`:st==="위시"?`<span class="ab-badge a-wish">위시</span>`:"";
   const star=(r.rating!=null&&r.rating!=="")?` <span class="ab-star">★${esc(r.rating)}</span>`:"";
-  return `<button class="card abcard" data-id="${r._id}"><div class="ab-cover">${cov}${b}</div><div class="ab-t">${esc(r.title||"앨범")}</div><div class="ab-a">${esc(r.artist||"")}${star}</div></button>`;
+  return `<button class="card abcard" data-id="${r._id}"><div class="ab-cover">${cov}${b}</div><div class="ab-t">${esc(r.title||"앨범")}</div><div class="ab-a">${esc(r.artist||"")}${star}${recMiniHTML(r)}</div></button>`;
 }
 function scrapCard(r){
   const esc=x=>String(x==null?"":x).replace(/</g,"&lt;"), eq=x=>String(x==null?"":x).replace(/"/g,"&quot;");
@@ -2400,6 +2400,7 @@ function scrapCard(r){
   const chip=r.source?`<span class="sc-srcchip">${esc(r.source)}</span>`:"";
   return `<button class="card sccard sc-text" data-id="${r._id}">${(chip||dtHtml)?`<div class="sc-topline">${chip}${dtHtml}</div>`:""}<div class="sc-title">${title}</div>${content}${tagsHtml}</button>`;
 }
+function recMiniHTML(r){ var l=String(r.recommend||"").split(/[\/,]+/).map(function(x){return x.trim();}).filter(Boolean); return l.map(function(t){return '<span class="rbadge">'+String(t).replace(/</g,"&lt;")+'</span>';}).join(""); }
 function renderCard(m, r, no){ if(m.id==="books") return bookCard(r); if(m.id==="quote") return quoteCard(r); if(m.id==="travel") return travelCard(r); if(m.id==="albums") return albumCard(r); if(m.id==="scrap") return scrapCard(r); const c=m.card;
   if(c.kind==="wallet") return walletCard(r);
   if(c.kind==="specimen"){ const meta=c.meta(r);
@@ -2410,7 +2411,7 @@ function renderCard(m, r, no){ if(m.id==="books") return bookCard(r); if(m.id===
     const _cov=r.cover||r._cover;
     const _memo=(c.memo&&r[c.memo])?`<div class="cmemo">${String(r[c.memo]).replace(/</g,"&lt;")}</div>`:"";
     return `<button class="card catcard" data-id="${r._id}"><span class="thumb">${_cov?`<img src="${_cov}" alt="">`:c.thumb}</span>
-      <span class="body"><h3>${r.title}${flags?` <span class="titleflags">${flags}</span>`:""}</h3><div class="meta">${meta}</div>${_memo}${tags?`<div class="cbadges">${tags}</div>`:""}</span></button>`; }
+      <span class="body"><h3>${r.title}${flags?` <span class="titleflags">${flags}</span>`:""}</h3><div class="meta">${meta}</div>${_memo}${(tags||recMiniHTML(r))?`<div class="cbadges">${tags}${recMiniHTML(r)}</div>`:""}</span></button>`; }
   const _kvcol=["#b45309","#0891b2","#16a34a","#9333ea","#dc2626","#0ea5e9"];
   const kv=c.kv.map((col,ci)=>{ const v=r[col.f]; if(v==null||v==="") return ""; const s=(typeof v==="number"?fmt(v):v)+(col.u?` ${col.u}`:"");
     const _cs=m.custom?` style="color:${_kvcol[ci%_kvcol.length]}"`:"";
@@ -2473,7 +2474,7 @@ function openDetail(m, r){ _navSet(m, r);
   const LBL={pace:"페이스"}; const FT={}; (m.fields||[]).forEach(f=>{ LBL[f.k]=f.sheet||String(f.label||f.k).replace(/\s*\(.*$/,""); FT[f.k]=f.type; });
   const _imgKeys=(m.fields||[]).filter(f=>f.type==="image").map(f=>f.k);
   const _compKeys=Object.keys(m.computed||{});
-  const _skipK=["_id","orig","_cover","_dist","benefit"].concat(m.id==="cards"?["name","issuer","owned","fav","link"]:(m.id==="subs"?["name"]:[]));
+  const _skipK=["_id","orig","_cover","_dist","benefit"].concat(["food","travel","culture","albums","cellar"].indexOf(m.id)>=0?["recommend","source"]:[]).concat(m.id==="cards"?["name","issuer","owned","fav","link"]:(m.id==="subs"?["name"]:[]));
   const rows=Object.entries(r).filter(([k,v])=>!_skipK.includes(k)&&!_imgKeys.includes(k)&&!_compKeys.includes(k)&&!(TOGGLE_HIDE[m.id]||[]).includes(k)&&(m.id!=="cards"||(FT[k]!==undefined&&!(v===""||v==null)))).map(([k,v])=>{
     if(FT[k]==="tiers"){ const arr=parseTiers({tiers:v}); if(!arr.length) return "";
       return arr.map(t=>{ const mn=String(t.min==null?"":t.min).trim(); const bl=String(t.benefits||"").split(/\n+/).map(x=>x.trim()).filter(Boolean);
@@ -2500,7 +2501,7 @@ function openDetail(m, r){ _navSet(m, r);
     foot="";
   }
   const _cf=(m.fields||[]).find(f=>f.type==="image"); const coverImg=(_cf&&r[_cf.k])?`<div class="det-cover"><img src="${String(r[_cf.k]).replace(/"/g,'&quot;')}" alt=""></div>`:"";
-  const d=$("#detail"); d.innerHTML=`<div class="dhead"><h3>${(m.id==="cards"||m.id==="insurance")?((r.issuer?String(r.issuer).replace(/</g,"&lt;")+" · ":"")+String(r.name||"카드").replace(/</g,"&lt;")):(m.id==="subs"?String(r.name||"구독").replace(/</g,"&lt;"):(m.card.kind==="specimen"?r.title:((m.card&&m.card.title)?m.card.title(r):((_isoOf(r.date)||r.date||"")+(r.car?" · "+r.car:"")))))}</h3><div class="dh-actions"><button class="dh-btn" id="dEdit">수정</button><button class="dh-btn dh-del" id="dDel">삭제</button><button class="dclose-x" onclick="this.closest('dialog').close()" aria-label="닫기">✕</button></div></div><div class="dbody">${coverImg}${rows}</div>${mapLinks}${m.id==="cards"?`<div class="mvlinks">${r.link?`<a class="btn ghost" target="_blank" rel="noopener" href="${(/^https?:\/\//i.test(String(r.link))?String(r.link):"https://"+String(r.link)).replace(/"/g,"&quot;")}">🔗 상세 링크</a>`:""}<a class="btn ghost" target="_blank" rel="noopener" href="https://search.naver.com/search.naver?query=${encodeURIComponent(((r.issuer||"")+" "+(r.name||"")+" 카드 혜택").trim())}">🔍 혜택 검색</a></div>`:""}${foot}`;
+  const d=$("#detail"); d.innerHTML=`<div class="dhead"><h3>${(m.id==="cards"||m.id==="insurance")?((r.issuer?String(r.issuer).replace(/</g,"&lt;")+" · ":"")+String(r.name||"카드").replace(/</g,"&lt;")):(m.id==="subs"?String(r.name||"구독").replace(/</g,"&lt;"):(m.card.kind==="specimen"?r.title:((m.card&&m.card.title)?m.card.title(r):((_isoOf(r.date)||r.date||"")+(r.car?" · "+r.car:"")))))}</h3><div class="dh-actions"><button class="dh-btn" id="dEdit">수정</button><button class="dh-btn dh-del" id="dDel">삭제</button><button class="dclose-x" onclick="this.closest('dialog').close()" aria-label="닫기">✕</button></div></div><div class="dbody">${coverImg}${rows}${(["food","travel","culture","albums","cellar"].indexOf(m.id)>=0 && (r.recommend||r.source))?`<div class="tags" style="margin:4px 0 2px">${String(r.recommend||"").split(/[\/,]+/).map(x=>x.trim()).filter(Boolean).map(t=>`<span class="rbadge">${t.replace(/</g,"&lt;")}</span>`).join("")}${r.source?`<span class="tag" style="opacity:.72">📍 ${String(r.source).replace(/</g,"&lt;")}</span>`:""}</div>`:""}</div>${mapLinks}${m.id==="cards"?`<div class="mvlinks">${r.link?`<a class="btn ghost" target="_blank" rel="noopener" href="${(/^https?:\/\//i.test(String(r.link))?String(r.link):"https://"+String(r.link)).replace(/"/g,"&quot;")}">🔗 상세 링크</a>`:""}<a class="btn ghost" target="_blank" rel="noopener" href="https://search.naver.com/search.naver?query=${encodeURIComponent(((r.issuer||"")+" "+(r.name||"")+" 카드 혜택").trim())}">🔍 혜택 검색</a></div>`:""}${foot}`;
   if(!d.open) d.showModal();
   if(isMovie){
     $("#mW").onclick=()=>toggleMovie(r,'W'); $("#mR").onclick=()=>toggleMovie(r,'R'); $("#mP").onclick=()=>toggleMovie(r,'P');
@@ -2644,7 +2645,7 @@ async function openMovieDetailDeploy(m, r){
         <div class="mvmeta">${metaBits}</div>
         ${people?`<div class="mvpeople">${people}</div>`:""}
         ${stream?`<div class="tags">${stream}</div>`:""}
-        ${r.recommend?`<div class="tags" style="margin-top:6px"><span class="tag rec">${r.recommend}</span></div>`:""}
+        ${(r.recommend||r.source)?`<div class="tags" style="margin-top:6px">${r.recommend?`<span class="tag rec">${r.recommend}</span>`:""}${r.source?`<span class="tag" style="opacity:.72">📍 ${String(r.source).replace(/</g,"&lt;")}</span>`:""}</div>`:""}
       </div>
     </div>
     <div class="drate"><span class="drate-l">내 별점</span> ${myStarsHTML(r.rating)}</div>
