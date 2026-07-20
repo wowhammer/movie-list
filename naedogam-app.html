@@ -682,7 +682,7 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
         <svg class="brandmark" width="40" height="30" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#F7F5F0"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#F7F5F0"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#F7F5F0"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#F7F5F0"/></svg>
         <span class="brandwm"><span class="bwm-ko">내도감</span><span class="bwm-en">NAEDOGAM</span></span>
       </button>
-      <span class="mhver">v233</span>
+      <span class="mhver">v234</span>
       <span class="spacer"></span>
       <span class="src-chip" id="srcChip" style="display:none">데모</span>
       <button class="icon-btn" id="searchToggle" type="button" style="display:none">🔍</button>
@@ -766,7 +766,9 @@ const MANIFESTS = {
              {k:"axes",sheet:"축상세",label:"축상세",type:"text",hideForm:true} ],
     search:["type","nick"], dateSort:"date",
     stats:[ {label:"측정",type:"count",c:"#7c3aed"} ] },
-  /* 영화: 실제 구글시트(Apps Script)에서 라이브로 불러옴.
+  assets:{ id:"assets", title:"자산", icon:"💰", vol:"", canAdd:true, source:{ type:"sheet", tab:"자산" }, fields:[ {k:"name",sheet:"자산명",label:"자산명",type:"text",full:true},{k:"kind",sheet:"종류",label:"종류",type:"select",options:["","부동산","예금·적금","주식·펀드","코인","현금","자동차","기타"]},{k:"value",sheet:"평가액",label:"평가액(원)",type:"number"},{k:"buyDate",sheet:"취득일",label:"취득일",type:"date"},{k:"place",sheet:"보관처",label:"보관처·계좌",type:"text"},{k:"memo",sheet:"메모",label:"메모",type:"textarea"} ], search:["name","kind","place","memo"], dateSort:"buyDate", card:{ kind:"specimen", thumb:"💰", memo:"memo", meta:function(r){ var v=(r.value!==""&&r.value!=null&&!isNaN(Number(r.value)))?Number(r.value).toLocaleString()+"원":""; return [r.kind,v].filter(Boolean).join(" · "); } }, stats:[ {label:"자산 수",type:"count",c:"#0891b2"} ] },
+  recipes:{ id:"recipes", title:"음식 레시피", icon:"🍳", vol:"", canAdd:true, source:{ type:"sheet", tab:"레시피" }, fields:[ {k:"title",sheet:"요리명",label:"요리명",type:"text",full:true},{k:"kind",sheet:"종류",label:"종류",type:"select",options:["","한식","중식","일식","양식","분식","베이킹","음료","기타"]},{k:"ingredients",sheet:"재료",label:"재료(쉼표로 여러 개)",type:"tags"},{k:"steps",sheet:"조리법",label:"조리법(순서대로)",type:"textarea",rows:4},{k:"time",sheet:"소요시간",label:"소요시간(분)",type:"number"},{k:"level",sheet:"난이도",label:"난이도",type:"select",options:["","쉬움","보통","어려움"]},{k:"rating",sheet:"별점",label:"별점",type:"rating"},{k:"status",sheet:"상태",label:"상태",type:"seg",options:["해봄","또할래","찜"]},{k:"memo",sheet:"메모",label:"메모·후기",type:"textarea"},{k:"cover",sheet:"사진",label:"사진",type:"image"} ], search:["title","kind","ingredients","memo"], card:{ kind:"specimen", thumb:"🍳", tags:"ingredients", memo:"memo", meta:function(r){ return [r.kind,(r.time?r.time+"분":""),r.level].filter(Boolean).join(" · "); }, flags:function(r){ return [ (r.rating!=null&&r.rating!=="")?{t:"★ "+r.rating}:null, r.status==="찜"?{t:"찜"}:null ]; } }, stats:[ {label:"레시피 수",type:"count",c:"#e8590c"} ] },
+    /* 영화: 실제 구글시트(Apps Script)에서 라이브로 불러옴.
      source.map = 시트 한글 헤더 → 엔진 항목 이름.  source.derive = 특수 처리(코드·수식·숫자). */
   movies:{ id:"movies", title:"영화", icon:"🎬", vol:"卷1", canAdd:true, shareFields:["title","director","year","country"],
     source:{ type:"sheet", tab:"영화", tabAlt:"MOVIE", idCol:"원제", skipEnsure:true,
@@ -4872,6 +4874,7 @@ async function boot(){
 }
 $("#brandBtn").addEventListener("click",goHome);
   try{ if(!store.getItem("nd.mbtiSeeded")){ var _aa=getActive(); if(MANIFESTS.mbti && _aa.indexOf("mbti")<0){ _aa.push("mbti"); setActive(_aa); } store.setItem("nd.mbtiSeeded","1"); } }catch(e){}
+  try{ if(!store.getItem("nd.seed234")){ var _ab=getActive(); ["assets","recipes"].forEach(function(id){ if(MANIFESTS[id] && _ab.indexOf(id)<0) _ab.push(id); }); setActive(_ab); store.setItem("nd.seed234","1"); } }catch(e){}
   document.addEventListener("click",function(e){ var b=e.target.closest?e.target.closest(".bnav-i"):null; if(!b) return; var n=b.dataset.nav; document.querySelectorAll(".bnav-i").forEach(function(x){x.classList.remove("on");}); b.classList.add("on"); if(n==="home") goHome(); else if(n==="stats") openDashboard(); else if(n==="insight") openInsight(); else if(n==="settings") openSettings(); });
 $("#searchToggle").addEventListener("click",()=>{ state.searchOpen=!state.searchOpen; applySearchUI(MANIFESTS[state.domain]); if(state.searchOpen) $("#search").focus(); });
 $("#tabs").addEventListener("click",e=>{ const t=e.target.closest(".tab"); if(t) openDomain(t.dataset.id); });
