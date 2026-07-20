@@ -581,7 +581,7 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
         <svg class="brandmark" width="40" height="30" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#F7F5F0"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#F7F5F0"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#F7F5F0"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#F7F5F0"/></svg>
         <span class="brandwm"><span class="bwm-ko">내도감</span><span class="bwm-en">NAEDOGAM</span></span>
       </button>
-      <span class="mhver">v214</span>
+      <span class="mhver">v215</span>
       <span class="spacer"></span>
       <span class="src-chip" id="srcChip" style="display:none">데모</span>
       <button class="icon-btn" id="searchToggle" type="button" style="display:none">🔍</button>
@@ -4106,18 +4106,18 @@ function recoBuildRow(m, it){
       const _sp=x=>String(x||"").split(/[\/,]+/).map(y=>y.trim()).filter(Boolean);
       const _cur=_sp(_dup.recommend), _mg=[..._cur];
       _sp(_newRec).forEach(x=>{ if(!_cur.some(c=>c.toLowerCase()===x.toLowerCase())) _mg.push(x); });
-      if(_mg.length>_cur.length){ const _u=Object.assign({}, _dup, {recommend:_mg.join(", ")}); _u.recommendList=_mg; return {_mergeRec:_u}; }
+      if(_mg.length>_cur.length){ const _u=Object.assign({}, _dup, {recommend:_mg.join(", ")}); _u.recommendList=_mg; if(it.__source&&!_dup.source) _u.source=it.__source; return {_mergeRec:_u}; }
       throw new Error("이미 있음"); } }
   if(id==="movies"){
-    const rec=String(it["추천"]||"");   // 속도: 담을 땐 TMDB 미검색(rating=null), 상세 열 때 TMDB평점 자동 저장
+    const rec=String(it["추천"]||it.__list||"");   // 속도: 담을 땐 TMDB 미검색(rating=null), 상세 열 때 TMDB평점 자동 저장
     return { _id:it["원제"], orig:it["원제"], title:(it["한국 개봉명"]||it["원제"]||""), year:it["개봉연도"]||null,
       director:it["감독"]||"", actors:it["배우"]||"", country:it["국적"]||"", rating:null, streaming:[],
-      recommend:rec, recommendList:rec.split(/[\/,]+/).map(x=>x.trim()).filter(Boolean), review:"", directSearch:"",
+      recommend:rec, recommendList:rec.split(/[\/,]+/).map(x=>x.trim()).filter(Boolean), source:it.__source||"", review:"", directSearch:"",
       watched:"", rewatch:false, pick:false, watchDate:"" };
   }
   const uid=(window.crypto&&crypto.randomUUID)?crypto.randomUUID():(String(Date.now())+Math.random().toString(16).slice(2));
   const row={ _id:uid };
-  (m.fields||[]).forEach(f=>{ if(it[f.k]!==undefined && it[f.k]!==null) row[f.k]=it[f.k]; });
+  (m.fields||[]).forEach(f=>{ if(it[f.k]!==undefined && it[f.k]!==null) row[f.k]=it[f.k]; }); if(it.__source!==undefined&&it.__source!=="") row.source=it.__source; if((row.recommend===undefined||row.recommend==="")&&it.__list) row.recommend=it.__list;
   return row;
 }
 async function recoAddOne(m, it){
@@ -4143,9 +4143,9 @@ async function recoSheetLists(id){
   const rows=await gvizFetch(CONFIG.RECO_SHEET_ID,catKo);
   return idx.filter(r=>(String(r["카테고리"]||"")===catKo||String(r["카테고리"]||"")===id) && String(r["공개"]||"").trim().toUpperCase().indexOf("Y")===0)
     .map(r=>{ const title=String(r["리스트제목"]||"");
-      const _map=RECO_SHEET_MAP[id]||{};
-      const items=rows.filter(x=>String(x["리스트제목"]||"")===title).map(x=>{ const o={}; for(const k in x){ if(k==="리스트제목") continue; const _kk=_map[k]||k; o[_kk]=x[k]; } o.__list=title; return o; });
-      return { title, subtitle:String(r["부제"]||""), items }; })
+      const _map=RECO_SHEET_MAP[id]||{}; const _src=String(r["출처"]||"");
+      const items=rows.filter(x=>String(x["리스트제목"]||"")===title).map(x=>{ const o={}; for(const k in x){ if(k==="리스트제목") continue; const _kk=_map[k]||k; o[_kk]=x[k]; } o.__list=title; o.__source=_src; return o; });
+      return { title, subtitle:String(r["부제"]||""), source:_src, items }; })
     .filter(l=>l.title && l.items.length);
 }
 async function recoLists(id){
