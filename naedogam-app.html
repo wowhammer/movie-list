@@ -472,6 +472,7 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
   /* 홈: 카테고리 카드 격자 */
   .home-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:9px; margin-top:20px; }
   .cat-card-zero{ opacity:.5; }
+  .qrec-btn{ position:absolute; top:8px; right:8px; z-index:3; font-size:11px; font-weight:600; padding:3px 9px; border:1px solid var(--line-soft,#e5e5e5); border-radius:999px; background:var(--card,#fff); color:var(--accent,#e0483f); cursor:pointer; box-shadow:0 1px 4px rgba(0,0,0,.08); }
   .cat-card{ position:relative; background:var(--card); border:1px solid var(--line); border-radius:12px; box-shadow:none; padding:11px 10px 10px; cursor:pointer; text-align:left; font:inherit; color:inherit; display:flex; flex-direction:column; gap:5px; min-height:78px; transition:border-color .15s ease, background .15s ease; }
   .cat-card:hover{ border-color:var(--accent); }
   .cat-card .ci{ color:var(--ink); line-height:1; height:24px; }
@@ -580,7 +581,7 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
         <svg class="brandmark" width="40" height="30" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#F7F5F0"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#F7F5F0"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#F7F5F0"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#F7F5F0"/></svg>
         <span class="brandwm"><span class="bwm-ko">내도감</span><span class="bwm-en">NAEDOGAM</span></span>
       </button>
-      <span class="mhver">v210</span>
+      <span class="mhver">v211</span>
       <span class="spacer"></span>
       <span class="src-chip" id="srcChip" style="display:none">데모</span>
       <button class="icon-btn" id="searchToggle" type="button" style="display:none">🔍</button>
@@ -1882,6 +1883,42 @@ function ndInjectRecChip(m){
   row.insertBefore(btn, row.firstChild);
 }
 
+function ndQuickRecBadge(b, m, r){
+  if(!(m.fields||[]).some(function(f){return f.k==="rating";})) return;
+  if(!(r.rating==null || r.rating==="")) return;
+  if(b.querySelector(".qrec-btn")) return;
+  var q=document.createElement("button"); q.type="button"; q.className="qrec-btn"; q.textContent="✏️ 기록";
+  q.onclick=function(e){ e.stopPropagation(); e.preventDefault(); openQuickRec(m, r); };
+  if(getComputedStyle(b).position==="static") b.style.position="relative";
+  b.appendChild(q);
+}
+function openQuickRec(m, r){
+  var esc=function(x){ return String(x==null?"":x).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/"/g,"&quot;"); };
+  var taField=(m.fields||[]).find(function(f){ return f.type==="textarea"; });
+  var taKey=taField?taField.k:null;
+  var old=document.getElementById("quickRecDlg"); if(old) old.remove();
+  var dlg=document.createElement("dialog"); dlg.id="quickRecDlg";
+  dlg.style.cssText="border:none;border-radius:16px;padding:0;max-width:400px;width:92%;background:var(--card,#fff);color:var(--ink,#222)";
+  var title=r.title||r.name||"";
+  dlg.innerHTML='<div style="padding:16px 18px 2px;font-weight:700;font-size:16px">'+esc(title)+'</div>'
+    +'<div style="padding:0 18px 6px;color:var(--ink-soft,#999);font-size:12.5px">빠른 기록 · 별점과 한줄평</div>'
+    +'<div style="padding:0 18px"><div class="drate" id="qrRate" style="padding:2px 0 10px"><span class="drate-l">내 별점</span> '+myStarsHTML(r.rating)+'</div>'
+    +(taKey?'<textarea id="qrTa" placeholder="'+esc(taField.label||"한줄평")+'" style="width:100%;box-sizing:border-box;min-height:84px;padding:10px;border:1px solid var(--line-soft,#ddd);border-radius:10px;font-size:14px;resize:vertical">'+esc(r[taKey]||"")+'</textarea>':'')
+    +'</div><div style="display:flex;gap:8px;padding:14px 18px 16px"><button id="qrSave" class="btn" type="button" style="flex:1">저장</button><button id="qrClose" class="btn ghost" type="button">닫기</button></div>';
+  document.body.appendChild(dlg); dlg.showModal();
+  function bindStars(){ dlg.querySelectorAll(".ms-hit,.ms-clear").forEach(function(el){ el.onclick=function(){ setMovieRatingDeploy(m, r, parseFloat(el.dataset.val)); var rc=dlg.querySelector("#qrRate"); if(rc){ rc.innerHTML='<span class="drate-l">내 별점</span> '+myStarsHTML(r.rating); bindStars(); } }; }); }
+  bindStars();
+  dlg.querySelector("#qrClose").onclick=function(){ dlg.close(); };
+  dlg.addEventListener("click",function(e){ if(e.target===dlg) dlg.close(); });
+  dlg.querySelector("#qrSave").onclick=async function(){
+    var sv=dlg.querySelector("#qrSave"); sv.disabled=true; sv.textContent="저장 중…";
+    try{
+      if(taKey){ var ta=dlg.querySelector("#qrTa"); r[taKey]=ta?ta.value:r[taKey]; await sheetSrc().update(m.id, r._id, r);
+        var arr=CACHE[m.id]; if(arr){ var it=arr.find(function(x){return String(x._id)===String(r._id);}); if(it){ it[taKey]=r[taKey]; savePersist(m.id,arr); } } }
+      dlg.close(); paintDomain(m);
+    }catch(e){ sv.disabled=false; sv.textContent="저장"; alert("저장 실패: "+(e&&e.message||e)); }
+  };
+}
 function openRecListPicker(m, recVals){
   var old=document.getElementById("recListDlg"); if(old) old.remove();
   var dlg=document.createElement("dialog"); dlg.id="recListDlg";
@@ -3147,7 +3184,7 @@ function paintDomain(m){   // state.rows를 화면에 그림 (데이터 다시 �
   const PER=40, total=rows.length, shown=rows.slice(0,(state.page+1)*PER); NAV_LIST=shown;
   $("#list").innerHTML=(total? shown.map((r,i)=>{ try{ return renderCard(m,r,i+1); }catch(e){ console.error("card",e); return ""; } }).join("") : emptyG)
     + (shown.length<total?`<button class="btn ghost" id="moreBtn" style="width:100%;margin-top:10px">더 보기 (${total-shown.length}개)</button>`:"");
-  $("#list").querySelectorAll(".card").forEach((b,i)=>{ const r=shown[i]; if(r) b.onclick=()=>openDetail(m, r); });
+  $("#list").querySelectorAll(".card").forEach((b,i)=>{ const r=shown[i]; if(r){ b.onclick=()=>openDetail(m, r); ndQuickRecBadge(b, m, r); } });
   { const more=$("#moreBtn"); if(more) more.onclick=()=>{ state.page++; paintDomain(m); }; }
   { const na=$("#nrAdd"); if(na) na.onclick=()=>{ if(m.id==="books"){ openAddBook(); const bq=$("#bq"); if(bq){ bq.value=state.query; bq.dispatchEvent(new Event("input")); } } else openRecordForm(m, null); }; }
   if(hasCal(m)){ _mountViewToggle(m); }
@@ -3291,7 +3328,7 @@ function paintMovies(m){
     : `<div class="count">결과가 없습니다.</div>`;
   $("#list").innerHTML = (shown.map((r,i)=>movieCard(r,i+1)).join("")||emptyM)
     + (shown.length<total?`<button class="btn ghost" id="moreBtn" style="width:100%;margin-top:10px">더 보기 (${total-shown.length}편)</button>`:"");
-  $("#list").querySelectorAll(".card").forEach((b,i)=>{ const r=shown[i]; if(r) b.onclick=()=>openDetail(m, r); });
+  $("#list").querySelectorAll(".card").forEach((b,i)=>{ const r=shown[i]; if(r){ b.onclick=()=>openDetail(m, r); ndQuickRecBadge(b, m, r); } });
   { const na=$("#nrAdd"); if(na) na.onclick=()=>{ openAddMovie(); const mq=$("#mq"); if(mq){ mq.value=state.query; mq.dispatchEvent(new Event("input")); } }; }
   document.querySelectorAll(".mvcard .plink").forEach(el=>el.onclick=e=>{ e.stopPropagation(); openPersonModal(el.dataset.name, el.dataset.role); });
   const more=$("#moreBtn"); if(more) more.onclick=()=>{ state.page++; paintMovies(m); };
