@@ -571,6 +571,53 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
   @media (min-width:520px){ .home-grid{ grid-template-columns:repeat(3,1fr); } }
   @media (max-width:430px){ .mh-row{ gap:5px; padding:11px 11px; } .mh-row .icon-btn{ padding:5px 7px; } .bwm-ko{ font-size:18px; } .mhver{ margin-left:1px; } .stat .n{ font-size:15.5px; } .stat .l{ font-size:10px; } }
   @media (prefers-reduced-motion:no-preference){ .card{ transition:border-color .15s ease; } }
+
+/* ── 내 결산(Wrapped) ── */
+.wrapDlg{border:none;padding:0;margin:0;max-width:100vw;width:100vw;height:100vh;max-height:100vh;background:#0d0a1f;color:#f4f1ff}
+.wrapDlg::backdrop{background:rgba(0,0,0,.6)}
+.wtop{position:sticky;top:0;z-index:5;display:flex;justify-content:space-between;align-items:center;padding:12px 16px;background:rgba(13,10,31,.92)}
+.wclose,.wsave{border:none;border-radius:999px;font-size:13px;font-weight:700;padding:9px 15px;cursor:pointer}
+.wclose{background:rgba(255,255,255,.1);color:#f4f1ff}
+.wsave{background:linear-gradient(100deg,#ffd66b,#ff6fae);color:#2a1150}
+.wscroll{overflow-y:auto;height:calc(100vh - 58px);display:flex;justify-content:center;padding:14px 0 50px}
+.wcard{width:380px;max-width:92vw;background:radial-gradient(120% 70% at 50% -8%,#3a1d6e 0%,#1b1140 46%,#0d0a1f 100%);border-radius:22px;padding:0 22px;overflow:hidden;height:max-content}
+.wloading{padding:80px 20px;text-align:center;color:#b9b2e0;font-size:15px;line-height:1.6}
+.wsec{padding:26px 0;border-bottom:1px solid rgba(255,255,255,.06)}
+.whead,.wfoot{border-bottom:none}
+.whead{padding:34px 0 18px;text-align:center}
+.wlogo{font-size:11px;letter-spacing:.16em;color:#ffd66b;font-weight:800}
+.wtitle{font-size:30px;font-weight:900;margin:12px 0 6px;color:#fff}
+.wdate{font-size:12px;color:#b9b2e0}
+.wpersona{background:linear-gradient(135deg,rgba(124,92,255,.3),rgba(255,111,174,.18));border:1px solid rgba(255,255,255,.12);border-radius:20px;padding:24px 18px;text-align:center}
+.wem{font-size:38px}
+.wph{font-size:22px;font-weight:900;line-height:1.3;margin:8px 0 10px;color:#ffe8a3}
+.wpp{font-size:13px;color:#e7e2ff;line-height:1.6}
+.wkick{font-size:11px;letter-spacing:.16em;color:#b9b2e0;font-weight:800}
+.wbig{font-size:64px;font-weight:900;line-height:1;color:#fff;margin-top:6px}
+.wbig2{font-size:46px;font-weight:900;color:#fff;margin:4px 0 8px}
+.wbig small,.wbig2 small{font-size:18px;color:#b9b2e0;font-weight:800;margin-left:5px}
+.wgrid{display:flex;gap:10px;margin-top:14px}
+.wstat{flex:1;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:14px}
+.wstat .wn{font-size:26px;font-weight:900;color:#fff}
+.wstat.wacc .wn{color:#ffd66b}
+.wstat .wl{font-size:11px;color:#b9b2e0;margin-top:3px}
+.wbar{height:10px;border-radius:99px;background:rgba(255,255,255,.1);overflow:hidden;margin-top:16px}
+.wbar i{display:block;height:100%;background:linear-gradient(90deg,#ffd66b,#ff6fae)}
+.wcap{font-size:13px;color:#cfc8f0;margin-top:8px;line-height:1.5}
+.wcap b,.wpp b,.winsight b,.wph b{color:#ffd66b}
+.wh2{font-size:13px;color:#ffd66b;font-weight:800;margin-bottom:12px}
+.wchips{display:flex;flex-wrap:wrap;gap:7px}
+.wchip{font-size:12px;font-weight:700;padding:6px 11px;border-radius:999px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);color:#efeaff}
+.wrow{display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px dashed rgba(255,255,255,.09);font-size:14px}
+.wrow span{color:#cfc8f0}.wrow b{color:#fff}.wrow b.wg{color:#ffd66b}
+.wfav{display:flex;align-items:center;gap:12px;background:rgba(255,214,107,.1);border:1px solid rgba(255,214,107,.28);border-radius:14px;padding:12px 14px;margin-top:14px}
+.wscore{font-size:28px;font-weight:900;color:#ffd66b}
+.wft{font-size:11px;color:#b9b2e0}.wfm{font-size:15px;font-weight:800;color:#fff}
+.wquote{font-size:16px;font-weight:700;color:#fff;margin-top:12px;line-height:1.5}
+.winsight{background:rgba(255,255,255,.04);border-left:3px solid #ffd66b;border-radius:0 12px 12px 0;padding:14px 16px;font-size:14px;line-height:1.7;color:#efeaff}
+.wfoot{text-align:center;padding:26px 0 8px;color:#b9b2e0;font-size:11px}
+.wfoot b{color:#ffd66b}
+
 </style>
 <script>try{var _t=localStorage.getItem("app:nd.theme")||localStorage.getItem("nd.theme");if(_t==="dark")document.documentElement.setAttribute("data-theme","dark");}catch(e){}</script>
 </head>
@@ -582,11 +629,12 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
         <svg class="brandmark" width="40" height="30" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#F7F5F0"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#F7F5F0"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#F7F5F0"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#F7F5F0"/></svg>
         <span class="brandwm"><span class="bwm-ko">내도감</span><span class="bwm-en">NAEDOGAM</span></span>
       </button>
-      <span class="mhver">v220</span>
+      <span class="mhver">v221</span>
       <span class="spacer"></span>
       <span class="src-chip" id="srcChip" style="display:none">데모</span>
       <button class="icon-btn" id="searchToggle" type="button" style="display:none">🔍</button>
       <button class="icon-btn" id="syncBtn" type="button" title="동기화" aria-label="동기화">↻</button>
+      <button class="icon-btn" id="wrapBtn" type="button">🎊 결산</button>
       <button class="icon-btn" id="dashBtn" type="button">📊 통계</button>
       <button class="icon-btn" id="setBtn" type="button">⚙ 설정</button>
     </div>
@@ -3503,6 +3551,127 @@ function chartTrend(ids, ev){     // 최근 10주 · 주별 합산 추이
   const total=counts.reduce((a,b)=>a+b,0);
   return `<div class="dash-note">최근 10주 · 총 ${total}건</div><svg viewBox="0 0 ${W} ${H}" width="100%" style="display:block"><path d="${area}" fill="var(--accent-wash)" stroke="none"/><path d="${line}" fill="none" stroke="#16a34a" stroke-width="2"/>${dots}${labs}</svg>`;
 }
+/* ── 내 결산 (Wrapped) : 실시간 생성 + 이미지 저장 ───────────────── */
+function _wTruthy(v){ return v===true||v==="TRUE"||v==="true"||v==="O"||v==="Y"||v==="예"||v===1||v==="1"; }
+function _wEsc(x){ return String(x==null?"":x).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
+function _wNum(v){ if(v==null||v==="") return null; var n=parseFloat(v); return isNaN(n)?null:n; }
+function _wDone(id,r){
+  if(_wNum(r.rating)!=null) return true;
+  if(_wTruthy(r.watched)||_wTruthy(r.climbed)) return true;
+  var st=String(r.status||""); if(st==="읽음"||st==="다녀옴"||st==="관람"||st==="완료"||st==="봤음"||st==="방문") return true;
+  if(id==="running") return true;
+  return false;
+}
+function wrapStats(ids, data){
+  var S={total:0,experienced:0,rated:0,ratingSum:0,best:null,cats:[]};
+  ids.forEach(function(id){
+    var rows=data[id]||[]; if(!rows.length) return;
+    var m=MANIFESTS[id]; var exp=0;
+    rows.forEach(function(r){
+      var rt=_wNum(r.rating);
+      if(rt!=null){ S.rated++; S.ratingSum+=rt; if(!S.best||rt>S.best.rating) S.best={rating:rt,title:(r.title||r.name||""),cat:m.title}; }
+      if(_wDone(id,r)) exp++;
+    });
+    S.total+=rows.length; S.experienced+=exp;
+    S.cats.push({id:id,title:m.title,icon:m.icon,n:rows.length,exp:exp});
+  });
+  S.cats.sort(function(a,b){return b.n-a.n;});
+  S.avg=S.rated?Math.round(S.ratingSum/S.rated*10)/10:null;
+  S.expPct=S.total?Math.round(S.experienced/S.total*100):0;
+  // 영화
+  if((data.movies||[]).length){ var mv=data.movies; var w=mv.filter(function(r){return _wTruthy(r.watched);});
+    var cc={},dc={},sum=0,cnt=0,best=null;
+    w.forEach(function(r){ var c=String(r.country||"").trim(); if(c) cc[c]=(cc[c]||0)+1; var d=String(r.director||"").trim(); if(d) dc[d]=(dc[d]||0)+1; var rt=_wNum(r.rating); if(rt!=null){sum+=rt;cnt++; if(!best||rt>best.rating)best={rating:rt,title:r.title};} });
+    var top=function(o){return Object.keys(o).map(function(k){return [k,o[k]];}).sort(function(a,b){return b[1]-a[1];});};
+    S.movies={watched:w.length,avg:cnt?Math.round(sum/cnt*10)/10:null,country:top(cc),director:top(dc).slice(0,4),best:best};
+  }
+  // 도서
+  if((data.books||[]).length){ var bk=data.books; var read=bk.filter(function(r){return String(r.status||"")==="읽음";});
+    var g={}; bk.forEach(function(r){ String(r.genre||"").split(/[,\s]+/).forEach(function(x){ x=x.trim(); if(x) g[x]=(g[x]||0)+1; }); });
+    S.books={read:read.length,total:bk.length,genres:Object.keys(g).map(function(k){return [k,g[k]];}).sort(function(a,b){return b[1]-a[1];}).slice(0,6),
+      readTitles:read.map(function(r){return r.title;}).filter(Boolean)};
+  }
+  // 등산
+  if((data.mountains||[]).length){ var mt=data.mountains; S.mountains={total:mt.length,climbed:mt.filter(function(r){return _wTruthy(r.climbed);}).map(function(r){return r.title;}).filter(Boolean)}; }
+  // 러닝
+  if((data.running||[]).length){ var rn=data.running; var dsum=0; rn.forEach(function(r){ var dd=_wNum(r.dist); if(dd)dsum+=dd; });
+    var last=rn[rn.length-1]||{}; S.running={count:rn.length,dist:Math.round(dsum*10)/10,memo:String(last.memo||"").trim(),place:String(last.place||"").trim()}; }
+  return S;
+}
+function wrapPersona(S){
+  if(S.expPct<25) return {em:"🧭",t:"명작을 수집하고<br>하나씩 정복하는 탐험가",p:"인생 명작 <b>"+S.total+"개</b>를 먼저 모아두고,<br>그중 진짜를 하나씩 경험해 나가는 사람.<br>서두르지 않지만, 방향이 뚜렷합니다."};
+  if(S.expPct<60) return {em:"🌱",t:"꾸준히 채워가는<br>기록의 사람",p:"모으는 힘과 경험하는 힘이<br>균형을 잡아가는 중. <b>"+S.expPct+"%</b>를 이미 내 것으로 만들었어요."};
+  return {em:"🔥",t:"경험을 탐닉하는<br>진짜 수집가",p:"담은 것의 <b>"+S.expPct+"%</b>를 실제로 경험한,<br>말보다 발이 앞서는 사람."};
+}
+function wrapCardHTML(S){
+  var p=wrapPersona(S);
+  var sec=[];
+  // 헤더
+  sec.push('<div class="wsec whead"><div class="wlogo">내도감 · MY LIFE DOGAM</div><div class="wtitle">나의 결산</div><div class="wdate">'+_wToday()+' 기준</div></div>');
+  // 페르소나
+  sec.push('<div class="wsec"><div class="wpersona"><div class="wem">'+p.em+'</div><div class="wph">당신은<br>“'+p.t+'”</div><div class="wpp">'+p.p+'</div></div></div>');
+  // 총 수집 + 경험
+  sec.push('<div class="wsec"><div class="wkick">TOTAL COLLECTED</div><div class="wbig">'+S.total+'<small>개 수집</small></div>'
+    +'<div class="wgrid"><div class="wstat wacc"><div class="wn">'+S.experienced+'</div><div class="wl">실제로 경험함</div></div>'
+    +'<div class="wstat"><div class="wn">'+Math.max(0,S.total-S.experienced)+'</div><div class="wl">아직 기다리는 것</div></div></div>'
+    +'<div class="wbar"><i style="width:'+Math.max(4,S.expPct)+'%"></i></div><div class="wcap">도감의 <b>'+S.expPct+'%</b>를 정복했어요</div></div>');
+  // 분야 top
+  if(S.cats.length){ var chips=S.cats.slice(0,6).map(function(c){return '<span class="wchip">'+_wEsc(c.title)+' '+c.n+'</span>';}).join("");
+    sec.push('<div class="wsec"><div class="wh2">📚 모은 분야</div><div class="wchips">'+chips+'</div></div>'); }
+  // 영화
+  if(S.movies){ var M=S.movies; var rows="";
+    if(M.avg!=null) rows+='<div class="wrow"><span>평균 별점</span><b class="wg">★ '+M.avg+' / 10</b></div>';
+    if(M.country.length) rows+='<div class="wrow"><span>가장 많이 본 나라</span><b>'+_wEsc(M.country[0][0])+' '+M.country[0][1]+'편</b></div>';
+    if(M.director.length) rows+='<div class="wrow"><span>최애 감독</span><b>'+M.director.slice(0,2).map(function(d){return _wEsc(d[0]);}).join(" · ")+'</b></div>';
+    var fav=M.best?'<div class="wfav"><div class="wscore">'+M.best.rating+'</div><div><div class="wft">최고 평점</div><div class="wfm">'+_wEsc(M.best.title)+'</div></div></div>':"";
+    sec.push('<div class="wsec"><div class="wh2">🎬 가장 뜨거운 · 영화</div><div class="wbig2">'+M.watched+'<small>편 감상</small></div>'+rows+fav+'</div>'); }
+  // 도서
+  if(S.books){ var B=S.books; var g=B.genres.map(function(x){return '<span class="wchip">'+_wEsc(x[0])+' '+x[1]+'</span>';}).join("");
+    var rt=B.readTitles.length?'<div class="wcap" style="margin-top:12px">읽은 책: <b>'+B.readTitles.slice(0,4).map(_wEsc).join(" · ")+'</b></div>':"";
+    sec.push('<div class="wsec"><div class="wh2">📖 도서 · 취향의 지도</div><div class="wcap"><b>'+B.total+'권</b>을 곁에 두고 <b>'+B.read+'권</b> 완독</div><div class="wchips" style="margin-top:10px">'+g+'</div>'+rt+'</div>'); }
+  // 몸의 기록
+  if(S.mountains||S.running){ var body="";
+    if(S.mountains) body+='<div class="wstat"><div class="wn" style="font-size:22px">'+(S.mountains.climbed[0]||"—")+'</div><div class="wl">'+(S.mountains.climbed.length)+'좌 등정 / '+S.mountains.total+'</div></div>';
+    if(S.running) body+='<div class="wstat wacc"><div class="wn" style="font-size:22px">'+S.running.dist+'km</div><div class="wl">러닝 '+S.running.count+'회</div></div>';
+    var q=(S.running&&S.running.memo)?'<div class="wquote">“'+_wEsc(S.running.memo)+'”</div>':"";
+    sec.push('<div class="wsec"><div class="wh2">🏔 몸으로 쓴 기록</div><div class="wgrid">'+body+'</div>'+q+'</div>'); }
+  // 인사이트
+  sec.push('<div class="wsec"><div class="wh2">💡 결산 인사이트</div><div class="winsight">당신은 <b>‘담는 힘’</b>이 강한 사람이에요. 이제 <b>‘경험하는 속도’</b>만 붙으면, 이 도감은 세상에 하나뿐인 <b>당신의 인생 지도</b>가 됩니다.</div></div>');
+  sec.push('<div class="wfoot">지금 이 순간 내 데이터로 자동 생성됨 · <b>내도감</b></div>');
+  return sec.join("");
+}
+function _wToday(){ try{ var t=state&&state._now?state._now:null; }catch(e){} var d=new Date(); return d.getFullYear()+"."+String(d.getMonth()+1).padStart(2,"0")+"."+String(d.getDate()).padStart(2,"0"); }
+async function openWrapped(){
+  var old=document.getElementById("wrapDlg"); if(old) old.remove();
+  var dlg=document.createElement("dialog"); dlg.id="wrapDlg"; dlg.className="wrapDlg";
+  dlg.innerHTML='<div class="wtop"><button class="wclose" onclick="this.closest(\'dialog\').close()">✕ 닫기</button><button class="wsave" id="wSave">📷 이미지 저장</button></div><div class="wscroll"><div class="wcard" id="wrapCard"><div class="wloading">내 결산을 만드는 중…</div></div></div>';
+  document.body.appendChild(dlg); dlg.showModal();
+  // 전체 카테고리 로딩(통계와 동일 패턴)
+  var ids=getActive().filter(function(id){return MANIFESTS[id];});
+  var data={};
+  var build=function(id,raw){ var m=MANIFESTS[id]; data[id]=applyComputed(m,(raw||[]).map(function(r){return Object.assign({_id:r._id||crypto.randomUUID()},r);})); };
+  var had={};
+  ids.forEach(function(id){ had[id]=!!CACHE[id]; var raw=CACHE[id]||loadPersist(id); if(raw&&!CACHE[id])CACHE[id]=raw; build(id,raw||[]); });
+  var draw=function(){ var S=wrapStats(ids,data); var card=document.getElementById("wrapCard"); if(card){ if(!S.total){ card.innerHTML='<div class="wloading">아직 담긴 기록이 없어요.<br>추천리스트에서 담거나 +로 추가해보세요.</div>'; } else { card.innerHTML=wrapCardHTML(S); } } };
+  draw();
+  var todo=ids.filter(function(id){return !had[id];});
+  if(todo.length){ await Promise.all(todo.map(async function(id){ try{ var fresh=await sourceFor(MANIFESTS[id]).list(id); CACHE[id]=fresh; savePersist(id,fresh); build(id,fresh); }catch(e){} })); if(dlg.open) draw(); }
+  // 이미지 저장
+  var sv=document.getElementById("wSave");
+  if(sv) sv.onclick=function(){ _wExport(sv); };
+}
+function _wLoadH2C(cb){ if(window.html2canvas) return cb(); var s=document.createElement("script"); s.src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"; s.onload=function(){cb();}; s.onerror=function(){ alert("이미지 저장 모듈을 불러오지 못했어요. 잠시 후 다시 시도해주세요."); }; document.head.appendChild(s); }
+function _wExport(btn){
+  var card=document.getElementById("wrapCard"); if(!card) return;
+  var t0=btn?btn.textContent:""; if(btn){ btn.disabled=true; btn.textContent="만드는 중…"; }
+  _wLoadH2C(function(){
+    html2canvas(card,{backgroundColor:"#0d0a1f",scale:2,useCORS:true,logging:false}).then(function(canvas){
+      try{ canvas.toBlob(function(blob){ var url=URL.createObjectURL(blob); var a=document.createElement("a"); a.href=url; a.download="내도감_결산.png"; document.body.appendChild(a); a.click(); a.remove(); setTimeout(function(){URL.revokeObjectURL(url);},2000); if(btn){btn.disabled=false;btn.textContent=t0;} },"image/png"); }
+      catch(e){ var a2=document.createElement("a"); a2.href=canvas.toDataURL("image/png"); a2.download="내도감_결산.png"; a2.click(); if(btn){btn.disabled=false;btn.textContent=t0;} }
+    }).catch(function(e){ alert("이미지 저장 실패: "+(e&&e.message||e)); if(btn){btn.disabled=false;btn.textContent=t0;} });
+  });
+}
+
 async function openDashboard(){
   const d=$("#dash");
   d.innerHTML=`<div class="dhead" style="display:flex;align-items:center;gap:10px"><h3 style="margin:0">📊 통계</h3><button class="pclose" onclick="this.closest('dialog').close()">✕</button></div><div class="dbody" id="dashBody"><div class="count">불러오는 중…</div></div>`;
@@ -4338,6 +4507,7 @@ $("#search").addEventListener("input",e=>{ state.query=e.target.value; state.pag
 $("#setBtn").addEventListener("click",openSettings);
 $("#syncBtn").addEventListener("click",syncNow);
 $("#dashBtn").addEventListener("click",openDashboard);
+  var _wb=document.getElementById("wrapBtn"); if(_wb) _wb.addEventListener("click",openWrapped);
 $("#addBtn").addEventListener("click",()=>{ const m=MANIFESTS[state.domain]; if(!m?.canAdd) return;
   if(state.domain==="movies" && !CONFIG.DEPLOY) openAddMovie();
   else if(state.domain==="books") openAddBook();
