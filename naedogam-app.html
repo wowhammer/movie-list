@@ -674,7 +674,7 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
         <svg class="brandmark" width="40" height="30" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#F7F5F0"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#F7F5F0"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#F7F5F0"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#F7F5F0"/></svg>
         <span class="brandwm"><span class="bwm-ko">내도감</span><span class="bwm-en">NAEDOGAM</span></span>
       </button>
-      <span class="mhver">v225</span>
+      <span class="mhver">v226</span>
       <span class="spacer"></span>
       <span class="src-chip" id="srcChip" style="display:none">데모</span>
       <button class="icon-btn" id="searchToggle" type="button" style="display:none">🔍</button>
@@ -3688,7 +3688,25 @@ function mbtiHistoryHTML(){
   var items=s.history.slice(0,12).map(function(h,i){ return '<button class="mbHistRow" data-idx="'+i+'"><span class="mbHd">'+_mbtiEsc(h.date||"")+'</span><span class="mbHt">'+_mbtiEsc(h.type||"")+(h.nick?' · '+_mbtiEsc(h.nick):'')+'</span></button>'; }).join("");
   return '<div class="wsec"><div class="wh2">📜 지난 결과 ('+s.history.length+')</div>'+items+'</div>';
 }
-function openMbti(){
+var MBTI_TAB="성격유형", MBTI_HEAD=["_id","측정일","유형","별칭","축상세"];
+async function mbtiSheetSave(res){
+  try{ var src=sheetSrc(); if(!src||typeof src._appendObj!=="function") return false;
+    var uid=(window.crypto&&crypto.randomUUID)?crypto.randomUUID():String(Date.now())+Math.random().toString(16).slice(2);
+    var obj={_id:uid, "측정일":res.date||"", "유형":res.type||"", "별칭":res.nick||"", "축상세":JSON.stringify(res.axes||{})};
+    await src._appendObj(MBTI_TAB, obj, MBTI_HEAD); return true;
+  }catch(e){ return false; }
+}
+async function mbtiSheetLoad(){
+  try{ var src=sheetSrc(); if(!src||typeof src._rowsOf!=="function") return null;
+    var r=await src._rowsOf(MBTI_TAB); var rows=(r&&r.rows)||[];
+    var hist=rows.map(function(o){ var ax={}; try{ ax=JSON.parse(o["축상세"]||"{}"); }catch(e){}
+      return {date:o["측정일"]||"", type:o["유형"]||"", nick:o["별칭"]||((MBTI_INFO[o["유형"]]||["",""])[0]), desc:(MBTI_INFO[o["유형"]]||["",""])[1], axes:ax}; })
+      .filter(function(h){return h.type;});
+    hist.reverse();
+    return hist;
+  }catch(e){ return null; }
+}
+async function openMbti(){
   var old=document.getElementById("mbtiDlg"); if(old) old.remove();
   var dlg=document.createElement("dialog"); dlg.id="mbtiDlg"; dlg.className="wrapDlg";
   dlg.innerHTML='<div class="wtop"><button class="wclose" onclick="this.closest(\'dialog\').close()">✕ 닫기</button><span class="mbTitle">🧠 성격유형</span><span style="width:56px"></span></div><div class="wscroll"><div class="wcard" id="mbtiCard"></div></div>';
@@ -3696,6 +3714,7 @@ function openMbti(){
   var saved=_mbtiSaved();
   if(saved && saved.latest) mbtiShowResult(saved.latest, true);
   else mbtiIntro();
+  try{ var hist=await mbtiSheetLoad(); if(hist&&hist.length){ var cur=_mbtiSaved()||{}; cur.history=hist; cur.latest=hist[0]; store.setItem("nd.mbti", JSON.stringify(cur)); window._mbtiLatest=hist[0]; var c=document.getElementById("mbtiCard"); if(c && !c.querySelector(".mbOpt")) mbtiShowResult(hist[0], true); } }catch(e){}
 }
 function mbtiIntro(){
   var c=document.getElementById("mbtiCard"); if(!c) return;
@@ -3761,8 +3780,9 @@ function mbtiSave(res){
     cur.latest=res; cur.history=(cur.history||[]); cur.history.unshift(res); if(cur.history.length>30) cur.history=cur.history.slice(0,30);
     store.setItem("nd.mbti", JSON.stringify(cur));
     window._mbtiLatest=res;
+    mbtiSheetSave(res).catch(function(){});
     mbtiShowResult(res, true);
-    try{ if(typeof toast==="function") toast("저장됐어요 · 결산에도 반영됩니다"); }catch(e){}
+    try{ if(typeof toast==="function") toast("저장됨 · 구글시트에 기록(기기간 공유)"); }catch(e){}
   }catch(e){ alert("저장 실패: "+(e&&e.message||e)); }
 }
 /* 공용 카드 이미지 저장(결산 export 재사용) */
