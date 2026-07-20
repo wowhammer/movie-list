@@ -577,7 +577,7 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
         <svg class="brandmark" width="40" height="30" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#F7F5F0"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#F7F5F0"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#F7F5F0"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#F7F5F0"/></svg>
         <span class="brandwm"><span class="bwm-ko">내도감</span><span class="bwm-en">NAEDOGAM</span></span>
       </button>
-      <span class="mhver">v200</span>
+      <span class="mhver">v201</span>
       <span class="spacer"></span>
       <span class="src-chip" id="srcChip" style="display:none">데모</span>
       <button class="icon-btn" id="searchToggle" type="button" style="display:none">🔍</button>
@@ -4021,7 +4021,7 @@ function recoBuildRow(m, it){
   const id=m.id;
   { const _v=recoView(id,it); const _probe = id==="movies" ? {orig:_v.key, title:_v.title} : (id==="books" ? {title:_v.key, author:it.author} : {title:_v.key});
     const _dup=ndFindDup(id,_probe);
-    if(_dup){ const _newRec=String((id==="movies"?it["추천"]:(it["추천"]||it.recommend||""))||"");
+    if(_dup){ const _newRec=String((id==="movies"?it["추천"]:(it["추천"]||it.recommend||it.__list||""))||"");
       const _sp=x=>String(x||"").split(/[\/,]+/).map(y=>y.trim()).filter(Boolean);
       const _cur=_sp(_dup.recommend), _mg=[..._cur];
       _sp(_newRec).forEach(x=>{ if(!_cur.some(c=>c.toLowerCase()===x.toLowerCase())) _mg.push(x); });
@@ -4063,7 +4063,7 @@ async function recoSheetLists(id){
   return idx.filter(r=>(String(r["카테고리"]||"")===catKo||String(r["카테고리"]||"")===id) && String(r["공개"]||"").trim().toUpperCase().indexOf("Y")===0)
     .map(r=>{ const title=String(r["리스트제목"]||"");
       const _map=RECO_SHEET_MAP[id]||{};
-      const items=rows.filter(x=>String(x["리스트제목"]||"")===title).map(x=>{ const o={}; for(const k in x){ if(k==="리스트제목") continue; const _kk=_map[k]||k; o[_kk]=x[k]; } return o; });
+      const items=rows.filter(x=>String(x["리스트제목"]||"")===title).map(x=>{ const o={}; for(const k in x){ if(k==="리스트제목") continue; const _kk=_map[k]||k; o[_kk]=x[k]; } o.__list=title; return o; });
       return { title, subtitle:String(r["부제"]||""), items }; })
     .filter(l=>l.title && l.items.length);
 }
@@ -4093,9 +4093,9 @@ async function openRecoPanel(m){
   const have=(await sheetSrc().list(id).catch(()=>null))||CACHE[id]||loadPersist(id)||[]; CACHE[id]=have;
   const hk=recoHaveKeys(id, have);
   const items=(data.items||[]).map(it=>{ const v=recoView(id,it); const has=recoIsHave(id,it,hk); let merge=false;
-    if(has && v.badge){ const _dup=ndFindDup(id, id==="movies"?{orig:v.key,title:v.title}:{title:v.key});
+    if(has && (m.fields||[]).some(f=>f.k==="recommend")){ const _dup=ndFindDup(id, id==="movies"?{orig:v.key,title:v.title}:{title:v.key});
       if(_dup){ const _cur=String(_dup.recommend||"").split(/[\/,]+/).map(x=>x.trim().toLowerCase()).filter(Boolean);
-        merge=String(v.badge).split(/[\/,]+/).map(x=>x.trim()).filter(Boolean).some(x=>_cur.indexOf(x.toLowerCase())<0); } }
+        merge=String(it["추천"]||it.recommend||it.__list||"").split(/[\/,]+/).map(x=>x.trim()).filter(Boolean).some(x=>_cur.indexOf(x.toLowerCase())<0); } }
     return { it, v, has, merge }; });
   const sel=new Set();
   function updateBar(){ const a=$("#rcAdd"); if(a) a.textContent=`선택한 ${sel.size}개 담기`; }
@@ -4104,7 +4104,7 @@ async function openRecoPanel(m){
     const rows=items.map((o,i)=>{
       if(o.has && !o.merge) return `<div class="reco-item dim"><div class="reco-b"><div class="reco-t">${o.v.title}</div><div class="reco-m">${o.v.sub}</div><span class="reco-badge">담김 ✓</span></div></div>`;
       const on=sel.has(i);
-      return `<div class="reco-item ${on?"on":""}" data-i="${i}"><input type="checkbox" class="reco-cb" ${on?"checked":""}><div class="reco-b"><div class="reco-t">${o.v.title}</div><div class="reco-m">${o.merge?"이미 담김 · 추천 출처 추가":o.v.sub}</div>${o.merge?`<span class="reco-badge" style="background:#e0f2fe;color:#0369a1">＋추천 ${o.v.badge}</span>`:(o.v.badge?`<span class="reco-badge">${o.v.badge}</span>`:"")}</div></div>`;
+      return `<div class="reco-item ${on?"on":""}" data-i="${i}"><input type="checkbox" class="reco-cb" ${on?"checked":""}><div class="reco-b"><div class="reco-t">${o.v.title}</div><div class="reco-m">${o.merge?"이미 담김 · 추천 출처 추가":o.v.sub}</div>${o.merge?`<span class="reco-badge" style="background:#e0f2fe;color:#0369a1">＋추천 ${o.it["추천"]||o.it.recommend||o.it.__list||o.v.badge}</span>`:(o.v.badge?`<span class="reco-badge">${o.v.badge}</span>`:"")}</div></div>`;
     }).join("");
     d.innerHTML=`<div class="dhead" style="display:flex;align-items:center;justify-content:space-between;gap:8px"><h3 style="margin:0">${data.title||"추천 리스트"}</h3>${(listsAll&&listsAll.length>1)?'<button class="btn ghost" id="rcBack" type="button" style="padding:4px 10px;flex:0 0 auto;white-space:nowrap">← 리스트</button>':''}<button class="dclose-x" onclick="this.closest('dialog').close()" aria-label="닫기">✕</button></div>
       <div class="dbody" style="padding-bottom:6px">
