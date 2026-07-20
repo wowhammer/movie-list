@@ -581,7 +581,7 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
         <svg class="brandmark" width="40" height="30" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#F7F5F0"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#F7F5F0"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#F7F5F0"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#F7F5F0"/></svg>
         <span class="brandwm"><span class="bwm-ko">내도감</span><span class="bwm-en">NAEDOGAM</span></span>
       </button>
-      <span class="mhver">v216</span>
+      <span class="mhver">v217</span>
       <span class="spacer"></span>
       <span class="src-chip" id="srcChip" style="display:none">데모</span>
       <button class="icon-btn" id="searchToggle" type="button" style="display:none">🔍</button>
@@ -1892,24 +1892,6 @@ function ndQuickRecBadge(b, m, r){
   if(getComputedStyle(b).position==="static") b.style.position="relative";
   b.appendChild(q);
 }
-function ndInlineRec(m, r, d, opts){
-  opts=opts||{};
-  if(!d) return;
-  var hasRate=(m.fields||[]).some(function(f){return f.k==="rating";});
-  if(!hasRate) return;
-  var taField=(m.fields||[]).find(function(f){return f.type==="textarea";});
-  if(d.querySelector("#dqrBlock")) return;
-  var esc=function(x){return String(x==null?"":x).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/"/g,"&quot;");};
-  var savedLbl=opts.stars?"한줄평 저장":"저장";
-  var wrap=document.createElement("div"); wrap.id="dqrBlock";
-  wrap.style.cssText="padding:10px 18px 12px;margin-top:4px;border-top:1px solid var(--line-soft,#eee)";
-  var starsHTML=opts.stars?('<div class="drate" id="dqrRate" style="padding:2px 0 8px"><span class="drate-l">내 별점</span> '+myStarsHTML(r.rating)+'</div>'):'';
-  var taHTML=taField?('<textarea id="dqrTa" placeholder="'+esc(taField.label||"한줄평")+'" style="width:100%;box-sizing:border-box;min-height:70px;padding:10px;border:1px solid var(--line-soft,#ddd);border-radius:10px;font-size:14px;resize:vertical">'+esc(r[taField.k]||"")+'</textarea><div style="display:flex;padding:8px 0 0"><button id="dqrSave" class="btn" type="button" style="flex:1">'+savedLbl+'</button></div>'):'';
-  wrap.innerHTML='<div style="font-size:12px;color:var(--ink-soft,#999);padding-bottom:6px">✏️ 빠른 기록</div>'+starsHTML+taHTML;
-  d.appendChild(wrap);
-  if(opts.stars){ (function bindStars(){ wrap.querySelectorAll(".ms-hit,.ms-clear").forEach(function(el){ el.onclick=function(){ setMovieRatingDeploy(m, r, parseFloat(el.dataset.val)); var rc=wrap.querySelector("#dqrRate"); if(rc){ rc.innerHTML='<span class="drate-l">내 별점</span> '+myStarsHTML(r.rating); bindStars(); } }; }); })(); }
-  if(taField){ var sv=wrap.querySelector("#dqrSave"); if(sv) sv.onclick=async function(){ sv.disabled=true; sv.textContent="저장 중…"; try{ var ta=wrap.querySelector("#dqrTa"); r[taField.k]=ta?ta.value:r[taField.k]; await sheetSrc().update(m.id, r._id, r); var arr=CACHE[m.id]; if(arr){ var it=arr.find(function(x){return String(x._id)===String(r._id);}); if(it){ it[taField.k]=r[taField.k]; savePersist(m.id,arr); } } sv.textContent="저장됨 ✓"; setTimeout(function(){ if(sv){ sv.disabled=false; sv.textContent=savedLbl; } }, 1200); }catch(e){ sv.disabled=false; sv.textContent=savedLbl; alert("저장 실패: "+(e&&e.message||e)); } }; }
-}
 function openQuickRec(m, r){
   var esc=function(x){ return String(x==null?"":x).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/"/g,"&quot;"); };
   var taField=(m.fields||[]).find(function(f){ return f.type==="textarea"; });
@@ -2300,7 +2282,7 @@ async function openBookDetail(m, r){
           : `<div class="bkrate-hint">읽고 나서 아래 ‘읽음’으로 표시하면 내 평점을 매길 수 있어요</div>`}
       </div>
     </div>
-    ${String(r.review||"").trim()?`<div class="mvreview"><b>📝 내 감상</b><br>${r.review}</div>`:""}
+    ${String(r.review||"").trim()?`<div class="mvreview"><b>📝 서평/메모</b><br>${r.review}</div>`:""}
     <div class="mvover" id="bkOver">책 소개 불러오는 중…</div>
     ${rec?`<div class="tags" style="margin:0 18px 8px">${rec}</div>`:""}
     <div class="bkmeta2">${[r.publisher,r.year].filter(Boolean).join(" · ")}<span id="bkExtra"></span></div>
@@ -2486,8 +2468,8 @@ function _mountDetailNav(){ const d=$("#detail"); if(!d.open||!NAV_CUR) return; 
     b.onclick=e=>{ e.stopPropagation(); if(ti>=0) openDetail(m, NAV_LIST[ti]); }; return b; };
   d.appendChild(mk("prev", leftI)); d.appendChild(mk("next", rightI)); }
 function openDetail(m, r){ _navSet(m, r);
-  if(m.id==="movies"){ if(CONFIG.DEPLOY){ openMovieDetailDeploy(m, r); ndInlineRec(m, r, $("#detail"), {stars:false}); return; } openMovieDetail(m, r); return; }
-  if(m.id==="books"){ openBookDetail(m, r); ndInlineRec(m, r, $("#detail"), {stars:false}); return; }
+  if(m.id==="movies"){ if(CONFIG.DEPLOY) return openMovieDetailDeploy(m, r); openMovieDetail(m, r); return; }
+  if(m.id==="books"){ openBookDetail(m, r); return; }
   const LBL={pace:"페이스"}; const FT={}; (m.fields||[]).forEach(f=>{ LBL[f.k]=f.sheet||String(f.label||f.k).replace(/\s*\(.*$/,""); FT[f.k]=f.type; });
   const _imgKeys=(m.fields||[]).filter(f=>f.type==="image").map(f=>f.k);
   const _compKeys=Object.keys(m.computed||{});
@@ -2520,7 +2502,6 @@ function openDetail(m, r){ _navSet(m, r);
   const _cf=(m.fields||[]).find(f=>f.type==="image"); const coverImg=(_cf&&r[_cf.k])?`<div class="det-cover"><img src="${String(r[_cf.k]).replace(/"/g,'&quot;')}" alt=""></div>`:"";
   const d=$("#detail"); d.innerHTML=`<div class="dhead"><h3>${(m.id==="cards"||m.id==="insurance")?((r.issuer?String(r.issuer).replace(/</g,"&lt;")+" · ":"")+String(r.name||"카드").replace(/</g,"&lt;")):(m.id==="subs"?String(r.name||"구독").replace(/</g,"&lt;"):(m.card.kind==="specimen"?r.title:((m.card&&m.card.title)?m.card.title(r):((_isoOf(r.date)||r.date||"")+(r.car?" · "+r.car:"")))))}</h3><div class="dh-actions"><button class="dh-btn" id="dEdit">수정</button><button class="dh-btn dh-del" id="dDel">삭제</button><button class="dclose-x" onclick="this.closest('dialog').close()" aria-label="닫기">✕</button></div></div><div class="dbody">${coverImg}${rows}</div>${mapLinks}${m.id==="cards"?`<div class="mvlinks">${r.link?`<a class="btn ghost" target="_blank" rel="noopener" href="${(/^https?:\/\//i.test(String(r.link))?String(r.link):"https://"+String(r.link)).replace(/"/g,"&quot;")}">🔗 상세 링크</a>`:""}<a class="btn ghost" target="_blank" rel="noopener" href="https://search.naver.com/search.naver?query=${encodeURIComponent(((r.issuer||"")+" "+(r.name||"")+" 카드 혜택").trim())}">🔍 혜택 검색</a></div>`:""}${foot}`;
   if(!d.open) d.showModal();
-  ndInlineRec(m, r, d, {stars:true});
   if(isMovie){
     $("#mW").onclick=()=>toggleMovie(r,'W'); $("#mR").onclick=()=>toggleMovie(r,'R'); $("#mP").onclick=()=>toggleMovie(r,'P');
     $("#dEdit").onclick=()=>{ d.close(); openRecordForm(m, r); };
