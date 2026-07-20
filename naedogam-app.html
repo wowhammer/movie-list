@@ -674,7 +674,7 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
         <svg class="brandmark" width="40" height="30" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#F7F5F0"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#F7F5F0"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#F7F5F0"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#F7F5F0"/></svg>
         <span class="brandwm"><span class="bwm-ko">내도감</span><span class="bwm-en">NAEDOGAM</span></span>
       </button>
-      <span class="mhver">v229</span>
+      <span class="mhver">v230</span>
       <span class="spacer"></span>
       <span class="src-chip" id="srcChip" style="display:none">데모</span>
       <button class="icon-btn" id="searchToggle" type="button" style="display:none">🔍</button>
@@ -750,6 +750,14 @@ const store = (() => {
  * ===================================================================== */
 /* ── 1. MANIFESTS: 도메인 정의(여기만 늘리면 도메인이 는다) ── */
 const MANIFESTS = {
+  mbti:{ id:"mbti", title:"MBTI", icon:"🧠", vol:"", canAdd:false,
+    source:{ type:"sheet", tab:"성격유형" },
+    fields:[ {k:"date",sheet:"측정일",label:"측정일",type:"date"},
+             {k:"type",sheet:"유형",label:"유형",type:"text"},
+             {k:"nick",sheet:"별칭",label:"별칭",type:"text"},
+             {k:"axes",sheet:"축상세",label:"축상세",type:"text",hideForm:true} ],
+    search:["type","nick"], dateSort:"date",
+    stats:[ {label:"측정",type:"count",c:"#7c3aed"} ] },
   /* 영화: 실제 구글시트(Apps Script)에서 라이브로 불러옴.
      source.map = 시트 한글 헤더 → 엔진 항목 이름.  source.derive = 특수 처리(코드·수식·숫자). */
   movies:{ id:"movies", title:"영화", icon:"🎬", vol:"卷1", canAdd:true, shareFields:["title","director","year","country"],
@@ -1707,7 +1715,7 @@ function showView(v){ state.view=v;
   $("#domainView").style.display = v==="domain"?"block":"none";
   if(v==="home") $("#searchToggle").style.display="none"; }
 function goHome(){ state.domain=null; state.query=""; state.pick=""; setMhSub(""); showView("home"); renderHome(); }
-function openDomain(id){ state.domain=id; state.query=""; state.pick=""; state.recPick=""; state.statFilter=null; state.sort="default"; state.sortAsc=false; state.searchScope="title"; state.selectQ=""; state.searchOpen=false; state.page=0; carWorkFilter=""; carSort="date"; carSortAsc=false; bookGenreFilter=""; mtnRegion=""; diaryTag=""; diaryView="list"; diaryYM=null; diaryMood=""; $("#search").value=""; $("#search").style.display="none"; $("#mvselect").style.display="none"; $("#scope").style.display="none"; if(MANIFESTS[id]&&MANIFESTS[id].scopeSort){ state.sort=MANIFESTS[id].scopeSort[0].k; state.sortAsc=false; } showView("domain"); loadAndRender(); }
+function openDomain(id){ if(id==="mbti"){ openMbti(); return; } state.domain=id; state.query=""; state.pick=""; state.recPick=""; state.statFilter=null; state.sort="default"; state.sortAsc=false; state.searchScope="title"; state.selectQ=""; state.searchOpen=false; state.page=0; carWorkFilter=""; carSort="date"; carSortAsc=false; bookGenreFilter=""; mtnRegion=""; diaryTag=""; diaryView="list"; diaryYM=null; diaryMood=""; $("#search").value=""; $("#search").style.display="none"; $("#mvselect").style.display="none"; $("#scope").style.display="none"; if(MANIFESTS[id]&&MANIFESTS[id].scopeSort){ state.sort=MANIFESTS[id].scopeSort[0].k; state.sortAsc=false; } showView("domain"); loadAndRender(); }
 
 /* 홈: 켜둔 카테고리를 카드로. 건수는 한 번 열어본 분야만 표시(홈을 빠르게 유지). */
 function renderHome(){
@@ -1725,9 +1733,8 @@ function renderHome(){
     const _arr = CACHE[m.id] || loadPersist(m.id); const cnt = _arr ? `${fmt(_arr.length)}건` : "";
     const ic = ND_ICONS[m.id] ? _ics(ND_ICONS[m.id]) : `<span style="font-size:24px">${m.icon}</span>`;
     return `<button class="cat-card${(_arr&&_arr.length===0)?' cat-card-zero':''}" data-id="${m.id}"><span class="ci" style="color:${ND_COLORS[m.id]||'var(--ink)'}">${ic}</span><span class="cn">${m.title}</span><span class="cc" data-cnt="${m.id}">${cnt}</span></button>`;
-  }).join("")+mbtiHomeCard()+`</div>`;
+  }).join("")+`</div>`;
   home.querySelectorAll(".cat-card[data-id]").forEach(b=>b.onclick=()=>openDomain(b.dataset.id));
-  { var _mc=home.querySelector("[data-mbti]"); if(_mc) _mc.onclick=openMbti; }
   { const _hs=$("#homeSearch"); if(_hs){ let _t=null; _hs.addEventListener("input",()=>{ clearTimeout(_t); _t=setTimeout(()=>runHomeSearch(_hs.value),200); }); } }
   active.forEach(m=>{ if(CACHE[m.id]||loadPersist(m.id)) return; try{ sourceFor(m).list(m.id).then(rows=>{ CACHE[m.id]=rows; savePersist(m.id,rows); const el=home.querySelector(`.cc[data-cnt="${m.id}"]`); if(el) el.textContent=`${fmt(rows.length)}건`; }).catch(()=>{}); }catch(e){} });
 }
@@ -3715,7 +3722,7 @@ function mbtiHomeCard(){
 async function openMbti(){
   var old=document.getElementById("mbtiDlg"); if(old) old.remove();
   var dlg=document.createElement("dialog"); dlg.id="mbtiDlg"; dlg.className="wrapDlg";
-  dlg.innerHTML='<div class="wtop"><button class="wclose" onclick="this.closest(\'dialog\').close()">✕ 닫기</button><span class="mbTitle">🧠 성격유형</span><span style="width:56px"></span></div><div class="wscroll"><div class="wcard" id="mbtiCard"></div></div>';
+  dlg.innerHTML='<div class="wtop"><button class="wclose" onclick="this.closest(\'dialog\').close()">✕ 닫기</button><span class="mbTitle">🧠 MBTI</span><span style="width:56px"></span></div><div class="wscroll"><div class="wcard" id="mbtiCard"></div></div>';
   document.body.appendChild(dlg); dlg.showModal();
   var saved=_mbtiSaved();
   if(saved && saved.latest) mbtiShowResult(saved.latest, true);
@@ -3724,7 +3731,7 @@ async function openMbti(){
 }
 function mbtiIntro(){
   var c=document.getElementById("mbtiCard"); if(!c) return;
-  c.innerHTML='<div class="wsec whead"><div class="wlogo">내도감 · INSIGHT</div><div class="wtitle">성격유형 진단</div><div class="wdate">48문항 · 약 3분 · 축별 강도까지</div></div>'
+  c.innerHTML='<div class="wsec whead"><div class="wlogo">내도감 · INSIGHT</div><div class="wtitle">MBTI 진단</div><div class="wdate">48문항 · 약 3분 · 축별 강도까지</div></div>'
    +'<div class="wsec" style="text-align:center"><div class="wem" style="font-size:44px">🧠</div><p class="wpp" style="margin-top:10px">두 문장 중 <b>더 나에 가까운 쪽</b>을 고르면 됩니다.<br>정답은 없어요. 떠오르는 대로 편하게.</p>'
    +'<button class="wsave mbStart" id="mbGo" style="margin-top:20px;width:100%;padding:14px">시작하기 →</button></div>';
   document.getElementById("mbGo").onclick=function(){ mbtiRun(); };
@@ -3764,7 +3771,7 @@ function mbtiBar(ax, leftL, rightL){
 function mbtiShowResult(res, isSaved){
   var c=document.getElementById("mbtiCard"); if(!c) return;
   var A=res.axes;
-  c.innerHTML='<div class="wsec whead"><div class="wlogo">내도감 · 성격유형</div>'
+  c.innerHTML='<div class="wsec whead"><div class="wlogo">내도감 · MBTI</div>'
     +'<div class="mbType">'+res.type+'</div><div class="mbNick">'+_mbtiEsc(res.nick)+'</div>'
     +'<div class="wdate" style="margin-top:6px">'+_mbtiEsc(res.desc)+'</div></div>'
    +'<div class="wsec"><div class="wh2">📊 축별 강도</div>'
@@ -4754,6 +4761,7 @@ async function boot(){
   })();
 }
 $("#brandBtn").addEventListener("click",goHome);
+  try{ if(!store.getItem("nd.mbtiSeeded")){ var _aa=getActive(); if(MANIFESTS.mbti && _aa.indexOf("mbti")<0){ _aa.push("mbti"); setActive(_aa); } store.setItem("nd.mbtiSeeded","1"); } }catch(e){}
   document.addEventListener("click",function(e){ var b=e.target.closest?e.target.closest(".bnav-i"):null; if(!b) return; var n=b.dataset.nav; document.querySelectorAll(".bnav-i").forEach(function(x){x.classList.remove("on");}); b.classList.add("on"); if(n==="home") goHome(); else if(n==="stats") openDashboard(); else if(n==="insight") openInsight(); else if(n==="settings") openSettings(); });
 $("#searchToggle").addEventListener("click",()=>{ state.searchOpen=!state.searchOpen; applySearchUI(MANIFESTS[state.domain]); if(state.searchOpen) $("#search").focus(); });
 $("#tabs").addEventListener("click",e=>{ const t=e.target.closest(".tab"); if(t) openDomain(t.dataset.id); });
