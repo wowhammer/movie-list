@@ -580,7 +580,7 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
         <svg class="brandmark" width="40" height="30" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#F7F5F0"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#F7F5F0"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#F7F5F0"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#F7F5F0"/></svg>
         <span class="brandwm"><span class="bwm-ko">내도감</span><span class="bwm-en">NAEDOGAM</span></span>
       </button>
-      <span class="mhver">v207</span>
+      <span class="mhver">v208</span>
       <span class="spacer"></span>
       <span class="src-chip" id="srcChip" style="display:none">데모</span>
       <button class="icon-btn" id="searchToggle" type="button" style="display:none">🔍</button>
@@ -1858,12 +1858,13 @@ function renderPicker(m){
   const p=$("#picker");
   const recVals=[...new Set(state.rows.flatMap(r=>String(r.recommend||"").split(/[,\/]+/).map(x=>x.trim())).filter(Boolean))];
   const hasRec=recVals.length>0;
+  const scoped = state.recPick ? state.rows.filter(r=>String(r.recommend||"").split(/[,\/]+/).map(x=>x.trim()).indexOf(state.recPick)>=0) : state.rows;
   let fbHtml="";
   if(m.filterBy){
-    const vals=[...new Set(state.rows.flatMap(r=>{ const v=r[m.filterBy.field]; return Array.isArray(v)?v.map(x=>String(x).trim()):String(v||"").split(",").map(x=>x.trim()); }).filter(Boolean))];
+    const vals=[...new Set(scoped.flatMap(r=>{ const v=r[m.filterBy.field]; return Array.isArray(v)?v.map(x=>String(x).trim()):String(v||"").split(",").map(x=>x.trim()); }).filter(Boolean))];
     if(vals.length >= (m.filterBy.always?1:2)){
       const opts=[{v:"",label:m.filterBy.allLabel||"전체"}, ...vals.map(v=>({v,label:v}))];
-      fbHtml=opts.map(o=>`<button class="chip ${o.v===state.pick&&!state.recPick?'on':''}" data-v="${o.v}">${o.label}</button>`).join("");
+      fbHtml=opts.map(o=>`<button class="chip ${o.v===state.pick?'on':''}" data-v="${o.v}">${o.label}</button>`).join("");
     }
   }
   if(!fbHtml && !hasRec){ p.style.display="none"; p.innerHTML=""; state.pick=""; state.recPick=""; return; }
@@ -1873,10 +1874,10 @@ function renderPicker(m){
     const lbl=state.recPick?("🏷 "+state.recPick+" ✕"):"🏷 추천리스트";
     recHtml=`<button class="chip recpick ${state.recPick?'on':''}" data-recbtn="1">${lbl}</button>`;
   }
-  p.innerHTML=fbHtml+recHtml;
-  p.querySelectorAll(".chip[data-v]").forEach(b=>b.onclick=()=>{ state.pick=b.dataset.v; state.recPick=""; loadAndRender(); });
+  p.innerHTML=recHtml+fbHtml;
+  p.querySelectorAll(".chip[data-v]").forEach(b=>b.onclick=()=>{ state.pick=b.dataset.v; loadAndRender(); });
   const rb=p.querySelector(".chip[data-recbtn]");
-  if(rb) rb.onclick=()=>{ if(state.recPick){ state.recPick=""; loadAndRender(); } else openRecListPicker(m, recVals); };
+  if(rb) rb.onclick=()=>{ if(state.recPick){ state.recPick=""; state.pick=""; loadAndRender(); } else openRecListPicker(m, recVals); };
 }
 
 function openRecListPicker(m, recVals){
