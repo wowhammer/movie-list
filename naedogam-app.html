@@ -674,7 +674,7 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
         <svg class="brandmark" width="40" height="30" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#F7F5F0"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#F7F5F0"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#F7F5F0"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#F7F5F0"/></svg>
         <span class="brandwm"><span class="bwm-ko">내도감</span><span class="bwm-en">NAEDOGAM</span></span>
       </button>
-      <span class="mhver">v228</span>
+      <span class="mhver">v229</span>
       <span class="spacer"></span>
       <span class="src-chip" id="srcChip" style="display:none">데모</span>
       <button class="icon-btn" id="searchToggle" type="button" style="display:none">🔍</button>
@@ -1725,8 +1725,9 @@ function renderHome(){
     const _arr = CACHE[m.id] || loadPersist(m.id); const cnt = _arr ? `${fmt(_arr.length)}건` : "";
     const ic = ND_ICONS[m.id] ? _ics(ND_ICONS[m.id]) : `<span style="font-size:24px">${m.icon}</span>`;
     return `<button class="cat-card${(_arr&&_arr.length===0)?' cat-card-zero':''}" data-id="${m.id}"><span class="ci" style="color:${ND_COLORS[m.id]||'var(--ink)'}">${ic}</span><span class="cn">${m.title}</span><span class="cc" data-cnt="${m.id}">${cnt}</span></button>`;
-  }).join("")+`</div>`;
+  }).join("")+mbtiHomeCard()+`</div>`;
   home.querySelectorAll(".cat-card[data-id]").forEach(b=>b.onclick=()=>openDomain(b.dataset.id));
+  { var _mc=home.querySelector("[data-mbti]"); if(_mc) _mc.onclick=openMbti; }
   { const _hs=$("#homeSearch"); if(_hs){ let _t=null; _hs.addEventListener("input",()=>{ clearTimeout(_t); _t=setTimeout(()=>runHomeSearch(_hs.value),200); }); } }
   active.forEach(m=>{ if(CACHE[m.id]||loadPersist(m.id)) return; try{ sourceFor(m).list(m.id).then(rows=>{ CACHE[m.id]=rows; savePersist(m.id,rows); const el=home.querySelector(`.cc[data-cnt="${m.id}"]`); if(el) el.textContent=`${fmt(rows.length)}건`; }).catch(()=>{}); }catch(e){} });
 }
@@ -3677,11 +3678,10 @@ function openInsight(){
     +'<div class="wsec whead"><div class="wlogo">내도감 · INSIGHT</div><div class="wtitle">인사이트</div><div class="wdate">내 기록이 돌려주는 것들</div></div>'
     +'<div class="wsec" style="border-bottom:none">'
     +'<button class="insCard" id="insWrap"><span class="insEm">🎊</span><span class="insTx"><b>나의 결산</b><i>수집·경험을 한 장으로 · 이미지 공유</i></span><span class="insGo">→</span></button>'
-    +'<button class="insCard" id="insMbti"><span class="insEm">🧠</span><span class="insTx"><b>MBTI 진단</b><i>48문항 상세 성격유형 · 변화 기록</i></span><span class="insGo">→</span></button>'
+    +'<div class="insCard" style="opacity:.5;cursor:default"><span class="insEm">📈</span><span class="insTx"><b>취향 리포트</b><i>내 기록을 더 깊이 분석 · 준비 중</i></span></div>'
     +'</div></div></div>';
   document.body.appendChild(dlg); dlg.showModal();
   document.getElementById("insWrap").onclick=function(){ dlg.close(); openWrapped(); };
-  document.getElementById("insMbti").onclick=function(){ dlg.close(); openMbti(); };
 }
 function mbtiHistoryHTML(){
   var s=_mbtiSaved(); if(!s||!s.history||s.history.length<2) return "";
@@ -3706,6 +3706,11 @@ async function mbtiSheetLoad(){
     hist.reverse();
     return hist;
   }catch(e){ return null; }
+}
+function mbtiHomeCard(){
+  var s=_mbtiSaved(); var n=(s&&s.history)?s.history.length:0; var lt=(s&&s.latest)?s.latest.type:"";
+  var ic='<span class="ci" style="color:#7c3aed"><svg class="ci-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 3.6-6 8-6s8 2 8 6"/></svg></span>';
+  return '<button class="cat-card'+(n?'':' cat-card-zero')+'" data-mbti="1">'+ic+'<span class="cn">성격유형</span><span class="cc">'+(n?(lt+' · '+n+'회'):'측정하기')+'</span></button>';
 }
 async function openMbti(){
   var old=document.getElementById("mbtiDlg"); if(old) old.remove();
