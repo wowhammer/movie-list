@@ -580,7 +580,7 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
         <svg class="brandmark" width="40" height="30" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#F7F5F0"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#F7F5F0"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#F7F5F0"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#F7F5F0"/></svg>
         <span class="brandwm"><span class="bwm-ko">내도감</span><span class="bwm-en">NAEDOGAM</span></span>
       </button>
-      <span class="mhver">v206</span>
+      <span class="mhver">v207</span>
       <span class="spacer"></span>
       <span class="src-chip" id="srcChip" style="display:none">데모</span>
       <button class="icon-btn" id="searchToggle" type="button" style="display:none">🔍</button>
@@ -1611,7 +1611,7 @@ function showView(v){ state.view=v;
   $("#domainView").style.display = v==="domain"?"block":"none";
   if(v==="home") $("#searchToggle").style.display="none"; }
 function goHome(){ state.domain=null; state.query=""; state.pick=""; setMhSub(""); showView("home"); renderHome(); }
-function openDomain(id){ state.domain=id; state.query=""; state.pick=""; state.statFilter=null; state.sort="default"; state.sortAsc=false; state.searchScope="title"; state.selectQ=""; state.searchOpen=false; state.page=0; carWorkFilter=""; carSort="date"; carSortAsc=false; bookGenreFilter=""; mtnRegion=""; diaryTag=""; diaryView="list"; diaryYM=null; diaryMood=""; $("#search").value=""; $("#search").style.display="none"; $("#mvselect").style.display="none"; $("#scope").style.display="none"; if(MANIFESTS[id]&&MANIFESTS[id].scopeSort){ state.sort=MANIFESTS[id].scopeSort[0].k; state.sortAsc=false; } showView("domain"); loadAndRender(); }
+function openDomain(id){ state.domain=id; state.query=""; state.pick=""; state.recPick=""; state.statFilter=null; state.sort="default"; state.sortAsc=false; state.searchScope="title"; state.selectQ=""; state.searchOpen=false; state.page=0; carWorkFilter=""; carSort="date"; carSortAsc=false; bookGenreFilter=""; mtnRegion=""; diaryTag=""; diaryView="list"; diaryYM=null; diaryMood=""; $("#search").value=""; $("#search").style.display="none"; $("#mvselect").style.display="none"; $("#scope").style.display="none"; if(MANIFESTS[id]&&MANIFESTS[id].scopeSort){ state.sort=MANIFESTS[id].scopeSort[0].k; state.sortAsc=false; } showView("domain"); loadAndRender(); }
 
 /* 홈: 켜둔 카테고리를 카드로. 건수는 한 번 열어본 분야만 표시(홈을 빠르게 유지). */
 function renderHome(){
@@ -1856,13 +1856,53 @@ function renderSearch(m){ const L={title:"제목",director:"감독",actors:"배�
 /* 선택기(예: 차량 전체|싼타페|제네시스): 데이터에서 값 자동 추출, 2개 이상일 때만 표시 */
 function renderPicker(m){
   const p=$("#picker");
-  if(!m.filterBy){ p.style.display="none"; p.innerHTML=""; return; }
-  const vals=[...new Set(state.rows.flatMap(r=>{ const v=r[m.filterBy.field]; return Array.isArray(v)?v.map(x=>String(x).trim()):String(v||"").split(",").map(x=>x.trim()); }).filter(Boolean))];
-  if(vals.length < (m.filterBy.always?1:2)){ p.style.display="none"; p.innerHTML=""; state.pick=""; return; }  // 보통 2개↑일 때 표시(always면 1개도)
+  const recVals=[...new Set(state.rows.flatMap(r=>String(r.recommend||"").split(/[,\/]+/).map(x=>x.trim())).filter(Boolean))];
+  const hasRec=recVals.length>0;
+  let fbHtml="";
+  if(m.filterBy){
+    const vals=[...new Set(state.rows.flatMap(r=>{ const v=r[m.filterBy.field]; return Array.isArray(v)?v.map(x=>String(x).trim()):String(v||"").split(",").map(x=>x.trim()); }).filter(Boolean))];
+    if(vals.length >= (m.filterBy.always?1:2)){
+      const opts=[{v:"",label:m.filterBy.allLabel||"전체"}, ...vals.map(v=>({v,label:v}))];
+      fbHtml=opts.map(o=>`<button class="chip ${o.v===state.pick&&!state.recPick?'on':''}" data-v="${o.v}">${o.label}</button>`).join("");
+    }
+  }
+  if(!fbHtml && !hasRec){ p.style.display="none"; p.innerHTML=""; state.pick=""; state.recPick=""; return; }
   p.style.display="flex";
-  const opts=[{v:"",label:m.filterBy.allLabel||"전체"}, ...vals.map(v=>({v,label:v}))];
-  p.innerHTML=opts.map(o=>`<button class="chip ${o.v===state.pick?'on':''}" data-v="${o.v}">${o.label}</button>`).join("");
-  p.querySelectorAll(".chip").forEach(b=>b.onclick=()=>{ state.pick=b.dataset.v; loadAndRender(); });
+  let recHtml="";
+  if(hasRec){
+    const lbl=state.recPick?("🏷 "+state.recPick+" ✕"):"🏷 추천리스트";
+    recHtml=`<button class="chip recpick ${state.recPick?'on':''}" data-recbtn="1">${lbl}</button>`;
+  }
+  p.innerHTML=fbHtml+recHtml;
+  p.querySelectorAll(".chip[data-v]").forEach(b=>b.onclick=()=>{ state.pick=b.dataset.v; state.recPick=""; loadAndRender(); });
+  const rb=p.querySelector(".chip[data-recbtn]");
+  if(rb) rb.onclick=()=>{ if(state.recPick){ state.recPick=""; loadAndRender(); } else openRecListPicker(m, recVals); };
+}
+
+function openRecListPicker(m, recVals){
+  var old=document.getElementById("recListDlg"); if(old) old.remove();
+  var dlg=document.createElement("dialog"); dlg.id="recListDlg";
+  dlg.style.cssText="border:none;border-radius:14px;padding:0;max-width:380px;width:92%;background:var(--card,#fff);color:var(--ink,#222)";
+  var counts={}; state.rows.forEach(function(r){ String(r.recommend||"").split(/[,\/]+/).map(function(x){return x.trim();}).filter(Boolean).forEach(function(t){ counts[t]=(counts[t]||0)+1; }); });
+  var vals=recVals.slice().sort(function(a,b){ return a.localeCompare(b,"ko"); });
+  function esc(x){ return String(x).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/"/g,"&quot;"); }
+  function body(filter){
+    var f=(filter||"").toLowerCase().trim();
+    var list=vals.filter(function(v){ return !f || v.toLowerCase().indexOf(f)>=0; });
+    if(!list.length) return '<div style="padding:16px;color:var(--ink-soft,#999);font-size:13px">해당 리스트 없음</div>';
+    return list.map(function(v){
+      return '<button class="reclist-item" data-v="'+esc(v)+'" style="display:flex;justify-content:space-between;align-items:center;gap:10px;width:100%;text-align:left;border:none;background:none;padding:12px 15px;border-bottom:1px solid var(--line-soft,#eee);cursor:pointer;font-size:14px;color:inherit"><span>'+esc(v)+'</span><span style="color:var(--ink-soft,#999);font-size:12px;flex:0 0 auto">'+(counts[v]||0)+'개</span></button>';
+    }).join("");
+  }
+  dlg.innerHTML='<div style="padding:14px 16px 10px;font-weight:700;font-size:15px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--line-soft,#eee)">추천리스트로 보기<button id="rlX" type="button" style="border:none;background:none;font-size:18px;cursor:pointer;color:var(--ink-soft,#999)">✕</button></div>'
+    +(vals.length>8?'<div style="padding:10px 14px 4px"><input id="rlQ" placeholder="🔍 리스트 검색" autocomplete="off" style="width:100%;padding:8px 10px;border:1px solid var(--line-soft,#ddd);border-radius:8px;font-size:13px;box-sizing:border-box"></div>':'')
+    +'<div id="rlBody" style="max-height:58vh;overflow:auto">'+body("")+'</div>';
+  document.body.appendChild(dlg); dlg.showModal();
+  function bindItems(){ dlg.querySelectorAll(".reclist-item").forEach(function(b){ b.onclick=function(){ state.recPick=b.dataset.v; state.pick=""; dlg.close(); loadAndRender(); }; }); }
+  bindItems();
+  var q=dlg.querySelector("#rlQ"); if(q){ q.oninput=function(){ dlg.querySelector("#rlBody").innerHTML=body(q.value); bindItems(); }; }
+  dlg.querySelector("#rlX").onclick=function(){ dlg.close(); };
+  dlg.addEventListener("click",function(e){ if(e.target===dlg) dlg.close(); });
 }
 
 /* ── 도서: 영화급(영화식 카드 + 리치 상세 + 교보/YES24/네이버 + 추천 팝업) ── */
@@ -3063,6 +3103,7 @@ function paintDomain(m){   // state.rows를 화면에 그림 (데이터 다시 �
   applySearchUI(m);
   let base = state.rows;
   if(m.filterBy && state.pick) base = base.filter(r=>{ const v=r[m.filterBy.field]; const _a=Array.isArray(v)?v.map(x=>String(x).trim()):String(v||"").split(",").map(x=>x.trim()); return _a.includes(state.pick); });
+  if(state.recPick) base = base.filter(function(r){ return String(r.recommend||"").split(/[,\/]+/).map(function(x){return x.trim();}).indexOf(state.recPick)>=0; });
   renderStats(m, base);
   setMhSub("");
   if(m.id==="books") renderBookGenres(m);
