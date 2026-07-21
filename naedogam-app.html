@@ -682,7 +682,7 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
         <svg class="brandmark" width="40" height="30" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#F7F5F0"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#F7F5F0"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#F7F5F0"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#F7F5F0"/></svg>
         <span class="brandwm"><span class="bwm-ko">내도감</span><span class="bwm-en">NAEDOGAM</span></span>
       </button>
-      <span class="mhver">v238</span>
+      <span class="mhver">v239</span>
       <span class="spacer"></span>
       <span class="src-chip" id="srcChip" style="display:none">데모</span>
       <button class="icon-btn" id="searchToggle" type="button" style="display:none">🔍</button>
@@ -3709,7 +3709,7 @@ function _insModal(id,title){
   var old=document.getElementById(id); if(old) old.remove();
   var dlg=document.createElement("dialog"); dlg.id=id; dlg.className="wrapDlg";
   dlg.innerHTML='<div class="wtop"><button class="wclose" onclick="this.closest(\'dialog\').close(); openInsight();">← 인사이트</button><span class="mbTitle">'+title+'</span><span style="width:56px"></span></div><div class="wscroll"><div class="wcard" id="'+id+'Card"><div class="wloading">불러오는 중…</div></div></div>';
-  document.body.appendChild(dlg); dlg.showModal(); return dlg;
+  document.body.appendChild(dlg); dlg.showModal(); dlg.addEventListener("click",function(e){ if(e.target===dlg) dlg.close(); }); return dlg;
 }
 function _dayNum(){ var d=new Date(); return Math.floor(Date.UTC(d.getFullYear(),d.getMonth(),d.getDate())/86400000); }
 function _detailOf(catId,item){ try{ state.domain=catId; state.rows=applyComputed(MANIFESTS[catId],(CACHE[catId]||[]).map(function(r){return Object.assign({_id:r._id||(crypto.randomUUID?crypto.randomUUID():String(Math.random()))},r);})); var r=state.rows.find(function(x){return String(x._id)===String(item._id);})||item; openDetail(MANIFESTS[catId], r); }catch(e){} }
@@ -3801,6 +3801,7 @@ function openInsight(){
     +'<button class="insCard" id="insMemory"><span class="insEm">🕰</span><span class="insTx"><b>회상</b><i>지난 기록을 다시 꺼내기</i></span><span class="insGo">→</span></button>'
     +'</div></div></div>';
   document.body.appendChild(dlg); dlg.showModal();
+  dlg.addEventListener("click",function(e){ if(e.target===dlg) dlg.close(); });
   document.getElementById("insWrap").onclick=function(){ dlg.close(); openWrapped(); };
   document.getElementById("insMirror").onclick=function(){ dlg.close(); openMirror(); };
   document.getElementById("insDecide").onclick=function(){ dlg.close(); openDecide(); };
@@ -3840,6 +3841,7 @@ async function openMbti(){
   var dlg=document.createElement("dialog"); dlg.id="mbtiDlg"; dlg.className="wrapDlg";
   dlg.innerHTML='<div class="wtop"><button class="wclose" onclick="this.closest(\'dialog\').close()">✕ 닫기</button><span class="mbTitle">🧠 MBTI</span><span style="width:56px"></span></div><div class="wscroll"><div class="wcard" id="mbtiCard"></div></div>';
   document.body.appendChild(dlg); dlg.showModal();
+  dlg.addEventListener("click",function(e){ if(e.target===dlg && !dlg.querySelector(".mbOpt")) dlg.close(); });
   var saved=_mbtiSaved();
   if(saved && saved.latest) mbtiShowResult(saved.latest, true);
   else mbtiIntro();
@@ -4022,6 +4024,7 @@ async function openWrapped(){
   var dlg=document.createElement("dialog"); dlg.id="wrapDlg"; dlg.className="wrapDlg";
   dlg.innerHTML='<div class="wtop"><button class="wclose" onclick="this.closest(\'dialog\').close(); openInsight();">← 인사이트</button><button class="wsave" id="wSave">📷 이미지 저장</button></div><div class="wscroll"><div class="wcard" id="wrapCard"><div class="wloading">내 결산을 만드는 중…</div></div></div>';
   document.body.appendChild(dlg); dlg.showModal();
+  dlg.addEventListener("click",function(e){ if(e.target===dlg) dlg.close(); });
   // 전체 카테고리 로딩(통계와 동일 패턴)
   var ids=getActive().filter(function(id){return MANIFESTS[id];});
   var data={};
