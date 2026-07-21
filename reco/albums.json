@@ -5,25 +5,166 @@
   "subtitle": "장르별 대표 명반 20 · 체크해서 담아보세요",
   "version": 1,
   "items": [
-    { "title": "Thriller", "artist": "Michael Jackson", "year": 1982, "genre": "팝" },
-    { "title": "Purple Rain", "artist": "Prince", "year": 1984, "genre": "팝" },
-    { "title": "21", "artist": "Adele", "year": 2011, "genre": "팝" },
-    { "title": "Random Access Memories", "artist": "Daft Punk", "year": 2013, "genre": "팝" },
-    { "title": "The Dark Side of the Moon", "artist": "Pink Floyd", "year": 1973, "genre": "록" },
-    { "title": "Abbey Road", "artist": "The Beatles", "year": 1969, "genre": "록" },
-    { "title": "Nevermind", "artist": "Nirvana", "year": 1991, "genre": "록" },
-    { "title": "OK Computer", "artist": "Radiohead", "year": 1997, "genre": "록" },
-    { "title": "Rumours", "artist": "Fleetwood Mac", "year": 1977, "genre": "록" },
-    { "title": "Kind of Blue", "artist": "Miles Davis", "year": 1959, "genre": "재즈" },
-    { "title": "A Love Supreme", "artist": "John Coltrane", "year": 1965, "genre": "재즈" },
-    { "title": "Illmatic", "artist": "Nas", "year": 1994, "genre": "힙합" },
-    { "title": "To Pimp a Butterfly", "artist": "Kendrick Lamar", "year": 2015, "genre": "힙합" },
-    { "title": "The Miseducation of Lauryn Hill", "artist": "Lauryn Hill", "year": 1998, "genre": "R&B" },
-    { "title": "Back to Black", "artist": "Amy Winehouse", "year": 2006, "genre": "R&B" },
-    { "title": "사랑하기 때문에", "artist": "유재하", "year": 1987, "genre": "가요" },
-    { "title": "들국화 1집", "artist": "들국화", "year": 1985, "genre": "가요" },
-    { "title": "다시 부르기 2", "artist": "김광석", "year": 1995, "genre": "가요" },
-    { "title": "서태지와 아이들 1집", "artist": "서태지와 아이들", "year": 1992, "genre": "가요" },
-    { "title": "Palette", "artist": "아이유", "year": 2017, "genre": "가요" }
-  ]
+    {
+      "title": "Thriller",
+      "artist": "Michael Jackson",
+      "year": 1982,
+      "genre": "팝",
+      "__list": "꼭 한 번은 들어볼 명반",
+      "__source": "내도감"
+    },
+    {
+      "title": "Purple Rain",
+      "artist": "Prince",
+      "year": 1984,
+      "genre": "팝",
+      "__list": "꼭 한 번은 들어볼 명반",
+      "__source": "내도감"
+    },
+    {
+      "title": "21",
+      "artist": "Adele",
+      "year": 2011,
+      "genre": "팝",
+      "__list": "꼭 한 번은 들어볼 명반",
+      "__source": "내도감"
+    },
+    {
+      "title": "Random Access Memories",
+      "artist": "Daft Punk",
+      "year": 2013,
+      "genre": "팝",
+      "__list": "꼭 한 번은 들어볼 명반",
+      "__source": "내도감"
+    },
+    {
+      "title": "The Dark Side of the Moon",
+      "artist": "Pink Floyd",
+      "year": 1973,
+      "genre": "록",
+      "__list": "꼭 한 번은 들어볼 명반",
+      "__source": "내도감"
+    },
+    {
+      "title": "Abbey Road",
+      "artist": "The Beatles",
+      "year": 1969,
+      "genre": "록",
+      "__list": "꼭 한 번은 들어볼 명반",
+      "__source": "내도감"
+    },
+    {
+      "title": "Nevermind",
+      "artist": "Nirvana",
+      "year": 1991,
+      "genre": "록",
+      "__list": "꼭 한 번은 들어볼 명반",
+      "__source": "내도감"
+    },
+    {
+      "title": "OK Computer",
+      "artist": "Radiohead",
+      "year": 1997,
+      "genre": "록",
+      "__list": "꼭 한 번은 들어볼 명반",
+      "__source": "내도감"
+    },
+    {
+      "title": "Rumours",
+      "artist": "Fleetwood Mac",
+      "year": 1977,
+      "genre": "록",
+      "__list": "꼭 한 번은 들어볼 명반",
+      "__source": "내도감"
+    },
+    {
+      "title": "Kind of Blue",
+      "artist": "Miles Davis",
+      "year": 1959,
+      "genre": "재즈",
+      "__list": "꼭 한 번은 들어볼 명반",
+      "__source": "내도감"
+    },
+    {
+      "title": "A Love Supreme",
+      "artist": "John Coltrane",
+      "year": 1965,
+      "genre": "재즈",
+      "__list": "꼭 한 번은 들어볼 명반",
+      "__source": "내도감"
+    },
+    {
+      "title": "Illmatic",
+      "artist": "Nas",
+      "year": 1994,
+      "genre": "힙합",
+      "__list": "꼭 한 번은 들어볼 명반",
+      "__source": "내도감"
+    },
+    {
+      "title": "To Pimp a Butterfly",
+      "artist": "Kendrick Lamar",
+      "year": 2015,
+      "genre": "힙합",
+      "__list": "꼭 한 번은 들어볼 명반",
+      "__source": "내도감"
+    },
+    {
+      "title": "The Miseducation of Lauryn Hill",
+      "artist": "Lauryn Hill",
+      "year": 1998,
+      "genre": "R&B",
+      "__list": "꼭 한 번은 들어볼 명반",
+      "__source": "내도감"
+    },
+    {
+      "title": "Back to Black",
+      "artist": "Amy Winehouse",
+      "year": 2006,
+      "genre": "R&B",
+      "__list": "꼭 한 번은 들어볼 명반",
+      "__source": "내도감"
+    },
+    {
+      "title": "사랑하기 때문에",
+      "artist": "유재하",
+      "year": 1987,
+      "genre": "가요",
+      "__list": "꼭 한 번은 들어볼 명반",
+      "__source": "내도감"
+    },
+    {
+      "title": "들국화 1집",
+      "artist": "들국화",
+      "year": 1985,
+      "genre": "가요",
+      "__list": "꼭 한 번은 들어볼 명반",
+      "__source": "내도감"
+    },
+    {
+      "title": "다시 부르기 2",
+      "artist": "김광석",
+      "year": 1995,
+      "genre": "가요",
+      "__list": "꼭 한 번은 들어볼 명반",
+      "__source": "내도감"
+    },
+    {
+      "title": "서태지와 아이들 1집",
+      "artist": "서태지와 아이들",
+      "year": 1992,
+      "genre": "가요",
+      "__list": "꼭 한 번은 들어볼 명반",
+      "__source": "내도감"
+    },
+    {
+      "title": "Palette",
+      "artist": "아이유",
+      "year": 2017,
+      "genre": "가요",
+      "__list": "꼭 한 번은 들어볼 명반",
+      "__source": "내도감"
+    }
+  ],
+  "source": "내도감"
 }
