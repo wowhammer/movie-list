@@ -797,7 +797,7 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
         <svg class="brandmark" width="40" height="30" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#F7F5F0"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#F7F5F0"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#F7F5F0"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#F7F5F0"/></svg>
         <span class="brandwm"><span class="bwm-ko">내도감</span><span class="bwm-en">NAEDOGAM</span></span>
       </button>
-      <span class="mhver">v262</span>
+      <span class="mhver">v263</span>
       <span class="spacer"></span>
       <span class="src-chip" id="srcChip" style="display:none">데모</span>
       <button class="icon-btn" id="searchToggle" type="button" style="display:none">🔍</button>
@@ -1870,7 +1870,12 @@ function renderHome(){
   home.querySelectorAll(".cat-card[data-id]").forEach(b=>b.onclick=()=>openDomain(b.dataset.id));
   _insHomeMemory();
   { const _hs=$("#homeSearch"); if(_hs){ let _t=null; _hs.addEventListener("input",()=>{ clearTimeout(_t); _t=setTimeout(()=>runHomeSearch(_hs.value),200); }); } }
-  active.forEach(m=>{ const _st=(Date.now()-(Number(store.getItem(persistKey(m.id)+"|t")||0)))>NDCACHE_TTL; if((CACHE[m.id]||loadPersist(m.id)) && !_st) return; try{ sourceFor(m).list(m.id).then(rows=>{ CACHE[m.id]=rows; savePersist(m.id,rows); const el=home.querySelector(`.cc[data-cnt="${m.id}"]`); if(el) el.textContent=`${fmt(rows.length)}건`; }).catch(()=>{}); }catch(e){} });
+  { const _need=active.filter(m=>{ const _st=(Date.now()-(Number(store.getItem(persistKey(m.id)+"|t")||0)))>NDCACHE_TTL; return !((CACHE[m.id]||loadPersist(m.id)) && !_st); }).map(m=>m.id);
+    const _apply=(id,rows)=>{ CACHE[id]=rows; savePersist(id,rows); const el=home.querySelector(`.cc[data-cnt="${id}"]`); if(el) el.textContent=`${fmt(rows.length)}건`; };
+    const _one=id=>{ const m=MANIFESTS[id]; try{ sourceFor(m).list(id).then(r=>_apply(id,r)).catch(()=>{}); }catch(e){} };
+    if(_need.length){ let _src; try{ _src=sheetSrc(); }catch(e){ _src=null; }
+      if(_src && typeof _src.listMany==="function"){ _src.listMany(_need).then(map=>{ Object.keys(map||{}).forEach(id=>_apply(id,map[id])); }).catch(()=>{ _need.forEach(_one); }); }
+      else { _need.forEach(_one); } } }
 }
 /* 분야가 선언한 source.type 에 따라 출처를 고른다.
    appsscript → 영화·차계부(기존 방식) / sheet → 도서·명산·러닝(기존 시트에 탭으로) */
@@ -2013,6 +2018,27 @@ class GSheetSource {
   async list(id){ const m=MANIFESTS[id]; await this.ensure(m); const {rows}=await this._rowsOf(m.source.tab);
     const inv=ndInv(m); const clean=m.source&&m.source.clean;
     return rows.map(row=>{ const o={}; for(const kh in row){ const ek=inv[ndNorm(kh)]||kh; const val=coerce(row[kh]); if(o[ek]===undefined||o[ek]===null||o[ek]==="") o[ek]=val; } var _oo=clean?clean(o):o; return _oo; }).filter(Boolean); }
+  async listMany(ids){   // 여러 탭을 batchGet 한 번으로 읽기(429 방지)
+    await this.ensureReady();
+    const titles=await this._tabTitles();
+    const metas=ids.map(id=>({id, m:MANIFESTS[id]})).filter(x=>x.m && x.m.source && x.m.source.tab);
+    const out={};
+    metas.filter(x=>!titles.includes(x.m.source.tab)).forEach(x=>{ out[x.id]=[]; });
+    const existing=metas.filter(x=>titles.includes(x.m.source.tab));
+    if(!existing.length) return out;
+    const ranges=existing.map(x=>"ranges="+this._rng(x.m.source.tab,"A1:Z10000")).join("&");
+    const d=await this._api("https://sheets.googleapis.com/v4/spreadsheets/"+this.ssId+"/values:batchGet?"+ranges);
+    const vr=d.valueRanges||[];
+    existing.forEach((x,i)=>{
+      const vals=(vr[i]&&vr[i].values)||[];
+      if(vals.length<1){ out[x.id]=[]; return; }
+      const head=vals[0], rows=[];
+      for(let r=1;r<vals.length;r++){ const o={}; for(let c=0;c<head.length;c++) o[head[c]]=(vals[r][c]==null?"":String(vals[r][c])); rows.push(o); }
+      const m=x.m, inv=ndInv(m), clean=m.source&&m.source.clean;
+      out[x.id]=rows.map(row=>{ const o={}; for(const kh in row){ const ek=inv[ndNorm(kh)]||kh; const val=coerce(row[kh]); if(o[ek]===undefined||o[ek]===null||o[ek]==="") o[ek]=val; } var _oo=clean?clean(o):o; return _oo; }).filter(Boolean);
+    });
+    return out;
+  }
   async upsert(id,row){ const m=MANIFESTS[id]; return this._appendObj(m.source.tab, this._flatten(m,row), ndHeaders(m)); }
   async update(id,rowId,row){ const m=MANIFESTS[id]; return this._updateObj(m.source.tab,"_id",rowId,this._flatten(m,row)); }
   async remove(id,rowId){ const m=MANIFESTS[id]; return this._deleteRow(m.source.tab,"_id",rowId); }
