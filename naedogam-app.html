@@ -682,7 +682,7 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
         <svg class="brandmark" width="40" height="30" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#F7F5F0"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#F7F5F0"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#F7F5F0"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#F7F5F0"/></svg>
         <span class="brandwm"><span class="bwm-ko">내도감</span><span class="bwm-en">NAEDOGAM</span></span>
       </button>
-      <span class="mhver">v240</span>
+      <span class="mhver">v241</span>
       <span class="spacer"></span>
       <span class="src-chip" id="srcChip" style="display:none">데모</span>
       <button class="icon-btn" id="searchToggle" type="button" style="display:none">🔍</button>
@@ -1973,7 +1973,7 @@ function renderSearch(m){ const L={title:"제목",director:"감독",actors:"배�
 function renderPicker(m){
   const p=$("#picker");
   if(!m.filterBy){ p.style.display="none"; p.innerHTML=""; return; }
-  const scoped = state.recPick ? state.rows.filter(r=>ndSrcVals(r,m.id).indexOf(state.recPick)>=0) : state.rows;
+  const scoped = state.recPick ? state.rows.filter(r=>String(r.recommend||"").split(/[,\/]+/).map(function(x){return x.trim();}).indexOf(state.recPick)>=0) : state.rows;
   const vals=[...new Set(scoped.flatMap(r=>{ const v=r[m.filterBy.field]; return Array.isArray(v)?v.map(x=>String(x).trim()):String(v||"").split(",").map(x=>x.trim()); }).filter(Boolean))];
   if(vals.length < (m.filterBy.always?1:2)){ p.style.display="none"; p.innerHTML=""; state.pick=""; return; }
   p.style.display="flex";
@@ -1983,8 +1983,7 @@ function renderPicker(m){
 }
 
 function ndInjectRecChip(m){
-  if(!RECO_SRC_MAP[m.id]){ ndBuildSrcMap(m.id).then(function(){ if(state.domain===m.id) ndInjectRecChip(m); }); }
-  var recVals=ndDistinctSrc(state.rows, m.id);
+  var recVals=[...new Set(state.rows.flatMap(function(r){ return String(r.recommend||"").split(/[,\/]+/).map(function(x){return x.trim();}); }).filter(Boolean))];
   var ex=document.getElementById("recchip"); if(ex) ex.remove();
   if(!recVals.length) return;
   var scope=document.getElementById("scope"), picker=document.getElementById("picker");
@@ -2039,7 +2038,7 @@ function openRecListPicker(m, recVals){
   var old=document.getElementById("recListDlg"); if(old) old.remove();
   var dlg=document.createElement("dialog"); dlg.id="recListDlg";
   dlg.style.cssText="border:none;border-radius:14px;padding:0;max-width:380px;width:92%;background:var(--card,#fff);color:var(--ink,#222)";
-  var counts={}; state.rows.forEach(function(r){ ndSrcVals(r,m.id).forEach(function(t){ counts[t]=(counts[t]||0)+1; }); });
+  var counts={}; state.rows.forEach(function(r){ String(r.recommend||"").split(/[,\/]+/).map(function(x){return x.trim();}).filter(Boolean).forEach(function(t){ counts[t]=(counts[t]||0)+1; }); });
   var vals=recVals.slice().sort(function(a,b){ return a.localeCompare(b,"ko"); });
   function esc(x){ return String(x).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/"/g,"&quot;"); }
   function body(filter){
@@ -2083,7 +2082,7 @@ function bookRecBadges(r, cls){
 }
 function bookGenresOf(r){ return (Array.isArray(r.genre)?r.genre:(r.genre==null||r.genre===""?[]:[r.genre])).map(g=>String(g).trim()).filter(Boolean); }
 function renderBookGenres(m){
-  const srcRows=state.recPick?state.rows.filter(function(r){return ndSrcVals(r,m.id).indexOf(state.recPick)>=0;}):state.rows; const genres=[...new Set(srcRows.flatMap(bookGenresOf))].sort((a,b)=>a.localeCompare(b,"ko")); if(bookGenreFilter && genres.indexOf(bookGenreFilter)<0) bookGenreFilter="";
+  const srcRows=state.recPick?state.rows.filter(function(r){return String(r.recommend||"").split(/[,\/]+/).map(function(x){return x.trim();}).indexOf(state.recPick)>=0;}):state.rows; const genres=[...new Set(srcRows.flatMap(bookGenresOf))].sort((a,b)=>a.localeCompare(b,"ko")); if(bookGenreFilter && genres.indexOf(bookGenreFilter)<0) bookGenreFilter="";
   const sc=$("#scope");
   if(!genres.length){ sc.style.display="none"; sc.innerHTML=""; return; }
   sc.style.display="flex"; sc.style.flexDirection="row";
@@ -2115,7 +2114,7 @@ function renderCatTags(m){
   var k=NDTAGCATS[m.id]; var sc=document.getElementById("scope"); if(!sc) return;
   if(ndCatTagFor!==m.id){ ndCatTag=""; ndCatTagFor=m.id; }
   var seen={}, all=[];
-  var srcRows=state.recPick?state.rows.filter(function(r){return ndSrcVals(r,m.id).indexOf(state.recPick)>=0;}):state.rows; srcRows.forEach(function(r){ ndTagVals(r,k).forEach(function(g){ if(!seen[g]){ seen[g]=1; all.push(g); } }); });
+  var srcRows=state.recPick?state.rows.filter(function(r){return String(r.recommend||"").split(/[,\/]+/).map(function(x){return x.trim();}).indexOf(state.recPick)>=0;}):state.rows; srcRows.forEach(function(r){ ndTagVals(r,k).forEach(function(g){ if(!seen[g]){ seen[g]=1; all.push(g); } }); });
   all.sort(function(a,b){ return a.localeCompare(b,"ko"); });
   if(ndCatTag && all.indexOf(ndCatTag)<0) ndCatTag=""; if(!all.length){ sc.style.display="none"; return; }
   sc.style.display=""; sc.style.flexWrap="nowrap";
@@ -3261,7 +3260,7 @@ function paintDomain(m){   // state.rows를 화면에 그림 (데이터 다시 �
   applySearchUI(m);
   let base = state.rows;
   if(m.filterBy && state.pick) base = base.filter(r=>{ const v=r[m.filterBy.field]; const _a=Array.isArray(v)?v.map(x=>String(x).trim()):String(v||"").split(",").map(x=>x.trim()); return _a.includes(state.pick); });
-  if(state.recPick) base = base.filter(function(r){ return ndSrcVals(r,m.id).indexOf(state.recPick)>=0; });
+  if(state.recPick) base = base.filter(function(r){ return String(r.recommend||"").split(/[,\/]+/).map(function(x){return x.trim();}).indexOf(state.recPick)>=0; });
   renderStats(m, base);
   setMhSub("");
   if(m.id==="books") renderBookGenres(m);
@@ -3384,8 +3383,7 @@ function movieSelectValues(rows, scope){
   const seen=new Set();
   rows.forEach(r=>{
     let arr = scope==="stream" ? (r.streaming||[])
-      : scope==="rec" ? (r.recommendList||[])
-      : scope==="src" ? ndSrcVals(r,"movies")
+      : scope==="rec" ? ((r.recommendList&&r.recommendList.length)?r.recommendList:String(r.recommend||"").split(/[\/,]+/).map(function(x){return x.trim();}).filter(Boolean))
       : String(r.director||"").split(/[,\/]+/);        // 감독
     arr.forEach(v=>{ const t=String(v).trim(); if(t) seen.add(t); });
   });
@@ -3394,26 +3392,24 @@ function movieSelectValues(rows, scope){
 function movieSearch(rows, scope, q, sel){
   if(scope==="director") return sel ? rows.filter(r=>String(r.director||"").includes(sel)) : rows;
   if(scope==="stream")   return sel ? rows.filter(r=>(r.streaming||[]).includes(sel)) : rows;
-  if(scope==="rec")      return sel ? rows.filter(r=>(r.recommendList||[]).includes(sel)) : rows;
-  if(scope==="src")      return sel ? rows.filter(r=>ndSrcVals(r,"movies").includes(sel)) : rows;
+  if(scope==="rec")      return sel ? rows.filter(function(r){ var a=(r.recommendList&&r.recommendList.length)?r.recommendList:String(r.recommend||"").split(/[\/,]+/).map(function(x){return x.trim();}).filter(Boolean); return a.indexOf(sel)>=0; }) : rows;
   const nq=(q||"").toLowerCase().replace(/\s+/g,""); if(!nq) return rows;
   const norm=s=>String(s==null?"":s).toLowerCase().replace(/\s+/g,"");
   if(scope==="actor") return rows.filter(r=>norm(r.actors).includes(nq));
   return rows.filter(r=>norm(r.title).includes(nq)||norm(r.orig).includes(nq));   // 제목
 }
 function paintMovies(m){
-  if(!RECO_SRC_MAP.movies){ ndBuildSrcMap("movies").then(function(){ if(state.domain==="movies") paintMovies(m); }); }
   renderStats(m, state.rows);
   try{ if(CONFIG.DEPLOY) setTimeout(autofillMovieRatings,300); }catch(e){}
   setMhSub("");
   const scope=state.searchScope||"title";
   const sc=$("#scope"); sc.style.display="flex"; sc.style.flexDirection="row"; sc.classList.add("scopetabs");     // 검색 범위 탭(밑줄·균등)
-  const scopes=[["title","제목"],["director","감독"],["actor","배우"],["stream","스트리밍"],["rec","추천"],["src","출처"]];
+  const scopes=[["title","제목"],["director","감독"],["actor","배우"],["stream","스트리밍"],["rec","추천"]];
   sc.innerHTML=scopes.map(([v,l])=>`<button class="chip ${scope===v?'on':''}" data-sc="${v}">${l}</button>`).join("");
   sc.querySelectorAll(".chip").forEach(b=>b.onclick=()=>{ state.searchScope=b.dataset.sc; state.query=""; state.selectQ=""; $("#search").value=""; state.page=0; paintMovies(m); });
 
   // 제목·배우 = 글자 입력(🔍 토글) / 감독·스트리밍·추천 = 드롭다운 (옛 앱과 동일)
-  const useSelect=["director","stream","rec","src"].includes(scope);
+  const useSelect=["director","stream","rec"].includes(scope);
   const selEl=$("#mvselect");
   if(useSelect){
     const vals=movieSelectValues(state.rows, scope);
