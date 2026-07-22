@@ -761,6 +761,18 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
 .insTx b{font-size:17px;font-weight:900}
 .insTx i{font-style:normal;font-size:12.5px;color:#b9b2e0;margin-top:3px}
 .insGo{font-size:20px;color:#ffd66b}
+.insLight{background:#fbf7f8;color:#2b2622}
+.insLight::backdrop{background:rgba(0,0,0,.4)}
+.insLight .wtop{background:#fff;border-bottom:1px solid #f0e6ea}
+.insLight .wclose{background:#f1eaec;color:#5a4a50}
+.insLight .mbTitle{color:#2b2622}
+.insLight .wlogo{color:#c98aa0}
+.insLight .wtitle{color:#2b2622}
+.insLight .wdate{color:#8a7c82}
+.insLight .insCard{background:#fff;border:1px solid #f0dfe4;color:#2b2622;box-shadow:0 1px 5px rgba(0,0,0,.06)}
+.insLight .insCard:hover,.insLight .insCard:active{background:#fdeef3;border-color:#ffc9d6}
+.insLight .insTx i{color:#8a7c82}
+.insLight .insGo{color:#c9b0b8}
 .mbHistRow{display:flex;justify-content:space-between;align-items:center;width:100%;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:12px 14px;margin-bottom:8px;cursor:pointer;color:#f4f1ff}
 .mbHistRow:hover{background:rgba(255,255,255,.09)}
 .mbHd{font-size:13px;color:#b9b2e0}
@@ -785,7 +797,7 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
         <svg class="brandmark" width="40" height="30" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#F7F5F0"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#F7F5F0"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#F7F5F0"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#F7F5F0"/></svg>
         <span class="brandwm"><span class="bwm-ko">내도감</span><span class="bwm-en">NAEDOGAM</span></span>
       </button>
-      <span class="mhver">v259</span>
+      <span class="mhver">v260</span>
       <span class="spacer"></span>
       <span class="src-chip" id="srcChip" style="display:none">데모</span>
       <button class="icon-btn" id="searchToggle" type="button" style="display:none">🔍</button>
@@ -3917,7 +3929,7 @@ async function _insHomeMemory(){
 }
 function openInsight(){
   var old=document.getElementById("insDlg"); if(old) old.remove();
-  var dlg=document.createElement("dialog"); dlg.id="insDlg"; dlg.className="wrapDlg";
+  var dlg=document.createElement("dialog"); dlg.id="insDlg"; dlg.className="wrapDlg insLight";
   dlg.innerHTML='<div class="wtop"><button class="wclose" onclick="this.closest(\'dialog\').close()">✕ 닫기</button><span class="mbTitle">✨ 인사이트</span><span style="width:56px"></span></div>'
     +'<div class="wscroll"><div class="wcard">'
     +'<div class="wsec whead"><div class="wlogo">내도감 · INSIGHT</div><div class="wtitle">인사이트</div><div class="wdate">내 기록이 돌려주는 것들</div></div>'
