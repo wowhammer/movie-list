@@ -797,7 +797,7 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
         <svg class="brandmark" width="40" height="30" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#F7F5F0"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#F7F5F0"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#F7F5F0"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#F7F5F0"/></svg>
         <span class="brandwm"><span class="bwm-ko">내도감</span><span class="bwm-en">NAEDOGAM</span></span>
       </button>
-      <span class="mhver">v261</span>
+      <span class="mhver">v262</span>
       <span class="spacer"></span>
       <span class="src-chip" id="srcChip" style="display:none">데모</span>
       <button class="icon-btn" id="searchToggle" type="button" style="display:none">🔍</button>
@@ -1870,7 +1870,7 @@ function renderHome(){
   home.querySelectorAll(".cat-card[data-id]").forEach(b=>b.onclick=()=>openDomain(b.dataset.id));
   _insHomeMemory();
   { const _hs=$("#homeSearch"); if(_hs){ let _t=null; _hs.addEventListener("input",()=>{ clearTimeout(_t); _t=setTimeout(()=>runHomeSearch(_hs.value),200); }); } }
-  active.forEach(m=>{ if(CACHE[m.id]||loadPersist(m.id)) return; try{ sourceFor(m).list(m.id).then(rows=>{ CACHE[m.id]=rows; savePersist(m.id,rows); const el=home.querySelector(`.cc[data-cnt="${m.id}"]`); if(el) el.textContent=`${fmt(rows.length)}건`; }).catch(()=>{}); }catch(e){} });
+  active.forEach(m=>{ const _st=(Date.now()-(Number(store.getItem(persistKey(m.id)+"|t")||0)))>NDCACHE_TTL; if((CACHE[m.id]||loadPersist(m.id)) && !_st) return; try{ sourceFor(m).list(m.id).then(rows=>{ CACHE[m.id]=rows; savePersist(m.id,rows); const el=home.querySelector(`.cc[data-cnt="${m.id}"]`); if(el) el.textContent=`${fmt(rows.length)}건`; }).catch(()=>{}); }catch(e){} });
 }
 /* 분야가 선언한 source.type 에 따라 출처를 고른다.
    appsscript → 영화·차계부(기존 방식) / sheet → 도서·명산·러닝(기존 시트에 탭으로) */
@@ -3032,16 +3032,22 @@ function goToMovie(match){   // 필터 초기화 → 목록 다시 그림 → �
 
 /* ── 공통: 추가·수정 폼 (모든 시트 분야가 같이 씀) ── */
 function refreshDomain(){ delete CACHE[state.domain]; loadAndRender(); }   // 시트에서 다시 읽어 최신 반영
-async function syncNow(){   // 구글시트에서 현재 분야를 강제로 새로 읽어옴(모바일에서 만든 자료 반영)
-  const m=MANIFESTS[state.domain]; if(!m) return;
+async function syncNow(){   // ↻ 동기화: 홈이면 전체, 분야면 그 분야만 시트에서 강제 재조회
   const btn=$("#syncBtn"); if(btn){ btn.classList.add("spin"); }
   try{
-    const fresh=await sourceFor(m).list(state.domain);
-    CACHE[state.domain]=fresh; savePersist(state.domain, fresh);
-    state.rows=applyComputed(m, fresh.map(r=>({_id:r._id||crypto.randomUUID(),...r})));
-    paintDomain(m);
-  }catch(e){ alert("동기화 실패: "+e.message); }
-  finally{ if(btn){ btn.classList.remove("spin"); } }
+    const m=MANIFESTS[state.domain];
+    if(state.view!=="home" && m){
+      const fresh=await sourceFor(m).list(state.domain);
+      CACHE[state.domain]=fresh; savePersist(state.domain, fresh);
+      state.rows=applyComputed(m, fresh.map(r=>({_id:r._id||crypto.randomUUID(),...r})));
+      paintDomain(m);
+    } else {
+      getActive().forEach(function(id){ delete CACHE[id]; try{ store.removeItem(persistKey(id)); store.removeItem(persistKey(id)+"|t"); }catch(e){} });
+      renderHome();
+      try{ if(typeof ndToast==="function") ndToast("최신 데이터로 동기화 중…"); }catch(e){}
+    }
+  }catch(e){ alert("동기화 실패: "+(e&&e.message||e)); }
+  finally{ if(btn){ setTimeout(function(){ btn.classList.remove("spin"); }, 900); } }
 }
 function afterSave(m,row){   // 저장 성공 후: 시트 재조회 없이 로컬 캐시에 바로 반영(빠름)
   const id=m.id; let arr=(CACHE[id]||loadPersist(id)||[]).slice();
@@ -3304,8 +3310,9 @@ function mergePending(id, fresh){
   s.forEach(pid=>{ if(have.has(pid)){ s.delete(pid); } else { const it=cache.find(x=>String(x._id)===pid); if(it) extras.push(it); } });
   return extras.length ? [...extras, ...fresh] : fresh;
 }
+const NDCACHE_TTL=6*3600*1000; /* 6시간 지나면 홈 로드시 자동 재동기화 */
 function persistKey(id){ return "nd.cache2."+id; }
-function savePersist(id, rows){ try{ store.setItem(persistKey(id), JSON.stringify(rows)); }catch(e){} }
+function savePersist(id, rows){ try{ store.setItem(persistKey(id), JSON.stringify(rows)); store.setItem(persistKey(id)+"|t", String(Date.now())); }catch(e){} }
 function loadPersist(id){ try{ const s=store.getItem(persistKey(id)); const a=s?JSON.parse(s):null; return (Array.isArray(a)&&a.length)?a:null; }catch(e){ return null; } }
 function rowsSig(rows){ try{ return rows.length+"|"+rows.slice(0,80).map(r=>Object.keys(r).filter(k=>k!=="_id").map(k=>r[k]).join("¦")).join("§"); }catch(e){ return Math.random()+""; } }
 async function loadAndRender(){
