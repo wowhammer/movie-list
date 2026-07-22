@@ -578,6 +578,17 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
 /* ─ 생리주기(Period) 라이트 모달 ─ */
 .pdDlg{border:none;padding:0;margin:auto;max-width:460px;width:94%;height:auto;max-height:90vh;border-radius:20px;overflow:hidden;background:#fff;color:#2b2622;box-shadow:0 16px 50px rgba(0,0,0,.28);display:flex;flex-direction:column}
 .pdDlg::backdrop{background:rgba(0,0,0,.45)}
+.pdDlg{opacity:0;transform:translateY(26px) scale(.985);transition:opacity .22s ease,transform .26s cubic-bezier(.2,.72,.24,1)}
+.pdDlg.pdOpen{opacity:1;transform:none}
+.pdDlg::backdrop{background:rgba(0,0,0,0);transition:background .24s ease}
+.pdDlg.pdOpen::backdrop{background:rgba(0,0,0,.45)}
+.pdX{font-size:17px;width:38px;height:38px}
+.pdClose{transition:transform .12s ease,background .15s ease}
+.pdClose:active{transform:scale(.9)}
+.pdBig,.pdSaveB,.pdSeg,.pdChip,.pdRec,.pdCancel,.pdDel,.pdNav,.pdCell,.pdHeroCell{transition:transform .12s ease,background .15s ease,border-color .15s ease,box-shadow .15s ease}
+.pdBig:active,.pdSaveB:active,.pdSeg:active,.pdChip:active,.pdRec:active,.pdCancel:active,.pdDel:active,.pdNav:active{transform:scale(.97)}
+.pdCell:active{transform:scale(.9)}
+.pdBody{scroll-behavior:smooth}
 .pdTop{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;background:linear-gradient(135deg,#ff7a9c,#ff5c7c);color:#fff;flex:0 0 auto}
 .pdTitle{font-size:16px;font-weight:800;letter-spacing:.02em}
 .pdClose{background:rgba(255,255,255,.22);border:none;color:#fff;font-size:15px;font-weight:800;width:34px;height:34px;border-radius:10px;cursor:pointer;display:flex;align-items:center;justify-content:center}
@@ -588,6 +599,7 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
 .pdHeroBig{font-size:30px;font-weight:900;color:#e03e63;line-height:1.1}
 .pdHeroSub{font-size:13px;color:#6b5860;margin-top:7px}
 .pdHeroSub b{color:#c62a4e}
+.pdHeroRange{font-size:12px;color:#b0929a;margin-top:3px;font-weight:600}
 .pdHeroRow{display:flex;gap:8px;justify-content:center;margin-top:12px;flex-wrap:wrap}
 .pdHeroCell{display:inline-flex;align-items:center;gap:5px;background:#fff;border:1px solid #ffd0dc;border-radius:10px;padding:5px 10px;font-size:12px;font-weight:700;color:#6b5860}
 .pdHeroCell i{width:9px;height:9px;border-radius:50%;display:inline-block}
@@ -753,7 +765,7 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
         <svg class="brandmark" width="40" height="30" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#F7F5F0"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#F7F5F0"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#F7F5F0"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#F7F5F0"/></svg>
         <span class="brandwm"><span class="bwm-ko">내도감</span><span class="bwm-en">NAEDOGAM</span></span>
       </button>
-      <span class="mhver">v246</span>
+      <span class="mhver">v247</span>
       <span class="spacer"></span>
       <span class="src-chip" id="srcChip" style="display:none">데모</span>
       <button class="icon-btn" id="searchToggle" type="button" style="display:none">🔍</button>
@@ -1815,7 +1827,7 @@ function renderHome(){
   }
   const _ics=d=>`<svg class="ci-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="${d}"/></svg>`;
   home.innerHTML=`<div class="home-search-wrap"><input class="home-search" id="homeSearch" type="search" placeholder="🔍 전체 검색 — 제목·이름" autocomplete="off"></div><div id="homeSearchRes" style="display:none"></div><div class="home-grid">`+active.map(m=>{
-    const _arr = CACHE[m.id] || loadPersist(m.id); const cnt = _arr ? `${fmt(_arr.length)}건` : "";
+    const _arr = CACHE[m.id] || loadPersist(m.id); const cnt = m.id==="period" ? pdHomeLabel() : (_arr ? `${fmt(_arr.length)}건` : "");
     const ic = ND_ICONS[m.id] ? _ics(ND_ICONS[m.id]) : `<span style="font-size:24px">${m.icon}</span>`;
     return `<button class="cat-card${(_arr&&_arr.length===0)?' cat-card-zero':''}" data-id="${m.id}"><span class="ci" style="color:${ND_COLORS[m.id]||'var(--ink)'}">${ic}</span><span class="cn">${m.title}</span><span class="cc" data-cnt="${m.id}">${cnt}</span></button>`;
   }).join("")+`</div>`;
@@ -4047,15 +4059,20 @@ function pdStats(){
 async function openPeriod(){
   var old=document.getElementById("periodDlg"); if(old) old.remove();
   var dlg=document.createElement("dialog"); dlg.id="periodDlg"; dlg.className="pdDlg";
-  dlg.innerHTML='<div class="pdTop"><button class="pdClose" onclick="this.closest(\'dialog\').close()">✕</button><span class="pdTitle">🌙 생리주기</span><button class="pdClose pdAddBtn" id="pdAddTop">＋ 기록</button></div><div class="pdBody" id="pdBody"></div>';
+  dlg.innerHTML='<div class="pdTop"><button class="pdClose pdX" type="button" aria-label="닫기">✕</button><span class="pdTitle">🌙 생리주기</span><button class="pdClose pdAddBtn" id="pdAddTop">＋ 기록</button></div><div class="pdBody" id="pdBody"></div>';
   document.body.appendChild(dlg); dlg.showModal();
-  dlg.addEventListener("click",function(e){ if(e.target===dlg) dlg.close(); });
+  requestAnimationFrame(function(){ dlg.classList.add("pdOpen"); });
+  var _px=dlg.querySelector(".pdX"); if(_px) _px.onclick=pdClose;
+  dlg.addEventListener("click",function(e){ if(e.target===dlg) pdClose(); });
+  dlg.addEventListener("cancel",function(e){ e.preventDefault(); pdClose(); });
   pdRenderMain();
   document.getElementById("pdAddTop").onclick=function(){ pdLogForm(null); };
   /* 시트에서 로드(기기간 공유) */
   try{ var rows=await pdSheetLoad(); if(rows){ var o=_pdSaved(); o.cycles=rows; _pdWrite(o); if(document.getElementById("pdBody")) pdRenderMain(); } }catch(e){}
 }
 
+function pdClose(){ var d=document.getElementById("periodDlg"); if(!d) return; d.classList.remove("pdOpen"); setTimeout(function(){ try{ d.close(); d.remove(); }catch(e){} }, 200); }
+function pdHomeLabel(){ try{ var st=pdStats(); if(!st.count) return "기록하기"; if(st.inPeriod) return "생리 "+st.periodDay+"일차"; if(st.dday===0) return "오늘 예정"; if(st.dday>0) return "D-"+st.dday+" · "+st.phase; return "D+"+Math.abs(st.dday); }catch(e){ return ""; } }
 function pdRenderMain(){
   var b=document.getElementById("pdBody"); if(!b) return;
   var st=pdStats();
@@ -4066,9 +4083,11 @@ function pdRenderMain(){
   } else {
     var ddayTxt = st.inPeriod ? ("생리 "+st.periodDay+"일차")
       : (st.dday===0 ? "오늘 시작 예정" : (st.dday>0 ? "D-"+st.dday : "D+"+Math.abs(st.dday)));
+    var _rng="";
+    if(st.minCycle&&st.maxCycle&&st.maxCycle>st.minCycle&&st.next){ var _lo=pdAdd(st.next,-(st.avgCycle-st.minCycle)), _hi=pdAdd(st.next,(st.maxCycle-st.avgCycle)); _rng='<div class="pdHeroRange">예상 범위 '+pdFmtMD(_lo)+' ~ '+pdFmtMD(_hi)+'</div>'; }
     hero='<div class="pdHero"><div class="pdHeroTag">'+_pdEsc(st.phase)+'</div>'
       +'<div class="pdHeroBig">'+ddayTxt+'</div>'
-      +'<div class="pdHeroSub">다음 생리 예정 <b>'+pdFmt(st.next)+'</b></div>'
+      +'<div class="pdHeroSub">다음 생리 예정 <b>'+pdFmt(st.next)+'</b></div>'+_rng
       +'<div class="pdHeroRow"><span class="pdHeroCell"><i class="pdDotFert"></i>가임기 '+pdFmtMD(st.fertS)+'~'+pdFmtMD(st.fertE)+'</span><span class="pdHeroCell"><i class="pdDotOvul"></i>배란 '+pdFmtMD(st.ovul)+'</span></div></div>';
   }
   var stats = st.count ? ('<div class="pdStats">'
