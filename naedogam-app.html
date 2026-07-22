@@ -765,7 +765,7 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
         <svg class="brandmark" width="40" height="30" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#F7F5F0"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#F7F5F0"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#F7F5F0"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#F7F5F0"/></svg>
         <span class="brandwm"><span class="bwm-ko">내도감</span><span class="bwm-en">NAEDOGAM</span></span>
       </button>
-      <span class="mhver">v247</span>
+      <span class="mhver">v248</span>
       <span class="spacer"></span>
       <span class="src-chip" id="srcChip" style="display:none">데모</span>
       <button class="icon-btn" id="searchToggle" type="button" style="display:none">🔍</button>
@@ -5049,7 +5049,8 @@ async function openRecoPanel(m){
         merge=String(it["추천"]||it.recommend||it.__list||"").split(/[\/,]+/).map(x=>x.trim()).filter(Boolean).some(x=>_cur.indexOf(x.toLowerCase())<0); } }
     return { it, v, has, merge }; });
   const sel=new Set();
-  function updateBar(){ const a=$("#rcAdd"); if(a) a.textContent=`선택한 ${sel.size}개 담기`; }
+  function rcRemain(){ return items.filter(o=>!o.has||o.merge).length; }
+  function updateBar(){ const a=$("#rcAdd"); if(!a) return; const rm=rcRemain(); if(sel.size>0){ a.textContent=`선택한 ${sel.size}개 담기`; a.disabled=false; } else { a.textContent=`📥 리스트 통째로 담기 (${rm}개)`; a.disabled=!rm; } }
   function render(){
     const remain=items.filter(o=>!o.has||o.merge).length;
     const rows=items.map((o,i)=>{
@@ -5060,9 +5061,8 @@ async function openRecoPanel(m){
     d.innerHTML=`<div class="dhead" style="display:flex;align-items:center;gap:8px;padding-right:42px"><h3 style="margin:0;padding:0;flex:1 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:17px">${data.title||"추천 리스트"}</h3>${(listsAll&&listsAll.length>1)?'<button class="btn ghost" id="rcBack" type="button" style="padding:4px 10px;flex:0 0 auto;white-space:nowrap">← 리스트</button>':''}<button class="dclose-x" onclick="this.closest('dialog').close()" aria-label="닫기">✕</button></div>
       <div class="dbody" style="padding-bottom:6px">
       <div class="count" style="margin:0 0 6px">${data.subtitle||""}</div>
-      <button class="btn ghost" id="rcAll" style="width:100%;margin:0 0 8px" ${remain?"":"disabled"}>📥 리스트 통째로 담기 (${remain}개)</button>
       <div id="rcList" style="max-height:52vh;overflow:auto;margin:0 -4px">${rows}</div>
-      <div class="reco-foot"><button class="btn" id="rcAdd" style="flex:1">선택한 ${sel.size}개 담기</button></div>
+      <div class="reco-foot"><button class="btn" id="rcAdd" style="flex:1" ${remain?"":"disabled"}>${sel.size>0?`선택한 ${sel.size}개 담기`:`📥 리스트 통째로 담기 (${remain}개)`}</button></div>
       </div>`;
     $("#rcList").querySelectorAll(".reco-item[data-i]").forEach(el=>{ el.onclick=()=>{
         const i=+el.dataset.i; const cb=el.querySelector(".reco-cb");
@@ -5070,8 +5070,7 @@ async function openRecoPanel(m){
         else { sel.add(i); el.classList.add("on"); if(cb)cb.checked=true; }
         updateBar();
       }; });
-    const all=$("#rcAll"); if(all&&remain) all.onclick=()=>{ items.forEach((o,i)=>{ if(!o.has||o.merge) sel.add(i); }); doAdd(); };
-    const add=$("#rcAdd"); if(add) add.onclick=doAdd;
+    const add=$("#rcAdd"); if(add) add.onclick=()=>{ if(sel.size===0){ items.forEach((o,i)=>{ if(!o.has||o.merge) sel.add(i); }); } doAdd(); };
     const cl=$("#rcClose"); if(cl) cl.onclick=()=>d.close();
     const bk=$("#rcBack"); if(bk) bk.onclick=()=>openRecoPanel(m);
   }
