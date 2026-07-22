@@ -601,6 +601,11 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
 .pdHeroSub{font-size:13px;color:#6b5860;margin-top:7px}
 .pdHeroSub b{color:#c62a4e}
 .pdHeroRange{font-size:12px;color:#b0929a;margin-top:3px;font-weight:600}
+.pdInsight{background:linear-gradient(135deg,#fff5f8,#fdeef3);border:1px solid #f5d9e2;border-radius:14px;padding:13px 14px;margin-bottom:12px}
+.pdInsightH{font-size:12px;font-weight:800;color:#c62a4e;margin-bottom:5px}
+.pdInsightB{font-size:13px;color:#5a4a50;line-height:1.5}
+.pdInsightB b{color:#e03e63}
+.pdInsightB span{color:#a89299;font-size:11px}
 .pdHeroRow{display:flex;gap:8px;justify-content:center;margin-top:12px;flex-wrap:wrap}
 .pdHeroCell{display:inline-flex;align-items:center;gap:5px;background:#fff;border:1px solid #ffd0dc;border-radius:10px;padding:5px 10px;font-size:12px;font-weight:700;color:#6b5860}
 .pdHeroCell i{width:9px;height:9px;border-radius:50%;display:inline-block}
@@ -766,7 +771,7 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
         <svg class="brandmark" width="40" height="30" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#F7F5F0"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#F7F5F0"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#F7F5F0"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#F7F5F0"/></svg>
         <span class="brandwm"><span class="bwm-ko">내도감</span><span class="bwm-en">NAEDOGAM</span></span>
       </button>
-      <span class="mhver">v250</span>
+      <span class="mhver">v251</span>
       <span class="spacer"></span>
       <span class="src-chip" id="srcChip" style="display:none">데모</span>
       <button class="icon-btn" id="searchToggle" type="button" style="display:none">🔍</button>
@@ -2624,7 +2629,7 @@ function renderCard(m, r, no){ if(m.id==="books") return bookCard(r); if(m.id===
     const _cs=m.custom?` style="color:${_kvcol[ci%_kvcol.length]}"`:"";
     return `<span><i class="kvk"${_cs}>${col.k}</i> <b>${s}</b></span>`; }).filter(Boolean).join("");
   return `<button class="card catcard" data-id="${r._id}"><span class="thumb">${(r.cover||r._cover)?`<img src="${r.cover||r._cover}" alt="">`:(c.thumb||"🧾")}</span>
-    <span class="body"><h3 style="font-size:15px">${c.title(r)}</h3><div class="kv">${kv}</div>${(()=>{ const cut=t=>t.slice(0,70).replace(/</g,"&lt;")+(t.length>70?"…":""); if(m.id==="diary"){ const a=[]; if(r.content) a.push(`<div class="meta" style="margin-top:5px">${cut(String(r.content))}</div>`); if(r.nddaily) a.push(`<div class="meta" style="margin-top:4px;opacity:.85">🗓 ${cut(String(r.nddaily).replace(/\n+/g," · "))}</div>`); return a.join(""); } const e=r.memo||r.content||r.nddaily; return e?`<div class="meta" style="margin-top:5px">${cut(String(e))}</div>`:""; })()}</span></button>`; }
+    <span class="body"><h3 style="font-size:15px">${c.title(r)}</h3><div class="kv">${kv}</div>${(()=>{ const cut=t=>t.slice(0,70).replace(/</g,"&lt;")+(t.length>70?"…":""); if(m.id==="diary"){ const a=[]; if(r.content) a.push(`<div class="meta" style="margin-top:5px">${cut(String(r.content))}</div>`); if(r.nddaily) a.push(`<div class="meta" style="margin-top:4px;opacity:.85">🗓 ${cut(String(r.nddaily).replace(/\n+/g," · "))}</div>`); const _pph=(typeof pdPhaseForDate==="function")?pdPhaseForDate(r.date):""; if(_pph) a.push(`<div class="meta" style="margin-top:4px;color:#e03e63;font-weight:700">🌙 ${_pph}</div>`); return a.join(""); } const e=r.memo||r.content||r.nddaily; return e?`<div class="meta" style="margin-top:5px">${cut(String(e))}</div>`:""; })()}</span></button>`; }
 async function ndPhotoSearch(q){
   var out=[];
   try{
@@ -4076,6 +4081,8 @@ async function openPeriod(){
 function pdClose(){ var d=document.getElementById("periodDlg"); if(!d) return; d.classList.remove("pdOpen"); setTimeout(function(){ try{ d.close(); d.remove(); }catch(e){} }, 200); }
 function pdHomeLabel(){ try{ var st=pdStats(); if(!st.count) return "기록하기"; if(st.inPeriod) return "생리 "+st.periodDay+"일차"; if(st.dday===0) return "오늘 예정"; if(st.dday>0) return "D-"+st.dday+" · "+st.phase; return "D+"+Math.abs(st.dday); }catch(e){ return ""; } }
 function pdPeriodDaySet(y,mo){ var out={}; try{ var st=pdStats(); (st.cycles||[]).forEach(function(c){ var a=pdParse(c.start); if(!a) return; var e=pdParse(c.end); if(!e) e=pdAdd(a,(st.avgPeriod||5)-1); var d=new Date(a.getFullYear(),a.getMonth(),a.getDate()), g=0; while(d<=e && g<40){ if(d.getFullYear()===y&&d.getMonth()===mo){ out[y+"-"+String(mo+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")]=true; } d=pdAdd(d,1); g++; } }); }catch(e){} return out; }
+function pdPhaseForDate(dstr){ try{ var d=pdParse(dstr); if(!d) return ""; var st=pdStats(); for(var i=0;i<(st.cycles||[]).length;i++){ var c=st.cycles[i]; var a=pdParse(c.start); if(!a) continue; var e=pdParse(c.end); if(!e) e=pdAdd(a,(st.avgPeriod||5)-1); if(pdDiff(a,d)>=0 && pdDiff(d,e)>=0) return "생리 "+(pdDiff(a,d)+1)+"일차"; } return ""; }catch(e){ return ""; } }
+function pdMoodInsight(){ try{ var diary=(typeof CACHE!=="undefined"&&CACHE["diary"])||(typeof loadPersist==="function"&&loadPersist("diary"))||[]; if(!diary.length) return null; var cy=pdCycles(); if(cy.length<2) return null; var starts=cy.map(function(c){return pdParse(c.start);}).filter(Boolean); var pms={total:0,moods:{}}; diary.forEach(function(e){ var d=pdParse(e.date); if(!d) return; var mood=String(e.mood||"").trim(); if(!mood) return; var inPms=false; starts.forEach(function(sx){ var df=pdDiff(d,sx); if(df>=1&&df<=5) inPms=true; }); if(inPms){ pms.total++; pms.moods[mood]=(pms.moods[mood]||0)+1; } }); if(pms.total<3) return null; var top=Object.keys(pms.moods).sort(function(a,b){return pms.moods[b]-pms.moods[a];})[0]; var pct=Math.round(pms.moods[top]/pms.total*100); if(pct<40) return null; return { topMood:top, pct:pct, n:pms.total }; }catch(e){ return null; } }
 function pdRenderMain(){
   var b=document.getElementById("pdBody"); if(!b) return;
   var st=pdStats();
@@ -4097,7 +4104,8 @@ function pdRenderMain(){
     +'<div class="pdStat"><b>'+st.avgCycle+'일</b><span>평균 주기</span></div>'
     +'<div class="pdStat"><b>'+st.avgPeriod+'일</b><span>평균 기간</span></div>'
     +'<div class="pdStat"><b>'+st.count+'회</b><span>기록</span></div></div>') : '';
-  b.innerHTML=hero+stats+pdCalHTML(st)+pdRecordsHTML(st);
+  var _insight=""; try{ var _mi=pdMoodInsight(); if(_mi){ _insight='<div class="pdInsight"><div class="pdInsightH">🧠 몸과 마음 · 일기 연동</div><div class="pdInsightB">생리 시작 <b>5일 전</b>, 일기 기분이 <b>'+_pdEsc(_mi.topMood)+'</b>인 날이 <b>'+_mi.pct+'%</b> <span>('+_mi.n+'일 기준)</span></div></div>'; } }catch(e){}
+  b.innerHTML=hero+stats+_insight+pdCalHTML(st)+pdRecordsHTML(st);
   var sb=document.getElementById("pdStartBtn"); if(sb) sb.onclick=function(){ pdLogForm(null); };
   var pv=document.getElementById("pdCalPrev"); if(pv) pv.onclick=function(){ pdCalM--; if(pdCalM<0){pdCalM=11;pdCalY--;} pdRenderMain(); };
   var nx=document.getElementById("pdCalNext"); if(nx) nx.onclick=function(){ pdCalM++; if(pdCalM>11){pdCalM=0;pdCalY++;} pdRenderMain(); };
@@ -4304,7 +4312,7 @@ function wrapCardHTML(S){
   // 페르소나
   sec.push('<div class="wsec"><div class="wpersona"><div class="wem">'+p.em+'</div><div class="wph">당신은<br>“'+p.t+'”</div><div class="wpp">'+p.p+'</div></div></div>');
   var _mb=_mbtiSaved(); if(_mb&&_mb.latest){ sec.push('<div class="wsec"><div class="wh2">🧠 나의 성격유형</div><div class="wmbti"><div class="wmbtiT">'+_mb.latest.type+'</div><div class="wmbtiN">'+_wEsc(_mb.latest.nick)+'</div></div></div>'); }
-  try{ if(typeof pdStats==="function"){ var _pd=pdStats(); if(_pd&&_pd.count){ var _sc={}; (_pd.cycles||[]).forEach(function(c){ (c.symptoms||[]).forEach(function(x){ _sc[x]=(_sc[x]||0)+1; }); }); var _tp=Object.keys(_sc).sort(function(a,b){return _sc[b]-_sc[a];})[0]||""; var _rows='<div class="wrow"><span>평균 주기</span><b>'+_pd.avgCycle+'일</b></div><div class="wrow"><span>평균 기간</span><b>'+_pd.avgPeriod+'일</b></div><div class="wrow"><span>기록</span><b>'+_pd.count+'회</b></div>'+(_tp?'<div class="wrow"><span>가장 잦은 증상</span><b>'+_wEsc(_tp)+'</b></div>':''); sec.push('<div class="wsec"><div class="wh2">🌙 생리주기</div><div class="wbig2">'+_pd.avgCycle+'<small>일 평균 주기</small></div>'+_rows+'</div>'); } } }catch(e){}
+  try{ if(typeof pdStats==="function"){ var _pd=pdStats(); if(_pd&&_pd.count){ var _sc={}; (_pd.cycles||[]).forEach(function(c){ (c.symptoms||[]).forEach(function(x){ _sc[x]=(_sc[x]||0)+1; }); }); var _tp=Object.keys(_sc).sort(function(a,b){return _sc[b]-_sc[a];})[0]||""; var _rows='<div class="wrow"><span>평균 주기</span><b>'+_pd.avgCycle+'일</b></div><div class="wrow"><span>평균 기간</span><b>'+_pd.avgPeriod+'일</b></div><div class="wrow"><span>기록</span><b>'+_pd.count+'회</b></div>'+(_tp?'<div class="wrow"><span>가장 잦은 증상</span><b>'+_wEsc(_tp)+'</b></div>':''); var _mins=''; try{ var _mi2=pdMoodInsight(); if(_mi2) _mins='<div class="winsight" style="margin-top:12px">생리 시작 <b>5일 전</b>, 일기 기분이 <b>'+_wEsc(_mi2.topMood)+'</b> <b>'+_mi2.pct+'%</b> ('+_mi2.n+'일)</div>'; }catch(e){} sec.push('<div class="wsec"><div class="wh2">🌙 생리주기</div><div class="wbig2">'+_pd.avgCycle+'<small>일 평균 주기</small></div>'+_rows+_mins+'</div>'); } } }catch(e){}
   // 총 수집 + 경험
   sec.push('<div class="wsec"><div class="wkick">TOTAL COLLECTED</div><div class="wbig">'+S.total+'<small>개 수집</small></div>'
     +'<div class="wgrid"><div class="wstat wacc"><div class="wn">'+S.experienced+'</div><div class="wl">실제로 경험함</div></div>'
