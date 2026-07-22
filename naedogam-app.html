@@ -771,7 +771,7 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
         <svg class="brandmark" width="40" height="30" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#F7F5F0"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#F7F5F0"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#F7F5F0"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#F7F5F0"/></svg>
         <span class="brandwm"><span class="bwm-ko">내도감</span><span class="bwm-en">NAEDOGAM</span></span>
       </button>
-      <span class="mhver">v251</span>
+      <span class="mhver">v252</span>
       <span class="spacer"></span>
       <span class="src-chip" id="srcChip" style="display:none">데모</span>
       <button class="icon-btn" id="searchToggle" type="button" style="display:none">🔍</button>
@@ -874,7 +874,7 @@ const MANIFESTS = {
         o.watched=code.charAt(0)==='W'?"O":""; o.rewatch=code.charAt(1)==='R';
         const jjim=String(o["찜"]==null?"":o["찜"]).trim().toLowerCase();
         o.pick=(jjim==='true'||jjim==='o'||jjim==='1'||jjim==='찜')?true:(code.charAt(1)==='P');
-        { const _rt=(o["TMDB평점"]!=null&&o["TMDB평점"]!=="")?o["평점"]:o["평점"]; o.rating=(_rt==null||_rt==="")?null:(parseFloat(_rt)||null); }
+        { const _rt=(o["TMDB평점"]!=null&&o["TMDB평점"]!=="")?o["TMDB평점"]:o["평점"]; o.rating=(_rt==null||_rt==="")?null:(parseFloat(_rt)||null); }
         o.watchDate=String(o["본날"]==null?"":o["본날"]);
         o.directSearch=String(o["직접검색"]==null?"":o["직접검색"]);
         o.streaming=(typeof o.streaming==="string")?o.streaming.split(/[,\/|]+/).map(x=>x.trim()).filter(Boolean):(Array.isArray(o.streaming)?o.streaming:[]);
@@ -3519,7 +3519,7 @@ function paintMovies(m){
   let rows=movieSearch(state.rows, scope, state.query, state.selectQ);
   rows=applyStatFilter(m, rows);
   const sort=state.sort||"default", asc=state.sortAsc;
-  if(sort==="rating") rows=[...rows].sort((a,b)=>{const d=(parseFloat(a.rating)||0)-(parseFloat(b.rating)||0); return asc?d:-d;});
+  if(sort==="rating") rows=[...rows].sort((a,b)=>{const ra=(parseFloat(a.rating)||parseFloat(a.tmdbRating)||0), rb=(parseFloat(b.rating)||parseFloat(b.tmdbRating)||0); const d=ra-rb; return asc?d:-d;});
   else if(sort==="year") rows=[...rows].sort((a,b)=>{const d=(a.year||0)-(b.year||0); return asc?d:-d;});
   else if(sort==="title") rows=[...rows].sort((a,b)=>{const d=String(a.title||"").localeCompare(String(b.title||""),"ko"); return asc?-d:d;});
 
