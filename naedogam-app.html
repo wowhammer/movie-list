@@ -765,7 +765,7 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
         <svg class="brandmark" width="40" height="30" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#F7F5F0"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#F7F5F0"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#F7F5F0"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#F7F5F0"/></svg>
         <span class="brandwm"><span class="bwm-ko">내도감</span><span class="bwm-en">NAEDOGAM</span></span>
       </button>
-      <span class="mhver">v248</span>
+      <span class="mhver">v249</span>
       <span class="spacer"></span>
       <span class="src-chip" id="srcChip" style="display:none">데모</span>
       <button class="icon-btn" id="searchToggle" type="button" style="display:none">🔍</button>
@@ -4301,6 +4301,7 @@ function wrapCardHTML(S){
   // 페르소나
   sec.push('<div class="wsec"><div class="wpersona"><div class="wem">'+p.em+'</div><div class="wph">당신은<br>“'+p.t+'”</div><div class="wpp">'+p.p+'</div></div></div>');
   var _mb=_mbtiSaved(); if(_mb&&_mb.latest){ sec.push('<div class="wsec"><div class="wh2">🧠 나의 성격유형</div><div class="wmbti"><div class="wmbtiT">'+_mb.latest.type+'</div><div class="wmbtiN">'+_wEsc(_mb.latest.nick)+'</div></div></div>'); }
+  try{ if(typeof pdStats==="function"){ var _pd=pdStats(); if(_pd&&_pd.count){ var _sc={}; (_pd.cycles||[]).forEach(function(c){ (c.symptoms||[]).forEach(function(x){ _sc[x]=(_sc[x]||0)+1; }); }); var _tp=Object.keys(_sc).sort(function(a,b){return _sc[b]-_sc[a];})[0]||""; var _rows='<div class="wrow"><span>평균 주기</span><b>'+_pd.avgCycle+'일</b></div><div class="wrow"><span>평균 기간</span><b>'+_pd.avgPeriod+'일</b></div><div class="wrow"><span>기록</span><b>'+_pd.count+'회</b></div>'+(_tp?'<div class="wrow"><span>가장 잦은 증상</span><b>'+_wEsc(_tp)+'</b></div>':''); sec.push('<div class="wsec"><div class="wh2">🌙 생리주기</div><div class="wbig2">'+_pd.avgCycle+'<small>일 평균 주기</small></div>'+_rows+'</div>'); } } }catch(e){}
   // 총 수집 + 경험
   sec.push('<div class="wsec"><div class="wkick">TOTAL COLLECTED</div><div class="wbig">'+S.total+'<small>개 수집</small></div>'
     +'<div class="wgrid"><div class="wstat wacc"><div class="wn">'+S.experienced+'</div><div class="wl">실제로 경험함</div></div>'
