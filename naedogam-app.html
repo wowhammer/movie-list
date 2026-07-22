@@ -175,6 +175,12 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
   .reco-t{ font-family:var(--serif); font-size:15px; font-weight:700; color:var(--ink); }
   .reco-m{ font-size:12px; color:var(--ink-soft); margin-top:2px; }
   .reco-badge{ display:inline-block; font-size:11px; color:var(--accent); border:1px solid var(--line); border-radius:10px; padding:1px 7px; margin-top:4px; }
+  .reco-item.done{ background:linear-gradient(90deg,#eefaf1,#ffffff 62%); box-shadow:inset 3px 0 0 #34b26b; }
+  .reco-item.done .reco-t{ color:#1f8f4e; }
+  .reco-badge.done{ color:#128a45; border-color:#bfe6cd; background:#eafaf0; font-weight:800; }
+  .reco-badge.part{ color:#b26a00; border-color:#f2dcae; background:#fff6e6; font-weight:700; }
+  .rc-prog{ height:4px; border-radius:999px; background:#ececef; overflow:hidden; margin-top:6px; max-width:150px; }
+  .rc-prog > i{ display:block; height:100%; background:linear-gradient(90deg,#ffcf7a,#f2a54a); border-radius:999px; }
   .reco-foot{ position:sticky; bottom:0; background:var(--card); padding:10px 0 4px; display:flex; gap:8px; }
   .ab-card{ border:1px solid var(--line); border-radius:10px; padding:10px 12px; margin-bottom:8px; font-size:13px; color:var(--ink); }
   .ab-card>div{ font-size:12.5px; color:var(--ink-soft); margin-top:3px; }
@@ -797,7 +803,7 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
         <svg class="brandmark" width="40" height="30" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#F7F5F0"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#F7F5F0"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#F7F5F0"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#F7F5F0"/></svg>
         <span class="brandwm"><span class="bwm-ko">내도감</span><span class="bwm-en">NAEDOGAM</span></span>
       </button>
-      <span class="mhver">v263</span>
+      <span class="mhver">v264</span>
       <span class="spacer"></span>
       <span class="src-chip" id="srcChip" style="display:none">데모</span>
       <button class="icon-btn" id="searchToggle" type="button" style="display:none">🔍</button>
@@ -5119,9 +5125,17 @@ async function recoLists(id){
   if(CONFIG.RECO_SHEET_ID){ try{ const ls=await recoSheetLists(id); if(ls&&ls.length) return ls; }catch(e){} }
   const d=await recoFetch(id); return Array.isArray(d)?d:[d];
 }
-function recoPickList(d, lists, catTitle){
+function recoPickList(d, lists, catTitle, id, hk){
   return new Promise(res=>{
-    const rows=lists.map((l,i)=>`<div class="reco-item" data-i="${i}" style="cursor:pointer"><div class="reco-b"><div class="reco-t">${l.title}</div><div class="reco-m">${l.subtitle||(l.items.length+"개")}</div></div><span class="reco-badge">${l.items.length}개</span></div>`).join("");
+    const rows=lists.map((l,i)=>{
+      const its=l.items||[]; const total=its.length; let got=0;
+      if(hk&&id) its.forEach(it=>{ try{ if(recoIsHave(id,it,hk)) got++; }catch(e){} });
+      const done=total>0 && got>=total;
+      const badge = done ? '<span class="reco-badge done">\u2713 \uB2F4\uAE40</span>'
+        : (got>0 ? '<span class="reco-badge part">'+got+'/'+total+' \uB2F4\uAE40</span>' : '<span class="reco-badge">'+total+'\uAC1C</span>');
+      const prog = (got>0 && !done) ? '<div class="rc-prog"><i style="width:'+Math.round(got/total*100)+'%"></i></div>' : '';
+      return '<div class="reco-item'+(done?' done':'')+'" data-i="'+i+'" style="cursor:pointer"><div class="reco-b"><div class="reco-t">'+l.title+'</div><div class="reco-m">'+(l.subtitle||(total+'\uAC1C'))+'</div>'+prog+'</div>'+badge+'</div>';
+    }).join("");
     d.innerHTML=`<div class="dhead"><h3>${catTitle} · 추천 리스트</h3></div><div class="dbody"><div class="count" style="margin:0 0 8px">담고 싶은 리스트를 고르세요</div><div id="rcPick" style="max-height:60vh;overflow:auto;margin:0 -4px">${rows}</div><button class="btn ghost" id="rcPickClose" style="width:100%;margin-top:12px">닫기</button></div>`;
     d.querySelectorAll("#rcPick .reco-item").forEach(el=>el.onclick=()=>res(lists[+el.dataset.i]));
     const c=$("#rcPickClose"); if(c) c.onclick=()=>{ d.close(); res(null); };
@@ -5136,7 +5150,8 @@ async function openRecoPanel(m){
   catch(e){ d.innerHTML=`<div class="dhead"><h3>추천 리스트</h3></div><div class="dbody"><div class="banner warn">추천 리스트를 불러오지 못했습니다: ${e.message}</div><button class="btn ghost" id="rcClose" style="margin-top:12px">닫기</button></div>`; const c=$("#rcClose"); if(c)c.onclick=()=>d.close(); return; }
   if(!listsAll||!listsAll.length){ d.innerHTML=`<div class="dhead"><h3>추천 리스트</h3></div><div class="dbody"><div class="count">아직 추천 리스트가 없어요.</div><button class="btn ghost" id="rcClose" style="margin-top:12px">닫기</button></div>`; const c=$("#rcClose"); if(c)c.onclick=()=>d.close(); return; }
   let data;
-  if(listsAll.length>1){ data=await recoPickList(d, listsAll, m.title||"추천"); if(!data){ return; } }
+  const _haveC=CACHE[id]||loadPersist(id)||[]; const _hkC=recoHaveKeys(id,_haveC);
+  if(listsAll.length>1){ data=await recoPickList(d, listsAll, m.title||"추천", id, _hkC); if(!data){ return; } }
   else { data=listsAll[0]||{items:[]}; }
   const have=(await sheetSrc().list(id).catch(()=>null))||CACHE[id]||loadPersist(id)||[]; CACHE[id]=have;
   const hk=recoHaveKeys(id, have);
