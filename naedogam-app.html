@@ -785,7 +785,7 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
         <svg class="brandmark" width="40" height="30" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#F7F5F0"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#F7F5F0"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#F7F5F0"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#F7F5F0"/></svg>
         <span class="brandwm"><span class="bwm-ko">내도감</span><span class="bwm-en">NAEDOGAM</span></span>
       </button>
-      <span class="mhver">v258</span>
+      <span class="mhver">v259</span>
       <span class="spacer"></span>
       <span class="src-chip" id="srcChip" style="display:none">데모</span>
       <button class="icon-btn" id="searchToggle" type="button" style="display:none">🔍</button>
@@ -2642,7 +2642,8 @@ function _ndAC(){ if(ndACache) return ndACache; try{ ndACache=JSON.parse(store.g
 function _ndACsave(){ try{ store.setItem("nd.autocover", JSON.stringify(ndACache||{})); }catch(e){} }
 function _ndACset(el,src){ if(!el) return; el.classList.remove("rc-noimg"); el.innerHTML='<img src="'+String(src).replace(/"/g,"&quot;")+'" alt="" loading="lazy">'; }
 async function ndWikiImg(title){ var langs=["ko","en"], t=String(title||"").trim(); if(!t) return ""; for(var i=0;i<langs.length;i++){ try{ var url="https://"+langs[i]+".wikipedia.org/w/api.php?action=query&titles="+encodeURIComponent(t)+"&prop=pageimages&piprop=thumbnail&pithumbsize=500&format=json&redirects=1&origin=*"; var d=await fetch(url).then(function(r){return r.json();}); var pages=(d.query&&d.query.pages)||{}; for(var k in pages){ var th=pages[k].thumbnail; if(th&&th.source) return th.source; } }catch(e){} } return ""; }
-function ndAutoCover(){ try{ var cache=_ndAC(); var io=new IntersectionObserver(function(ents,obs){ ents.forEach(function(e){ if(!e.isIntersecting) return; var el=e.target; obs.unobserve(el); var t=el.getAttribute("data-ac"); if(!t) return; var key="r|"+t; if(cache[key]==="0") return; if(cache[key]){ _ndACset(el,cache[key]); return; } ndWikiImg(t).then(function(src){ cache[key]=src||"0"; _ndACsave(); if(src&&document.body.contains(el)) _ndACset(el,src); }); }); },{rootMargin:"400px"}); document.querySelectorAll(".rc-img[data-ac]").forEach(function(el){ io.observe(el); }); }catch(e){} }
+var AUTO_COVER_CATS={recipes:1, food:1, culture:1, cellar:1};
+function ndAutoCover(){ try{ var cache=_ndAC(); var io=new IntersectionObserver(function(ents,obs){ ents.forEach(function(e){ if(!e.isIntersecting) return; var el=e.target; obs.unobserve(el); var t=el.getAttribute("data-ac"); if(!t) return; var key="r|"+t; if(cache[key]==="0") return; if(cache[key]){ _ndACset(el,cache[key]); return; } ndWikiImg(t).then(function(src){ cache[key]=src||"0"; _ndACsave(); if(src&&document.body.contains(el)) _ndACset(el,src); }); }); },{rootMargin:"400px"}); document.querySelectorAll(".rc-img[data-ac], .thumb[data-ac]").forEach(function(el){ io.observe(el); }); }catch(e){} }
 function renderCard(m, r, no){ if(m.id==="recipes") return recipeCard(r); if(m.id==="books") return bookCard(r); if(m.id==="quote") return quoteCard(r); if(m.id==="travel") return travelCard(r); if(m.id==="albums") return albumCard(r); if(m.id==="scrap") return scrapCard(r); const c=m.card;
   if(c.kind==="wallet") return walletCard(r);
   if(c.kind==="specimen"){ const meta=c.meta(r);
@@ -2653,8 +2654,9 @@ function renderCard(m, r, no){ if(m.id==="recipes") return recipeCard(r); if(m.i
     const flags=(typeof c.flags==="function"?c.flags(r):[]).filter(Boolean)
       .map(f=>`<span class="flag ${f.cls||""}">${f.t}</span>`).join("");
     const _cov=r.cover||r._cover;
+    const _acAttr=(!_cov&&typeof AUTO_COVER_CATS!=="undefined"&&AUTO_COVER_CATS[m.id]&&r.title)?` data-ac="${String(r.title).replace(/&/g,"&amp;").replace(/"/g,"&quot;").replace(/</g,"&lt;")}"`:"";
     const _memo=(c.memo&&r[c.memo])?`<div class="cmemo">${String(r[c.memo]).replace(/</g,"&lt;")}</div>`:"";
-    return `<button class="card catcard" data-id="${r._id}"><span class="thumb">${_cov?`<img src="${_cov}" alt="">`:c.thumb}</span>
+    return `<button class="card catcard" data-id="${r._id}"><span class="thumb"${_acAttr}>${_cov?`<img src="${_cov}" alt="">`:c.thumb}</span>
       <span class="body"><h3>${r.title}${flags?` <span class="titleflags">${flags}</span>`:""}</h3><div class="meta">${meta}</div>${_memo}${(tags||recMiniHTML(r))?`<div class="cbadges">${tags}${recMiniHTML(r)}</div>`:""}</span></button>`; }
   const _kvcol=["#b45309","#0891b2","#16a34a","#9333ea","#dc2626","#0ea5e9"];
   const kv=c.kv.map((col,ci)=>{ const v=r[col.f]; if(v==null||v==="") return ""; const s=(typeof v==="number"?fmt(v):v)+(col.u?` ${col.u}`:"");
@@ -3431,7 +3433,7 @@ function paintDomain(m){   // state.rows를 화면에 그림 (데이터 다시 �
     + (shown.length<total?`<button class="btn ghost" id="moreBtn" style="width:100%;margin-top:10px">더 보기 (${total-shown.length}개)</button>`:"");
   $("#list").querySelectorAll(".card").forEach((b,i)=>{ const r=shown[i]; if(r){ b.onclick=()=>openDetail(m, r); } });
   { const more=$("#moreBtn"); if(more) more.onclick=()=>{ state.page++; paintDomain(m); }; }
-  if(m.id==="recipes"){ try{ ndAutoCover(); }catch(e){} }
+  if(typeof AUTO_COVER_CATS!=="undefined" && AUTO_COVER_CATS[m.id]){ try{ ndAutoCover(); }catch(e){} }
   { const na=$("#nrAdd"); if(na) na.onclick=()=>{ if(m.id==="books"){ openAddBook(); const bq=$("#bq"); if(bq){ bq.value=state.query; bq.dispatchEvent(new Event("input")); } } else openRecordForm(m, null); }; }
   if(hasCal(m)){ _mountViewToggle(m); }
   if(m.id==="scrap" && total){ $("#list").insertAdjacentHTML("afterbegin", '<button class="btn ghost" id="scrapRnd" type="button" style="width:100%;margin-bottom:10px">🎲 다시보기 (랜덤 소환)</button>'); const _sr=$("#scrapRnd"); if(_sr) _sr.onclick=()=>{ const r=shown[Math.floor(Math.random()*shown.length)]; if(r) openDetail(m,r); }; }
