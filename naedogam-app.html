@@ -682,7 +682,7 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
         <svg class="brandmark" width="40" height="30" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#F7F5F0"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#F7F5F0"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#F7F5F0"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#F7F5F0"/></svg>
         <span class="brandwm"><span class="bwm-ko">내도감</span><span class="bwm-en">NAEDOGAM</span></span>
       </button>
-      <span class="mhver">v242</span>
+      <span class="mhver">v243</span>
       <span class="spacer"></span>
       <span class="src-chip" id="srcChip" style="display:none">데모</span>
       <button class="icon-btn" id="searchToggle" type="button" style="display:none">🔍</button>
@@ -1982,6 +1982,7 @@ function renderPicker(m){
   p.querySelectorAll(".chip[data-v]").forEach(b=>b.onclick=()=>{ state.pick=b.dataset.v; loadAndRender(); });
 }
 
+function ndToast(msg){ try{ var t=document.getElementById("ndToast"); if(t) t.remove(); t=document.createElement("div"); t.id="ndToast"; t.textContent=msg; t.style.cssText="position:fixed;left:50%;bottom:calc(120px + env(safe-area-inset-bottom));transform:translateX(-50%);background:#2b2622;color:#fff;padding:12px 20px;border-radius:999px;font-size:14px;font-weight:700;z-index:200;box-shadow:0 6px 22px rgba(0,0,0,.28);opacity:0;transition:opacity .2s ease,transform .2s ease;max-width:88%;text-align:center;pointer-events:none"; document.body.appendChild(t); requestAnimationFrame(function(){ t.style.opacity="1"; t.style.transform="translateX(-50%) translateY(-6px)"; }); setTimeout(function(){ if(!t)return; t.style.opacity="0"; setTimeout(function(){ if(t&&t.parentNode) t.remove(); },250); }, 2000); }catch(e){} }
 function ndInjectRecChip(m){
   var recVals=[...new Set(state.rows.flatMap(function(r){ return String(r.recommend||"").split(/[,\/]+/).map(function(x){return x.trim();}); }).filter(Boolean))];
   var ex=document.getElementById("recchip"); if(ex) ex.remove();
@@ -4783,7 +4784,7 @@ async function openRecoPanel(m){
     CACHE[m.id]=arr; savePersist(m.id, arr);
     if(aBtn) aBtn.textContent=`✓ ${added+merged}개 담음`;
     d.close(); refreshDomain();
-    if(fail) setTimeout(()=>alert(authErr ? `로그인이 만료됐어요. 화면을 새로고침(재연결)한 뒤 다시 담아 주세요.\n(${added}개 담음 · ${fail}개 실패)` : `${added}개 담음${merged?` · ${merged}개 추천병합`:""} · ${fail}개 실패`),120);   /* 성공 시엔 조용히 닫힘 */
+    if(fail) setTimeout(()=>alert(authErr ? `로그인이 만료됐어요. 화면을 새로고침(재연결)한 뒤 다시 담아 주세요.\n(${added}개 담음 · ${fail}개 실패)` : `${added}개 담음${merged?` · ${merged}개 추천병합`:""} · ${fail}개 실패`),120); else if(added+merged>0) ndToast("✓ "+(added+merged)+"개 담았어요"+(merged?" (추천 "+merged+"개 병합)":""));
   }
   render();
 }
