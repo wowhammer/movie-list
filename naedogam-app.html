@@ -214,6 +214,20 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
   .wm-dot{ display:inline-block; width:10px; height:10px; border-radius:50%; vertical-align:-1px; margin-right:2px; }
   .wm-done{ background:#E0483F; } .wm-plan{ background:#f0a83a; }
   #list:has(.tvcard){ display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+  #list:has(.rccard){ display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+  #list .rccard{ display:block; padding:0; overflow:hidden; border:none; border-radius:16px; background:var(--card); box-shadow:0 2px 8px rgba(0,0,0,.08); text-align:left; cursor:pointer; transition:transform .12s ease, box-shadow .15s ease; }
+  #list .rccard:active{ transform:scale(.98); }
+  #list .rccard:hover{ box-shadow:0 5px 16px rgba(0,0,0,.13); }
+  .rccard .rc-img{ width:100%; aspect-ratio:4/3; overflow:hidden; background:linear-gradient(135deg,#fff3e6,#ffe6d2); display:flex; align-items:center; justify-content:center; font-size:46px; }
+  .rccard .rc-img img{ width:100%; height:100%; object-fit:cover; display:block; }
+  .rccard .rc-noimg{ color:#e8935c; }
+  .rccard .rc-body{ padding:11px 12px 13px; }
+  .rccard .rc-title{ font-size:15px; font-weight:800; line-height:1.25; color:var(--ink); word-break:keep-all; }
+  .rccard .rc-meta{ font-size:12px; color:var(--ink-soft); margin-top:5px; }
+  .rccard .rc-flags{ display:flex; gap:5px; margin-top:8px; flex-wrap:wrap; }
+  .rccard .rc-star{ background:#fff4e0; color:#d9770a; font-size:11px; font-weight:800; padding:2px 8px; border-radius:999px; }
+  .rccard .rc-jjim{ background:#ffe3ea; color:#e03e63; font-size:11px; font-weight:800; padding:2px 8px; border-radius:999px; }
+  .rccard .rc-status{ background:var(--line-soft); color:var(--ink-soft); font-size:11px; font-weight:700; padding:2px 8px; border-radius:999px; }
   #list .tvcard{ display:block; padding:0; overflow:hidden; border:none; border-radius:14px; background:var(--card); box-shadow:0 1px 4px rgba(0,0,0,.09); text-align:left; cursor:pointer; }
   .tvcard .tv-cover{ position:relative; width:100%; aspect-ratio:16/10; background:#e9e7df; }
   .tvcard .tv-cover img{ width:100%; height:100%; object-fit:cover; display:block; }
@@ -771,7 +785,7 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
         <svg class="brandmark" width="40" height="30" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#F7F5F0"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#F7F5F0"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#F7F5F0"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#F7F5F0"/></svg>
         <span class="brandwm"><span class="bwm-ko">내도감</span><span class="bwm-en">NAEDOGAM</span></span>
       </button>
-      <span class="mhver">v252</span>
+      <span class="mhver">v253</span>
       <span class="spacer"></span>
       <span class="src-chip" id="srcChip" style="display:none">데모</span>
       <button class="icon-btn" id="searchToggle" type="button" style="display:none">🔍</button>
@@ -2613,7 +2627,14 @@ function scrapCard(r){
 }
 function srcMiniHTML(r){ var v=r.source==null?"":String(r.source).trim(); return v?'<span class="reclbl">출처</span><span class="rbadge">'+v.replace(/</g,"&lt;")+'</span>':""; }
 function recMiniHTML(r){ var l=String(r.recommend||"").split(/[\/,]+/).map(function(x){return x.trim();}).filter(Boolean); var _r=l.length?('<span class="reclbl">추천</span>'+l.map(function(t){return '<span class="rbadge">'+String(t).replace(/</g,"&lt;")+'</span>';}).join("")):""; return _r+srcMiniHTML(r); }
-function renderCard(m, r, no){ if(m.id==="books") return bookCard(r); if(m.id==="quote") return quoteCard(r); if(m.id==="travel") return travelCard(r); if(m.id==="albums") return albumCard(r); if(m.id==="scrap") return scrapCard(r); const c=m.card;
+function recipeCard(r){ var esc=function(x){return String(x==null?"":x).replace(/</g,"&lt;");};
+  var cov=r.cover||r._cover;
+  var img=cov?('<div class="rc-img"><img src="'+String(cov).replace(/"/g,"&quot;")+'" alt="" loading="lazy"></div>'):'<div class="rc-img rc-noimg">🍳</div>';
+  var meta=[r.kind,(r.time?r.time+"분":""),r.level].filter(Boolean).map(esc).join(" · ");
+  var rating=(r.rating!=null&&r.rating!=="")?'<span class="rc-star">★ '+esc(r.rating)+'</span>':"";
+  var status=(r.status==="찜")?'<span class="rc-jjim">찜</span>':(r.status?'<span class="rc-status">'+esc(r.status)+'</span>':"");
+  return '<button class="card rccard" data-id="'+String(r._id).replace(/"/g,"&quot;")+'">'+img+'<div class="rc-body"><div class="rc-title">'+esc(r.title)+'</div>'+(meta?'<div class="rc-meta">'+meta+'</div>':"")+((rating||status)?'<div class="rc-flags">'+rating+status+'</div>':"")+'</div></button>'; }
+function renderCard(m, r, no){ if(m.id==="recipes") return recipeCard(r); if(m.id==="books") return bookCard(r); if(m.id==="quote") return quoteCard(r); if(m.id==="travel") return travelCard(r); if(m.id==="albums") return albumCard(r); if(m.id==="scrap") return scrapCard(r); const c=m.card;
   if(c.kind==="wallet") return walletCard(r);
   if(c.kind==="specimen"){ const meta=c.meta(r);
     const traw=r[c.tags]; const tarr=Array.isArray(traw)?traw:(traw==null||traw===""?[]:String(traw).split(",").map(x=>x.trim()).filter(Boolean));   // 쉼표 문자열도 개별 태그로
