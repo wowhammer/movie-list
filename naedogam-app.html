@@ -797,7 +797,7 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
         <svg class="brandmark" width="40" height="30" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#F7F5F0"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#F7F5F0"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#F7F5F0"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#F7F5F0"/></svg>
         <span class="brandwm"><span class="bwm-ko">내도감</span><span class="bwm-en">NAEDOGAM</span></span>
       </button>
-      <span class="mhver">v260</span>
+      <span class="mhver">v261</span>
       <span class="spacer"></span>
       <span class="src-chip" id="srcChip" style="display:none">데모</span>
       <button class="icon-btn" id="searchToggle" type="button" style="display:none">🔍</button>
@@ -1736,15 +1736,6 @@ const CUSTOM_HDR = ["_id","제목","아이콘","탭","정의"];
 const CAT_EMOJIS = ["✨","🌷","🌸","🌼","🌿","🍀","🌈","☕","🍰","🧁","🍓","🍷","🥂","🍸","🎬","🎧","🎨","📖","📸","✈️","🏝️","🏔️","🌙","⭐","🪴","🌺","💐","🐱","🐶","🦋","🐳","🐰","🎀","🎁","💎","🧸","🕯️","🫧"];
 /* ── 카테고리 템플릿(완성형 예시) — v134. 고르면 빌더가 자동으로 채워짐. ── */
 const CAT_TEMPLATES = [
-  { title:"위스키", icon:"🥃", fields:[
-    {label:"이름",type:"text",title:true},{label:"증류소",type:"text"},
-    {label:"종류",type:"select",options:["싱글몰트","블렌디드","버번","라이","기타"]},
-    {label:"도수",type:"number"},{label:"가격",type:"number",money:true},
-    {label:"구입일",type:"date"},{label:"평점",type:"rating"},{label:"사진",type:"image"},{label:"메모",type:"textarea"} ] },
-  { title:"와인", icon:"🍷", fields:[
-    {label:"이름",type:"text",title:true},{label:"품종",type:"text"},{label:"국가",type:"text"},
-    {label:"빈티지",type:"number"},{label:"가격",type:"number",money:true},{label:"마신날",type:"date"},
-    {label:"평점",type:"rating"},{label:"사진",type:"image"},{label:"메모",type:"textarea"} ] },
   { title:"향수", icon:"🧴", fields:[
     {label:"이름",type:"text",title:true},{label:"브랜드",type:"text"},
     {label:"계열",type:"select",options:["시트러스","플로럴","우디","오리엔탈","프레시","기타"]},
@@ -1763,13 +1754,6 @@ const CAT_TEMPLATES = [
   { title:"운동기록", icon:"🏋️", fields:[
     {label:"운동",type:"text",title:true},{label:"날짜",type:"date"},{label:"부위",type:"tags"},
     {label:"세트",type:"number"},{label:"시간(분)",type:"number"},{label:"메모",type:"textarea"} ] },
-  { title:"건강검진", icon:"🩺", fields:[
-    {label:"항목",type:"text",title:true},{label:"검사일",type:"date"},{label:"수치",type:"text"},
-    {label:"정상범위",type:"text"},{label:"병원",type:"text"},{label:"메모",type:"textarea"} ] },
-  { title:"약·영양제", icon:"💊", fields:[
-    {label:"이름",type:"text",title:true},
-    {label:"종류",type:"select",options:["처방약","영양제","한약","기타"]},
-    {label:"복용시작",type:"date"},{label:"복용법",type:"text"},{label:"처방·구입처",type:"text"},{label:"메모",type:"textarea"} ] },
   { title:"반려간식", icon:"🦴", fields:[
     {label:"이름",type:"text",title:true},{label:"브랜드",type:"text"},{label:"종류",type:"text"},
     {label:"구입일",type:"date"},{label:"기호도",type:"rating"},{label:"사진",type:"image"},{label:"메모",type:"textarea"} ] },
@@ -1778,7 +1762,27 @@ const CAT_TEMPLATES = [
     {label:"기념일",type:"date"},{label:"상태",type:"select",options:["아이디어","구입완료","전달완료"]},{label:"메모",type:"textarea"} ] },
   { title:"맛집위시", icon:"🍽️", fields:[
     {label:"가게명",type:"text",title:true},{label:"지역",type:"text"},{label:"메뉴",type:"text"},
-    {label:"가고싶은이유",type:"text"},{label:"가봄",type:"bool"},{label:"사진",type:"image"},{label:"메모",type:"textarea"} ] }
+    {label:"가고싶은이유",type:"text"},{label:"가봄",type:"bool"},{label:"사진",type:"image"},{label:"메모",type:"textarea"} ] },
+  { title:"수제맥주", icon:"🍺", fields:[
+    {label:"이름",type:"text",title:true},{label:"양조장",type:"text"},
+    {label:"스타일",type:"select",options:["IPA","라거","에일","스타우트","위트","사워","기타"]},
+    {label:"도수",type:"number"},{label:"구입처",type:"text"},{label:"평점",type:"rating"},{label:"사진",type:"image"},{label:"메모",type:"textarea"} ] },
+  { title:"칵테일", icon:"🍸", fields:[
+    {label:"이름",type:"text",title:true},{label:"베이스",type:"select",options:["진","보드카","럼","위스키","데킬라","기타"]},
+    {label:"재료",type:"tags"},{label:"마신곳",type:"text"},{label:"평점",type:"rating"},{label:"사진",type:"image"},{label:"메모",type:"textarea"} ] },
+  { title:"스니커즈", icon:"👟", fields:[
+    {label:"모델명",type:"text",title:true},{label:"브랜드",type:"text"},{label:"컬러",type:"text"},
+    {label:"사이즈",type:"text"},{label:"구입가",type:"number",money:true},{label:"구입일",type:"date"},{label:"사진",type:"image"},{label:"메모",type:"textarea"} ] },
+  { title:"캔들·디퓨저", icon:"🕯️", fields:[
+    {label:"이름",type:"text",title:true},{label:"브랜드",type:"text"},{label:"향",type:"text"},
+    {label:"구입일",type:"date"},{label:"평점",type:"rating"},{label:"사진",type:"image"},{label:"메모",type:"textarea"} ] },
+  { title:"캠핑기어", icon:"⛺", fields:[
+    {label:"이름",type:"text",title:true},{label:"종류",type:"select",options:["텐트","침낭","의자","테이블","화로","조리","기타"]},
+    {label:"브랜드",type:"text"},{label:"구입가",type:"number",money:true},{label:"구입일",type:"date"},{label:"사진",type:"image"},{label:"메모",type:"textarea"} ] },
+  { title:"뷰티·화장품", icon:"💄", fields:[
+    {label:"제품명",type:"text",title:true},{label:"브랜드",type:"text"},
+    {label:"종류",type:"select",options:["스킨케어","베이스","립","아이","향수","기타"]},
+    {label:"구입일",type:"date"},{label:"평점",type:"rating"},{label:"재구매",type:"bool"},{label:"사진",type:"image"},{label:"메모",type:"textarea"} ] }
 ];
 function expandCustomManifest(spec){
   const fields=(spec.fields||[]).map((f,i)=>{
