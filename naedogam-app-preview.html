@@ -82,7 +82,7 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
   .brandwm{ display:flex; flex-direction:column; align-items:flex-start; line-height:1; }
   .bwm-ko{ font-family:var(--sans); font-weight:800; font-size:20px; letter-spacing:.5px; color:#F7F5F0; }
   .bwm-en{ font-family:var(--mono); font-size:8.5px; letter-spacing:.32em; color:#6f6a62; margin-top:3px; }
-  .mhver{ font-family:var(--mono); font-size:15px; font-weight:800; color:#E0483F; align-self:flex-end; margin:0 0 3px 5px; letter-spacing:.02em; background:rgba(224,72,63,.10); padding:1px 6px; border-radius:6px; }   /* 배포전: 적용여부 확인용으로 크게 (출시 때 축소) */
+  .mhver{ font-family:var(--mono); font-size:11px; font-weight:800; color:#E0483F; align-self:flex-end; margin:0 0 3px 5px; letter-spacing:.02em; background:rgba(224,72,63,.10); padding:1px 6px; border-radius:6px; }   /* 배포전: 적용여부 확인용으로 크게 (출시 때 축소) */
   .mh-row .icon-btn{ background:transparent; border-color:#47413a; color:#cfcbc3; flex-shrink:0; }
   .brandbtn{ flex-shrink:0; }
   .mh-row .icon-btn:hover{ border-color:#F7F5F0; color:#F7F5F0; }
@@ -968,6 +968,15 @@ body.home-dark .bnav-i.on .bnav-ic svg{ stroke:#f6eddf !important; }
 [data-theme="dark"] .sccard .sc-cover,
 [data-theme="dark"] .tvcard .tv-cover{ background:var(--line-soft); }
 
+
+/* === 서브 상단 탭 = 홈 스타일 통일(둥근 필) + 카테고리 색(#9) === */
+.tabs{ border:1px solid var(--line); border-radius:20px; background:var(--card); padding:6px; gap:3px; margin:2px 0 12px; box-shadow:0 8px 20px rgba(0,0,0,.16); }
+.tabs .tab{ flex-direction:column; align-items:center; gap:4px; border:0 !important; border-radius:14px; padding:7px 11px 6px; color:var(--ink-soft); }
+.tabs .tab .tabname{ font-size:12px; font-weight:700; letter-spacing:-.03em; white-space:nowrap; }
+.tabs .tab[aria-selected="true"]{ color:#fff6e8; font-weight:700; box-shadow:0 4px 12px rgba(0,0,0,.25); }
+.tabs .tab[aria-selected="true"] svg{ stroke:#fff6e8 !important; color:#fff6e8 !important; opacity:1; }
+.tabs .tab[aria-selected="true"] .tabemo,.tabs .tab[aria-selected="true"] .tabico{ opacity:1; }
+
 </style>
 <script>try{var _t=localStorage.getItem("app:nd.theme")||localStorage.getItem("nd.theme");document.documentElement.setAttribute("data-theme","dark");}catch(e){}</script>
 <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@latest/dist/web/static/pretendard.min.css">
@@ -980,7 +989,7 @@ body.home-dark .bnav-i.on .bnav-ic svg{ stroke:#f6eddf !important; }
         <svg class="brandmark" width="40" height="30" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#F7F5F0"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#F7F5F0"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#F7F5F0"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#F7F5F0"/></svg>
         <span class="brandwm"><span class="bwm-ko">내도감</span><span class="bwm-en">NAEDOGAM</span></span>
       </button>
-      <span class="mhver">v269β</span>
+      <span class="mhver">v270β</span>
       <span class="spacer"></span>
       <span class="src-chip" id="srcChip" style="display:none">데모</span>
       <button class="icon-btn" id="searchToggle" type="button" style="display:none">🔍</button>
@@ -2334,7 +2343,7 @@ function tabIco(id, m){ const ic=ND_ICONS[id]; const _c=ND_COLORS[id]||"currentC
   return ic ? `<svg class="tabico" style="color:${_c}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="${ic}"/></svg>`
             : `<span class="tabemo">${m.icon}</span>`; }
 function renderTabs(){ const tw=$("#tabs"); tw.innerHTML=getActive().map(id=>{ const m=MANIFESTS[id]; if(!m) return "";
-  return `<button class="tab" role="tab" data-id="${id}" aria-selected="${id===state.domain}">${tabIco(id,m)} ${m.title}</button>`; }).join("");
+  const _on=id===state.domain; const _st=_on?` style="background:${ND_COLORS[id]||"#48423a"};color:#fff6e8;border-color:transparent"`:""; return `<button class="tab${_on?" tab-on":""}" role="tab" data-id="${id}" aria-selected="${_on}"${_st}>${tabIco(id,m)}<span class="tabname">${m.title}</span></button>`; }).join("");
   const _sel=tw.querySelector('.tab[aria-selected="true"]'); if(_sel){ tw.scrollLeft=Math.max(0,_sel.offsetLeft-(tw.clientWidth-_sel.offsetWidth)/2); } }
 function renderStats(m, rows){
   const isMovie = m.id==="movies" && !CONFIG.DEPLOY;
@@ -5527,15 +5536,15 @@ async function boot(){
   if(_tt){ _tt.onclick=()=>window.scrollTo({top:0,behavior:"smooth"});
     const _upd=()=>_tt.classList.toggle("show", (window.scrollY||document.documentElement.scrollTop||0)>360);
     window.addEventListener("scroll", _upd, {passive:true}); _upd(); }
-  document.addEventListener("wheel", e=>{ const row=e.target.closest&&e.target.closest(".scope,.picker,.tabs,.sort-btns"); if(row && row.scrollWidth>row.clientWidth+2 && e.deltaY){ row.scrollLeft+=e.deltaY; e.preventDefault(); } }, {passive:false});
-  (function(){ let el=null,sx=0,sl=0,moved=false; const SEL=".scope,.picker,.sort-btns,.tabs";
+  document.addEventListener("wheel", e=>{ const row=e.target.closest&&e.target.closest(".scope,.picker,.tabs,.sort-btns,.ndh-tabs"); if(row && row.scrollWidth>row.clientWidth+2 && e.deltaY){ row.scrollLeft+=e.deltaY; e.preventDefault(); } }, {passive:false});
+  (function(){ let el=null,sx=0,sl=0,moved=false; const SEL=".scope,.picker,.sort-btns,.tabs,.ndh-tabs";
     document.addEventListener("mousedown",e=>{ const row=e.target.closest&&e.target.closest(SEL); if(row&&row.scrollWidth>row.clientWidth+2){ el=row; sx=e.pageX; sl=row.scrollLeft; moved=false; el.classList.add("nd-drag"); } });
     document.addEventListener("mousemove",e=>{ if(!el) return; const dx=e.pageX-sx; if(Math.abs(dx)>4) moved=true; el.scrollLeft=sl-dx; });
     document.addEventListener("mouseup",()=>{ if(!el) return; const wm=moved; el.classList.remove("nd-drag"); el=null; if(wm){ const kill=ev=>{ ev.stopPropagation(); ev.preventDefault(); document.removeEventListener("click",kill,true); }; document.addEventListener("click",kill,true); setTimeout(()=>document.removeEventListener("click",kill,true),50); } });
   })();
   /* 모바일: 스와이프로 카테고리 이동 (왼쪽=다음, 오른쪽=이전/홈) */
   (function(){ let x0=null,y0=null,t0=0,skip=false;
-    document.addEventListener("touchstart",e=>{ if(e.touches.length!==1){ skip=true; return; } const t=e.touches[0]; x0=t.clientX; y0=t.clientY; t0=Date.now(); skip=!!(e.target.closest&&e.target.closest(".scope,.picker,.tabs,.sort-btns,dialog")); }, {passive:true});
+    document.addEventListener("touchstart",e=>{ if(e.touches.length!==1){ skip=true; return; } const t=e.touches[0]; x0=t.clientX; y0=t.clientY; t0=Date.now(); skip=!!(e.target.closest&&e.target.closest(".scope,.picker,.tabs,.sort-btns,.ndh-tabs,dialog")); }, {passive:true});
     document.addEventListener("touchend",e=>{ if(skip||x0==null){ x0=null; return; } const t=e.changedTouches[0]; const dx=t.clientX-x0, dy=t.clientY-y0, dt=Date.now()-t0; x0=null;
       if(!(dt<800 && Math.abs(dx)>50 && Math.abs(dx)>Math.abs(dy)*1.15 && Math.abs(dy)<80)) return;
       const act=getActive(); if(!act.length) return;
