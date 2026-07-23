@@ -80,12 +80,12 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
   .brandbtn{ display:flex; align-items:center; gap:9px; background:none; border:none; padding:0; cursor:pointer; }
   .brandmark{ display:block; flex-shrink:0; }
   .brandwm{ display:flex; flex-direction:column; align-items:flex-start; line-height:1; }
-  .bwm-ko{ font-family:var(--sans); font-weight:800; font-size:20px; letter-spacing:.5px; color:#F7F5F0; }
-  .bwm-en{ font-family:var(--mono); font-size:8.5px; letter-spacing:.32em; color:#6f6a62; margin-top:3px; }
+  .bwm-ko{ font-family:var(--sans); font-weight:800; font-size:20px; letter-spacing:.5px; color:#f6eddf; }
+  .bwm-en{ font-family:var(--mono); font-size:8.5px; letter-spacing:.32em; color:#c9bcac; margin-top:3px; }
   .mhver{ font-family:var(--mono); font-size:11px; font-weight:800; color:#E0483F; align-self:flex-end; margin:0 0 3px 5px; letter-spacing:.02em; background:rgba(224,72,63,.10); padding:1px 6px; border-radius:6px; }   /* 배포전: 적용여부 확인용으로 크게 (출시 때 축소) */
   .mh-row .icon-btn{ background:transparent; border-color:#47413a; color:#cfcbc3; flex-shrink:0; }
   .brandbtn{ flex-shrink:0; }
-  .mh-row .icon-btn:hover{ border-color:#F7F5F0; color:#F7F5F0; }
+  .mh-row .icon-btn:hover{ border-color:#f6eddf; color:#f6eddf; }
   #syncBtn{ font-size:18px; font-weight:700; line-height:1; padding-top:4px; padding-bottom:4px; }
   .icon-btn.spin{ animation:ndspin .8s linear infinite; pointer-events:none; }
   @keyframes ndspin{ to{ transform:rotate(360deg); } }
@@ -473,7 +473,7 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
   .rf-seg{ display:flex; gap:6px; flex-wrap:wrap; margin-top:2px; }
   .rf-segbtn.on{ background:var(--ink); color:var(--paper); border-color:var(--ink); }
   .home-search-wrap{ margin:10px 0 2px; }
-  .home-search{ width:100%; box-sizing:border-box; font-size:15px; padding:11px 14px; border:1px solid #47413a; border-radius:12px; background:#201c16; color:#F7F5F0; }
+  .home-search{ width:100%; box-sizing:border-box; font-size:15px; padding:11px 14px; border:1px solid #47413a; border-radius:12px; background:#201c16; color:#f6eddf; }
   .home-search::placeholder{ color:#8a8a8f; }
   #homeSearchRes{ margin:6px 0 10px; }
   .hs-group{ margin:8px 0; }
@@ -1009,6 +1009,12 @@ body.home-dark .bnav-i.on .bnav-ic svg{ stroke:#f6eddf !important; }
 .ndhome .nc-glyph .ci-svg{ width:38px; height:38px; }
 .ndhome .collection-card .coll-glyph .ci-svg{ width:40px; height:40px; }
 
+
+body{ background:radial-gradient(circle at 50% -10%, rgba(102,78,57,.16), transparent 560px), linear-gradient(180deg,#1b1916,#0d0d0c 100%) !important; }
+.masthead{ padding-top:14px !important; }
+.masthead .mh-row{ padding:2px 2px 16px !important; gap:11px; }
+.brandbtn{ gap:11px !important; }
+
 </style>
 <script>try{var _t=localStorage.getItem("app:nd.theme")||localStorage.getItem("nd.theme");document.documentElement.setAttribute("data-theme","dark");}catch(e){}</script>
 <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@latest/dist/web/static/pretendard.min.css">
@@ -1018,10 +1024,10 @@ body.home-dark .bnav-i.on .bnav-ic svg{ stroke:#f6eddf !important; }
   <header class="masthead">
     <div class="mh-row">
       <button id="brandBtn" type="button" class="brandbtn" aria-label="홈"><!-- Naedogam DEPLOY-build · v141 토큰캐시 (구글 로그인 + 각자 시트 · 범용 분야 · 영화/차계부 제외) -->
-        <svg class="brandmark" width="40" height="30" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#F7F5F0"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#F7F5F0"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#F7F5F0"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#F7F5F0"/></svg>
+        <svg class="brandmark" width="40" height="30" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg>
         <span class="brandwm"><span class="bwm-ko">내도감</span><span class="bwm-en">NAEDOGAM</span></span>
       </button>
-      <span class="mhver">v272β</span>
+      <span class="mhver">v273β</span>
       <span class="spacer"></span>
       <span class="src-chip" id="srcChip" style="display:none">데모</span>
       <button class="icon-btn" id="searchToggle" type="button" style="display:none">🔍</button>
@@ -1061,10 +1067,10 @@ body.home-dark .bnav-i.on .bnav-ic svg{ stroke:#f6eddf !important; }
 <dialog id="rec"></dialog>
 <dialog id="dash"></dialog>
 <dialog id="catbuilder"></dialog>
-<div id="gate" style="display:none;position:fixed;inset:0;z-index:200;background:#201c16;color:#F7F5F0;flex-direction:column;align-items:center;justify-content:center;padding:24px;text-align:center;font-family:var(--sans)">
-  <svg width="66" height="58" viewBox="18 26 70 56" aria-hidden="true" style="margin-bottom:10px"><rect x="22" y="46" width="11" height="32" rx="4" fill="#F7F5F0"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#F7F5F0"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#F7F5F0"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#F7F5F0"/></svg>
+<div id="gate" style="display:none;position:fixed;inset:0;z-index:200;background:#201c16;color:#f6eddf;flex-direction:column;align-items:center;justify-content:center;padding:24px;text-align:center;font-family:var(--sans)">
+  <svg width="66" height="58" viewBox="18 26 70 56" aria-hidden="true" style="margin-bottom:10px"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg>
   <div style="font-size:21px;font-weight:700;margin-bottom:8px">내도감</div>
-  <div style="font-size:13px;color:#a1a1aa;line-height:1.65;max-width:300px;margin-bottom:22px">구글로 로그인하면 <b style="color:#F7F5F0">내 구글드라이브에 내 시트</b>가 자동으로 만들어지고, 모든 기록이 거기 <b style="color:#F7F5F0">영원히</b> 저장됩니다. (앱이 만든 파일만 접근)</div>
+  <div style="font-size:13px;color:#a1a1aa;line-height:1.65;max-width:300px;margin-bottom:22px">구글로 로그인하면 <b style="color:#f6eddf">내 구글드라이브에 내 시트</b>가 자동으로 만들어지고, 모든 기록이 거기 <b style="color:#f6eddf">영원히</b> 저장됩니다. (앱이 만든 파일만 접근)</div>
   <button id="gateBtn" style="background:#E0483F;color:#fff;border:none;border-radius:10px;padding:13px 26px;font-size:15px;font-weight:600;cursor:pointer">구글로 시작하기</button>
   <div id="gateMsg" style="font-size:12px;color:#a1a1aa;margin-top:14px;min-height:16px;max-width:300px"></div>
 </div>
@@ -2076,7 +2082,7 @@ function openDomain(id){ if(id==="mbti"){ openMbti(); return; } if(id==="period"
 
 /* 홈: 켜둔 카테고리를 카드로. 건수는 한 번 열어본 분야만 표시(홈을 빠르게 유지). */
 function ndDeep(h){ if(typeof h!=="string"||h.charAt(0)!=="#") h="#8a7a6a"; var n=parseInt(h.slice(1),16),r=(n>>16)&255,g=(n>>8)&255,b=n&255; function d(x,f){return Math.round(x*f);} return "linear-gradient(145deg,rgb("+d(r,.5)+","+d(g,.5)+","+d(b,.5)+"),rgb("+d(r,.28)+","+d(g,.28)+","+d(b,.28)+"))"; }
-var ND_LOGO_HTML='<div class="ndh-brand"><svg width="47" height="35" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg><div class="ndh-wm"><b>내도감</b><small>NAEDOGAM</small></div><span class="mhver ndh-ver">v272β</span></div><button class="ndh-sync" type="button" title="동기화" aria-label="동기화" onclick="try{syncNow()}catch(e){}">↻</button>';
+var ND_LOGO_HTML='<div class="ndh-brand"><svg width="47" height="35" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg><div class="ndh-wm"><b>내도감</b><small>NAEDOGAM</small></div><span class="mhver ndh-ver">v273β</span></div><button class="ndh-sync" type="button" title="동기화" aria-label="동기화" onclick="try{syncNow()}catch(e){}">↻</button>';
 /* 홈 카드 크기: wide(넓게=한 줄 전체) · half(보통=한 줄 2개) · mini(작게=하단 3칸). 기본값=프리셋 */
 var ND_PRESET_SIZE={running:"wide",food:"wide",recipes:"wide",movies:"half",books:"half",period:"half",diary:"half",travel:"half",mountains:"half",culture:"half",albums:"half",cellar:"half",scrap:"half",wish:"half",gift:"half",pet:"half"};
 function getHomeSizes(){ try{ return JSON.parse(store.getItem("nd.homesize")||"{}")||{}; }catch(e){ return {}; } }
