@@ -805,7 +805,7 @@ body.home-dark .bnav-i.on{ color:#f6eddf !important; }
 body.home-dark .bnav-i.on .bnav-ic svg{ stroke:#f6eddf !important; }
 
 .ndhome{ color:#f6eddf; font-family:Pretendard,"Apple SD Gothic Neo","Noto Sans KR",system-ui,-apple-system,sans-serif;
-  width:min(100%,460px); margin:0 auto; padding:14px 18px calc(90px + env(safe-area-inset-bottom)); -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility; }
+  width:min(100%,460px); margin:0 auto; padding:14px 18px calc(116px + env(safe-area-inset-bottom)); -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility; }
 .ndhome .emj{ font-size:20px; }
 .ndhome .ci-svg{ width:22px; height:22px; }
 .ndh-top{ display:flex; align-items:center; justify-content:space-between; padding:2px 2px 16px; }
@@ -835,6 +835,7 @@ body.home-dark .bnav-i.on .bnav-ic svg{ stroke:#f6eddf !important; }
 .ndhome .hero .metric b{ font-size:42px; }
 .ndhome .fan{ position:relative; width:128px; height:78px; margin-left:auto; }
 .ndhome .fan span{ position:absolute; top:7px; width:48px; height:68px; border:1px solid rgba(255,255,255,.15); border-radius:8px; background-size:cover; background-position:center; background-color:#4a4038; box-shadow:0 10px 17px rgba(0,0,0,.32); }
+.ndhome .fan.fan-empty span{ background-color:transparent; border:1.5px dashed rgba(255,255,255,.16); box-shadow:none; }
 .ndhome .fan span:nth-child(1){ left:6px; transform:rotate(-11deg); }
 .ndhome .fan span:nth-child(2){ left:43px; }
 .ndhome .fan span:nth-child(3){ left:79px; transform:rotate(9deg); }
@@ -854,13 +855,14 @@ body.home-dark .bnav-i.on .bnav-ic svg{ stroke:#f6eddf !important; }
 .ndhome .bar{ min-height:7px; border-radius:7px; background:linear-gradient(180deg,#8fb9d0,#5484a0); box-shadow:inset 0 1px 0 rgba(255,255,255,.16); }
 .ndhome .days{ color:#e3d8ca; font-size:11px; font-weight:680; line-height:1; text-align:center; }
 
-.ndhome .mini-card{ display:grid; grid-template-columns:minmax(0,1fr) 60px; align-items:center; min-height:108px; padding:15px; }
+.ndhome .mini-card{ display:grid; grid-template-columns:minmax(0,1fr) 48px; gap:8px; align-items:center; min-height:108px; padding:15px 14px; }
 .ndhome .mini-card .nc-main{ min-width:0; overflow:hidden; }
+.ndhome .mini-card h3{ white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 .ndhome .mini-card .metric b{ font-size:34px; }
-.ndhome .cycle .metric{ white-space:normal; }
-.ndhome .cycle .metric b{ font-size:24px; line-height:1.16; }
-.ndhome .moon{ position:relative; width:52px; height:52px; border-radius:50%; background:linear-gradient(145deg,#da665d,#a73037); box-shadow:0 10px 20px rgba(36,6,11,.26); flex:0 0 auto; }
-.ndhome .moon::after{ content:""; position:absolute; top:0; right:-1px; width:39px; height:39px; border-radius:50%; background:#3b1519; }
+.ndhome .cycle .metric b{ font-size:19px; line-height:1.1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:100%; }
+.ndhome .moon{ position:relative; width:46px; height:46px; border-radius:50%; background:linear-gradient(145deg,#da665d,#a73037); box-shadow:0 10px 20px rgba(36,6,11,.26); flex:0 0 auto; }
+.ndhome .moon::after{ content:""; position:absolute; top:0; right:-1px; width:34px; height:34px; border-radius:50%; background:#3b1519; }
+.ndhome .food .nc-glyph{ justify-self:end; align-self:center; }
 .ndhome .pen{ width:46px; height:46px; color:#d9ccbf; opacity:.86; transform:rotate(-14deg); }
 .ndhome .pen svg{ width:100%; height:100%; fill:none; stroke:currentColor; stroke-width:1.6; stroke-linecap:round; stroke-linejoin:round; }
 
@@ -1979,7 +1981,7 @@ function renderHome(){
 
   const collHTML=m=>{ const vis=coversOf(m).length?`<div class="covers">${coverCells(m,"cover")}</div>`:`<span class="nc-glyph coll-glyph">${iconOf(m)}</span>`; return `<button class="card collection-card${zeroOf(m)}" data-id="${m.id}" ${bg(m)}><div><h3>${m.title}</h3>${metric(m)}</div>${vis}</button>`; };
   const runningHTML=m=>{ const H=[48,86,37,72,10,60,46]; const bars=H.map(h=>`<span class="bar" style="height:${h}%${h<12?";opacity:.3":""}"></span>`).join(""); const days=["일","월","화","수","목","금","토"].map(d=>`<span>${d}</span>`).join(""); const rc=recentTitles(m,1); return `<button class="card running${zeroOf(m)}" data-id="${m.id}" ${bg(m)}><div class="nc-main"><h3>${m.title}</h3>${metric(m)}${rc?`<p class="helper">최근: ${rc.replace(/</g,"&lt;")}</p>`:""}</div><div class="run-chart"><div class="bars">${bars}</div><div class="days">${days}</div></div></button>`; };
-  const foodHTML=m=>{ const rc=recentTitles(m,2); return `<button class="card food${zeroOf(m)}" data-id="${m.id}" ${bg(m)}><div class="nc-main"><h3>${m.title}</h3>${metric(m)}${rc?`<p class="helper">최근: ${rc.replace(/</g,"&lt;")}</p>`:""}</div><div class="food-photos">${coverCells(m,"food-photo")}</div></button>`; };
+  const foodHTML=m=>{ const rc=recentTitles(m,2); const vis=coversOf(m).length?`<div class="food-photos">${coverCells(m,"food-photo")}</div>`:`<span class="nc-glyph coll-glyph">${iconOf(m)}</span>`; return `<button class="card food${zeroOf(m)}" data-id="${m.id}" ${bg(m)}><div class="nc-main"><h3>${m.title}</h3>${metric(m)}${rc?`<p class="helper">최근: ${rc.replace(/</g,"&lt;")}</p>`:""}</div>${vis}</button>`; };
   const cycleHTML=m=>`<button class="card mini-card cycle${zeroOf(m)}" data-id="${m.id}" ${bg(m)}><div class="nc-main"><h3>${m.title}</h3><div class="metric"><b class="ndc" data-cnt="${m.id}">${pdHomeLabel()}</b></div></div><span class="moon"></span></button>`;
   const diaryHTML=m=>{ const rc=recentTitles(m,1); return `<button class="card mini-card diary${zeroOf(m)}" data-id="${m.id}" ${bg(m)}><div class="nc-main"><h3>${m.title}</h3>${metric(m)}${rc?`<p class="helper">${rc.slice(0,16).replace(/</g,"&lt;")}</p>`:""}</div><span class="pen"><svg viewBox="0 0 48 48"><path d="m15 34-2 9 9-3 17-24c1.8-2.5 1.2-6-1.3-7.8s-6-1.2-7.8 1.3z"/><path d="m27 14 9 6M16 34l6 5"/></svg></span></button>`; };
   const miniHTML=m=>`<button class="card small-card${zeroOf(m)}" data-id="${m.id}" ${bg(m)}><span class="mi">${iconOf(m)}</span><div><h3>${m.title}</h3><strong class="ndc" data-cnt="${m.id}">${cntNum(m)}</strong></div></button>`;
@@ -1987,8 +1989,8 @@ function renderHome(){
   // 히어로
   const totalItems = active.reduce((s,m)=>{const a=rowsOf(m);return s+(a?a.length:0);},0);
   const allCovers=[]; active.forEach(m=>{ coversOf(m).forEach(c=>{ if(allCovers.length<3) allCovers.push(c); }); });
-  const heroFan = `<div class="fan">`+[0,1,2].map(i=> allCovers[i]?`<span style="background-image:url('${esc(allCovers[i])}')"></span>`:`<span></span>`).join("")+`</div>`;
-  const heroCard = `<article class="card hero"><div class="nc-main"><p class="eyebrow">지금까지 수집</p><div class="metric"><b>${fmt(totalItems)}</b><i>개</i></div><p class="helper">${active.length}개 카테고리 · 오늘도 기록 중</p></div>${heroFan}</article>`;
+  const heroFan = `<div class="fan${allCovers.length?"":" fan-empty"}">`+[0,1,2].map(i=> allCovers[i]?`<span style="background-image:url('${esc(allCovers[i])}')"></span>`:`<span></span>`).join("")+`</div>`;
+  const heroCard = `<article class="card hero"><div class="nc-main"><p class="eyebrow">지금까지 수집</p><div class="metric"><b id="ndHeroTotal">${fmt(totalItems)}</b><i>개</i></div><p class="helper">${active.length}개 카테고리 · 오늘도 기록 중</p></div>${heroFan}</article>`;
 
   // 순서: 확정본대로 영화·도서 → 러닝 → 생리·일기 → 맛집 → 나머지 표지형 → 미니
   const has=id=>active.some(m=>m.id===id);
@@ -2020,7 +2022,8 @@ function renderHome(){
   home.querySelectorAll(".card[data-id],.ndh-tab[data-id]").forEach(b=>b.onclick=()=>openDomain(b.dataset.id));
 
   { const _need=active.filter(m=>{ const _st=(Date.now()-(Number(store.getItem(persistKey(m.id)+"|t")||0)))>NDCACHE_TTL; return !((CACHE[m.id]||loadPersist(m.id)) && !_st); }).map(m=>m.id);
-    const _apply=(id,rows)=>{ CACHE[id]=rows; savePersist(id,rows); if(id==="period")return; const el=home.querySelector(`.ndc[data-cnt="${id}"]`); if(el) el.textContent=`${fmt(rows.length)}`; };
+    const _hero=()=>{ const el=home.querySelector("#ndHeroTotal"); if(el){ let t=0; active.forEach(m=>{ const a=CACHE[m.id]||loadPersist(m.id); if(a) t+=a.length; }); el.textContent=fmt(t); } };
+    const _apply=(id,rows)=>{ CACHE[id]=rows; savePersist(id,rows); if(id!=="period"){ const el=home.querySelector(`.ndc[data-cnt="${id}"]`); if(el) el.textContent=`${fmt(rows.length)}`; } _hero(); };
     const _one=id=>{ const m=MANIFESTS[id]; try{ sourceFor(m).list(id).then(r=>_apply(id,r)).catch(()=>{}); }catch(e){} };
     if(_need.length){ let _src; try{ _src=sheetSrc(); }catch(e){ _src=null; }
       if(_src && typeof _src.listMany==="function"){ _src.listMany(_need).then(map=>{ Object.keys(map||{}).forEach(id=>_apply(id,map[id])); }).catch(()=>{ _need.forEach(_one); }); }
