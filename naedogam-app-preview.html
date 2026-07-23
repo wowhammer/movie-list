@@ -969,7 +969,7 @@ body.home-dark .bnav-i.on .bnav-ic svg{ stroke:#f6eddf !important; }
 [data-theme="dark"] .tvcard .tv-cover{ background:var(--line-soft); }
 
 </style>
-<script>try{var _t=localStorage.getItem("app:nd.theme")||localStorage.getItem("nd.theme");if(_t!=="light")document.documentElement.setAttribute("data-theme","dark");}catch(e){}</script>
+<script>try{var _t=localStorage.getItem("app:nd.theme")||localStorage.getItem("nd.theme");document.documentElement.setAttribute("data-theme","dark");}catch(e){}</script>
 <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@latest/dist/web/static/pretendard.min.css">
 </head>
 <body>
@@ -4880,8 +4880,7 @@ function renderSettingsBody(d){
     <div class="ord-list" id="catList">${act.map(arow).join("")}</div>
     ${inact.length?`<div class="hint" style="margin-top:12px;color:var(--sub)">꺼진 카테고리 · 켜면 홈에 추가</div>${inact.map(irow).join("")}`:""}
     <button class="btn ghost" id="catNew" type="button" style="margin-top:14px">＋ 내 카테고리 만들기</button>
-    <h4>화면</h4>
-    <div class="cat-mrow" style="cursor:default"><span class="mi">🌙</span><span class="mn">다크 모드</span><button class="sw" id="themeSw" role="switch" type="button"></button></div>
+
     </div>
     <div class="set-sec" data-sec="intro" style="display:none">${aboutBodyHTML()}</div>
     <div class="set-sec" data-sec="data" style="display:none">
