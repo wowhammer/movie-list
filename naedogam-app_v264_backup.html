@@ -792,125 +792,8 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
 .memstrip .ms-go{font-size:12px;color:var(--ink-soft);font-weight:700;white-space:nowrap}
 .memstrip:active{transform:translateY(1px)}
 
-
-/* ===== 확정 홈(따뜻한 다크 도감) — .ndhome 스코프. 다른 화면 무영향 ===== */
-body.home-dark{ background:radial-gradient(circle at 50% -10%, rgba(102,78,57,.16), transparent 560px), linear-gradient(180deg,#1b1916,#0d0d0c 100%) !important; }
-body.home-dark .masthead{ display:none !important; }
-body.home-dark #root{ background:transparent !important; max-width:none !important; padding-left:0 !important; padding-right:0 !important; }
-body.home-dark #home{ padding:0 !important; }
-body.home-dark #banner:empty{ display:none; }
-body.home-dark .bnav{ background:rgba(23,21,18,.97) !important; border-top:1px solid rgba(238,224,205,.09) !important; }
-body.home-dark .bnav-i{ color:#9a8f80 !important; }
-body.home-dark .bnav-i.on{ color:#f6eddf !important; }
-body.home-dark .bnav-i.on .bnav-ic svg{ stroke:#f6eddf !important; }
-
-.ndhome{ color:#f6eddf; font-family:Pretendard,"Apple SD Gothic Neo","Noto Sans KR",system-ui,-apple-system,sans-serif;
-  width:min(100%,520px); margin:0 auto; padding:14px 12px calc(116px + env(safe-area-inset-bottom)); -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility; }
-.ndhome .emj{ font-size:20px; }
-.ndhome .ci-svg{ width:22px; height:22px; }
-.ndh-top{ display:flex; align-items:center; justify-content:space-between; padding:2px 2px 16px; }
-.ndh-brand{ display:flex; align-items:center; gap:11px; }
-.ndh-wm{ display:flex; flex-direction:column; line-height:1; }
-.ndh-wm b{ font-size:23px; font-weight:800; letter-spacing:-.05em; }
-.ndh-wm small{ font-size:9px; font-weight:800; letter-spacing:.28em; color:#c9bcac; margin-top:3px; }
-.ndh-prof{ width:41px; height:41px; border-radius:50%; border:1px solid rgba(255,255,255,.08); background:linear-gradient(145deg,#8a8177,#5f5952); cursor:pointer; flex:0 0 auto; }
-.ndh-tabs{ display:flex; gap:2px; overflow-x:auto; padding:7px; margin-bottom:16px; border:1px solid rgba(238,224,205,.13); border-radius:22px; background:linear-gradient(180deg,rgba(255,255,255,.026),rgba(255,255,255,.008)),rgba(35,31,27,.92); box-shadow:0 12px 30px rgba(0,0,0,.13); scrollbar-width:none; }
-.ndh-tabs::-webkit-scrollbar{ display:none; }
-.ndh-tab{ flex:1 0 auto; display:flex; flex-direction:column; align-items:center; gap:5px; min-width:56px; padding:8px 8px 6px; border:0; border-radius:16px; background:transparent; color:#dfd5c7; cursor:pointer; }
-.ndh-tab.on{ color:#fff6e8; background:linear-gradient(145deg,rgba(255,255,255,.13),rgba(255,255,255,.055)),#48423a; box-shadow:inset 0 1px 0 rgba(255,255,255,.08); }
-.ndh-tab span{ font-size:12px; font-weight:720; letter-spacing:-.04em; white-space:nowrap; }
-
-.ndh-dash{ display:grid; gap:10px; }
-.ndh-dash .split{ display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px; }
-.ndh-dash .bottom-grid{ display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:9px; }
-.ndhome .card{ position:relative; overflow:hidden; border:1px solid rgba(255,242,224,.12); border-radius:25px; box-shadow:0 15px 35px rgba(0,0,0,.24); color:#f6eddf; text-align:left; cursor:pointer; isolation:isolate; }
-.ndhome .card::after{ content:""; position:absolute; inset:0; z-index:-1; border-radius:inherit; background:linear-gradient(145deg,rgba(255,255,255,.05),transparent 45%); pointer-events:none; }
-.ndhome .card h3,.ndhome .eyebrow{ margin:0; font-size:17px; font-weight:760; letter-spacing:-.055em; line-height:1.25; }
-.ndhome .metric{ display:flex; align-items:baseline; gap:4px; margin-top:4px; color:#fff3e2; white-space:nowrap; font-variant-numeric:tabular-nums; }
-.ndhome .metric b{ font-size:38px; font-weight:820; letter-spacing:-.065em; line-height:1; }
-.ndhome .metric i{ font-size:15px; font-weight:760; font-style:normal; color:#eee1d1; letter-spacing:-.04em; }
-.ndhome .helper{ margin:9px 0 0; overflow:hidden; color:#e5dbcd; font-size:13px; font-weight:600; letter-spacing:-.045em; line-height:1.4; text-overflow:ellipsis; white-space:nowrap; }
-
-.ndhome .hero{ display:grid; grid-template-columns:minmax(0,1.12fr) minmax(112px,.88fr); align-items:center; min-height:121px; padding:17px 18px; background:radial-gradient(circle at 90% 10%,rgba(108,79,128,.25),transparent 46%),linear-gradient(135deg,#35283e,#1d1924); }
-.ndhome .hero .metric b{ font-size:42px; }
-.ndhome .fan{ position:relative; width:128px; height:78px; margin-left:auto; }
-.ndhome .fan span{ position:absolute; top:7px; width:48px; height:68px; border:1px solid rgba(255,255,255,.15); border-radius:8px; background-size:cover; background-position:center; background-color:#4a4038; box-shadow:0 10px 17px rgba(0,0,0,.32); }
-.ndhome .fan.fan-empty span{ background-color:transparent; border:1.5px dashed rgba(255,255,255,.16); box-shadow:none; }
-.ndhome .fan span:nth-child(1){ left:6px; transform:rotate(-11deg); }
-.ndhome .fan span:nth-child(2){ left:43px; }
-.ndhome .fan span:nth-child(3){ left:79px; transform:rotate(9deg); }
-
-.ndhome .collection-card{ display:flex; flex-direction:column; justify-content:space-between; min-height:150px; padding:15px 15px 13px; }
-.ndhome .collection-card .metric{ margin-top:5px; }
-.ndhome .collection-card .metric b{ font-size:39px; }
-.ndhome .covers{ display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:6px; height:58px; margin-top:10px; }
-.ndhome .cover{ border-radius:7px; background-size:cover; background-position:center; background-color:#3a332c; border:1px solid rgba(255,245,230,.21); box-shadow:0 8px 12px rgba(0,0,0,.24); }
-.ndhome .cover-e{ background:rgba(255,255,255,.06); box-shadow:none; }
-
-.ndhome .running{ display:grid; grid-template-columns:minmax(0,1fr) 145px; align-items:center; min-height:120px; padding:16px 18px; }
-.ndhome .running .metric b{ font-size:41px; }
-.ndhome .run-chart{ display:grid; grid-template-rows:68px auto; gap:6px; min-width:0; }
-.ndhome .bars,.ndhome .days{ display:grid; grid-template-columns:repeat(7,minmax(0,1fr)); gap:7px; align-items:end; }
-.ndhome .bars{ height:68px; }
-.ndhome .bar{ min-height:7px; border-radius:7px; background:linear-gradient(180deg,#8fb9d0,#5484a0); box-shadow:inset 0 1px 0 rgba(255,255,255,.16); }
-.ndhome .days{ color:#e3d8ca; font-size:11px; font-weight:680; line-height:1; text-align:center; }
-
-.ndhome .mini-card{ display:grid; grid-template-columns:minmax(0,1fr) 48px; gap:8px; align-items:center; min-height:108px; padding:15px 14px; }
-.ndhome .mini-card .nc-main{ min-width:0; overflow:hidden; }
-.ndhome .mini-card h3{ white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-.ndhome .mini-card .metric b{ font-size:34px; }
-.ndhome .cycle .metric b{ font-size:19px; line-height:1.1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:100%; }
-.ndhome .moon{ position:relative; width:46px; height:46px; border-radius:50%; background:linear-gradient(145deg,#da665d,#a73037); box-shadow:0 10px 20px rgba(36,6,11,.26); flex:0 0 auto; }
-.ndhome .moon::after{ content:""; position:absolute; top:0; right:-1px; width:34px; height:34px; border-radius:50%; background:#3b1519; }
-.ndhome .food .nc-glyph{ justify-self:end; align-self:center; }
-.ndhome .pen{ width:46px; height:46px; color:#d9ccbf; opacity:.86; transform:rotate(-14deg); }
-.ndhome .pen svg{ width:100%; height:100%; fill:none; stroke:currentColor; stroke-width:1.6; stroke-linecap:round; stroke-linejoin:round; }
-
-.ndhome .food{ display:grid; grid-template-columns:minmax(0,.78fr) minmax(170px,1.22fr); align-items:center; min-height:111px; padding:15px 15px 14px; }
-.ndhome .food .metric b{ font-size:39px; }
-.ndhome .food-photos{ display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:7px; height:67px; }
-.ndhome .food-photo{ border-radius:8px; background-size:cover; background-position:center; background-color:#3a332c; border:1px solid rgba(255,241,220,.2); box-shadow:0 7px 12px rgba(0,0,0,.22); }
-
-.ndhome .small-card{ display:flex; flex-direction:column; justify-content:space-between; min-height:86px; padding:13px 12px; border-radius:22px; }
-.ndhome .small-card .mi{ display:inline-flex; }
-.ndhome .small-card .mi svg{ width:22px; height:22px; }
-.ndhome .small-card h3{ font-size:15px; margin:7px 0 0; }
-.ndhome .small-card strong{ display:block; margin-top:3px; font-size:15px; font-weight:760; color:#e6dccd; font-variant-numeric:tabular-nums; }
-
-.ndhome .nc-glyph{ opacity:.5; align-self:center; justify-self:end; }
-.ndhome .nc-glyph .ci-svg{ width:46px; height:46px; }
-.ndhome .collection-card .coll-glyph{ align-self:flex-end; opacity:.42; }
-.ndhome .collection-card .coll-glyph .ci-svg{ width:50px; height:50px; }
-.ndhome .nc-glyph .emj{ font-size:44px; opacity:.85; }
-.ndhome .mini-card .metric b{ font-size:34px; }
-.ndhome .nc-zero{ opacity:.62; }
-.ndhome .home-empty{ text-align:center; padding:60px 20px; color:#cfc3b5; }
-.ndhome .home-empty h2{ color:#f6eddf; font-size:20px; margin:12px 0 8px; }
-.ndhome .home-empty p{ font-size:13.5px; line-height:1.6; }
-.ndhome .home-empty .btn{ margin-top:16px; background:#e0483f; color:#fff; border:none; border-radius:10px; padding:12px 22px; font-size:15px; font-weight:600; cursor:pointer; }
-@media (max-width:374px){ .ndhome{ padding-left:10px; padding-right:10px; } .ndhome .metric b{ font-size:35px; } .ndhome .food{ grid-template-columns:minmax(0,.76fr) minmax(150px,1.24fr); } }
-
-/* ── 전용 검색 화면 ── */
-#ndSearchDlg{ border:none; padding:0; margin:0; width:100vw; max-width:100vw; height:100vh; max-height:100vh; background:linear-gradient(180deg,#1b1916,#0d0d0c); color:#f6eddf; font-family:Pretendard,"Apple SD Gothic Neo","Noto Sans KR",system-ui,-apple-system,sans-serif; }
-#ndSearchDlg::backdrop{ background:rgba(0,0,0,.5); }
-#ndSearchDlg .nsHead{ position:sticky; top:0; display:flex; gap:8px; align-items:center; padding:calc(14px + env(safe-area-inset-top)) 14px 10px; background:#141210; border-bottom:1px solid rgba(238,224,205,.08); }
-#ndSearchDlg .home-search{ flex:1; background:#211e1a; border:1px solid rgba(238,224,205,.15); color:#f6eddf; }
-#ndSearchDlg .home-search::placeholder{ color:#9a8f80; }
-#ndSearchDlg .nsClose{ background:none; border:none; color:#cfc3b5; font-size:14px; font-weight:700; cursor:pointer; padding:8px 6px; flex:0 0 auto; }
-#ndSearchDlg .nsRes{ padding:8px 14px calc(28px + env(safe-area-inset-bottom)); }
-#ndSearchDlg .hs-cat{ color:#cfc3b5; } #ndSearchDlg .hs-cat span{ color:#e0a86a; }
-#ndSearchDlg .hs-item{ background:#211e1a; border:1px solid rgba(238,224,205,.1); }
-#ndSearchDlg .hs-item b{ color:#f6eddf; } #ndSearchDlg .hs-item span{ color:#b8ab97; }
-#ndSearchDlg .hs-none{ color:#cfc3b5; }
-
-.cat-mrow .mn{ min-width:0; overflow:hidden; white-space:nowrap; text-overflow:ellipsis; }
-.cat-mrow .sz-seg{ display:inline-flex; flex:0 0 auto; border:1px solid var(--line); border-radius:9px; overflow:hidden; }
-.cat-mrow .sz-seg .szb{ border:0; border-left:1px solid var(--line); background:var(--card); color:var(--sub); font-size:11px; font-weight:700; line-height:1; padding:6px 8px; cursor:pointer; }
-.cat-mrow .sz-seg .szb:first-child{ border-left:0; }
-.cat-mrow .sz-seg .szb.on{ background:#e0483f; color:#fff; }
 </style>
 <script>try{var _t=localStorage.getItem("app:nd.theme")||localStorage.getItem("nd.theme");if(_t==="dark")document.documentElement.setAttribute("data-theme","dark");}catch(e){}</script>
-<link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@latest/dist/web/static/pretendard.min.css">
 </head>
 <body>
 <div class="wrap" id="root" data-domain="movies">
@@ -920,7 +803,7 @@ body.home-dark .bnav-i.on .bnav-ic svg{ stroke:#f6eddf !important; }
         <svg class="brandmark" width="40" height="30" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#F7F5F0"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#F7F5F0"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#F7F5F0"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#F7F5F0"/></svg>
         <span class="brandwm"><span class="bwm-ko">내도감</span><span class="bwm-en">NAEDOGAM</span></span>
       </button>
-      <span class="mhver">v268</span>
+      <span class="mhver">v264</span>
       <span class="spacer"></span>
       <span class="src-chip" id="srcChip" style="display:none">데모</span>
       <button class="icon-btn" id="searchToggle" type="button" style="display:none">🔍</button>
@@ -1966,7 +1849,7 @@ function setCarCover(car,url){ car=String(car||"").trim(); if(!car) return; cons
 function carDefaultCover(car){ car=String(car||"").trim(); return car?(carCoverMap()[car]||""):""; }
 
 /* 화면 전환: home(카드 격자) ↔ domain(분야 목록) */
-function showView(v){ state.view=v; document.body.classList.toggle("home-dark", v==="home");
+function showView(v){ state.view=v;
   $("#home").style.display = v==="home"?"block":"none";
   $("#domainView").style.display = v==="domain"?"block":"none";
   if(v==="home") $("#searchToggle").style.display="none"; }
@@ -1974,89 +1857,31 @@ function goHome(){ state.domain=null; state.query=""; state.pick=""; setMhSub(""
 function openDomain(id){ if(id==="mbti"){ openMbti(); return; } if(id==="period"){ openPeriod(); return; } state.domain=id; state.query=""; state.pick=""; state.recPick=""; state.statFilter=null; state.sort="default"; state.sortAsc=false; state.searchScope="title"; state.selectQ=""; state.searchOpen=false; state.page=0; carWorkFilter=""; carSort="date"; carSortAsc=false; bookGenreFilter=""; mtnRegion=""; diaryTag=""; diaryView="list"; diaryYM=null; diaryMood=""; $("#search").value=""; $("#search").style.display="none"; $("#mvselect").style.display="none"; $("#scope").style.display="none"; if(MANIFESTS[id]&&MANIFESTS[id].scopeSort){ state.sort=MANIFESTS[id].scopeSort[0].k; state.sortAsc=false; } showView("domain"); loadAndRender(); }
 
 /* 홈: 켜둔 카테고리를 카드로. 건수는 한 번 열어본 분야만 표시(홈을 빠르게 유지). */
-function ndDeep(h){ if(typeof h!=="string"||h.charAt(0)!=="#") h="#8a7a6a"; var n=parseInt(h.slice(1),16),r=(n>>16)&255,g=(n>>8)&255,b=n&255; function d(x,f){return Math.round(x*f);} return "linear-gradient(145deg,rgb("+d(r,.5)+","+d(g,.5)+","+d(b,.5)+"),rgb("+d(r,.28)+","+d(g,.28)+","+d(b,.28)+"))"; }
-var ND_LOGO_HTML='<div class="ndh-brand"><svg width="47" height="35" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg><div class="ndh-wm"><b>내도감</b><small>NAEDOGAM</small></div></div><button class="ndh-prof" type="button" aria-label="설정" onclick="try{openSettings()}catch(e){}"></button>';
-/* 홈 카드 크기: wide(넓게=한 줄 전체) · half(보통=한 줄 2개) · mini(작게=하단 3칸). 기본값=프리셋 */
-var ND_PRESET_SIZE={running:"wide",food:"wide",recipes:"wide",movies:"half",books:"half",period:"half",diary:"half",travel:"half",mountains:"half",culture:"half",albums:"half",cellar:"half",scrap:"half",wish:"half",gift:"half",pet:"half"};
-function getHomeSizes(){ try{ return JSON.parse(store.getItem("nd.homesize")||"{}")||{}; }catch(e){ return {}; } }
-function setHomeSize(id,sz){ try{ var o=getHomeSizes(); if(!sz||sz==="__preset") delete o[id]; else o[id]=sz; store.setItem("nd.homesize", JSON.stringify(o)); }catch(e){} }
-function ndEffSize(id){ var o; try{o=getHomeSizes();}catch(e){o={};} return o[id]||ND_PRESET_SIZE[id]||"mini"; }
-function ndNat(id){ if(id==="running")return "run"; if(id==="food"||id==="recipes")return "food"; if(id==="period")return "cycle"; if(id==="diary")return "diary"; return "coll"; }
 function renderHome(){
   const active = getActive().map(id=>MANIFESTS[id]).filter(Boolean);
   const home=$("#home");
-  document.body.classList.add("home-dark");
-  const _ics=d=>`<svg class="ci-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="${d}"/></svg>`;
-  const iconOf=m=> ND_ICONS[m.id]?_ics(ND_ICONS[m.id]):`<span class="emj">${m.icon}</span>`;
   if(!active.length){
-    home.innerHTML=`<div class="ndhome"><div class="ndh-top">${ND_LOGO_HTML}</div><div class="home-empty"><div class="em" style="font-size:40px">🗂</div><h2>아직 담은 카테고리가 없어요</h2><p>설정에서 원하는 카테고리를 켜면<br>여기 카드로 올라옵니다.</p><button class="btn" id="emptyAdd">카테고리 추가하기</button></div></div>`;
+    home.innerHTML=`<div class="home-empty"><div class="em">🗂</div>
+      <h2>아직 담은 카테고리가 없어요</h2>
+      <p>설정에서 원하는 카테고리를 켜면<br>여기 카드로 올라옵니다.</p>
+      <button class="btn" id="emptyAdd">카테고리 추가하기</button></div>`;
     $("#emptyAdd").onclick=openSettings; return;
   }
-  const rowsOf=m=> CACHE[m.id]||loadPersist(m.id)||null;
-  const coversOf=m=>{ const a=rowsOf(m); const out=[]; if(a){ for(let i=a.length-1;i>=0&&out.length<3;i--){ const c=a[i]&&(a[i].cover||a[i]._cover); if(c) out.push(c);} } return out; };
-  const UNIT={movies:"편",books:"권",mountains:"봉",running:"회",diary:"편",travel:"곳",food:"곳",recipes:"개",culture:"편",albums:"장",subs:"개",cards:"개",carlog:"건",wish:"개",bucket:"개",quote:"개",gift:"개",insurance:"개",scrap:"개",cellar:"병",meds:"개",checkup:"건",assets:"개",pet:""};
-  const unitOf=m=> UNIT[m.id]!=null?UNIT[m.id]:"개";
-  const cntNum=m=>{ const a=rowsOf(m); return a?`${fmt(a.length)}`:""; };
-  const colOf=m=> ND_COLORS[m.id]||"#8a7a6a";
-  const esc=u=>String(u).replace(/'/g,"%27").replace(/"/g,"&quot;");
-  const bg=m=>`style="background:${ndDeep(colOf(m))}"`;
-  const zeroOf=m=>{ const a=rowsOf(m); return (a&&a.length===0)?" nc-zero":""; };
-  const recentTitles=(m,k)=>{ const a=rowsOf(m); if(!a||!a.length) return ""; const out=[]; for(let i=a.length-1;i>=0&&out.length<k;i--){ const t=a[i]&&(a[i].title||a[i].name); if(t) out.push(String(t)); } return out.join(" · "); };
-  const coverCells=(m,cls)=>{ const cs=coversOf(m); let h=""; for(let i=0;i<3;i++){ h+= cs[i]?`<span class="${cls}" style="background-image:url('${esc(cs[i])}')"></span>`:`<span class="${cls} cover-e"></span>`; } return h; };
-  const metric=m=>`<div class="metric"><b class="ndc" data-cnt="${m.id}">${cntNum(m)}</b><i>${unitOf(m)}</i></div>`;
-
-  const collHTML=m=>{ const vis=coversOf(m).length?`<div class="covers">${coverCells(m,"cover")}</div>`:`<span class="nc-glyph coll-glyph">${iconOf(m)}</span>`; return `<button class="card collection-card${zeroOf(m)}" data-id="${m.id}" ${bg(m)}><div><h3>${m.title}</h3>${metric(m)}</div>${vis}</button>`; };
-  const runningHTML=m=>{ const H=[48,86,37,72,10,60,46]; const bars=H.map(h=>`<span class="bar" style="height:${h}%${h<12?";opacity:.3":""}"></span>`).join(""); const days=["일","월","화","수","목","금","토"].map(d=>`<span>${d}</span>`).join(""); const rc=recentTitles(m,1); return `<button class="card running${zeroOf(m)}" data-id="${m.id}" ${bg(m)}><div class="nc-main"><h3>${m.title}</h3>${metric(m)}${rc?`<p class="helper">최근: ${rc.replace(/</g,"&lt;")}</p>`:""}</div><div class="run-chart"><div class="bars">${bars}</div><div class="days">${days}</div></div></button>`; };
-  const foodHTML=m=>{ const rc=recentTitles(m,2); const vis=coversOf(m).length?`<div class="food-photos">${coverCells(m,"food-photo")}</div>`:`<span class="nc-glyph coll-glyph">${iconOf(m)}</span>`; return `<button class="card food${zeroOf(m)}" data-id="${m.id}" ${bg(m)}><div class="nc-main"><h3>${m.title}</h3>${metric(m)}${rc?`<p class="helper">최근: ${rc.replace(/</g,"&lt;")}</p>`:""}</div>${vis}</button>`; };
-  const cycleHTML=m=>`<button class="card mini-card cycle${zeroOf(m)}" data-id="${m.id}" ${bg(m)}><div class="nc-main"><h3>${m.title}</h3><div class="metric"><b class="ndc" data-cnt="${m.id}">${pdHomeLabel()}</b></div></div><span class="moon"></span></button>`;
-  const diaryHTML=m=>{ const rc=recentTitles(m,1); return `<button class="card mini-card diary${zeroOf(m)}" data-id="${m.id}" ${bg(m)}><div class="nc-main"><h3>${m.title}</h3>${metric(m)}${rc?`<p class="helper">${rc.slice(0,16).replace(/</g,"&lt;")}</p>`:""}</div><span class="pen"><svg viewBox="0 0 48 48"><path d="m15 34-2 9 9-3 17-24c1.8-2.5 1.2-6-1.3-7.8s-6-1.2-7.8 1.3z"/><path d="m27 14 9 6M16 34l6 5"/></svg></span></button>`; };
-  const miniHTML=m=>`<button class="card small-card${zeroOf(m)}" data-id="${m.id}" ${bg(m)}><span class="mi">${iconOf(m)}</span><div><h3>${m.title}</h3><strong class="ndc" data-cnt="${m.id}">${cntNum(m)}</strong></div></button>`;
-  // 크기별 렌더러: 카테고리 성격(nat)에 맞춰 넓게/보통 카드 생성
-  const wideStat=m=>{ const rc=recentTitles(m,2); return `<button class="card food${zeroOf(m)}" data-id="${m.id}" ${bg(m)}><div class="nc-main"><h3>${m.title}</h3>${metric(m)}${rc?`<p class="helper">최근: ${rc.replace(/</g,"&lt;")}</p>`:""}</div><span class="nc-glyph coll-glyph">${iconOf(m)}</span></button>`; };
-  const wideCard=m=>{ const nat=ndNat(m.id); if(nat==="run") return runningHTML(m); if(nat==="food") return foodHTML(m); return coversOf(m).length?foodHTML(m):wideStat(m); };
-  const halfCard=m=>{ const nat=ndNat(m.id); if(nat==="cycle") return cycleHTML(m); if(nat==="diary") return diaryHTML(m); return collHTML(m); };
-
-  // 히어로
-  const totalItems = active.reduce((s,m)=>{const a=rowsOf(m);return s+(a?a.length:0);},0);
-  const allCovers=[]; active.forEach(m=>{ coversOf(m).forEach(c=>{ if(allCovers.length<3) allCovers.push(c); }); });
-  const heroFan = `<div class="fan${allCovers.length?"":" fan-empty"}">`+[0,1,2].map(i=> allCovers[i]?`<span style="background-image:url('${esc(allCovers[i])}')"></span>`:`<span></span>`).join("")+`</div>`;
-  const heroCard = `<article class="card hero"><div class="nc-main"><p class="eyebrow">지금까지 수집</p><div class="metric"><b id="ndHeroTotal">${fmt(totalItems)}</b><i>개</i></div><p class="helper">${active.length}개 카테고리 · 오늘도 기록 중</p></div>${heroFan}</article>`;
-
-  // 표시 순서 = 설정에서 정한 순서(getActive) 그대로. 크기(넓게/보통/작게)가 폭을 결정.
-  // 넓게=한 줄 전체 / 보통=한 줄 2개 / 작게=한 줄 3개. 크기가 바뀌는 지점에서 줄을 끊음.
-  let out=""; let buf=[]; let bufSz="";
-  const flush=()=>{ if(!buf.length) return; out+=`<div class="${bufSz==="mini"?"bottom-grid":"split"}">${buf.join("")}</div>`; buf=[]; bufSz=""; };
-  active.forEach(m=>{ const sz=ndEffSize(m.id);
-    if(sz==="wide"){ flush(); out+=wideCard(m); return; }
-    if(bufSz && bufSz!==sz) flush();
-    bufSz=sz; buf.push(sz==="mini"?miniHTML(m):halfCard(m));
-    if(buf.length===(sz==="mini"?3:2)) flush();
-  });
-  flush();
-
-  const tabs = `<div class="ndh-tabs">`+active.map((m,i)=>`<button class="ndh-tab${i===0?" on":""}" data-id="${m.id}">${iconOf(m)}<span>${m.title}</span></button>`).join("")+`</div>`;
-  home.innerHTML=`<div class="ndhome"><div class="ndh-top">${ND_LOGO_HTML}</div>${tabs}<div class="ndh-dash">${heroCard}${out}</div></div>`;
-  home.querySelectorAll(".card[data-id],.ndh-tab[data-id]").forEach(b=>b.onclick=()=>openDomain(b.dataset.id));
-
+  const _ics=d=>`<svg class="ci-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="${d}"/></svg>`;
+  home.innerHTML=`<div class="home-search-wrap"><input class="home-search" id="homeSearch" type="search" placeholder="🔍 전체 검색 — 제목·이름" autocomplete="off"></div><div id="homeSearchRes" style="display:none"></div><div class="home-grid">`+active.map(m=>{
+    const _arr = CACHE[m.id] || loadPersist(m.id); const cnt = m.id==="period" ? pdHomeLabel() : (_arr ? `${fmt(_arr.length)}건` : "");
+    const ic = ND_ICONS[m.id] ? _ics(ND_ICONS[m.id]) : `<span style="font-size:24px">${m.icon}</span>`;
+    return `<button class="cat-card${(_arr&&_arr.length===0)?' cat-card-zero':''}" data-id="${m.id}"><span class="ci" style="color:${ND_COLORS[m.id]||'var(--ink)'}">${ic}</span><span class="cn">${m.title}</span><span class="cc" data-cnt="${m.id}">${cnt}</span></button>`;
+  }).join("")+`</div>`;
+  home.querySelectorAll(".cat-card[data-id]").forEach(b=>b.onclick=()=>openDomain(b.dataset.id));
+  _insHomeMemory();
+  { const _hs=$("#homeSearch"); if(_hs){ let _t=null; _hs.addEventListener("input",()=>{ clearTimeout(_t); _t=setTimeout(()=>runHomeSearch(_hs.value),200); }); } }
   { const _need=active.filter(m=>{ const _st=(Date.now()-(Number(store.getItem(persistKey(m.id)+"|t")||0)))>NDCACHE_TTL; return !((CACHE[m.id]||loadPersist(m.id)) && !_st); }).map(m=>m.id);
-    const _hero=()=>{ const el=home.querySelector("#ndHeroTotal"); if(el){ let t=0; active.forEach(m=>{ const a=CACHE[m.id]||loadPersist(m.id); if(a) t+=a.length; }); el.textContent=fmt(t); } };
-    const _apply=(id,rows)=>{ CACHE[id]=rows; savePersist(id,rows); if(id!=="period"){ const el=home.querySelector(`.ndc[data-cnt="${id}"]`); if(el) el.textContent=`${fmt(rows.length)}`; } _hero(); };
+    const _apply=(id,rows)=>{ CACHE[id]=rows; savePersist(id,rows); const el=home.querySelector(`.cc[data-cnt="${id}"]`); if(el) el.textContent=`${fmt(rows.length)}건`; };
     const _one=id=>{ const m=MANIFESTS[id]; try{ sourceFor(m).list(id).then(r=>_apply(id,r)).catch(()=>{}); }catch(e){} };
     if(_need.length){ let _src; try{ _src=sheetSrc(); }catch(e){ _src=null; }
       if(_src && typeof _src.listMany==="function"){ _src.listMany(_need).then(map=>{ Object.keys(map||{}).forEach(id=>_apply(id,map[id])); }).catch(()=>{ _need.forEach(_one); }); }
       else { _need.forEach(_one); } } }
-}
-function openSearch(){
-  var d=document.getElementById("ndSearchDlg");
-  if(!d){ d=document.createElement("dialog"); d.id="ndSearchDlg"; document.body.appendChild(d);
-    d.addEventListener("close",function(){ try{ document.querySelectorAll(".bnav-i").forEach(function(x){x.classList.remove("on");}); var h=document.querySelector('.bnav-i[data-nav="home"]'); if(h) h.classList.add("on"); }catch(e){} }); }
-  d.innerHTML='<div class="nsHead"><input id="homeSearch" class="home-search" type="search" placeholder="🔍 전체 검색 — 제목·이름" autocomplete="off"><button class="nsClose" type="button">닫기</button></div><div id="homeSearchRes" class="nsRes"></div>';
-  d.showModal();
-  var inp=d.querySelector("#homeSearch"), t=null;
-  inp.addEventListener("input",function(){ clearTimeout(t); t=setTimeout(function(){ runHomeSearch(inp.value); },200); });
-  d.querySelector(".nsClose").onclick=function(){ d.close(); };
-  d.querySelector("#homeSearchRes").addEventListener("click",function(e){ if(e.target.closest&&e.target.closest(".hs-item")) setTimeout(function(){ d.close(); },0); });
-  setTimeout(function(){ try{ inp.focus(); }catch(e){} },80);
 }
 /* 분야가 선언한 source.type 에 따라 출처를 고른다.
    appsscript → 영화·차계부(기존 방식) / sheet → 도서·명산·러닝(기존 시트에 탭으로) */
@@ -4807,7 +4632,7 @@ function renderSettingsBody(d){
   const act=getActive(); const actSet=new Set(act);
   const inact=Object.values(MANIFESTS).map(m=>m.id).filter(id=>!actSet.has(id));
   const _cc=m=>m.custom?`<button class="cat-edit" data-id="${m.id}" title="수정" type="button" style="background:none;border:none;cursor:pointer;font-size:13px;opacity:.6;padding:2px 5px">✏</button><button class="cat-del" data-id="${m.id}" title="삭제" type="button" style="background:none;border:none;cursor:pointer;font-size:13px;opacity:.6;padding:2px 5px">🗑</button>`:"";
-  const arow=id=>{ const m=MANIFESTS[id]; const _sz=(typeof ndEffSize==="function"?ndEffSize(id):"mini"); const _sb=(v,l)=>`<button type="button" class="szb${v===_sz?" on":""}" data-id="${id}" data-sz="${v}">${l}</button>`; return `<div class="cat-mrow ord-row" data-id="${id}"><span class="ord-handle" aria-label="끌어서 순서 이동">≡</span><span class="mi">${m.icon}</span><span class="mn">${m.title} <span class="mv">${m.vol}</span></span><span class="sz-seg" role="group" aria-label="홈 카드 크기">${_sb("wide","넓게")}${_sb("half","보통")}${_sb("mini","작게")}</span>${_cc(m)}<button class="sw on" data-id="${id}" role="switch" aria-checked="true" type="button"></button></div>`; };
+  const arow=id=>{ const m=MANIFESTS[id]; return `<div class="cat-mrow ord-row" data-id="${id}"><span class="ord-handle" aria-label="끌어서 순서 이동">≡</span><span class="mi">${m.icon}</span><span class="mn">${m.title} <span class="mv">${m.vol}</span></span>${_cc(m)}<button class="sw on" data-id="${id}" role="switch" aria-checked="true" type="button"></button></div>`; };
   const irow=id=>{ const m=MANIFESTS[id]; return `<div class="cat-mrow" data-id="${id}"><span class="ord-handle ord-ph">≡</span><span class="mi">${m.icon}</span><span class="mn">${m.title} <span class="mv">${m.vol}</span></span>${_cc(m)}<button class="sw" data-id="${id}" role="switch" aria-checked="false" type="button"></button></div>`; };
   d.innerHTML=`<div class="dhead"><h3>설정</h3><button class="dclose-x" onclick="this.closest('dialog').close()" aria-label="닫기">✕</button></div><div class="dbody set">
     <div class="set-tabs">
@@ -4816,7 +4641,7 @@ function renderSettingsBody(d){
       <button type="button" class="set-tab" data-sec="data">데이터</button>
     </div>
     <div class="set-sec" data-sec="cat">
-    <div class="hint">토글로 켜고 끄고, 오른쪽에서 홈 카드 <b>크기</b>(넓게·보통·작게)를 고르고, 왼쪽 <b>≡</b>을 끌어 순서를 바꾸세요. 순서·크기 모두 홈에 바로 반영됩니다.</div>
+    <div class="hint">토글로 켜고 끄고, 왼쪽 <b>≡</b>을 끌어 순서를 바꾸세요. 홈·상단 탭에 바로 반영됩니다. (시트 데이터는 지워지지 않아요)</div>
     <div class="ord-list" id="catList">${act.map(arow).join("")}</div>
     ${inact.length?`<div class="hint" style="margin-top:12px;color:var(--sub)">꺼진 카테고리 · 켜면 홈에 추가</div>${inact.map(irow).join("")}`:""}
     <button class="btn ghost" id="catNew" type="button" style="margin-top:14px">＋ 내 카테고리 만들기</button>
@@ -4851,7 +4676,6 @@ function renderSettingsBody(d){
     if(state.view==="home") renderHome(); else if(state.view==="domain") renderTabs();
     renderSettingsBody(d);
   });
-  d.querySelectorAll(".szb").forEach(b=>{ b.onpointerdown=e=>e.stopPropagation(); b.onclick=e=>{ e.stopPropagation(); setHomeSize(b.dataset.id, b.dataset.sz); const seg=b.parentNode; if(seg) seg.querySelectorAll(".szb").forEach(x=>x.classList.toggle("on",x===b)); if(state.view==="home") renderHome(); }; });
   d.querySelectorAll(".cat-edit").forEach(b=>b.onclick=e=>{ e.stopPropagation(); openCatEdit(b.dataset.id); });
   d.querySelectorAll(".cat-del").forEach(b=>b.onclick=e=>{ e.stopPropagation(); deleteCustomCategory(b.dataset.id); });
   const cl=$("#catList"); if(cl) wireReorder(cl, order=>{ setActive(order); if(state.view==="home") renderHome(); else if(state.view==="domain") renderTabs(); });
@@ -5490,7 +5314,7 @@ $("#brandBtn").addEventListener("click",goHome);
   try{ if(!store.getItem("nd.mbtiSeeded")){ var _aa=getActive(); if(MANIFESTS.mbti && _aa.indexOf("mbti")<0){ _aa.push("mbti"); setActive(_aa); } store.setItem("nd.mbtiSeeded","1"); } }catch(e){}
   try{ if(!store.getItem("nd.seedPeriod")){ var _ap=getActive(); if(MANIFESTS.period && _ap.indexOf("period")<0){ _ap.push("period"); setActive(_ap); } store.setItem("nd.seedPeriod","1"); } }catch(e){}
   try{ if(!store.getItem("nd.seed234")){ var _ab=getActive(); ["assets","recipes"].forEach(function(id){ if(MANIFESTS[id] && _ab.indexOf(id)<0) _ab.push(id); }); setActive(_ab); store.setItem("nd.seed234","1"); } }catch(e){}
-  document.addEventListener("click",function(e){ var b=e.target.closest?e.target.closest(".bnav-i"):null; if(!b) return; var n=b.dataset.nav; document.querySelectorAll(".bnav-i").forEach(function(x){x.classList.remove("on");}); b.classList.add("on"); if(n==="home") goHome(); else if(n==="search") openSearch(); else if(n==="stats") openDashboard(); else if(n==="insight") openInsight(); else if(n==="settings") openSettings(); });
+  document.addEventListener("click",function(e){ var b=e.target.closest?e.target.closest(".bnav-i"):null; if(!b) return; var n=b.dataset.nav; document.querySelectorAll(".bnav-i").forEach(function(x){x.classList.remove("on");}); b.classList.add("on"); if(n==="home") goHome(); else if(n==="stats") openDashboard(); else if(n==="insight") openInsight(); else if(n==="settings") openSettings(); });
 $("#searchToggle").addEventListener("click",()=>{ state.searchOpen=!state.searchOpen; applySearchUI(MANIFESTS[state.domain]); if(state.searchOpen) $("#search").focus(); });
 $("#tabs").addEventListener("click",e=>{ const t=e.target.closest(".tab"); if(t) openDomain(t.dataset.id); });
 $("#search").addEventListener("input",e=>{ state.query=e.target.value; state.page=0; loadAndRender(); });
@@ -5627,7 +5451,6 @@ boot();
 </style>
 <nav class="bnav" id="bnav">
  <button class="bnav-i on" data-nav="home"><span class="bnav-ic"><svg viewBox="0 0 24 24"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V20h14V9.5"/></svg></span>홈</button>
- <button class="bnav-i" data-nav="search"><span class="bnav-ic"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg></span>검색</button>
  <button class="bnav-i" data-nav="stats"><span class="bnav-ic"><svg viewBox="0 0 24 24"><path d="M4 20h16"/><path d="M7 20v-7M12 20V6M17 20v-4"/></svg></span>통계</button>
  <button class="bnav-i" data-nav="insight"><span class="bnav-ic"><svg viewBox="0 0 24 24"><path d="M12 3.5l1.7 4.8 4.8 1.7-4.8 1.7L12 16.5l-1.7-4.8L5.5 10l4.8-1.7z"/></svg></span>인사이트</button>
  <button class="bnav-i" data-nav="settings"><span class="bnav-ic"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></span>설정</button>
