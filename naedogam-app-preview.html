@@ -23,7 +23,7 @@
 <link rel="icon" type="image/png" href="favicon.png" />
 <link rel="apple-touch-icon" href="apple-touch-icon.png" />
 <link rel="manifest" href="manifest.json" />
-<meta name="theme-color" content="#18181B" />
+<meta name="theme-color" content="#201c16" />
 <meta name="apple-mobile-web-app-capable" content="yes" />
 <meta name="mobile-web-app-capable" content="yes" />
 <meta name="apple-mobile-web-app-status-bar-style" content="black" />
@@ -65,8 +65,8 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
   *{ box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
   html{ overflow-y:scroll; scrollbar-gutter:stable; }   /* 목록 길이와 무관하게 스크롤바 자리 고정 → 탭 전환 시 가로 안 밀림 */
   [data-theme="dark"]{
-    --paper:#0e1013; --card:#181a1f; --ink:#e7e8ec; --ink-soft:#9aa0aa;
-    --line:#2a2d34; --line-soft:#20232a; --accent-wash:#12281b; --ochre-wash:#2a220f;
+    --paper:#16130f; --card:#232019; --ink:#f6eddf; --ink-soft:#b3a794;
+    --line:#35302a; --line-soft:#2a251f; --accent-wash:#2a1f16; --ochre-wash:#2a220f;
   }
   [data-theme="dark"] .sw::after{ background:#d5d8de; }
   body{ margin:0; color:var(--ink); font-family:var(--sans); line-height:1.5; -webkit-font-smoothing:antialiased;
@@ -76,14 +76,14 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
   /* 마스트헤드(압축·상단 고정) */
   .masthead{ background:transparent; padding:0 0 6px; border-bottom:none; }
   .wrap{ max-width:600px; margin:0 auto; padding:0 16px calc(100px + env(safe-area-inset-bottom)); }
-  .mh-row{ display:flex; align-items:center; gap:7px; background:#18181B; border-radius:14px; margin:9px 0 0; padding:12px 14px; }
+  .mh-row{ display:flex; align-items:center; gap:7px; background:#201c16; border-radius:14px; margin:9px 0 0; padding:12px 14px; }
   .brandbtn{ display:flex; align-items:center; gap:9px; background:none; border:none; padding:0; cursor:pointer; }
   .brandmark{ display:block; flex-shrink:0; }
   .brandwm{ display:flex; flex-direction:column; align-items:flex-start; line-height:1; }
   .bwm-ko{ font-family:var(--sans); font-weight:800; font-size:20px; letter-spacing:.5px; color:#F7F5F0; }
   .bwm-en{ font-family:var(--mono); font-size:8.5px; letter-spacing:.32em; color:#6f6a62; margin-top:3px; }
   .mhver{ font-family:var(--mono); font-size:15px; font-weight:800; color:#E0483F; align-self:flex-end; margin:0 0 3px 5px; letter-spacing:.02em; background:rgba(224,72,63,.10); padding:1px 6px; border-radius:6px; }   /* 배포전: 적용여부 확인용으로 크게 (출시 때 축소) */
-  .mh-row .icon-btn{ background:transparent; border-color:#3a3a3d; color:#cfcbc3; flex-shrink:0; }
+  .mh-row .icon-btn{ background:transparent; border-color:#47413a; color:#cfcbc3; flex-shrink:0; }
   .brandbtn{ flex-shrink:0; }
   .mh-row .icon-btn:hover{ border-color:#F7F5F0; color:#F7F5F0; }
   #syncBtn{ font-size:18px; font-weight:700; line-height:1; padding-top:4px; padding-bottom:4px; }
@@ -473,7 +473,7 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
   .rf-seg{ display:flex; gap:6px; flex-wrap:wrap; margin-top:2px; }
   .rf-segbtn.on{ background:var(--ink); color:var(--paper); border-color:var(--ink); }
   .home-search-wrap{ margin:10px 0 2px; }
-  .home-search{ width:100%; box-sizing:border-box; font-size:15px; padding:11px 14px; border:1px solid #3a3a3d; border-radius:12px; background:#18181B; color:#F7F5F0; }
+  .home-search{ width:100%; box-sizing:border-box; font-size:15px; padding:11px 14px; border:1px solid #47413a; border-radius:12px; background:#201c16; color:#F7F5F0; }
   .home-search::placeholder{ color:#8a8a8f; }
   #homeSearchRes{ margin:6px 0 10px; }
   .hs-group{ margin:8px 0; }
@@ -814,7 +814,7 @@ body.home-dark .bnav-i.on .bnav-ic svg{ stroke:#f6eddf !important; }
 .ndh-wm b{ font-size:23px; font-weight:800; letter-spacing:-.05em; }
 .ndh-wm small{ font-size:9px; font-weight:800; letter-spacing:.28em; color:#c9bcac; margin-top:3px; }
 .ndh-prof{ width:41px; height:41px; border-radius:50%; border:1px solid rgba(255,255,255,.08); background:linear-gradient(145deg,#8a8177,#5f5952); cursor:pointer; flex:0 0 auto; }
-.ndh-tabs{ display:flex; gap:2px; overflow-x:auto; padding:7px; margin-bottom:16px; border:1px solid rgba(238,224,205,.13); border-radius:22px; background:linear-gradient(180deg,rgba(255,255,255,.026),rgba(255,255,255,.008)),rgba(35,31,27,.92); box-shadow:0 12px 30px rgba(0,0,0,.13); scrollbar-width:none; }
+.ndh-tabs{ display:flex; gap:2px; overflow-x:auto; -webkit-overflow-scrolling:touch; touch-action:pan-x; padding:7px; margin-bottom:16px; border:1px solid rgba(238,224,205,.13); border-radius:22px; background:linear-gradient(180deg,rgba(255,255,255,.026),rgba(255,255,255,.008)),rgba(35,31,27,.92); box-shadow:0 12px 30px rgba(0,0,0,.13); scrollbar-width:none; }
 .ndh-tabs::-webkit-scrollbar{ display:none; }
 .ndh-tab{ flex:1 0 auto; display:flex; flex-direction:column; align-items:center; gap:5px; min-width:56px; padding:8px 8px 6px; border:0; border-radius:16px; background:transparent; color:#dfd5c7; cursor:pointer; }
 .ndh-tab.on{ color:#fff6e8; background:linear-gradient(145deg,rgba(255,255,255,.13),rgba(255,255,255,.055)),#48423a; box-shadow:inset 0 1px 0 rgba(255,255,255,.08); }
@@ -908,8 +908,68 @@ body.home-dark .bnav-i.on .bnav-ic svg{ stroke:#f6eddf !important; }
 .cat-mrow .sz-seg .szb{ border:0; border-left:1px solid var(--line); background:var(--card); color:var(--sub); font-size:11px; font-weight:700; line-height:1; padding:6px 8px; cursor:pointer; }
 .cat-mrow .sz-seg .szb:first-child{ border-left:0; }
 .cat-mrow .sz-seg .szb.on{ background:#e0483f; color:#fff; }
+
+/* === 다크 통일 보정: 변수 안 쓰는 하드코딩 라이트 컴포넌트 (구조/글자만, 의미색은 유지) === */
+/* 1) 어두운 글자 → 밝게 */
+[data-theme="dark"] .mv-title,
+[data-theme="dark"] .body h3,
+[data-theme="dark"] .clx-date,
+[data-theme="dark"] .clx-work,
+[data-theme="dark"] .insLight,
+[data-theme="dark"] .insLight .mbTitle,
+[data-theme="dark"] .insLight .wtitle,
+[data-theme="dark"] .pdCell,
+[data-theme="dark"] .pdRecD,
+[data-theme="dark"] .pdDlg{ color:var(--ink); }
+[data-theme="dark"] .mv-sub{ color:var(--ink-soft); }
+
+/* 2) 인사이트 허브(라이트 모달) */
+[data-theme="dark"] .insLight{ background:var(--paper); color:var(--ink); }
+[data-theme="dark"] .insLight .wtop,
+[data-theme="dark"] .insLight .insCard{ background:var(--card); border-color:var(--line); color:var(--ink); }
+[data-theme="dark"] .insLight .insCard:hover{ background:var(--line-soft); }
+[data-theme="dark"] .insLight .wclose{ background:var(--card); border-color:var(--line); color:var(--ink); }
+
+/* 3) 생리주기 모달 — 겉/폼/칩/버튼만 어둡게, 배란·예측 등 의미색 셀은 유지 */
+[data-theme="dark"] .pdDlg,
+[data-theme="dark"] .pdBody,
+[data-theme="dark"] .pdRec{ background:var(--paper); }
+[data-theme="dark"] .pdHeroCell,
+[data-theme="dark"] .pdStat,
+[data-theme="dark"] .pdCalWrap,
+[data-theme="dark"] .pdSec,
+[data-theme="dark"] .pdForm,
+[data-theme="dark"] .pdIn,
+[data-theme="dark"] .pdSeg,
+[data-theme="dark"] .pdChip,
+[data-theme="dark"] .pdNav,
+[data-theme="dark"] .pdRecT i,
+[data-theme="dark"] .pdCancel,
+[data-theme="dark"] .pdDel{ background:var(--card); border-color:var(--line); color:var(--ink); }
+[data-theme="dark"] .pdIn::placeholder{ color:var(--ink-soft); }
+
+/* 4) 추천/추천리스트 카드·배지 (구조만) */
+[data-theme="dark"] .qrec-btn{ background:var(--card); border-color:var(--line); color:var(--ink); }
+[data-theme="dark"] .reco-item.done,
+[data-theme="dark"] .reco-item.on{ background:var(--card); border-color:var(--line); }
+[data-theme="dark"] .reco-badge.done,
+[data-theme="dark"] .reco-badge.part{ background:var(--accent-wash); border-color:var(--line); }
+[data-theme="dark"] .rccard .rc-star{ background:var(--accent-wash); }
+[data-theme="dark"] .rccard .rc-img{ background:var(--line-soft); }
+
+/* 5) 태그·작은 배지 (밝은 회색/라벤더 → 어둡게) */
+[data-theme="dark"] .tag,
+[data-theme="dark"] .gtag,
+[data-theme="dark"] .rbadge{ background:var(--line-soft); border-color:var(--line); color:var(--ink-soft); }
+[data-theme="dark"] .set-menu-item:active{ background:var(--line-soft); }
+
+/* 6) 표지 자리(빈 이미지) 밝은 베이지 → 따뜻한 다크 */
+[data-theme="dark"] .abcard .ab-cover,
+[data-theme="dark"] .sccard .sc-cover,
+[data-theme="dark"] .tvcard .tv-cover{ background:var(--line-soft); }
+
 </style>
-<script>try{var _t=localStorage.getItem("app:nd.theme")||localStorage.getItem("nd.theme");if(_t==="dark")document.documentElement.setAttribute("data-theme","dark");}catch(e){}</script>
+<script>try{var _t=localStorage.getItem("app:nd.theme")||localStorage.getItem("nd.theme");if(_t!=="light")document.documentElement.setAttribute("data-theme","dark");}catch(e){}</script>
 <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@latest/dist/web/static/pretendard.min.css">
 </head>
 <body>
@@ -920,7 +980,7 @@ body.home-dark .bnav-i.on .bnav-ic svg{ stroke:#f6eddf !important; }
         <svg class="brandmark" width="40" height="30" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#F7F5F0"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#F7F5F0"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#F7F5F0"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#F7F5F0"/></svg>
         <span class="brandwm"><span class="bwm-ko">내도감</span><span class="bwm-en">NAEDOGAM</span></span>
       </button>
-      <span class="mhver">v267β</span>
+      <span class="mhver">v269β</span>
       <span class="spacer"></span>
       <span class="src-chip" id="srcChip" style="display:none">데모</span>
       <button class="icon-btn" id="searchToggle" type="button" style="display:none">🔍</button>
@@ -960,7 +1020,7 @@ body.home-dark .bnav-i.on .bnav-ic svg{ stroke:#f6eddf !important; }
 <dialog id="rec"></dialog>
 <dialog id="dash"></dialog>
 <dialog id="catbuilder"></dialog>
-<div id="gate" style="display:none;position:fixed;inset:0;z-index:200;background:#18181B;color:#F7F5F0;flex-direction:column;align-items:center;justify-content:center;padding:24px;text-align:center;font-family:var(--sans)">
+<div id="gate" style="display:none;position:fixed;inset:0;z-index:200;background:#201c16;color:#F7F5F0;flex-direction:column;align-items:center;justify-content:center;padding:24px;text-align:center;font-family:var(--sans)">
   <svg width="66" height="58" viewBox="18 26 70 56" aria-hidden="true" style="margin-bottom:10px"><rect x="22" y="46" width="11" height="32" rx="4" fill="#F7F5F0"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#F7F5F0"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#F7F5F0"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#F7F5F0"/></svg>
   <div style="font-size:21px;font-weight:700;margin-bottom:8px">내도감</div>
   <div style="font-size:13px;color:#a1a1aa;line-height:1.65;max-width:300px;margin-bottom:22px">구글로 로그인하면 <b style="color:#F7F5F0">내 구글드라이브에 내 시트</b>가 자동으로 만들어지고, 모든 기록이 거기 <b style="color:#F7F5F0">영원히</b> 저장됩니다. (앱이 만든 파일만 접근)</div>
