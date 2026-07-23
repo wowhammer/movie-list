@@ -890,6 +890,19 @@ body.home-dark .bnav-i.on .bnav-ic svg{ stroke:#f6eddf !important; }
 .ndhome .home-empty .btn{ margin-top:16px; background:#e0483f; color:#fff; border:none; border-radius:10px; padding:12px 22px; font-size:15px; font-weight:600; cursor:pointer; }
 @media (max-width:374px){ .ndhome{ padding-left:10px; padding-right:10px; } .ndhome .metric b{ font-size:35px; } .ndhome .food{ grid-template-columns:minmax(0,.76fr) minmax(150px,1.24fr); } }
 
+/* ── 전용 검색 화면 ── */
+#ndSearchDlg{ border:none; padding:0; margin:0; width:100vw; max-width:100vw; height:100vh; max-height:100vh; background:linear-gradient(180deg,#1b1916,#0d0d0c); color:#f6eddf; font-family:Pretendard,"Apple SD Gothic Neo","Noto Sans KR",system-ui,-apple-system,sans-serif; }
+#ndSearchDlg::backdrop{ background:rgba(0,0,0,.5); }
+#ndSearchDlg .nsHead{ position:sticky; top:0; display:flex; gap:8px; align-items:center; padding:calc(14px + env(safe-area-inset-top)) 14px 10px; background:#141210; border-bottom:1px solid rgba(238,224,205,.08); }
+#ndSearchDlg .home-search{ flex:1; background:#211e1a; border:1px solid rgba(238,224,205,.15); color:#f6eddf; }
+#ndSearchDlg .home-search::placeholder{ color:#9a8f80; }
+#ndSearchDlg .nsClose{ background:none; border:none; color:#cfc3b5; font-size:14px; font-weight:700; cursor:pointer; padding:8px 6px; flex:0 0 auto; }
+#ndSearchDlg .nsRes{ padding:8px 14px calc(28px + env(safe-area-inset-bottom)); }
+#ndSearchDlg .hs-cat{ color:#cfc3b5; } #ndSearchDlg .hs-cat span{ color:#e0a86a; }
+#ndSearchDlg .hs-item{ background:#211e1a; border:1px solid rgba(238,224,205,.1); }
+#ndSearchDlg .hs-item b{ color:#f6eddf; } #ndSearchDlg .hs-item span{ color:#b8ab97; }
+#ndSearchDlg .hs-none{ color:#cfc3b5; }
+
 </style>
 <script>try{var _t=localStorage.getItem("app:nd.theme")||localStorage.getItem("nd.theme");if(_t==="dark")document.documentElement.setAttribute("data-theme","dark");}catch(e){}</script>
 <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@latest/dist/web/static/pretendard.min.css">
@@ -2030,6 +2043,18 @@ function renderHome(){
     if(_need.length){ let _src; try{ _src=sheetSrc(); }catch(e){ _src=null; }
       if(_src && typeof _src.listMany==="function"){ _src.listMany(_need).then(map=>{ Object.keys(map||{}).forEach(id=>_apply(id,map[id])); }).catch(()=>{ _need.forEach(_one); }); }
       else { _need.forEach(_one); } } }
+}
+function openSearch(){
+  var d=document.getElementById("ndSearchDlg");
+  if(!d){ d=document.createElement("dialog"); d.id="ndSearchDlg"; document.body.appendChild(d);
+    d.addEventListener("close",function(){ try{ document.querySelectorAll(".bnav-i").forEach(function(x){x.classList.remove("on");}); var h=document.querySelector('.bnav-i[data-nav="home"]'); if(h) h.classList.add("on"); }catch(e){} }); }
+  d.innerHTML='<div class="nsHead"><input id="homeSearch" class="home-search" type="search" placeholder="🔍 전체 검색 — 제목·이름" autocomplete="off"><button class="nsClose" type="button">닫기</button></div><div id="homeSearchRes" class="nsRes"></div>';
+  d.showModal();
+  var inp=d.querySelector("#homeSearch"), t=null;
+  inp.addEventListener("input",function(){ clearTimeout(t); t=setTimeout(function(){ runHomeSearch(inp.value); },200); });
+  d.querySelector(".nsClose").onclick=function(){ d.close(); };
+  d.querySelector("#homeSearchRes").addEventListener("click",function(e){ if(e.target.closest&&e.target.closest(".hs-item")) setTimeout(function(){ d.close(); },0); });
+  setTimeout(function(){ try{ inp.focus(); }catch(e){} },80);
 }
 /* 분야가 선언한 source.type 에 따라 출처를 고른다.
    appsscript → 영화·차계부(기존 방식) / sheet → 도서·명산·러닝(기존 시트에 탭으로) */
@@ -5462,7 +5487,7 @@ $("#brandBtn").addEventListener("click",goHome);
   try{ if(!store.getItem("nd.mbtiSeeded")){ var _aa=getActive(); if(MANIFESTS.mbti && _aa.indexOf("mbti")<0){ _aa.push("mbti"); setActive(_aa); } store.setItem("nd.mbtiSeeded","1"); } }catch(e){}
   try{ if(!store.getItem("nd.seedPeriod")){ var _ap=getActive(); if(MANIFESTS.period && _ap.indexOf("period")<0){ _ap.push("period"); setActive(_ap); } store.setItem("nd.seedPeriod","1"); } }catch(e){}
   try{ if(!store.getItem("nd.seed234")){ var _ab=getActive(); ["assets","recipes"].forEach(function(id){ if(MANIFESTS[id] && _ab.indexOf(id)<0) _ab.push(id); }); setActive(_ab); store.setItem("nd.seed234","1"); } }catch(e){}
-  document.addEventListener("click",function(e){ var b=e.target.closest?e.target.closest(".bnav-i"):null; if(!b) return; var n=b.dataset.nav; document.querySelectorAll(".bnav-i").forEach(function(x){x.classList.remove("on");}); b.classList.add("on"); if(n==="home") goHome(); else if(n==="stats") openDashboard(); else if(n==="insight") openInsight(); else if(n==="settings") openSettings(); });
+  document.addEventListener("click",function(e){ var b=e.target.closest?e.target.closest(".bnav-i"):null; if(!b) return; var n=b.dataset.nav; document.querySelectorAll(".bnav-i").forEach(function(x){x.classList.remove("on");}); b.classList.add("on"); if(n==="home") goHome(); else if(n==="search") openSearch(); else if(n==="stats") openDashboard(); else if(n==="insight") openInsight(); else if(n==="settings") openSettings(); });
 $("#searchToggle").addEventListener("click",()=>{ state.searchOpen=!state.searchOpen; applySearchUI(MANIFESTS[state.domain]); if(state.searchOpen) $("#search").focus(); });
 $("#tabs").addEventListener("click",e=>{ const t=e.target.closest(".tab"); if(t) openDomain(t.dataset.id); });
 $("#search").addEventListener("input",e=>{ state.query=e.target.value; state.page=0; loadAndRender(); });
@@ -5599,6 +5624,7 @@ boot();
 </style>
 <nav class="bnav" id="bnav">
  <button class="bnav-i on" data-nav="home"><span class="bnav-ic"><svg viewBox="0 0 24 24"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V20h14V9.5"/></svg></span>홈</button>
+ <button class="bnav-i" data-nav="search"><span class="bnav-ic"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg></span>검색</button>
  <button class="bnav-i" data-nav="stats"><span class="bnav-ic"><svg viewBox="0 0 24 24"><path d="M4 20h16"/><path d="M7 20v-7M12 20V6M17 20v-4"/></svg></span>통계</button>
  <button class="bnav-i" data-nav="insight"><span class="bnav-ic"><svg viewBox="0 0 24 24"><path d="M12 3.5l1.7 4.8 4.8 1.7-4.8 1.7L12 16.5l-1.7-4.8L5.5 10l4.8-1.7z"/></svg></span>인사이트</button>
  <button class="bnav-i" data-nav="settings"><span class="bnav-ic"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></span>설정</button>
