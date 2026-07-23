@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>내도감</title><!-- v268 rebuild nudge -->
+<title>내도감</title>
 
 <!-- 카톡·슬랙·페북 링크 미리보기 (Open Graph) -->
 <meta property="og:type" content="website" />
@@ -23,7 +23,7 @@
 <link rel="icon" type="image/png" href="favicon.png" />
 <link rel="apple-touch-icon" href="apple-touch-icon.png" />
 <link rel="manifest" href="manifest.json" />
-<meta name="theme-color" content="#18181B" />
+<meta name="theme-color" content="#201c16" />
 <meta name="apple-mobile-web-app-capable" content="yes" />
 <meta name="mobile-web-app-capable" content="yes" />
 <meta name="apple-mobile-web-app-status-bar-style" content="black" />
@@ -65,27 +65,27 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
   *{ box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
   html{ overflow-y:scroll; scrollbar-gutter:stable; }   /* 목록 길이와 무관하게 스크롤바 자리 고정 → 탭 전환 시 가로 안 밀림 */
   [data-theme="dark"]{
-    --paper:#0e1013; --card:#181a1f; --ink:#e7e8ec; --ink-soft:#9aa0aa;
-    --line:#2a2d34; --line-soft:#20232a; --accent-wash:#12281b; --ochre-wash:#2a220f;
+    --paper:#16130f; --card:#232019; --ink:#f6eddf; --ink-soft:#b3a794;
+    --line:#35302a; --line-soft:#2a251f; --accent-wash:#2a1f16; --ochre-wash:#2a220f;
   }
   [data-theme="dark"] .sw::after{ background:#d5d8de; }
   body{ margin:0; color:var(--ink); font-family:var(--sans); line-height:1.5; -webkit-font-smoothing:antialiased;
     background-color:var(--paper); }
-  .wrap{ max-width:600px; margin:0 auto; padding:0 16px 96px; }
+  .wrap{ max-width:520px; margin:0 auto; padding:0 12px 96px; }
 
   /* 마스트헤드(압축·상단 고정) */
   .masthead{ background:transparent; padding:0 0 6px; border-bottom:none; }
-  .wrap{ max-width:600px; margin:0 auto; padding:0 16px calc(100px + env(safe-area-inset-bottom)); }
-  .mh-row{ display:flex; align-items:center; gap:7px; background:#18181B; border-radius:14px; margin:9px 0 0; padding:12px 14px; }
+  .wrap{ max-width:520px; margin:0 auto; padding:0 12px calc(100px + env(safe-area-inset-bottom)); }
+  .mh-row{ display:flex; align-items:center; gap:7px; background:#201c16; border-radius:14px; margin:9px 0 0; padding:12px 14px; }
   .brandbtn{ display:flex; align-items:center; gap:9px; background:none; border:none; padding:0; cursor:pointer; }
   .brandmark{ display:block; flex-shrink:0; }
   .brandwm{ display:flex; flex-direction:column; align-items:flex-start; line-height:1; }
-  .bwm-ko{ font-family:var(--sans); font-weight:800; font-size:20px; letter-spacing:.5px; color:#F7F5F0; }
-  .bwm-en{ font-family:var(--mono); font-size:8.5px; letter-spacing:.32em; color:#6f6a62; margin-top:3px; }
-  .mhver{ font-family:var(--mono); font-size:15px; font-weight:800; color:#E0483F; align-self:flex-end; margin:0 0 3px 5px; letter-spacing:.02em; background:rgba(224,72,63,.10); padding:1px 6px; border-radius:6px; }   /* 배포전: 적용여부 확인용으로 크게 (출시 때 축소) */
-  .mh-row .icon-btn{ background:transparent; border-color:#3a3a3d; color:#cfcbc3; flex-shrink:0; }
+  .bwm-ko{ font-family:var(--sans); font-weight:800; font-size:20px; letter-spacing:.5px; color:#f6eddf; }
+  .bwm-en{ font-family:var(--mono); font-size:8.5px; letter-spacing:.32em; color:#c9bcac; margin-top:3px; }
+  .mhver{ font-family:var(--mono); font-size:11px; font-weight:800; color:#E0483F; align-self:flex-end; margin:0 0 3px 5px; letter-spacing:.02em; background:rgba(224,72,63,.10); padding:1px 6px; border-radius:6px; }   /* 배포전: 적용여부 확인용으로 크게 (출시 때 축소) */
+  .mh-row .icon-btn{ background:transparent; border-color:#47413a; color:#cfcbc3; flex-shrink:0; }
   .brandbtn{ flex-shrink:0; }
-  .mh-row .icon-btn:hover{ border-color:#F7F5F0; color:#F7F5F0; }
+  .mh-row .icon-btn:hover{ border-color:#f6eddf; color:#f6eddf; }
   #syncBtn{ font-size:18px; font-weight:700; line-height:1; padding-top:4px; padding-bottom:4px; }
   .icon-btn.spin{ animation:ndspin .8s linear infinite; pointer-events:none; }
   @keyframes ndspin{ to{ transform:rotate(360deg); } }
@@ -473,7 +473,7 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
   .rf-seg{ display:flex; gap:6px; flex-wrap:wrap; margin-top:2px; }
   .rf-segbtn.on{ background:var(--ink); color:var(--paper); border-color:var(--ink); }
   .home-search-wrap{ margin:10px 0 2px; }
-  .home-search{ width:100%; box-sizing:border-box; font-size:15px; padding:11px 14px; border:1px solid #3a3a3d; border-radius:12px; background:#18181B; color:#F7F5F0; }
+  .home-search{ width:100%; box-sizing:border-box; font-size:15px; padding:11px 14px; border:1px solid #47413a; border-radius:12px; background:#201c16; color:#f6eddf; }
   .home-search::placeholder{ color:#8a8a8f; }
   #homeSearchRes{ margin:6px 0 10px; }
   .hs-group{ margin:8px 0; }
@@ -808,13 +808,13 @@ body.home-dark .bnav-i.on .bnav-ic svg{ stroke:#f6eddf !important; }
   width:min(100%,520px); margin:0 auto; padding:14px 12px calc(116px + env(safe-area-inset-bottom)); -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility; }
 .ndhome .emj{ font-size:20px; }
 .ndhome .ci-svg{ width:22px; height:22px; }
-.ndh-top{ display:flex; align-items:center; justify-content:space-between; padding:2px 2px 16px; }
+.ndh-top{ display:flex; align-items:center; justify-content:space-between; padding:2px 2px 16px; font-family:Pretendard,"Apple SD Gothic Neo","Noto Sans KR",system-ui,-apple-system,sans-serif; -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility; }
 .ndh-brand{ display:flex; align-items:center; gap:11px; }
 .ndh-wm{ display:flex; flex-direction:column; line-height:1; }
 .ndh-wm b{ font-size:23px; font-weight:800; letter-spacing:-.05em; }
 .ndh-wm small{ font-size:9px; font-weight:800; letter-spacing:.28em; color:#c9bcac; margin-top:3px; }
 .ndh-prof{ width:41px; height:41px; border-radius:50%; border:1px solid rgba(255,255,255,.08); background:linear-gradient(145deg,#8a8177,#5f5952); cursor:pointer; flex:0 0 auto; }
-.ndh-tabs{ display:flex; gap:2px; overflow-x:auto; padding:7px; margin-bottom:16px; border:1px solid rgba(238,224,205,.13); border-radius:22px; background:linear-gradient(180deg,rgba(255,255,255,.026),rgba(255,255,255,.008)),rgba(35,31,27,.92); box-shadow:0 12px 30px rgba(0,0,0,.13); scrollbar-width:none; }
+.ndh-tabs{ display:flex; gap:2px; overflow-x:auto; -webkit-overflow-scrolling:touch; touch-action:pan-x; padding:7px; margin-bottom:16px; border:1px solid rgba(238,224,205,.13); border-radius:22px; background:linear-gradient(180deg,rgba(255,255,255,.026),rgba(255,255,255,.008)),rgba(35,31,27,.92); box-shadow:0 12px 30px rgba(0,0,0,.13); scrollbar-width:none; }
 .ndh-tabs::-webkit-scrollbar{ display:none; }
 .ndh-tab{ flex:1 0 auto; display:flex; flex-direction:column; align-items:center; gap:5px; min-width:56px; padding:8px 8px 6px; border:0; border-radius:16px; background:transparent; color:#dfd5c7; cursor:pointer; }
 .ndh-tab.on{ color:#fff6e8; background:linear-gradient(145deg,rgba(255,255,255,.13),rgba(255,255,255,.055)),#48423a; box-shadow:inset 0 1px 0 rgba(255,255,255,.08); }
@@ -908,8 +908,130 @@ body.home-dark .bnav-i.on .bnav-ic svg{ stroke:#f6eddf !important; }
 .cat-mrow .sz-seg .szb{ border:0; border-left:1px solid var(--line); background:var(--card); color:var(--sub); font-size:11px; font-weight:700; line-height:1; padding:6px 8px; cursor:pointer; }
 .cat-mrow .sz-seg .szb:first-child{ border-left:0; }
 .cat-mrow .sz-seg .szb.on{ background:#e0483f; color:#fff; }
+
+/* === 다크 통일 보정: 변수 안 쓰는 하드코딩 라이트 컴포넌트 (구조/글자만, 의미색은 유지) === */
+/* 1) 어두운 글자 → 밝게 */
+[data-theme="dark"] .mv-title,
+[data-theme="dark"] .body h3,
+[data-theme="dark"] .clx-date,
+[data-theme="dark"] .clx-work,
+[data-theme="dark"] .insLight,
+[data-theme="dark"] .insLight .mbTitle,
+[data-theme="dark"] .insLight .wtitle,
+[data-theme="dark"] .pdCell,
+[data-theme="dark"] .pdRecD,
+[data-theme="dark"] .pdDlg{ color:var(--ink); }
+[data-theme="dark"] .mv-sub{ color:var(--ink-soft); }
+
+/* 2) 인사이트 허브(라이트 모달) */
+[data-theme="dark"] .insLight{ background:var(--paper); color:var(--ink); }
+[data-theme="dark"] .insLight .wtop,
+[data-theme="dark"] .insLight .insCard{ background:var(--card); border-color:var(--line); color:var(--ink); }
+[data-theme="dark"] .insLight .insCard:hover{ background:var(--line-soft); }
+[data-theme="dark"] .insLight .wclose{ background:var(--card); border-color:var(--line); color:var(--ink); }
+
+/* 3) 생리주기 모달 — 겉/폼/칩/버튼만 어둡게, 배란·예측 등 의미색 셀은 유지 */
+[data-theme="dark"] .pdDlg,
+[data-theme="dark"] .pdBody,
+[data-theme="dark"] .pdRec{ background:var(--paper); }
+[data-theme="dark"] .pdHeroCell,
+[data-theme="dark"] .pdStat,
+[data-theme="dark"] .pdCalWrap,
+[data-theme="dark"] .pdSec,
+[data-theme="dark"] .pdForm,
+[data-theme="dark"] .pdIn,
+[data-theme="dark"] .pdSeg,
+[data-theme="dark"] .pdChip,
+[data-theme="dark"] .pdNav,
+[data-theme="dark"] .pdRecT i,
+[data-theme="dark"] .pdCancel,
+[data-theme="dark"] .pdDel{ background:var(--card); border-color:var(--line); color:var(--ink); }
+[data-theme="dark"] .pdIn::placeholder{ color:var(--ink-soft); }
+
+/* 4) 추천/추천리스트 카드·배지 (구조만) */
+[data-theme="dark"] .qrec-btn{ background:var(--card); border-color:var(--line); color:var(--ink); }
+[data-theme="dark"] .reco-item.done,
+[data-theme="dark"] .reco-item.on{ background:var(--card); border-color:var(--line); }
+[data-theme="dark"] .reco-badge.done,
+[data-theme="dark"] .reco-badge.part{ background:var(--accent-wash); border-color:var(--line); }
+[data-theme="dark"] .rccard .rc-star{ background:var(--accent-wash); }
+[data-theme="dark"] .rccard .rc-img{ background:var(--line-soft); }
+
+/* 5) 태그·작은 배지 (밝은 회색/라벤더 → 어둡게) */
+[data-theme="dark"] .tag,
+[data-theme="dark"] .gtag,
+[data-theme="dark"] .rbadge{ background:var(--line-soft); border-color:var(--line); color:var(--ink-soft); }
+[data-theme="dark"] .set-menu-item:active{ background:var(--line-soft); }
+
+/* 6) 표지 자리(빈 이미지) 밝은 베이지 → 따뜻한 다크 */
+[data-theme="dark"] .abcard .ab-cover,
+[data-theme="dark"] .sccard .sc-cover,
+[data-theme="dark"] .tvcard .tv-cover{ background:var(--line-soft); }
+
+
+/* === 서브 상단 탭 = 홈과 완전 동일한 둥근 필(크기·여백) + 카테고리 색(#9) === */
+.tabs{ border:1px solid rgba(238,224,205,.13); border-radius:22px; padding:7px; gap:2px; margin:0 0 14px; position:static !important;
+  background:linear-gradient(180deg,rgba(255,255,255,.026),rgba(255,255,255,.008)),rgba(35,31,27,.92);
+  box-shadow:0 12px 30px rgba(0,0,0,.16); }
+.tabs .tab{ flex:1 0 auto; min-width:56px; flex-direction:column; align-items:center; gap:5px;
+  border:0 !important; border-radius:16px; padding:8px 8px 6px; color:#dfd5c7; }
+.tabs .tab .tabname{ font-size:12px; font-weight:720; letter-spacing:-.04em; white-space:nowrap; }
+.tabs .tab[aria-selected="true"]{ color:#fff6e8; font-weight:720; box-shadow:0 4px 12px rgba(0,0,0,.28); }
+.tabs .tab[aria-selected="true"] svg{ stroke:#fff6e8 !important; color:#fff6e8 !important; opacity:1; }
+.tabs .tab[aria-selected="true"] .tabemo,.tabs .tab[aria-selected="true"] .tabico{ opacity:1; }
+
+
+/* #4 다크에서 흰색(var(--ink))이라 안 보이던 선택상태 → 초록 강조 */
+[data-theme="dark"] .vseg.on,
+[data-theme="dark"] .dv-btn.on,
+[data-theme="dark"] .viewseg .dv-btn.on,
+[data-theme="dark"] .sort-btn.on,
+[data-theme="dark"] .rf-segbtn.on{ background:var(--accent); color:#fff; border-color:var(--accent); }
+[data-theme="dark"] .reco-item.on{ background:var(--line-soft); }
+/* #4 사진첨부(드롭존) 테두리 또렷하게 */
+[data-theme="dark"] .rf-imgzone{ border-color:#5a5044; background:var(--line-soft); }
+/* #2 서브 상단 = 홈처럼 투명 배경 + 큰 로고(메인 로고 유지) */
+.masthead .mh-row{ background:transparent !important; border-radius:0 !important; padding:6px 2px 12px !important; gap:11px; }
+.brandmark{ width:47px !important; height:35px !important; }
+.bwm-ko{ font-size:23px !important; }
+#syncBtn.icon-btn{ width:41px; height:41px; border-radius:50%; border:1px solid rgba(238,224,205,.15);
+  background:linear-gradient(145deg,rgba(255,255,255,.06),rgba(255,255,255,.02)),rgba(35,31,27,.92); color:#f6eddf; font-size:19px; }
+/* #5 홈 동기화 버튼(달=프로필 원 대체) */
+.ndh-sync{ width:41px; height:41px; border-radius:50%; border:1px solid rgba(238,224,205,.15);
+  background:linear-gradient(145deg,rgba(255,255,255,.06),rgba(255,255,255,.02)),rgba(35,31,27,.92); color:#f6eddf;
+  font-size:20px; line-height:1; cursor:pointer; display:flex; align-items:center; justify-content:center; flex:0 0 auto; box-shadow:0 6px 16px rgba(0,0,0,.2); }
+.ndh-sync:active{ transform:rotate(180deg); transition:transform .3s; }
+.ndh-ver{ align-self:center !important; margin:0 0 0 2px !important; }
+/* #3 홈 아이콘 보통 크기로(탭·카드 글리프) */
+.ndhome .ci-svg{ width:19px; height:19px; }
+.ndhome .emj{ font-size:17px; }
+.tabs .tab svg,.tabs .tab .ci-svg{ width:19px; height:19px; }
+.ndhome .nc-glyph .ci-svg{ width:38px; height:38px; }
+.ndhome .collection-card .coll-glyph .ci-svg{ width:40px; height:40px; }
+
+
+body{ background:radial-gradient(circle at 50% -10%, rgba(102,78,57,.16), transparent 560px), linear-gradient(180deg,#1b1916,#0d0d0c 100%) !important; }
+.masthead{ padding-top:14px !important; }
+.masthead .mh-row{ padding:2px 2px 16px !important; gap:11px; }
+.brandbtn{ gap:11px !important; }
+
+
+.masthead{ padding:14px 0 0 !important; }
+.masthead .mh-row{ margin:0 !important; padding:2px 2px 16px !important; align-items:center; }
+/* 서브 버전 배지 위치도 홈과 동일하게(가운데 정렬) */
+.masthead .mhver{ align-self:center !important; margin:0 0 0 2px !important; }
+/* 홈 활성 탭도 카테고리색(서브와 동일하게) — 회색 대신 */
+.ndh-tab.on svg{ stroke:#fff6e8 !important; color:#fff6e8 !important; }
+
+
+.tabs .tab .tabico{ color:#dfd5c7 !important; width:19px !important; height:19px !important; opacity:1 !important; }
+.tabs .tab[aria-selected="true"] .tabico{ color:#fff6e8 !important; }
+/* v282β: 서브 탭 = 홈 탭과 완전 동일 구현(.ndh-tab). 아이콘 크기를 스코프 밖에서도 보장 */
+.ndh-tab .ci-svg{ width:19px !important; height:19px !important; }
+.ndh-tab .emj{ font-size:17px; }
+
 </style>
-<script>try{var _t=localStorage.getItem("app:nd.theme")||localStorage.getItem("nd.theme");if(_t==="dark")document.documentElement.setAttribute("data-theme","dark");}catch(e){}</script>
+<script>try{var _t=localStorage.getItem("app:nd.theme")||localStorage.getItem("nd.theme");document.documentElement.setAttribute("data-theme","dark");}catch(e){}</script>
 <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@latest/dist/web/static/pretendard.min.css">
 </head>
 <body>
@@ -917,10 +1039,10 @@ body.home-dark .bnav-i.on .bnav-ic svg{ stroke:#f6eddf !important; }
   <header class="masthead">
     <div class="mh-row">
       <button id="brandBtn" type="button" class="brandbtn" aria-label="홈"><!-- Naedogam DEPLOY-build · v141 토큰캐시 (구글 로그인 + 각자 시트 · 범용 분야 · 영화/차계부 제외) -->
-        <svg class="brandmark" width="40" height="30" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#F7F5F0"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#F7F5F0"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#F7F5F0"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#F7F5F0"/></svg>
+        <svg class="brandmark" width="40" height="30" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg>
         <span class="brandwm"><span class="bwm-ko">내도감</span><span class="bwm-en">NAEDOGAM</span></span>
       </button>
-      <span class="mhver">v268</span>
+      <span class="mhver">v282β</span>
       <span class="spacer"></span>
       <span class="src-chip" id="srcChip" style="display:none">데모</span>
       <button class="icon-btn" id="searchToggle" type="button" style="display:none">🔍</button>
@@ -960,10 +1082,10 @@ body.home-dark .bnav-i.on .bnav-ic svg{ stroke:#f6eddf !important; }
 <dialog id="rec"></dialog>
 <dialog id="dash"></dialog>
 <dialog id="catbuilder"></dialog>
-<div id="gate" style="display:none;position:fixed;inset:0;z-index:200;background:#18181B;color:#F7F5F0;flex-direction:column;align-items:center;justify-content:center;padding:24px;text-align:center;font-family:var(--sans)">
-  <svg width="66" height="58" viewBox="18 26 70 56" aria-hidden="true" style="margin-bottom:10px"><rect x="22" y="46" width="11" height="32" rx="4" fill="#F7F5F0"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#F7F5F0"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#F7F5F0"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#F7F5F0"/></svg>
+<div id="gate" style="display:none;position:fixed;inset:0;z-index:200;background:#201c16;color:#f6eddf;flex-direction:column;align-items:center;justify-content:center;padding:24px;text-align:center;font-family:var(--sans)">
+  <svg width="66" height="58" viewBox="18 26 70 56" aria-hidden="true" style="margin-bottom:10px"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg>
   <div style="font-size:21px;font-weight:700;margin-bottom:8px">내도감</div>
-  <div style="font-size:13px;color:#a1a1aa;line-height:1.65;max-width:300px;margin-bottom:22px">구글로 로그인하면 <b style="color:#F7F5F0">내 구글드라이브에 내 시트</b>가 자동으로 만들어지고, 모든 기록이 거기 <b style="color:#F7F5F0">영원히</b> 저장됩니다. (앱이 만든 파일만 접근)</div>
+  <div style="font-size:13px;color:#a1a1aa;line-height:1.65;max-width:300px;margin-bottom:22px">구글로 로그인하면 <b style="color:#f6eddf">내 구글드라이브에 내 시트</b>가 자동으로 만들어지고, 모든 기록이 거기 <b style="color:#f6eddf">영원히</b> 저장됩니다. (앱이 만든 파일만 접근)</div>
   <button id="gateBtn" style="background:#E0483F;color:#fff;border:none;border-radius:10px;padding:13px 26px;font-size:15px;font-weight:600;cursor:pointer">구글로 시작하기</button>
   <div id="gateMsg" style="font-size:12px;color:#a1a1aa;margin-top:14px;min-height:16px;max-width:300px"></div>
 </div>
@@ -1975,7 +2097,7 @@ function openDomain(id){ if(id==="mbti"){ openMbti(); return; } if(id==="period"
 
 /* 홈: 켜둔 카테고리를 카드로. 건수는 한 번 열어본 분야만 표시(홈을 빠르게 유지). */
 function ndDeep(h){ if(typeof h!=="string"||h.charAt(0)!=="#") h="#8a7a6a"; var n=parseInt(h.slice(1),16),r=(n>>16)&255,g=(n>>8)&255,b=n&255; function d(x,f){return Math.round(x*f);} return "linear-gradient(145deg,rgb("+d(r,.5)+","+d(g,.5)+","+d(b,.5)+"),rgb("+d(r,.28)+","+d(g,.28)+","+d(b,.28)+"))"; }
-var ND_LOGO_HTML='<div class="ndh-brand"><svg width="47" height="35" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg><div class="ndh-wm"><b>내도감</b><small>NAEDOGAM</small></div></div><button class="ndh-prof" type="button" aria-label="설정" onclick="try{openSettings()}catch(e){}"></button>';
+var ND_LOGO_HTML='<div class="ndh-brand"><svg width="47" height="35" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg><div class="ndh-wm"><b>내도감</b><small>NAEDOGAM</small></div><span class="mhver ndh-ver">v282β</span></div><button class="ndh-sync" type="button" title="동기화" aria-label="동기화" onclick="try{syncNow()}catch(e){}">↻</button>';
 /* 홈 카드 크기: wide(넓게=한 줄 전체) · half(보통=한 줄 2개) · mini(작게=하단 3칸). 기본값=프리셋 */
 var ND_PRESET_SIZE={running:"wide",food:"wide",recipes:"wide",movies:"half",books:"half",period:"half",diary:"half",travel:"half",mountains:"half",culture:"half",albums:"half",cellar:"half",scrap:"half",wish:"half",gift:"half",pet:"half"};
 function getHomeSizes(){ try{ return JSON.parse(store.getItem("nd.homesize")||"{}")||{}; }catch(e){ return {}; } }
@@ -2034,7 +2156,7 @@ function renderHome(){
   });
   flush();
 
-  const tabs = `<div class="ndh-tabs">`+active.map((m,i)=>`<button class="ndh-tab${i===0?" on":""}" data-id="${m.id}">${iconOf(m)}<span>${m.title}</span></button>`).join("")+`</div>`;
+  const tabs = `<div class="ndh-tabs">`+active.map((m,i)=>`<button class="ndh-tab${i===0?" on":""}" data-id="${m.id}"${i===0?` style="background:${ND_COLORS[m.id]||"#48423a"};color:#fff6e8"`:""}>${iconOf(m)}<span>${m.title}</span></button>`).join("")+`</div>`;
   home.innerHTML=`<div class="ndhome"><div class="ndh-top">${ND_LOGO_HTML}</div>${tabs}<div class="ndh-dash">${heroCard}${out}</div></div>`;
   home.querySelectorAll(".card[data-id],.ndh-tab[data-id]").forEach(b=>b.onclick=()=>openDomain(b.dataset.id));
 
@@ -2273,9 +2395,9 @@ const HOME_SOON=[
 function tabIco(id, m){ const ic=ND_ICONS[id]; const _c=ND_COLORS[id]||"currentColor";
   return ic ? `<svg class="tabico" style="color:${_c}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="${ic}"/></svg>`
             : `<span class="tabemo">${m.icon}</span>`; }
-function renderTabs(){ const tw=$("#tabs"); tw.innerHTML=getActive().map(id=>{ const m=MANIFESTS[id]; if(!m) return "";
-  return `<button class="tab" role="tab" data-id="${id}" aria-selected="${id===state.domain}">${tabIco(id,m)} ${m.title}</button>`; }).join("");
-  const _sel=tw.querySelector('.tab[aria-selected="true"]'); if(_sel){ tw.scrollLeft=Math.max(0,_sel.offsetLeft-(tw.clientWidth-_sel.offsetWidth)/2); } }
+function renderTabs(){ const tw=$("#tabs"); tw.className="ndh-tabs"; const _ndics=d=>'<svg class="ci-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="'+d+'"/></svg>'; const _ndicon=m=> ND_ICONS[m.id]?_ndics(ND_ICONS[m.id]):'<span class="emj">'+m.icon+'</span>'; tw.innerHTML=getActive().map(id=>{ const m=MANIFESTS[id]; if(!m) return "";
+  const _on=id===state.domain; const _st=_on?` style="background:${ND_COLORS[id]||"#48423a"};color:#fff6e8"`:""; return `<button class="ndh-tab${_on?" on":""}" data-id="${id}"${_st}>${_ndicon(m)}<span>${m.title}</span></button>`; }).join("");
+  const _sel=tw.querySelector('.ndh-tab.on'); if(_sel){ var _sc=function(){ var s=tw.querySelector('.ndh-tab.on'); if(s){ try{ tw.scrollLeft = tw.scrollLeft + (s.getBoundingClientRect().left - tw.getBoundingClientRect().left) - (tw.clientWidth - s.offsetWidth)/2; }catch(e){} } }; requestAnimationFrame(_sc); setTimeout(_sc,180); } }
 function renderStats(m, rows){
   const isMovie = m.id==="movies" && !CONFIG.DEPLOY;
   if(m.statStyle==="mood"){ $("#stats").style.display="none"; $("#stats").innerHTML=""; return; }
@@ -4820,8 +4942,7 @@ function renderSettingsBody(d){
     <div class="ord-list" id="catList">${act.map(arow).join("")}</div>
     ${inact.length?`<div class="hint" style="margin-top:12px;color:var(--sub)">꺼진 카테고리 · 켜면 홈에 추가</div>${inact.map(irow).join("")}`:""}
     <button class="btn ghost" id="catNew" type="button" style="margin-top:14px">＋ 내 카테고리 만들기</button>
-    <h4>화면</h4>
-    <div class="cat-mrow" style="cursor:default"><span class="mi">🌙</span><span class="mn">다크 모드</span><button class="sw" id="themeSw" role="switch" type="button"></button></div>
+
     </div>
     <div class="set-sec" data-sec="intro" style="display:none">${aboutBodyHTML()}</div>
     <div class="set-sec" data-sec="data" style="display:none">
@@ -5468,15 +5589,15 @@ async function boot(){
   if(_tt){ _tt.onclick=()=>window.scrollTo({top:0,behavior:"smooth"});
     const _upd=()=>_tt.classList.toggle("show", (window.scrollY||document.documentElement.scrollTop||0)>360);
     window.addEventListener("scroll", _upd, {passive:true}); _upd(); }
-  document.addEventListener("wheel", e=>{ const row=e.target.closest&&e.target.closest(".scope,.picker,.tabs,.sort-btns"); if(row && row.scrollWidth>row.clientWidth+2 && e.deltaY){ row.scrollLeft+=e.deltaY; e.preventDefault(); } }, {passive:false});
-  (function(){ let el=null,sx=0,sl=0,moved=false; const SEL=".scope,.picker,.sort-btns,.tabs";
+  document.addEventListener("wheel", e=>{ const row=e.target.closest&&e.target.closest(".scope,.picker,.tabs,.sort-btns,.ndh-tabs"); if(row && row.scrollWidth>row.clientWidth+2 && e.deltaY){ row.scrollLeft+=e.deltaY; e.preventDefault(); } }, {passive:false});
+  (function(){ let el=null,sx=0,sl=0,moved=false; const SEL=".scope,.picker,.sort-btns,.tabs,.ndh-tabs";
     document.addEventListener("mousedown",e=>{ const row=e.target.closest&&e.target.closest(SEL); if(row&&row.scrollWidth>row.clientWidth+2){ el=row; sx=e.pageX; sl=row.scrollLeft; moved=false; el.classList.add("nd-drag"); } });
     document.addEventListener("mousemove",e=>{ if(!el) return; const dx=e.pageX-sx; if(Math.abs(dx)>4) moved=true; el.scrollLeft=sl-dx; });
     document.addEventListener("mouseup",()=>{ if(!el) return; const wm=moved; el.classList.remove("nd-drag"); el=null; if(wm){ const kill=ev=>{ ev.stopPropagation(); ev.preventDefault(); document.removeEventListener("click",kill,true); }; document.addEventListener("click",kill,true); setTimeout(()=>document.removeEventListener("click",kill,true),50); } });
   })();
   /* 모바일: 스와이프로 카테고리 이동 (왼쪽=다음, 오른쪽=이전/홈) */
   (function(){ let x0=null,y0=null,t0=0,skip=false;
-    document.addEventListener("touchstart",e=>{ if(e.touches.length!==1){ skip=true; return; } const t=e.touches[0]; x0=t.clientX; y0=t.clientY; t0=Date.now(); skip=!!(e.target.closest&&e.target.closest(".scope,.picker,.tabs,.sort-btns,dialog")); }, {passive:true});
+    document.addEventListener("touchstart",e=>{ if(e.touches.length!==1){ skip=true; return; } const t=e.touches[0]; x0=t.clientX; y0=t.clientY; t0=Date.now(); skip=!!(e.target.closest&&e.target.closest(".scope,.picker,.tabs,.sort-btns,.ndh-tabs,dialog")); }, {passive:true});
     document.addEventListener("touchend",e=>{ if(skip||x0==null){ x0=null; return; } const t=e.changedTouches[0]; const dx=t.clientX-x0, dy=t.clientY-y0, dt=Date.now()-t0; x0=null;
       if(!(dt<800 && Math.abs(dx)>50 && Math.abs(dx)>Math.abs(dy)*1.15 && Math.abs(dy)<80)) return;
       const act=getActive(); if(!act.length) return;
@@ -5492,10 +5613,11 @@ $("#brandBtn").addEventListener("click",goHome);
   try{ if(!store.getItem("nd.seed234")){ var _ab=getActive(); ["assets","recipes"].forEach(function(id){ if(MANIFESTS[id] && _ab.indexOf(id)<0) _ab.push(id); }); setActive(_ab); store.setItem("nd.seed234","1"); } }catch(e){}
   document.addEventListener("click",function(e){ var b=e.target.closest?e.target.closest(".bnav-i"):null; if(!b) return; var n=b.dataset.nav; document.querySelectorAll(".bnav-i").forEach(function(x){x.classList.remove("on");}); b.classList.add("on"); if(n==="home") goHome(); else if(n==="search") openSearch(); else if(n==="stats") openDashboard(); else if(n==="insight") openInsight(); else if(n==="settings") openSettings(); });
 $("#searchToggle").addEventListener("click",()=>{ state.searchOpen=!state.searchOpen; applySearchUI(MANIFESTS[state.domain]); if(state.searchOpen) $("#search").focus(); });
-$("#tabs").addEventListener("click",e=>{ const t=e.target.closest(".tab"); if(t) openDomain(t.dataset.id); });
+$("#tabs").addEventListener("click",e=>{ const t=e.target.closest(".ndh-tab,.tab"); if(t) openDomain(t.dataset.id); });
 $("#search").addEventListener("input",e=>{ state.query=e.target.value; state.page=0; loadAndRender(); });
 $("#setBtn").addEventListener("click",openSettings);
 $("#syncBtn").addEventListener("click",syncNow);
+(function(){var mh=document.querySelector(".masthead");if(mh&&typeof ND_LOGO_HTML==="string"){var mr=mh.querySelector(".mh-row");if(mr)mr.style.display="none";var t=document.createElement("div");t.className="ndh-top";t.innerHTML=ND_LOGO_HTML;var b=t.querySelector(".ndh-brand");if(b){b.style.cursor="pointer";b.onclick=function(){try{goHome()}catch(e){}};}mh.insertBefore(t,mh.firstChild);}})();
 $("#dashBtn").addEventListener("click",openDashboard);
   var _wb=document.getElementById("wrapBtn"); if(_wb) _wb.addEventListener("click",openWrapped);
   var _mbb=document.getElementById("mbtiBtn"); if(_mbb) _mbb.addEventListener("click",openMbti);
