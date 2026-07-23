@@ -903,7 +903,11 @@ body.home-dark .bnav-i.on .bnav-ic svg{ stroke:#f6eddf !important; }
 #ndSearchDlg .hs-item b{ color:#f6eddf; } #ndSearchDlg .hs-item span{ color:#b8ab97; }
 #ndSearchDlg .hs-none{ color:#cfc3b5; }
 
-.cat-mrow .sz-sel{ flex:0 0 auto; font-size:11.5px; padding:3px 5px; border:1px solid var(--line); border-radius:8px; background:var(--card); color:inherit; }
+.cat-mrow .mn{ min-width:0; overflow:hidden; white-space:nowrap; text-overflow:ellipsis; }
+.cat-mrow .sz-seg{ display:inline-flex; flex:0 0 auto; border:1px solid var(--line); border-radius:9px; overflow:hidden; }
+.cat-mrow .sz-seg .szb{ border:0; border-left:1px solid var(--line); background:var(--card); color:var(--sub); font-size:11px; font-weight:700; line-height:1; padding:6px 8px; cursor:pointer; }
+.cat-mrow .sz-seg .szb:first-child{ border-left:0; }
+.cat-mrow .sz-seg .szb.on{ background:#e0483f; color:#fff; }
 </style>
 <script>try{var _t=localStorage.getItem("app:nd.theme")||localStorage.getItem("nd.theme");if(_t==="dark")document.documentElement.setAttribute("data-theme","dark");}catch(e){}</script>
 <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@latest/dist/web/static/pretendard.min.css">
@@ -916,7 +920,7 @@ body.home-dark .bnav-i.on .bnav-ic svg{ stroke:#f6eddf !important; }
         <svg class="brandmark" width="40" height="30" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#F7F5F0"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#F7F5F0"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#F7F5F0"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#F7F5F0"/></svg>
         <span class="brandwm"><span class="bwm-ko">내도감</span><span class="bwm-en">NAEDOGAM</span></span>
       </button>
-      <span class="mhver">v266β</span>
+      <span class="mhver">v267β</span>
       <span class="spacer"></span>
       <span class="src-chip" id="srcChip" style="display:none">데모</span>
       <button class="icon-btn" id="searchToggle" type="button" style="display:none">🔍</button>
@@ -2018,23 +2022,17 @@ function renderHome(){
   const heroFan = `<div class="fan${allCovers.length?"":" fan-empty"}">`+[0,1,2].map(i=> allCovers[i]?`<span style="background-image:url('${esc(allCovers[i])}')"></span>`:`<span></span>`).join("")+`</div>`;
   const heroCard = `<article class="card hero"><div class="nc-main"><p class="eyebrow">지금까지 수집</p><div class="metric"><b id="ndHeroTotal">${fmt(totalItems)}</b><i>개</i></div><p class="helper">${active.length}개 카테고리 · 오늘도 기록 중</p></div>${heroFan}</article>`;
 
-  // 표시 순서: 확정본 흐름 우선(영화·도서→러닝→생리·일기→맛집→표지형), 나머지는 활성 순서
-  const M=id=>MANIFESTS[id];
-  const ordIds=[]; const seen={};
-  const push=id=>{ if(MANIFESTS[id]&&active.some(m=>m.id===id)&&!seen[id]){ seen[id]=1; ordIds.push(id); } };
-  ["movies","books","running","period","diary","food","recipes","travel","mountains","culture","albums","cellar","scrap","wish","gift","pet"].forEach(push);
-  active.forEach(m=>{ if(!seen[m.id]){ seen[m.id]=1; ordIds.push(m.id); } });
-
-  // 크기별 배치: 넓게=전체 / 보통=2단 split / 작게=하단 3칸 grid
-  let out="", buf=[]; const minis=[];
-  const flush=()=>{ if(buf.length){ out+=`<div class="split">${buf.join("")}</div>`; buf=[]; } };
-  ordIds.forEach(id=>{ const m=M(id); const sz=ndEffSize(id);
-    if(sz==="mini"){ minis.push(id); return; }
-    if(sz==="wide"){ flush(); out+=wideCard(m); }
-    else { buf.push(halfCard(m)); if(buf.length===2) flush(); }
+  // 표시 순서 = 설정에서 정한 순서(getActive) 그대로. 크기(넓게/보통/작게)가 폭을 결정.
+  // 넓게=한 줄 전체 / 보통=한 줄 2개 / 작게=한 줄 3개. 크기가 바뀌는 지점에서 줄을 끊음.
+  let out=""; let buf=[]; let bufSz="";
+  const flush=()=>{ if(!buf.length) return; out+=`<div class="${bufSz==="mini"?"bottom-grid":"split"}">${buf.join("")}</div>`; buf=[]; bufSz=""; };
+  active.forEach(m=>{ const sz=ndEffSize(m.id);
+    if(sz==="wide"){ flush(); out+=wideCard(m); return; }
+    if(bufSz && bufSz!==sz) flush();
+    bufSz=sz; buf.push(sz==="mini"?miniHTML(m):halfCard(m));
+    if(buf.length===(sz==="mini"?3:2)) flush();
   });
   flush();
-  if(minis.length) out+=`<div class="bottom-grid">`+minis.map(id=>miniHTML(M(id))).join("")+`</div>`;
 
   const tabs = `<div class="ndh-tabs">`+active.map((m,i)=>`<button class="ndh-tab${i===0?" on":""}" data-id="${m.id}">${iconOf(m)}<span>${m.title}</span></button>`).join("")+`</div>`;
   home.innerHTML=`<div class="ndhome"><div class="ndh-top">${ND_LOGO_HTML}</div>${tabs}<div class="ndh-dash">${heroCard}${out}</div></div>`;
@@ -4809,7 +4807,7 @@ function renderSettingsBody(d){
   const act=getActive(); const actSet=new Set(act);
   const inact=Object.values(MANIFESTS).map(m=>m.id).filter(id=>!actSet.has(id));
   const _cc=m=>m.custom?`<button class="cat-edit" data-id="${m.id}" title="수정" type="button" style="background:none;border:none;cursor:pointer;font-size:13px;opacity:.6;padding:2px 5px">✏</button><button class="cat-del" data-id="${m.id}" title="삭제" type="button" style="background:none;border:none;cursor:pointer;font-size:13px;opacity:.6;padding:2px 5px">🗑</button>`:"";
-  const arow=id=>{ const m=MANIFESTS[id]; const _sz=(typeof ndEffSize==="function"?ndEffSize(id):"mini"); const _so=(v,l)=>`<option value="${v}"${v===_sz?" selected":""}>${l}</option>`; return `<div class="cat-mrow ord-row" data-id="${id}"><span class="ord-handle" aria-label="끌어서 순서 이동">≡</span><span class="mi">${m.icon}</span><span class="mn">${m.title} <span class="mv">${m.vol}</span></span><select class="sz-sel" data-id="${id}" title="홈 카드 크기" aria-label="홈 카드 크기">${_so("wide","넓게")}${_so("half","보통")}${_so("mini","작게")}</select>${_cc(m)}<button class="sw on" data-id="${id}" role="switch" aria-checked="true" type="button"></button></div>`; };
+  const arow=id=>{ const m=MANIFESTS[id]; const _sz=(typeof ndEffSize==="function"?ndEffSize(id):"mini"); const _sb=(v,l)=>`<button type="button" class="szb${v===_sz?" on":""}" data-id="${id}" data-sz="${v}">${l}</button>`; return `<div class="cat-mrow ord-row" data-id="${id}"><span class="ord-handle" aria-label="끌어서 순서 이동">≡</span><span class="mi">${m.icon}</span><span class="mn">${m.title} <span class="mv">${m.vol}</span></span><span class="sz-seg" role="group" aria-label="홈 카드 크기">${_sb("wide","넓게")}${_sb("half","보통")}${_sb("mini","작게")}</span>${_cc(m)}<button class="sw on" data-id="${id}" role="switch" aria-checked="true" type="button"></button></div>`; };
   const irow=id=>{ const m=MANIFESTS[id]; return `<div class="cat-mrow" data-id="${id}"><span class="ord-handle ord-ph">≡</span><span class="mi">${m.icon}</span><span class="mn">${m.title} <span class="mv">${m.vol}</span></span>${_cc(m)}<button class="sw" data-id="${id}" role="switch" aria-checked="false" type="button"></button></div>`; };
   d.innerHTML=`<div class="dhead"><h3>설정</h3><button class="dclose-x" onclick="this.closest('dialog').close()" aria-label="닫기">✕</button></div><div class="dbody set">
     <div class="set-tabs">
@@ -4818,7 +4816,7 @@ function renderSettingsBody(d){
       <button type="button" class="set-tab" data-sec="data">데이터</button>
     </div>
     <div class="set-sec" data-sec="cat">
-    <div class="hint">토글로 켜고 끄고, 가운데에서 홈 카드 <b>크기</b>(넓게·보통·작게)를 고르고, 왼쪽 <b>≡</b>을 끌어 순서를 바꾸세요. 홈에 바로 반영됩니다.</div>
+    <div class="hint">토글로 켜고 끄고, 오른쪽에서 홈 카드 <b>크기</b>(넓게·보통·작게)를 고르고, 왼쪽 <b>≡</b>을 끌어 순서를 바꾸세요. 순서·크기 모두 홈에 바로 반영됩니다.</div>
     <div class="ord-list" id="catList">${act.map(arow).join("")}</div>
     ${inact.length?`<div class="hint" style="margin-top:12px;color:var(--sub)">꺼진 카테고리 · 켜면 홈에 추가</div>${inact.map(irow).join("")}`:""}
     <button class="btn ghost" id="catNew" type="button" style="margin-top:14px">＋ 내 카테고리 만들기</button>
@@ -4853,7 +4851,7 @@ function renderSettingsBody(d){
     if(state.view==="home") renderHome(); else if(state.view==="domain") renderTabs();
     renderSettingsBody(d);
   });
-  d.querySelectorAll(".sz-sel").forEach(sel=>{ sel.onpointerdown=e=>e.stopPropagation(); sel.onclick=e=>e.stopPropagation(); sel.onchange=()=>{ setHomeSize(sel.dataset.id, sel.value); if(state.view==="home") renderHome(); }; });
+  d.querySelectorAll(".szb").forEach(b=>{ b.onpointerdown=e=>e.stopPropagation(); b.onclick=e=>{ e.stopPropagation(); setHomeSize(b.dataset.id, b.dataset.sz); const seg=b.parentNode; if(seg) seg.querySelectorAll(".szb").forEach(x=>x.classList.toggle("on",x===b)); if(state.view==="home") renderHome(); }; });
   d.querySelectorAll(".cat-edit").forEach(b=>b.onclick=e=>{ e.stopPropagation(); openCatEdit(b.dataset.id); });
   d.querySelectorAll(".cat-del").forEach(b=>b.onclick=e=>{ e.stopPropagation(); deleteCustomCategory(b.dataset.id); });
   const cl=$("#catList"); if(cl) wireReorder(cl, order=>{ setActive(order); if(state.view==="home") renderHome(); else if(state.view==="domain") renderTabs(); });
