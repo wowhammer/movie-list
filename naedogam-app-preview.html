@@ -980,6 +980,35 @@ body.home-dark .bnav-i.on .bnav-ic svg{ stroke:#f6eddf !important; }
 .tabs .tab[aria-selected="true"] svg{ stroke:#fff6e8 !important; color:#fff6e8 !important; opacity:1; }
 .tabs .tab[aria-selected="true"] .tabemo,.tabs .tab[aria-selected="true"] .tabico{ opacity:1; }
 
+
+/* #4 다크에서 흰색(var(--ink))이라 안 보이던 선택상태 → 초록 강조 */
+[data-theme="dark"] .vseg.on,
+[data-theme="dark"] .dv-btn.on,
+[data-theme="dark"] .viewseg .dv-btn.on,
+[data-theme="dark"] .sort-btn.on,
+[data-theme="dark"] .rf-segbtn.on{ background:var(--accent); color:#fff; border-color:var(--accent); }
+[data-theme="dark"] .reco-item.on{ background:var(--line-soft); }
+/* #4 사진첨부(드롭존) 테두리 또렷하게 */
+[data-theme="dark"] .rf-imgzone{ border-color:#5a5044; background:var(--line-soft); }
+/* #2 서브 상단 = 홈처럼 투명 배경 + 큰 로고(메인 로고 유지) */
+.masthead .mh-row{ background:transparent !important; border-radius:0 !important; padding:6px 2px 12px !important; gap:11px; }
+.brandmark{ width:47px !important; height:35px !important; }
+.bwm-ko{ font-size:23px !important; }
+#syncBtn.icon-btn{ width:41px; height:41px; border-radius:50%; border:1px solid rgba(238,224,205,.15);
+  background:linear-gradient(145deg,rgba(255,255,255,.06),rgba(255,255,255,.02)),rgba(35,31,27,.92); color:#f6eddf; font-size:19px; }
+/* #5 홈 동기화 버튼(달=프로필 원 대체) */
+.ndh-sync{ width:41px; height:41px; border-radius:50%; border:1px solid rgba(238,224,205,.15);
+  background:linear-gradient(145deg,rgba(255,255,255,.06),rgba(255,255,255,.02)),rgba(35,31,27,.92); color:#f6eddf;
+  font-size:20px; line-height:1; cursor:pointer; display:flex; align-items:center; justify-content:center; flex:0 0 auto; box-shadow:0 6px 16px rgba(0,0,0,.2); }
+.ndh-sync:active{ transform:rotate(180deg); transition:transform .3s; }
+.ndh-ver{ align-self:center !important; margin:0 0 0 2px !important; }
+/* #3 홈 아이콘 보통 크기로(탭·카드 글리프) */
+.ndhome .ci-svg{ width:19px; height:19px; }
+.ndhome .emj{ font-size:17px; }
+.tabs .tab svg,.tabs .tab .ci-svg{ width:19px; height:19px; }
+.ndhome .nc-glyph .ci-svg{ width:38px; height:38px; }
+.ndhome .collection-card .coll-glyph .ci-svg{ width:40px; height:40px; }
+
 </style>
 <script>try{var _t=localStorage.getItem("app:nd.theme")||localStorage.getItem("nd.theme");document.documentElement.setAttribute("data-theme","dark");}catch(e){}</script>
 <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@latest/dist/web/static/pretendard.min.css">
@@ -992,7 +1021,7 @@ body.home-dark .bnav-i.on .bnav-ic svg{ stroke:#f6eddf !important; }
         <svg class="brandmark" width="40" height="30" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#F7F5F0"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#F7F5F0"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#F7F5F0"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#F7F5F0"/></svg>
         <span class="brandwm"><span class="bwm-ko">내도감</span><span class="bwm-en">NAEDOGAM</span></span>
       </button>
-      <span class="mhver">v271β</span>
+      <span class="mhver">v272β</span>
       <span class="spacer"></span>
       <span class="src-chip" id="srcChip" style="display:none">데모</span>
       <button class="icon-btn" id="searchToggle" type="button" style="display:none">🔍</button>
@@ -2047,7 +2076,7 @@ function openDomain(id){ if(id==="mbti"){ openMbti(); return; } if(id==="period"
 
 /* 홈: 켜둔 카테고리를 카드로. 건수는 한 번 열어본 분야만 표시(홈을 빠르게 유지). */
 function ndDeep(h){ if(typeof h!=="string"||h.charAt(0)!=="#") h="#8a7a6a"; var n=parseInt(h.slice(1),16),r=(n>>16)&255,g=(n>>8)&255,b=n&255; function d(x,f){return Math.round(x*f);} return "linear-gradient(145deg,rgb("+d(r,.5)+","+d(g,.5)+","+d(b,.5)+"),rgb("+d(r,.28)+","+d(g,.28)+","+d(b,.28)+"))"; }
-var ND_LOGO_HTML='<div class="ndh-brand"><svg width="47" height="35" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg><div class="ndh-wm"><b>내도감</b><small>NAEDOGAM</small></div></div><button class="ndh-prof" type="button" aria-label="설정" onclick="try{openSettings()}catch(e){}"></button>';
+var ND_LOGO_HTML='<div class="ndh-brand"><svg width="47" height="35" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg><div class="ndh-wm"><b>내도감</b><small>NAEDOGAM</small></div><span class="mhver ndh-ver">v272β</span></div><button class="ndh-sync" type="button" title="동기화" aria-label="동기화" onclick="try{syncNow()}catch(e){}">↻</button>';
 /* 홈 카드 크기: wide(넓게=한 줄 전체) · half(보통=한 줄 2개) · mini(작게=하단 3칸). 기본값=프리셋 */
 var ND_PRESET_SIZE={running:"wide",food:"wide",recipes:"wide",movies:"half",books:"half",period:"half",diary:"half",travel:"half",mountains:"half",culture:"half",albums:"half",cellar:"half",scrap:"half",wish:"half",gift:"half",pet:"half"};
 function getHomeSizes(){ try{ return JSON.parse(store.getItem("nd.homesize")||"{}")||{}; }catch(e){ return {}; } }
