@@ -296,7 +296,7 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
   .mv-memo{ font-size:12px; color:#a8894e; line-height:1.45; margin-top:5px; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
   #list:has(.qcard){ display:flex; flex-direction:column; gap:8px; }
   .qcard .qjjim{ color:#e0a86a; font-size:11px; font-weight:800; margin-right:7px; }
-  /* v294β #3#5 레시피·맛집 가로형 카드 + 손글씨체(Gaegu) */
+  /* v295β #3#5 레시피·맛집 가로형 카드 + 손글씨체(Gaegu) */
   #list .rccard{ display:flex; align-items:stretch; gap:0; padding:0; }
   .rccard .rc-img{ flex:0 0 116px; width:116px; aspect-ratio:1/1; }
   .rccard .rc-body{ flex:1; min-width:0; padding:11px 13px 12px; display:flex; flex-direction:column; gap:7px; font-family:'Gaegu',var(--sans); }
@@ -320,13 +320,13 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
   .foodcard .fl-star{ color:#d9770a; font-weight:700; margin-left:8px; }
   .foodcard .fl-menu{ font-size:13.5px; color:var(--ink-soft); margin-top:5px; font-family:'Gaegu',var(--sans); }
   [data-theme="dark"] .foodcard .fl-img{ background:var(--line-soft); }
-  /* v294β 생리주기 인페이지 */
+  /* v295β 생리주기 인페이지 */
   .pdInlineBar{ display:flex; align-items:center; justify-content:space-between; margin:2px 0 12px; }
   .pdInlineBar .pdTitle{ font-size:17px; font-weight:800; color:var(--ink); }
   .pdBig.pdBigSm{ width:auto; font-size:13.5px; padding:8px 15px; margin:0; }
   .pdBody.pdInline{ max-height:none; overflow:visible; border-radius:16px; }
   .wcard.mbInline{ max-width:none; padding:0 2px; }
-  /* v294β MBTI 검사 몰입 오버레이 */
+  /* v295β MBTI 검사 몰입 오버레이 */
   .mbTestOv{ position:fixed; inset:0; z-index:200; display:flex; flex-direction:column; background:linear-gradient(180deg,#1b1916,#0d0d0c); color:#f4f1ff; }
   .mbTestOv .mbTestTop{ display:flex; align-items:center; justify-content:space-between; padding:calc(16px + env(safe-area-inset-top)) 18px 10px; }
   .mbTestOv .mbQuit{ background:none; border:none; color:#b8ab97; font-size:14px; font-weight:700; cursor:pointer; padding:4px 2px; }
@@ -342,7 +342,7 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
   .mbTestOv .mbQuitYes{ background:rgba(224,72,63,.18); border-color:rgba(224,72,63,.4); text-align:center; }
   .mbTestOv .mbQuitNo{ text-align:center; }
   .mbStartGhost{ background:transparent!important; border:1px solid var(--line)!important; color:var(--ink-soft)!important; }
-  /* v294β 육아일기 카드피드 */
+  /* v295β 육아일기 카드피드 */
   #list:has(.bbcard){ display:flex; flex-direction:column; gap:16px; }
   #list .bbcard{ display:block; padding:0; overflow:hidden; border:none; border-radius:20px; background:var(--card); box-shadow:0 3px 14px rgba(0,0,0,.10); text-align:left; cursor:pointer; }
   .bbcard .bb-img{ width:100%; aspect-ratio:4/3; overflow:hidden; background:linear-gradient(135deg,#ffe3ee,#fff0e0); display:flex; align-items:center; justify-content:center; font-size:56px; }
@@ -1089,16 +1089,16 @@ body{ background:radial-gradient(circle at 50% -10%, rgba(102,78,57,.16), transp
 
 .tabs .tab .tabico{ color:#dfd5c7 !important; width:19px !important; height:19px !important; opacity:1 !important; }
 .tabs .tab[aria-selected="true"] .tabico{ color:#fff6e8 !important; }
-/* v294β: 서브 탭 = 홈 탭과 완전 동일 구현(.ndh-tab). 아이콘 크기를 스코프 밖에서도 보장 */
+/* v295β: 서브 탭 = 홈 탭과 완전 동일 구현(.ndh-tab). 아이콘 크기를 스코프 밖에서도 보장 */
 .ndh-tab .ci-svg{ width:19px !important; height:19px !important; }
 .ndh-tab .emj{ font-size:17px; height:19px; line-height:19px; display:inline-flex; align-items:center; justify-content:center; }
-/* v294β ⑧ 소개 = naedogam.com 라이트(크림+빨강) 고정 — 다크앱 안에서도 */
+/* v295β ⑧ 소개 = naedogam.com 라이트(크림+빨강) 고정 — 다크앱 안에서도 */
 .ndAbout{ --ink:#2b2622; --ink-soft:#7c736b; --card:#ffffff; --line:#e7e0d8; --accent:#E0483F; background:#faf7f3; color:#2b2622; border:1px solid #efe7dd; border-radius:16px; padding:16px 14px 22px; margin:2px 0 4px; -webkit-font-smoothing:antialiased; }
 .ndAbout .ab-card{ background:#fff; padding:15px 17px; margin-bottom:11px; border-radius:13px; }
 .ndAbout p{ line-height:1.9 !important; }
 .ndAbout h2{ margin:16px 0 14px !important; }
 .ndAbout table td, .ndAbout table th{ padding:11px 9px !important; line-height:1.55; }
-/* v294β ⑦ 인사이트 카드 색 강조 복원(다크에서 무채색으로 눌린 것) */
+/* v295β ⑦ 인사이트 카드 색 강조 복원(다크에서 무채색으로 눌린 것) */
 [data-theme="dark"] .insLight .insCard{ border-left:3px solid var(--line); }
 [data-theme="dark"] .insLight #insWrap{ border-left-color:#e0a86a; }
 [data-theme="dark"] .insLight #insMirror{ border-left-color:#d98fb0; }
@@ -1118,7 +1118,7 @@ body{ background:radial-gradient(circle at 50% -10%, rgba(102,78,57,.16), transp
         <svg class="brandmark" width="40" height="30" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg>
         <span class="brandwm"><span class="bwm-ko">내도감</span><span class="bwm-en">NAEDOGAM</span></span>
       </button>
-      <span class="mhver">v294β</span>
+      <span class="mhver">v295β</span>
       <span class="spacer"></span>
       <span class="src-chip" id="srcChip" style="display:none">데모</span>
       <button class="icon-btn" id="searchToggle" type="button" style="display:none">🔍</button>
@@ -1206,7 +1206,7 @@ const MANIFESTS = {
     fields:[ {k:"start",sheet:"시작일",label:"시작일",type:"date"},{k:"end",sheet:"종료일",label:"종료일",type:"date"},{k:"flow",sheet:"양",label:"양",type:"text"},{k:"symptoms",sheet:"증상",label:"증상",type:"text"},{k:"mood",sheet:"기분",label:"기분",type:"text"},{k:"note",sheet:"메모",label:"메모",type:"text"} ],
     search:["flow","mood","note"], dateSort:"start",
     stats:[ {label:"기록",type:"count",c:"#e03e63"} ] },
-  assets:{ id:"assets", title:"자산", icon:"💰", vol:"", canAdd:true, source:{ type:"sheet", tab:"자산" }, fields:[ {k:"name",sheet:"자산명",label:"자산명",type:"text",full:true},{k:"kind",sheet:"종류",label:"종류",type:"select",options:["","부동산","예금·적금","주식·펀드","코인","현금","자동차","기타"]},{k:"value",sheet:"평가액",label:"평가액(원)",type:"number"},{k:"buyDate",sheet:"취득일",label:"취득일",type:"date"},{k:"expiry",sheet:"만기일",label:"만기일",type:"date"},{k:"place",sheet:"보관처",label:"보관처·계좌",type:"text"},{k:"memo",sheet:"메모",label:"메모",type:"textarea"} ], search:["name","kind","place","memo"], dateSort:"buyDate", card:{ kind:"specimen", thumb:"💰", memo:"memo", meta:function(r){ var v=(r.value!==""&&r.value!=null&&!isNaN(Number(r.value)))?Number(r.value).toLocaleString()+"원":""; return [r.kind,v].filter(Boolean).join(" · "); } }, stats:[ {label:"자산 수",type:"count",c:"#0891b2"} ] },
+  assets:{ id:"assets", title:"자산", icon:"💰", vol:"", canAdd:true, source:{ type:"sheet", tab:"자산" }, fields:[ {k:"name",sheet:"자산명",label:"자산명",type:"text",full:true},{k:"kind",sheet:"종류",label:"종류",type:"select",options:["","부동산","예금·적금","주식·펀드","코인","현금","자동차","기타"]},{k:"value",sheet:"평가액",label:"평가액(원)",type:"number",money:true},{k:"buyDate",sheet:"취득일",label:"취득일",type:"date"},{k:"expiry",sheet:"만기일",label:"만기일",type:"date"},{k:"place",sheet:"보관처",label:"보관처·계좌",type:"text"},{k:"memo",sheet:"메모",label:"메모",type:"textarea"} ], search:["name","kind","place","memo"], dateSort:"buyDate", card:{ kind:"specimen", thumb:"💰", memo:"memo", title:function(r){ return r.name||"(무제)"; }, meta:function(r){ var v=(r.value!==""&&r.value!=null&&!isNaN(Number(r.value)))?Number(r.value).toLocaleString()+"원":""; return [r.kind,v].filter(Boolean).join(" · "); } }, stats:[ {label:"자산 수",type:"count",c:"#0891b2"} ] },
   recipes:{ id:"recipes", title:"음식 레시피", icon:"🍳", vol:"", canAdd:true, source:{ type:"sheet", tab:"레시피" }, fields:[ {k:"title",sheet:"요리명",label:"요리명",type:"text",full:true},{k:"kind",sheet:"종류",label:"종류",type:"select",options:["","한식","중식","일식","양식","분식","베이킹","음료","기타"]},{k:"ingredients",sheet:"재료",label:"재료(쉼표로 여러 개)",type:"tags"},{k:"steps",sheet:"조리법",label:"조리법(순서대로)",type:"textarea",rows:4},{k:"time",sheet:"소요시간",label:"소요시간(분)",type:"number"},{k:"level",sheet:"난이도",label:"난이도",type:"select",options:["","쉬움","보통","어려움"]},{k:"rating",sheet:"별점",label:"별점",type:"rating"},{k:"status",sheet:"상태",label:"상태",type:"seg",options:["해봄","또할래","찜"],hideForm:true},{k:"memo",sheet:"메모",label:"메모·후기",type:"textarea"},{k:"cover",sheet:"사진",label:"사진",type:"image"} ], search:["title","kind","ingredients","memo"], filterBy:{ field:"kind", allLabel:"전체" }, card:{ kind:"specimen", thumb:"🍳", tags:"ingredients", memo:"memo", meta:function(r){ return [r.kind,(r.time?r.time+"분":""),r.level].filter(Boolean).join(" · "); }, flags:function(r){ return [ (r.rating!=null&&r.rating!=="")?{t:"★ "+r.rating}:null, stHas(r,"찜")?{t:"찜"}:null ]; } }, stats:[ {label:"레시피 수",type:"count",c:"#e8590c"}, {label:"찜",type:"countIf",field:"status",eq:"찜",c:"#e0a86a"} ] },
     /* 영화: 실제 구글시트(Apps Script)에서 라이브로 불러옴.
      source.map = 시트 한글 헤더 → 엔진 항목 이름.  source.derive = 특수 처리(코드·수식·숫자). */
@@ -1603,8 +1603,8 @@ const MANIFESTS = {
     source:{ type:"sheet", tab:"버킷리스트" },
     fields:[ {k:"title",sheet:"목표",label:"하고 싶은 것",type:"text",full:true},
              {k:"kind",sheet:"분류",label:"분류",type:"select",options:["여행","도전","배움","경험","관계","기타"]},
-             {k:"target",sheet:"목표시기",label:"목표 시기(예: 2027 / 언젠가)",type:"text"},
-             {k:"status",sheet:"상태",label:"상태",type:"seg",options:["하는중","달성","보류"]},
+             {k:"target",sheet:"목표시기",label:"목표 시기(년·월)",type:"month"},
+             {k:"status",sheet:"상태",label:"상태",type:"seg",options:["하는중","달성","예정","보류"]},
              {k:"date",sheet:"달성일",label:"달성일",type:"date"},
              {k:"content",sheet:"메모",label:"메모",type:"textarea"},
              {k:"cover",sheet:"사진",label:"사진",type:"image"} ],
@@ -1619,6 +1619,7 @@ const MANIFESTS = {
            meta:r=>[ r.kind, r.target, (r.status==="달성"&&r.date?"달성 "+(_isoOf(r.date)||r.date):"") ].filter(Boolean).join(" · "),
            flags:r=>[ r.status==="달성"?{t:"✓ 달성",cls:"on"}:0,
                       r.status==="하는중"?{t:"하는중",cls:"on"}:0,
+                      r.status==="예정"?{t:"예정",cls:"on"}:0,
                       r.status==="보류"?{t:"보류",cls:"on"}:0 ] } },
 
   quote:{ id:"quote", title:"명언", icon:"❝", vol:"卷15", canAdd:true,
@@ -1746,17 +1747,18 @@ const MANIFESTS = {
     source:{ type:"sheet", tab:"약·영양제" },
     fields:[ {k:"name",sheet:"이름",label:"이름",type:"text"},
              {k:"kind",sheet:"종류",label:"종류",type:"select",options:["","처방약","영양제","한약","기타"]},
+             {k:"effect",sheet:"효능",label:"효능·성분(예: 혈압약)",type:"text"},
              {k:"startDate",sheet:"복용시작",label:"복용시작",type:"date"},
              {k:"dose",sheet:"복용법",label:"복용법",type:"text"},
              {k:"place",sheet:"처방·구입처",label:"처방·구입처",type:"text"},
              {k:"memo",sheet:"메모",label:"메모",type:"textarea"} ],
-    search:["name","dose","place","memo"],
+    search:["name","effect","dose","place","memo"],
     activity:{ df:"startDate", when:r=>true, label:"약·영양제", name:r=>r.name },
     stats:[ {label:"전체",type:"count"},
             {label:"처방약",type:"countIf",field:"kind",eq:"처방약",c:"#dc2626"},
             {label:"영양제",type:"countIf",field:"kind",eq:"영양제",c:"#16a34a"} ],
     card:{ kind:"data", title:r=>r.name||"(제목 없음)",
-           kv:[{k:"종류",f:"kind"},{k:"복용시작",f:"startDate"},{k:"복용법",f:"dose"},{k:"처방·구입처",f:"place"}] } },
+           kv:[{k:"종류",f:"kind"},{k:"효능",f:"effect"},{k:"복용시작",f:"startDate"},{k:"복용법",f:"dose"},{k:"처방·구입처",f:"place"}] } },
 
   /* 건강검진: 검사 항목·수치·정상범위 기록. 검사일로 활동 반영. */
   checkup:{ id:"checkup", title:"건강검진", icon:"🩺", vol:"卷22", canAdd:true,
@@ -2199,7 +2201,7 @@ function openDomain(id){ if(id==="mbti"){ openMbti(); return; } if(id==="period"
 
 /* 홈: 켜둔 카테고리를 카드로. 건수는 한 번 열어본 분야만 표시(홈을 빠르게 유지). */
 function ndDeep(h){ if(typeof h!=="string"||h.charAt(0)!=="#") h="#8a7a6a"; var n=parseInt(h.slice(1),16),r=(n>>16)&255,g=(n>>8)&255,b=n&255; function d(x,f){return Math.round(x*f);} return "linear-gradient(145deg,rgb("+d(r,.5)+","+d(g,.5)+","+d(b,.5)+"),rgb("+d(r,.28)+","+d(g,.28)+","+d(b,.28)+"))"; }
-var ND_LOGO_HTML='<div class="ndh-brand"><svg width="47" height="35" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg><div class="ndh-wm"><b>내도감</b><small>NAEDOGAM</small></div><span class="mhver ndh-ver">v294β</span></div><button class="ndh-sync" type="button" title="동기화" aria-label="동기화" onclick="try{syncNow()}catch(e){}">↻</button>';
+var ND_LOGO_HTML='<div class="ndh-brand"><svg width="47" height="35" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg><div class="ndh-wm"><b>내도감</b><small>NAEDOGAM</small></div><span class="mhver ndh-ver">v295β</span></div><button class="ndh-sync" type="button" title="동기화" aria-label="동기화" onclick="try{syncNow()}catch(e){}">↻</button>';
 /* 홈 카드 크기: wide(넓게=한 줄 전체) · half(보통=한 줄 2개) · mini(작게=하단 3칸). 기본값=프리셋 */
 var ND_PRESET_SIZE={running:"wide",food:"wide",recipes:"wide",movies:"half",books:"half",period:"half",diary:"half",travel:"half",mountains:"half",culture:"half",albums:"half",cellar:"half",scrap:"half",wish:"half",gift:"half",pet:"half"};
 function getHomeSizes(){ try{ return JSON.parse(store.getItem("nd.homesize")||"{}")||{}; }catch(e){ return {}; } }
@@ -3146,7 +3148,7 @@ function renderCard(m, r, no){ if(m.id==="recipes") return recipeCard(r); if(m.i
     const _acAttr=(!_cov&&typeof AUTO_COVER_CATS!=="undefined"&&AUTO_COVER_CATS[m.id]&&r.title)?` data-ac="${String(r.title).replace(/&/g,"&amp;").replace(/"/g,"&quot;").replace(/</g,"&lt;")}"`:"";
     const _memo=(c.memo&&r[c.memo])?`<div class="cmemo">${String(r[c.memo]).replace(/</g,"&lt;")}</div>`:"";
     return `<button class="card catcard" data-id="${r._id}"><span class="thumb"${_acAttr}>${_cov?`<img src="${_cov}" alt="">`:c.thumb}</span>
-      <span class="body"><h3>${r.title}${flags?` <span class="titleflags">${flags}</span>`:""}</h3><div class="meta">${meta}</div>${_memo}${(tags||recMiniHTML(r))?`<div class="cbadges">${tags}${recMiniHTML(r)}</div>`:""}</span></button>`; }
+      <span class="body"><h3>${(c.title?c.title(r):r.title)||""}${flags?` <span class="titleflags">${flags}</span>`:""}</h3><div class="meta">${meta}</div>${_memo}${(tags||recMiniHTML(r))?`<div class="cbadges">${tags}${recMiniHTML(r)}</div>`:""}</span></button>`; }
   const _kvcol=["#b45309","#0891b2","#16a34a","#9333ea","#dc2626","#0ea5e9"];
   const kv=c.kv.map((col,ci)=>{ const v=r[col.f]; if(v==null||v==="") return ""; const s=(typeof v==="number"?fmt(v):v)+(col.u?` ${col.u}`:"");
     const _cs=m.custom?` style="color:${_kvcol[ci%_kvcol.length]}"`:"";
@@ -3236,7 +3238,7 @@ function openDetail(m, r){ _navSet(m, r);
     foot="";
   }
   const _cf=(m.fields||[]).find(f=>f.type==="image"); const coverImg=(_cf&&r[_cf.k])?`<div class="det-cover"><img src="${String(r[_cf.k]).replace(/"/g,'&quot;')}" alt=""></div>`:"";
-  const d=$("#detail"); d.innerHTML=`<div class="dhead"><h3>${(m.id==="cards"||m.id==="insurance")?((r.issuer?String(r.issuer).replace(/</g,"&lt;")+" · ":"")+String(r.name||"카드").replace(/</g,"&lt;")):(m.id==="subs"?String(r.name||"구독").replace(/</g,"&lt;"):(m.card.kind==="specimen"?r.title:((m.card&&m.card.title)?m.card.title(r):((_isoOf(r.date)||r.date||"")+(r.car?" · "+r.car:"")))))}</h3><div class="dh-actions"><button class="dh-btn" id="dEdit">수정</button><button class="dh-btn dh-del" id="dDel">삭제</button><button class="dclose-x" onclick="this.closest('dialog').close()" aria-label="닫기">✕</button></div></div><div class="dbody">${coverImg}${rows}${(["food","travel","culture","albums","cellar"].indexOf(m.id)>=0 && (r.recommend||r.source))?`<div class="tags" style="margin:4px 0 2px">${String(r.recommend||"").split(/[\/,]+/).map(x=>x.trim()).filter(Boolean).map(t=>`<span class="rbadge">${t.replace(/</g,"&lt;")}</span>`).join("")}${r.source?`<span class="tag" style="opacity:.72">📍 ${String(r.source).replace(/</g,"&lt;")}</span>`:""}</div>`:""}</div>${mapLinks}${m.id==="cards"?`<div class="mvlinks">${r.link?`<a class="btn ghost" target="_blank" rel="noopener" href="${(/^https?:\/\//i.test(String(r.link))?String(r.link):"https://"+String(r.link)).replace(/"/g,"&quot;")}">🔗 상세 링크</a>`:""}<a class="btn ghost" target="_blank" rel="noopener" href="https://search.naver.com/search.naver?query=${encodeURIComponent(((r.issuer||"")+" "+(r.name||"")+" 카드 혜택").trim())}">🔍 혜택 검색</a></div>`:""}${foot}`;
+  const d=$("#detail"); d.innerHTML=`<div class="dhead"><h3>${(m.id==="cards"||m.id==="insurance")?((r.issuer?String(r.issuer).replace(/</g,"&lt;")+" · ":"")+String(r.name||"카드").replace(/</g,"&lt;")):(m.id==="subs"?String(r.name||"구독").replace(/</g,"&lt;"):(m.card.kind==="specimen"?((m.card&&m.card.title)?m.card.title(r):r.title):((m.card&&m.card.title)?m.card.title(r):((_isoOf(r.date)||r.date||"")+(r.car?" · "+r.car:"")))))}</h3><div class="dh-actions"><button class="dh-btn" id="dEdit">수정</button><button class="dh-btn dh-del" id="dDel">삭제</button><button class="dclose-x" onclick="this.closest('dialog').close()" aria-label="닫기">✕</button></div></div><div class="dbody">${coverImg}${rows}${(["food","travel","culture","albums","cellar"].indexOf(m.id)>=0 && (r.recommend||r.source))?`<div class="tags" style="margin:4px 0 2px">${String(r.recommend||"").split(/[\/,]+/).map(x=>x.trim()).filter(Boolean).map(t=>`<span class="rbadge">${t.replace(/</g,"&lt;")}</span>`).join("")}${r.source?`<span class="tag" style="opacity:.72">📍 ${String(r.source).replace(/</g,"&lt;")}</span>`:""}</div>`:""}</div>${mapLinks}${m.id==="cards"?`<div class="mvlinks">${r.link?`<a class="btn ghost" target="_blank" rel="noopener" href="${(/^https?:\/\//i.test(String(r.link))?String(r.link):"https://"+String(r.link)).replace(/"/g,"&quot;")}">🔗 상세 링크</a>`:""}<a class="btn ghost" target="_blank" rel="noopener" href="https://search.naver.com/search.naver?query=${encodeURIComponent(((r.issuer||"")+" "+(r.name||"")+" 카드 혜택").trim())}">🔍 혜택 검색</a></div>`:""}${foot}`;
   if(!d.open) d.showModal();
   if(isMovie){
     $("#mW").onclick=()=>toggleMovie(r,'W'); $("#mR").onclick=()=>toggleMovie(r,'R'); $("#mP").onclick=()=>toggleMovie(r,'P');
@@ -3605,7 +3607,11 @@ function openRecordForm(m, existing, prefill){
       if(raw){ const pd=parseDate(raw); if(pd) dv=pd.getFullYear()+"-"+String(pd.getMonth()+1).padStart(2,"0")+"-"+String(pd.getDate()).padStart(2,"0"); }
       else if(prefill && prefill[f.k]) dv=prefill[f.k];
       else if(f.today && !isEdit) dv=todayStr();
-      return `<label>${ndFL(f)}</label><input type="date" class="rf" data-k="${f.k}" data-type="date" value="${dv}">`; }
+      return `<label>${ndFL(f)}</label><input type="date" class="rf" data-k="${f.k}" data-type="date" value="${dv}" onclick="try{this.showPicker&&this.showPicker()}catch(e){}">`; }
+    if(f.type==="month"){ let mv=""; const raw=(val==null?"":String(val)).trim();
+      if(raw){ const _mm=raw.match(/(\d{4})[-./ ]?\s*(\d{1,2})/); if(_mm) mv=_mm[1]+"-"+String(_mm[2]).padStart(2,"0"); }
+      else if(f.today && !isEdit) mv=todayStr().slice(0,7);
+      return `<label>${ndFL(f)}</label><input type="month" class="rf" data-k="${f.k}" data-type="text" value="${mv}" onclick="try{this.showPicker&&this.showPicker()}catch(e){}">`; }
     if(f.type==="textarea"){ const tv=(val==null?"":String(val)).replace(/&/g,'&amp;').replace(/</g,'&lt;'); return `<label>${ndFL(f)}</label><textarea class="rf" data-k="${f.k}" data-type="text" rows="${f.rows||5}" style="width:100%;font-family:inherit;font-size:15px;padding:9px 11px;border:1px solid var(--line);border-radius:9px;box-sizing:border-box;resize:vertical" autocomplete="off">${tv}</textarea>`; }
     if(f.type==="rating"){ const rv=(val==null||val==='')?'':val; return `<div class="rf-ratewrap" data-k="${f.k}"><label>${ndFL(f)}</label><div class="rf-starbox" data-k="${f.k}"><input type="hidden" class="rf" data-k="${f.k}" data-type="number" value="${rv}">${starBarHTML(rv===''?0:parseFloat(rv))}<span class="rf-star-num"></span><button type="button" class="rf-star-clr">✕</button></div><div class="rf-ratehint" style="display:none;font-size:12.5px;color:var(--sub);margin-top:5px">‘읽음’ 상태로 표시하면 내 평점을 매길 수 있어요</div></div>`; }
     if(f.type==="seg") return `<label>${ndFL(f)}</label><div class="rf-seg" data-k="${f.k}">${(f.options||[]).map(o=>`<button type="button" class="btn ghost rf-segbtn ${String(val||'')===o?'on':''}" data-v="${o}">${o}</button>`).join("")}</div>`;
