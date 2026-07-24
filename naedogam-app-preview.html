@@ -246,7 +246,7 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
   .tvcard .tv-foot{ display:flex; align-items:center; gap:6px; margin-top:7px; flex-wrap:wrap; }
   .tvcard .tv-star{ color:#e0a020; font-size:12px; font-weight:700; }
   .tvcard .tv-spot{ font-size:10.5px; color:var(--ink-soft); background:var(--paper); border:1px solid var(--line); border-radius:9px; padding:1px 7px; }
-  #list:has(.abcard){ display:grid; grid-template-columns:repeat(3,1fr); gap:9px; }
+  #list:has(.abcard){ display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:9px; }
   #list .abcard{ display:block; padding:0; border:none; background:none; box-shadow:none; text-align:left; cursor:pointer; }
   .abcard .ab-cover{ position:relative; width:100%; aspect-ratio:1/1; border-radius:8px; overflow:hidden; background:#e9e7df; box-shadow:0 2px 7px rgba(0,0,0,.16); }
   .abcard .ab-cover img{ width:100%; height:100%; object-fit:cover; display:block; }
@@ -1027,13 +1027,13 @@ body{ background:radial-gradient(circle at 50% -10%, rgba(102,78,57,.16), transp
 
 .tabs .tab .tabico{ color:#dfd5c7 !important; width:19px !important; height:19px !important; opacity:1 !important; }
 .tabs .tab[aria-selected="true"] .tabico{ color:#fff6e8 !important; }
-/* v285β: 서브 탭 = 홈 탭과 완전 동일 구현(.ndh-tab). 아이콘 크기를 스코프 밖에서도 보장 */
+/* v286β: 서브 탭 = 홈 탭과 완전 동일 구현(.ndh-tab). 아이콘 크기를 스코프 밖에서도 보장 */
 .ndh-tab .ci-svg{ width:19px !important; height:19px !important; }
 .ndh-tab .emj{ font-size:17px; height:19px; line-height:19px; display:inline-flex; align-items:center; justify-content:center; }
-/* v285β ⑧ 소개 = naedogam.com 라이트(크림+빨강) 고정 — 다크앱 안에서도 */
+/* v286β ⑧ 소개 = naedogam.com 라이트(크림+빨강) 고정 — 다크앱 안에서도 */
 .ndAbout{ --ink:#2b2622; --ink-soft:#7c736b; --card:#ffffff; --line:#e7e0d8; --accent:#E0483F; background:#faf7f3; color:#2b2622; border:1px solid #efe7dd; border-radius:16px; padding:16px 14px 22px; margin:2px 0 4px; -webkit-font-smoothing:antialiased; }
 .ndAbout .ab-card{ background:#fff; }
-/* v285β ⑦ 인사이트 카드 색 강조 복원(다크에서 무채색으로 눌린 것) */
+/* v286β ⑦ 인사이트 카드 색 강조 복원(다크에서 무채색으로 눌린 것) */
 [data-theme="dark"] .insLight .insCard{ border-left:3px solid var(--line); }
 [data-theme="dark"] .insLight #insWrap{ border-left-color:#e0a86a; }
 [data-theme="dark"] .insLight #insMirror{ border-left-color:#d98fb0; }
@@ -1053,7 +1053,7 @@ body{ background:radial-gradient(circle at 50% -10%, rgba(102,78,57,.16), transp
         <svg class="brandmark" width="40" height="30" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg>
         <span class="brandwm"><span class="bwm-ko">내도감</span><span class="bwm-en">NAEDOGAM</span></span>
       </button>
-      <span class="mhver">v285β</span>
+      <span class="mhver">v286β</span>
       <span class="spacer"></span>
       <span class="src-chip" id="srcChip" style="display:none">데모</span>
       <button class="icon-btn" id="searchToggle" type="button" style="display:none">🔍</button>
@@ -1379,6 +1379,7 @@ const MANIFESTS = {
     stats:[ {label:"전체",type:"count"},
             {label:"다녀옴",type:"countIf",field:"status",eq:"다녀옴",c:"#16a34a"},
             {label:"예정",type:"countIf",field:"status",eq:"예정",c:"#c2410c"},
+            {label:"찜",type:"countIf",field:"status",eq:"찜",c:"#e0a86a"},
             {label:"총 비용",type:"sum",field:"cost",unit:"원",c:"#0891b2"} ],
     card:{ kind:"specimen", thumb:"✈",
            meta:r=>[ (r.startDate?String(r.startDate).slice(0,10)+(r.endDate&&r.endDate!==r.startDate?" ~ "+String(r.endDate).slice(0,10):""):""), r.place, r.country ].filter(Boolean).join(" · "),
@@ -1433,6 +1434,7 @@ const MANIFESTS = {
     stats:[ {label:"전체",type:"count"},
             {label:"다녀옴",type:"countIf",field:"status",eq:"다녀옴",c:"#16a34a"},
             {label:"예정",type:"countIf",field:"status",eq:"예정",c:"#c2410c"},
+            {label:"찜",type:"countIf",field:"status",eq:"찜",c:"#e0a86a"},
             {label:"총 비용",type:"sum",field:"cost",unit:"원",c:"#0891b2"} ],
     card:{ kind:"specimen", thumb:"🎫",
            meta:r=>[ (r.date?(_isoOf(r.date)||String(r.date).slice(0,10)):""), r.kind, r.place ].filter(Boolean).join(" · "),
@@ -1462,7 +1464,8 @@ const MANIFESTS = {
     activity:{ df:"date", when:r=>r.status==="다녀옴", label:"맛집", name:r=>r.title||r.place },
     stats:[ {label:"전체",type:"count"},
             {label:"다녀옴",type:"countIf",field:"status",eq:"다녀옴",c:"#16a34a"},
-            {label:"가볼곳",type:"countIf",field:"status",eq:"가볼곳",c:"#c2410c"} ],
+            {label:"가볼곳",type:"countIf",field:"status",eq:"가볼곳",c:"#c2410c"},
+            {label:"찜",type:"countIf",field:"status",eq:"찜",c:"#e0a86a"} ],
     card:{ kind:"specimen", thumb:"🍽", memo:"content",
            meta:r=>[ (r.date?(_isoOf(r.date)||String(r.date).slice(0,10)):""), r.kind, r.place ].filter(Boolean).join(" · "),
            flags:r=>[ (r.rating!=null&&r.rating!=="")?{t:"★ "+r.rating,cls:"star"}:0,
@@ -1638,19 +1641,20 @@ const MANIFESTS = {
              {k:"origin",sheet:"생산지",label:"생산지·와이너리·증류소",type:"text"},
              {k:"year",sheet:"빈티지",label:"빈티지/연도(예: 2018 · NV · 12년)",type:"text"},
              {k:"variety",sheet:"품종",label:"품종·캐스크(예: 카베르네 / 셰리캐스크)",type:"text"},
-             {k:"abv",sheet:"도수",label:"도수(%)",type:"number",third:true},{k:"price",sheet:"가격",label:"가격(원)",type:"number",money:true,third:true},{k:"pairing",sheet:"페어링",label:"어울리는 음식",type:"text",third:true},{k:"recommend",sheet:"추천",label:"추천",type:"text"},{k:"source",sheet:"출처",label:"출처",type:"text"},{k:"rating",sheet:"별점",label:"별점",type:"rating"},{k:"status",sheet:"상태",label:"상태",type:"seg",options:["소장","마심","위시"]},{k:"note",sheet:"맛향",label:"맛·향 메모",type:"textarea"},{k:"cover",sheet:"사진",label:"사진",type:"image"} ],
+             {k:"abv",sheet:"도수",label:"도수(%)",type:"number",third:true},{k:"price",sheet:"가격",label:"가격(원)",type:"number",money:true,third:true},{k:"pairing",sheet:"페어링",label:"어울리는 음식",type:"text",third:true},{k:"recommend",sheet:"추천",label:"추천",type:"text"},{k:"source",sheet:"출처",label:"출처",type:"text"},{k:"rating",sheet:"별점",label:"별점",type:"rating"},{k:"status",sheet:"상태",label:"상태",type:"seg",options:["소장","마셔봄","찜"]},{k:"note",sheet:"맛향",label:"맛·향 메모",type:"textarea"},{k:"cover",sheet:"사진",label:"사진",type:"image"} ],
     search:["title","origin","variety","note","kind"],
     filterBy:{ field:"kind", allLabel:"전체" },
     newestFirst:true,
     stats:[ {label:"전체",type:"count"},
             {label:"소장",type:"countIf",field:"status",eq:"소장",c:"#16a34a"},
-            {label:"마심",type:"countIf",field:"status",eq:"마심",c:"#c2410c"} ],
+            {label:"마셔봄",type:"countIf",field:"status",eq:"마셔봄",c:"#c2410c"},
+            {label:"찜",type:"countIf",field:"status",eq:"찜",c:"#e0a86a"} ],
     card:{ kind:"specimen", thumb:"🍷", tags:"variety", memo:"note",
            meta:r=>[ r.kind, r.origin, r.year, (r.abv?r.abv+"%":"") ].filter(Boolean).join(" · "),
            flags:r=>[ (r.rating!=null&&r.rating!=="")?{t:"★ "+r.rating,cls:"star"}:0,
                       r.status==="소장"?{t:"소장",cls:"on"}:0,
-                      r.status==="마심"?{t:"마심",cls:"on"}:0,
-                      r.status==="위시"?{t:"위시",cls:"on"}:0 ] } },
+                      r.status==="마셔봄"?{t:"마셔봄",cls:"on"}:0,
+                      r.status==="찜"?{t:"찜",cls:"on"}:0 ] } },
 
   /* 약·영양제: 복용 기록. 복용시작 날짜로 일기 '오늘 내도감'에도 반영. */
   meds:{ id:"meds", title:"약·영양제", icon:"💊", vol:"卷21", canAdd:true,
@@ -1936,6 +1940,7 @@ const CALCS = { // 확장점: 새 계산식은 여기 등록
   subYearly(rows, field){ return rows.map(r=>{ const c=+r.cost||0; return {...r,[field]: r.cycle==="연"?c:c*12 }; }); }              // 월구독은 12배 연 환산
 };
 function applyComputed(m, rows){
+  if(m&&m.id==="cellar"&&Array.isArray(rows)){ rows.forEach(function(r){ if(r){ if(r.status==="마심") r.status="마셔봄"; if(r.status==="위시") r.status="찜"; } }); }
   if(!m.computed) return rows;
   let out=rows;
   for(const [field,spec] of Object.entries(m.computed)){
@@ -2108,7 +2113,7 @@ function openDomain(id){ if(id==="mbti"){ openMbti(); return; } if(id==="period"
 
 /* 홈: 켜둔 카테고리를 카드로. 건수는 한 번 열어본 분야만 표시(홈을 빠르게 유지). */
 function ndDeep(h){ if(typeof h!=="string"||h.charAt(0)!=="#") h="#8a7a6a"; var n=parseInt(h.slice(1),16),r=(n>>16)&255,g=(n>>8)&255,b=n&255; function d(x,f){return Math.round(x*f);} return "linear-gradient(145deg,rgb("+d(r,.5)+","+d(g,.5)+","+d(b,.5)+"),rgb("+d(r,.28)+","+d(g,.28)+","+d(b,.28)+"))"; }
-var ND_LOGO_HTML='<div class="ndh-brand"><svg width="47" height="35" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg><div class="ndh-wm"><b>내도감</b><small>NAEDOGAM</small></div><span class="mhver ndh-ver">v285β</span></div><button class="ndh-sync" type="button" title="동기화" aria-label="동기화" onclick="try{syncNow()}catch(e){}">↻</button>';
+var ND_LOGO_HTML='<div class="ndh-brand"><svg width="47" height="35" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg><div class="ndh-wm"><b>내도감</b><small>NAEDOGAM</small></div><span class="mhver ndh-ver">v286β</span></div><button class="ndh-sync" type="button" title="동기화" aria-label="동기화" onclick="try{syncNow()}catch(e){}">↻</button>';
 /* 홈 카드 크기: wide(넓게=한 줄 전체) · half(보통=한 줄 2개) · mini(작게=하단 3칸). 기본값=프리셋 */
 var ND_PRESET_SIZE={running:"wide",food:"wide",recipes:"wide",movies:"half",books:"half",period:"half",diary:"half",travel:"half",mountains:"half",culture:"half",albums:"half",cellar:"half",scrap:"half",wish:"half",gift:"half",pet:"half"};
 function getHomeSizes(){ try{ return JSON.parse(store.getItem("nd.homesize")||"{}")||{}; }catch(e){ return {}; } }
