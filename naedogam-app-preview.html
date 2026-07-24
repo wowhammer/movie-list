@@ -220,7 +220,7 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
   .wm-dot{ display:inline-block; width:10px; height:10px; border-radius:50%; vertical-align:-1px; margin-right:2px; }
   .wm-done{ background:#E0483F; } .wm-plan{ background:#f0a83a; }
   #list:has(.tvcard){ display:grid; grid-template-columns:1fr 1fr; gap:10px; }
-  #list:has(.rccard){ display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+  #list:has(.rccard){ display:flex; flex-direction:column; gap:14px; }
   #list .rccard{ display:block; padding:0; overflow:hidden; border:none; border-radius:16px; background:var(--card); box-shadow:0 2px 8px rgba(0,0,0,.08); text-align:left; cursor:pointer; transition:transform .12s ease, box-shadow .15s ease; }
   #list .rccard:active{ transform:scale(.98); }
   #list .rccard:hover{ box-shadow:0 5px 16px rgba(0,0,0,.13); }
@@ -1027,13 +1027,16 @@ body{ background:radial-gradient(circle at 50% -10%, rgba(102,78,57,.16), transp
 
 .tabs .tab .tabico{ color:#dfd5c7 !important; width:19px !important; height:19px !important; opacity:1 !important; }
 .tabs .tab[aria-selected="true"] .tabico{ color:#fff6e8 !important; }
-/* v287β: 서브 탭 = 홈 탭과 완전 동일 구현(.ndh-tab). 아이콘 크기를 스코프 밖에서도 보장 */
+/* v288β: 서브 탭 = 홈 탭과 완전 동일 구현(.ndh-tab). 아이콘 크기를 스코프 밖에서도 보장 */
 .ndh-tab .ci-svg{ width:19px !important; height:19px !important; }
 .ndh-tab .emj{ font-size:17px; height:19px; line-height:19px; display:inline-flex; align-items:center; justify-content:center; }
-/* v287β ⑧ 소개 = naedogam.com 라이트(크림+빨강) 고정 — 다크앱 안에서도 */
+/* v288β ⑧ 소개 = naedogam.com 라이트(크림+빨강) 고정 — 다크앱 안에서도 */
 .ndAbout{ --ink:#2b2622; --ink-soft:#7c736b; --card:#ffffff; --line:#e7e0d8; --accent:#E0483F; background:#faf7f3; color:#2b2622; border:1px solid #efe7dd; border-radius:16px; padding:16px 14px 22px; margin:2px 0 4px; -webkit-font-smoothing:antialiased; }
-.ndAbout .ab-card{ background:#fff; }
-/* v287β ⑦ 인사이트 카드 색 강조 복원(다크에서 무채색으로 눌린 것) */
+.ndAbout .ab-card{ background:#fff; padding:15px 17px; margin-bottom:11px; border-radius:13px; }
+.ndAbout p{ line-height:1.9 !important; }
+.ndAbout h2{ margin:16px 0 14px !important; }
+.ndAbout table td, .ndAbout table th{ padding:11px 9px !important; line-height:1.55; }
+/* v288β ⑦ 인사이트 카드 색 강조 복원(다크에서 무채색으로 눌린 것) */
 [data-theme="dark"] .insLight .insCard{ border-left:3px solid var(--line); }
 [data-theme="dark"] .insLight #insWrap{ border-left-color:#e0a86a; }
 [data-theme="dark"] .insLight #insMirror{ border-left-color:#d98fb0; }
@@ -1053,7 +1056,7 @@ body{ background:radial-gradient(circle at 50% -10%, rgba(102,78,57,.16), transp
         <svg class="brandmark" width="40" height="30" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg>
         <span class="brandwm"><span class="bwm-ko">내도감</span><span class="bwm-en">NAEDOGAM</span></span>
       </button>
-      <span class="mhver">v287β</span>
+      <span class="mhver">v288β</span>
       <span class="spacer"></span>
       <span class="src-chip" id="srcChip" style="display:none">데모</span>
       <button class="icon-btn" id="searchToggle" type="button" style="display:none">🔍</button>
@@ -1945,6 +1948,7 @@ const CALCS = { // 확장점: 새 계산식은 여기 등록
 };
 function applyComputed(m, rows){
   if(m&&m.id==="cellar"&&Array.isArray(rows)){ rows.forEach(function(r){ if(r){ if(r.status==="마심") r.status="마셔봄"; if(r.status==="위시") r.status="찜"; } }); }
+  if(m&&m.id==="albums"&&Array.isArray(rows)){ rows.forEach(function(r){ if(r&&r.genre!=null) r.genre=String(r.genre).replace(/^\s*\d+위\s*·\s*/,""); }); }
   if(!m.computed) return rows;
   let out=rows;
   for(const [field,spec] of Object.entries(m.computed)){
@@ -2117,7 +2121,7 @@ function openDomain(id){ if(id==="mbti"){ openMbti(); return; } if(id==="period"
 
 /* 홈: 켜둔 카테고리를 카드로. 건수는 한 번 열어본 분야만 표시(홈을 빠르게 유지). */
 function ndDeep(h){ if(typeof h!=="string"||h.charAt(0)!=="#") h="#8a7a6a"; var n=parseInt(h.slice(1),16),r=(n>>16)&255,g=(n>>8)&255,b=n&255; function d(x,f){return Math.round(x*f);} return "linear-gradient(145deg,rgb("+d(r,.5)+","+d(g,.5)+","+d(b,.5)+"),rgb("+d(r,.28)+","+d(g,.28)+","+d(b,.28)+"))"; }
-var ND_LOGO_HTML='<div class="ndh-brand"><svg width="47" height="35" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg><div class="ndh-wm"><b>내도감</b><small>NAEDOGAM</small></div><span class="mhver ndh-ver">v287β</span></div><button class="ndh-sync" type="button" title="동기화" aria-label="동기화" onclick="try{syncNow()}catch(e){}">↻</button>';
+var ND_LOGO_HTML='<div class="ndh-brand"><svg width="47" height="35" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg><div class="ndh-wm"><b>내도감</b><small>NAEDOGAM</small></div><span class="mhver ndh-ver">v288β</span></div><button class="ndh-sync" type="button" title="동기화" aria-label="동기화" onclick="try{syncNow()}catch(e){}">↻</button>';
 /* 홈 카드 크기: wide(넓게=한 줄 전체) · half(보통=한 줄 2개) · mini(작게=하단 3칸). 기본값=프리셋 */
 var ND_PRESET_SIZE={running:"wide",food:"wide",recipes:"wide",movies:"half",books:"half",period:"half",diary:"half",travel:"half",mountains:"half",culture:"half",albums:"half",cellar:"half",scrap:"half",wish:"half",gift:"half",pet:"half"};
 function getHomeSizes(){ try{ return JSON.parse(store.getItem("nd.homesize")||"{}")||{}; }catch(e){ return {}; } }
@@ -2831,9 +2835,11 @@ const TOGGLE_DEFS={
   albums:[ {label:"소장", on:r=>r.status==="소장", ch:r=>({status:r.status==="소장"?"":"소장"})}, {label:"위시", on:r=>r.status==="위시", ch:r=>({status:r.status==="위시"?"":"위시"})} ],
   wish:[ {label:"사고싶음", on:r=>r.status==="사고싶음", ch:r=>({status:r.status==="사고싶음"?"":"사고싶음"})}, {label:"구매함", on:r=>r.status==="구매함", ch:r=>({status:r.status==="구매함"?"":"구매함"})}, {label:"보류", on:r=>r.status==="보류", ch:r=>({status:r.status==="보류"?"":"보류"})} ],
   bucket:[ {label:"하는중", on:r=>r.status==="하는중", ch:r=>({status:r.status==="하는중"?"":"하는중"})}, {label:"달성", on:r=>r.status==="달성", ch:r=>({status:r.status==="달성"?"":"달성"})}, {label:"보류", on:r=>r.status==="보류", ch:r=>({status:r.status==="보류"?"":"보류"})} ],
-  cellar:[ {label:"소장", on:r=>r.status==="소장", ch:r=>({status:r.status==="소장"?"":"소장"})}, {label:"마심", on:r=>r.status==="마심", ch:r=>({status:r.status==="마심"?"":"마심"})}, {label:"위시", on:r=>r.status==="위시", ch:r=>({status:r.status==="위시"?"":"위시"})} ],
+  cellar:[ {label:"소장", on:r=>r.status==="소장", ch:r=>({status:r.status==="소장"?"":"소장"})}, {label:"마셔봄", on:r=>r.status==="마셔봄", ch:r=>({status:r.status==="마셔봄"?"":"마셔봄"})}, {label:"찜", on:r=>r.status==="찜", ch:r=>({status:r.status==="찜"?"":"찜"})} ],
+  quote:[ {label:"찜", on:r=>r.status==="찜", ch:r=>({status:r.status==="찜"?"":"찜"})} ],
+  scrap:[ {label:"찜", on:r=>r.status==="찜", ch:r=>({status:r.status==="찜"?"":"찜"})} ],
 };
-const TOGGLE_HIDE={ mountains:["climbed","revisit","pick"], travel:["status"], subs:["status"], culture:["status"], food:["status"], albums:["status"], wish:["status"], bucket:["status"], cellar:["status"] };
+const TOGGLE_HIDE={ mountains:["climbed","revisit","pick"], travel:["status"], subs:["status"], culture:["status"], food:["status"], albums:["status"], wish:["status"], bucket:["status"], cellar:["status"], quote:["status"], scrap:["status"] };
 function statusBtnsHTML(m, r){
   const defs=TOGGLE_DEFS[m.id]; if(!defs) return "";
   return defs.map((d,i)=>`<button class="btn ${d.on(r)?'':'ghost'}" data-tg="${i}">${d.on(r)?'✓ '+d.label:d.label}</button>`).join("");
@@ -3015,7 +3021,8 @@ function recipeCard(r){ var esc=function(x){return String(x==null?"":x).replace(
   var meta=[r.kind,(r.time?r.time+"분":""),r.level].filter(Boolean).map(esc).join(" · ");
   var rating=(r.rating!=null&&r.rating!=="")?'<span class="rc-star">★ '+esc(r.rating)+'</span>':"";
   var status=(r.status==="찜")?'<span class="rc-jjim">찜</span>':(r.status?'<span class="rc-status">'+esc(r.status)+'</span>':"");
-  return '<button class="card rccard" data-id="'+String(r._id).replace(/"/g,"&quot;")+'">'+img+'<div class="rc-body"><div class="rc-title">'+esc(r.title)+'</div>'+(meta?'<div class="rc-meta">'+meta+'</div>':"")+((rating||status)?'<div class="rc-flags">'+rating+status+'</div>':"")+'</div></button>'; }
+  var _jj=(r.status==="찜")?' <span class="rc-jjim">찜</span>':((r.status&&r.status!=="일반")?' <span class="rc-status">'+esc(r.status)+'</span>':"");
+  return '<button class="card rccard" data-id="'+String(r._id).replace(/"/g,"&quot;")+'">'+img+'<div class="rc-body"><div class="rc-title">'+esc(r.title)+_jj+'</div>'+recipeDetailBody(r)+'</div></button>'; }
 /* 자동 커버: 사진 없는 카드를 위키피디아 이미지로 채움(제목 기준, localStorage 캐시) */
 var ndACache=null;
 function _ndAC(){ if(ndACache) return ndACache; try{ ndACache=JSON.parse(store.getItem("nd.autocover")||"{}"); }catch(e){ ndACache={}; } return ndACache; }
@@ -5554,14 +5561,14 @@ function aboutBodyHTML(){
   const card=(t,b)=>`<div class="ab-card"><b>${t}</b><div>${b}</div></div>`;
   const step=(n,t,b)=>`<div style="display:flex;gap:11px;align-items:flex-start;margin:0 0 13px"><div style="flex:0 0 26px;height:26px;border-radius:50%;background:${A};color:#fff;font-weight:800;font-size:13px;display:flex;align-items:center;justify-content:center">${n}</div><div><div style="font-weight:700;color:${I};font-size:14px;margin-bottom:2px">${t}</div><div style="font-size:12.5px;color:${S};line-height:1.6">${b}</div></div></div>`;
   const chip=(t)=>`<span style="display:inline-block;border:1px solid var(--line,#e7e0d8);border-radius:999px;padding:7px 13px;font-size:12.5px;color:${I};background:var(--card,#fff);margin:0 6px 8px 0">${t}</span>`;
-  const H=(kick,title)=>`<div style="text-align:center;margin:26px 0 12px"><div style="color:${A};font-size:11.5px;font-weight:700;letter-spacing:1px;margin-bottom:5px">${kick}</div><div style="font-family:${SF};font-size:20px;font-weight:800;color:${I};line-height:1.35">${title}</div></div>`;
+  const H=(kick,title)=>`<div style="text-align:center;margin:38px 0 16px"><div style="color:${A};font-size:11.5px;font-weight:700;letter-spacing:1.5px;margin-bottom:7px">${kick}</div><div style="font-family:${SF};font-size:20px;font-weight:800;color:${I};line-height:1.5">${title}</div></div>`;
   return `<div class="ndAbout">    <div style="text-align:center;padding:8px 0 4px">
       <div style="font-size:30px;letter-spacing:-3px;color:${I};font-weight:900">❚❚<span style="color:${A}">▍</span></div>
       <h2 style="font-family:${SF};font-size:26px;font-weight:900;color:${I};margin:14px 0 10px;line-height:1.3">내 삶을 수집하는 도감</h2>
       <p style="font-size:13px;color:${S};line-height:1.7;margin:0 6px">영화·책·산·러닝·일기, 그리고 <b>내가 만든 칸</b>까지 — 한 곳에.<br>내 기록은 <b>내 구글드라이브에 영원히</b>, 앱이 사라져도 남습니다.</p>
     </div>
 
-    <div style="margin:24px 0;padding:18px 4px;border-top:1px solid var(--line,#e7e0d8);border-bottom:1px solid var(--line,#e7e0d8);text-align:center">
+    <div style="margin:30px 0;padding:24px 6px;border-top:1px solid var(--line,#e7e0d8);border-bottom:1px solid var(--line,#e7e0d8);text-align:center">
       <div style="font-family:${SF};font-size:19px;font-weight:800;color:${I};margin-bottom:8px">기록이 여기저기 흩어져 있죠</div>
       <div style="font-size:13px;color:${S};line-height:1.7">"영화는 메모앱에, 가계부는 엑셀에, 읽은 책은… 어디 적었더라?"</div>
       <div style="font-size:14px;color:${A};font-weight:700;margin-top:12px">흩어진 기록은 결국 사라집니다.</div>
