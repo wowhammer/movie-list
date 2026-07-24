@@ -4,6 +4,7 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>내도감</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Gaegu:wght@400;700&display=swap" rel="stylesheet">
 
 <!-- 카톡·슬랙·페북 링크 미리보기 (Open Graph) -->
 <meta property="og:type" content="website" />
@@ -294,6 +295,31 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
   .cal-cell .cal-pd{ position:absolute; top:3px; right:4px; width:7px; height:7px; border-radius:50%; background:#ff5c7c; box-shadow:0 0 0 1.5px #fff; z-index:3; }
   .mv-memo{ font-size:12px; color:#a8894e; line-height:1.45; margin-top:5px; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
   #list:has(.qcard){ display:flex; flex-direction:column; gap:8px; }
+  .qcard .qjjim{ color:#e0a86a; font-size:11px; font-weight:800; margin-right:7px; }
+  /* v289β #3#5 레시피·맛집 가로형 카드 + 손글씨체(Gaegu) */
+  #list .rccard{ display:flex; align-items:stretch; gap:0; padding:0; }
+  .rccard .rc-img{ flex:0 0 116px; width:116px; aspect-ratio:1/1; }
+  .rccard .rc-body{ flex:1; min-width:0; padding:11px 13px 12px; display:flex; flex-direction:column; gap:7px; font-family:'Gaegu',var(--sans); }
+  .rccard .rc-title{ font-size:20px; font-weight:700; line-height:1.18; color:var(--ink); font-family:'Gaegu',var(--sans); }
+  .rccard .rc-badges{ display:flex; flex-wrap:wrap; gap:5px; }
+  .rccard .rc-b{ font-size:11px; font-weight:700; padding:2px 9px; border-radius:999px; background:var(--line-soft); color:var(--ink-soft); font-family:var(--sans); }
+  .rccard .rc-b.rc-star{ background:#fff4e0; color:#d9770a; }
+  .rccard .rc-b.rc-jjim{ background:#ffe3ea; color:#e03e63; }
+  .rccard .rc-ing{ display:flex; flex-wrap:wrap; gap:4px; }
+  .rccard .rc-ing span{ font-size:13px; color:var(--ink-soft); background:var(--card); border:1px solid var(--line); border-radius:8px; padding:2px 8px; font-family:'Gaegu',var(--sans); }
+  #list:has(.foodcard){ display:flex; flex-direction:column; gap:12px; }
+  #list .foodcard{ display:flex; align-items:stretch; padding:0; overflow:hidden; border:none; border-radius:16px; background:var(--card); box-shadow:0 2px 8px rgba(0,0,0,.08); text-align:left; cursor:pointer; }
+  .foodcard .fl-img{ flex:0 0 116px; width:116px; aspect-ratio:1/1; overflow:hidden; background:linear-gradient(135deg,#fff3e6,#ffe6d2); display:flex; align-items:center; justify-content:center; font-size:40px; }
+  .foodcard .fl-img img{ width:100%; height:100%; object-fit:cover; display:block; }
+  .foodcard .fl-noimg{ color:#e8935c; }
+  .foodcard .fl-body{ flex:1; min-width:0; padding:11px 13px 12px; font-family:'Gaegu',var(--sans); }
+  .foodcard .fl-title{ font-size:20px; font-weight:700; line-height:1.2; color:var(--ink); font-family:'Gaegu',var(--sans); }
+  .foodcard .fl-st{ font-size:11px; font-weight:700; padding:2px 8px; border-radius:999px; margin-left:7px; vertical-align:middle; background:var(--line-soft); color:var(--ink-soft); font-family:var(--sans); }
+  .foodcard .fl-st.s-done{ background:#e6f4ea; color:#16a34a; } .foodcard .fl-st.s-plan{ background:#fdeee2; color:#c2410c; } .foodcard .fl-st.s-pick{ background:#ffe3ea; color:#e03e63; }
+  .foodcard .fl-meta{ font-size:14.5px; color:var(--ink-soft); margin-top:6px; font-family:'Gaegu',var(--sans); }
+  .foodcard .fl-star{ color:#d9770a; font-weight:700; margin-left:8px; }
+  .foodcard .fl-menu{ font-size:13.5px; color:var(--ink-soft); margin-top:5px; font-family:'Gaegu',var(--sans); }
+  [data-theme="dark"] .foodcard .fl-img{ background:var(--line-soft); }
   #list .qcard{ display:flex; flex-direction:column; align-items:stretch; text-align:left; background:var(--card); border:1px solid var(--line); border-radius:14px; padding:14px 14px 15px; cursor:pointer; width:100%; }
   .qmark{ font-family:var(--serif); font-size:20px; color:#E0483F; opacity:.5; margin-right:5px; vertical-align:-2px; }
   .qtext{ font-family:var(--serif); font-size:15px; line-height:1.75; color:var(--ink); margin:0 0 10px; width:100%; word-break:keep-all; }
@@ -1027,16 +1053,16 @@ body{ background:radial-gradient(circle at 50% -10%, rgba(102,78,57,.16), transp
 
 .tabs .tab .tabico{ color:#dfd5c7 !important; width:19px !important; height:19px !important; opacity:1 !important; }
 .tabs .tab[aria-selected="true"] .tabico{ color:#fff6e8 !important; }
-/* v288β: 서브 탭 = 홈 탭과 완전 동일 구현(.ndh-tab). 아이콘 크기를 스코프 밖에서도 보장 */
+/* v289β: 서브 탭 = 홈 탭과 완전 동일 구현(.ndh-tab). 아이콘 크기를 스코프 밖에서도 보장 */
 .ndh-tab .ci-svg{ width:19px !important; height:19px !important; }
 .ndh-tab .emj{ font-size:17px; height:19px; line-height:19px; display:inline-flex; align-items:center; justify-content:center; }
-/* v288β ⑧ 소개 = naedogam.com 라이트(크림+빨강) 고정 — 다크앱 안에서도 */
+/* v289β ⑧ 소개 = naedogam.com 라이트(크림+빨강) 고정 — 다크앱 안에서도 */
 .ndAbout{ --ink:#2b2622; --ink-soft:#7c736b; --card:#ffffff; --line:#e7e0d8; --accent:#E0483F; background:#faf7f3; color:#2b2622; border:1px solid #efe7dd; border-radius:16px; padding:16px 14px 22px; margin:2px 0 4px; -webkit-font-smoothing:antialiased; }
 .ndAbout .ab-card{ background:#fff; padding:15px 17px; margin-bottom:11px; border-radius:13px; }
 .ndAbout p{ line-height:1.9 !important; }
 .ndAbout h2{ margin:16px 0 14px !important; }
 .ndAbout table td, .ndAbout table th{ padding:11px 9px !important; line-height:1.55; }
-/* v288β ⑦ 인사이트 카드 색 강조 복원(다크에서 무채색으로 눌린 것) */
+/* v289β ⑦ 인사이트 카드 색 강조 복원(다크에서 무채색으로 눌린 것) */
 [data-theme="dark"] .insLight .insCard{ border-left:3px solid var(--line); }
 [data-theme="dark"] .insLight #insWrap{ border-left-color:#e0a86a; }
 [data-theme="dark"] .insLight #insMirror{ border-left-color:#d98fb0; }
@@ -1056,7 +1082,7 @@ body{ background:radial-gradient(circle at 50% -10%, rgba(102,78,57,.16), transp
         <svg class="brandmark" width="40" height="30" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg>
         <span class="brandwm"><span class="bwm-ko">내도감</span><span class="bwm-en">NAEDOGAM</span></span>
       </button>
-      <span class="mhver">v288β</span>
+      <span class="mhver">v289β</span>
       <span class="spacer"></span>
       <span class="src-chip" id="srcChip" style="display:none">데모</span>
       <button class="icon-btn" id="searchToggle" type="button" style="display:none">🔍</button>
@@ -1145,7 +1171,7 @@ const MANIFESTS = {
     search:["flow","mood","note"], dateSort:"start",
     stats:[ {label:"기록",type:"count",c:"#e03e63"} ] },
   assets:{ id:"assets", title:"자산", icon:"💰", vol:"", canAdd:true, source:{ type:"sheet", tab:"자산" }, fields:[ {k:"name",sheet:"자산명",label:"자산명",type:"text",full:true},{k:"kind",sheet:"종류",label:"종류",type:"select",options:["","부동산","예금·적금","주식·펀드","코인","현금","자동차","기타"]},{k:"value",sheet:"평가액",label:"평가액(원)",type:"number"},{k:"buyDate",sheet:"취득일",label:"취득일",type:"date"},{k:"expiry",sheet:"만기일",label:"만기일",type:"date"},{k:"place",sheet:"보관처",label:"보관처·계좌",type:"text"},{k:"memo",sheet:"메모",label:"메모",type:"textarea"} ], search:["name","kind","place","memo"], dateSort:"buyDate", card:{ kind:"specimen", thumb:"💰", memo:"memo", meta:function(r){ var v=(r.value!==""&&r.value!=null&&!isNaN(Number(r.value)))?Number(r.value).toLocaleString()+"원":""; return [r.kind,v].filter(Boolean).join(" · "); } }, stats:[ {label:"자산 수",type:"count",c:"#0891b2"} ] },
-  recipes:{ id:"recipes", title:"음식 레시피", icon:"🍳", vol:"", canAdd:true, source:{ type:"sheet", tab:"레시피" }, fields:[ {k:"title",sheet:"요리명",label:"요리명",type:"text",full:true},{k:"kind",sheet:"종류",label:"종류",type:"select",options:["","한식","중식","일식","양식","분식","베이킹","음료","기타"]},{k:"ingredients",sheet:"재료",label:"재료(쉼표로 여러 개)",type:"tags"},{k:"steps",sheet:"조리법",label:"조리법(순서대로)",type:"textarea",rows:4},{k:"time",sheet:"소요시간",label:"소요시간(분)",type:"number"},{k:"level",sheet:"난이도",label:"난이도",type:"select",options:["","쉬움","보통","어려움"]},{k:"rating",sheet:"별점",label:"별점",type:"rating"},{k:"status",sheet:"상태",label:"상태",type:"seg",options:["해봄","또할래","찜"]},{k:"memo",sheet:"메모",label:"메모·후기",type:"textarea"},{k:"cover",sheet:"사진",label:"사진",type:"image"} ], search:["title","kind","ingredients","memo"], card:{ kind:"specimen", thumb:"🍳", tags:"ingredients", memo:"memo", meta:function(r){ return [r.kind,(r.time?r.time+"분":""),r.level].filter(Boolean).join(" · "); }, flags:function(r){ return [ (r.rating!=null&&r.rating!=="")?{t:"★ "+r.rating}:null, r.status==="찜"?{t:"찜"}:null ]; } }, stats:[ {label:"레시피 수",type:"count",c:"#e8590c"} ] },
+  recipes:{ id:"recipes", title:"음식 레시피", icon:"🍳", vol:"", canAdd:true, source:{ type:"sheet", tab:"레시피" }, fields:[ {k:"title",sheet:"요리명",label:"요리명",type:"text",full:true},{k:"kind",sheet:"종류",label:"종류",type:"select",options:["","한식","중식","일식","양식","분식","베이킹","음료","기타"]},{k:"ingredients",sheet:"재료",label:"재료(쉼표로 여러 개)",type:"tags"},{k:"steps",sheet:"조리법",label:"조리법(순서대로)",type:"textarea",rows:4},{k:"time",sheet:"소요시간",label:"소요시간(분)",type:"number"},{k:"level",sheet:"난이도",label:"난이도",type:"select",options:["","쉬움","보통","어려움"]},{k:"rating",sheet:"별점",label:"별점",type:"rating"},{k:"status",sheet:"상태",label:"상태",type:"seg",options:["해봄","또할래","찜"]},{k:"memo",sheet:"메모",label:"메모·후기",type:"textarea"},{k:"cover",sheet:"사진",label:"사진",type:"image"} ], search:["title","kind","ingredients","memo"], filterBy:{ field:"kind", allLabel:"전체" }, card:{ kind:"specimen", thumb:"🍳", tags:"ingredients", memo:"memo", meta:function(r){ return [r.kind,(r.time?r.time+"분":""),r.level].filter(Boolean).join(" · "); }, flags:function(r){ return [ (r.rating!=null&&r.rating!=="")?{t:"★ "+r.rating}:null, r.status==="찜"?{t:"찜"}:null ]; } }, stats:[ {label:"레시피 수",type:"count",c:"#e8590c"}, {label:"찜",type:"countIf",field:"status",eq:"찜",c:"#e0a86a"} ] },
     /* 영화: 실제 구글시트(Apps Script)에서 라이브로 불러옴.
      source.map = 시트 한글 헤더 → 엔진 항목 이름.  source.derive = 특수 처리(코드·수식·숫자). */
   movies:{ id:"movies", title:"영화", icon:"🎬", vol:"卷1", canAdd:true, shareFields:["title","director","year","country"],
@@ -2121,7 +2147,7 @@ function openDomain(id){ if(id==="mbti"){ openMbti(); return; } if(id==="period"
 
 /* 홈: 켜둔 카테고리를 카드로. 건수는 한 번 열어본 분야만 표시(홈을 빠르게 유지). */
 function ndDeep(h){ if(typeof h!=="string"||h.charAt(0)!=="#") h="#8a7a6a"; var n=parseInt(h.slice(1),16),r=(n>>16)&255,g=(n>>8)&255,b=n&255; function d(x,f){return Math.round(x*f);} return "linear-gradient(145deg,rgb("+d(r,.5)+","+d(g,.5)+","+d(b,.5)+"),rgb("+d(r,.28)+","+d(g,.28)+","+d(b,.28)+"))"; }
-var ND_LOGO_HTML='<div class="ndh-brand"><svg width="47" height="35" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg><div class="ndh-wm"><b>내도감</b><small>NAEDOGAM</small></div><span class="mhver ndh-ver">v288β</span></div><button class="ndh-sync" type="button" title="동기화" aria-label="동기화" onclick="try{syncNow()}catch(e){}">↻</button>';
+var ND_LOGO_HTML='<div class="ndh-brand"><svg width="47" height="35" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg><div class="ndh-wm"><b>내도감</b><small>NAEDOGAM</small></div><span class="mhver ndh-ver">v289β</span></div><button class="ndh-sync" type="button" title="동기화" aria-label="동기화" onclick="try{syncNow()}catch(e){}">↻</button>';
 /* 홈 카드 크기: wide(넓게=한 줄 전체) · half(보통=한 줄 2개) · mini(작게=하단 3칸). 기본값=프리셋 */
 var ND_PRESET_SIZE={running:"wide",food:"wide",recipes:"wide",movies:"half",books:"half",period:"half",diary:"half",travel:"half",mountains:"half",culture:"half",albums:"half",cellar:"half",scrap:"half",wish:"half",gift:"half",pet:"half"};
 function getHomeSizes(){ try{ return JSON.parse(store.getItem("nd.homesize")||"{}")||{}; }catch(e){ return {}; } }
@@ -2148,11 +2174,11 @@ function renderHome(){
   const bg=m=>`style="background:${ndDeep(colOf(m))}"`;
   const zeroOf=m=>{ const a=rowsOf(m); return (a&&a.length===0)?" nc-zero":""; };
   const recentTitles=(m,k)=>{ const a=rowsOf(m); if(!a||!a.length) return ""; const out=[]; for(let i=a.length-1;i>=0&&out.length<k;i--){ const t=a[i]&&(a[i].title||a[i].name); if(t) out.push(String(t)); } return out.join(" · "); };
-  const coverCells=(m,cls)=>{ const cs=coversOf(m); let h=""; for(let i=0;i<3;i++){ h+= cs[i]?`<span class="${cls}" style="background-image:url('${esc(cs[i])}')"></span>`:`<span class="${cls} cover-e"></span>`; } return h; };
+  const coverCells=(m,cls)=>{ const cs=coversOf(m); let h=""; for(let i=0;i<cs.length&&i<3;i++){ h+= `<span class="${cls}" style="background-image:url('${esc(cs[i])}')"></span>`; } return h; };
   const metric=m=>`<div class="metric"><b class="ndc" data-cnt="${m.id}">${cntNum(m)}</b><i>${unitOf(m)}</i></div>`;
 
   const collHTML=m=>{ const vis=coversOf(m).length?`<div class="covers">${coverCells(m,"cover")}</div>`:`<span class="nc-glyph coll-glyph">${iconOf(m)}</span>`; return `<button class="card collection-card${zeroOf(m)}" data-id="${m.id}" ${bg(m)}><div><h3>${m.title}</h3>${metric(m)}</div>${vis}</button>`; };
-  const runningHTML=m=>{ const _rows=rowsOf(m)||[]; const _now=new Date(); const _sun=new Date(_now.getFullYear(),_now.getMonth(),_now.getDate()-_now.getDay()); const _km=[0,0,0,0,0,0,0]; _rows.forEach(r=>{ const pd=parseDate(String((r&&r.date)||"")); if(!pd) return; const _di=Math.round((new Date(pd.getFullYear(),pd.getMonth(),pd.getDate())-_sun)/86400000); if(_di>=0&&_di<7){ _km[_di]+=parseFloat(r.dist)||0; } }); const _mx=Math.max.apply(null,_km.concat(0.001)); const _wtot=_km.reduce((a,b)=>a+b,0); const _hasWk=_wtot>0; const bars=_km.map(v=>{ const h=v>0?Math.max(14,Math.round(v/_mx*100)):0; return `<span class="bar" style="height:${h}%${v<=0?";opacity:.22":""}"></span>`; }).join(""); const days=["일","월","화","수","목","금","토"].map((d,i)=>`<span${i===_now.getDay()?" class=\"rd-today\"":""}>${d}</span>`).join(""); const rc=recentTitles(m,1); return `<button class="card running${zeroOf(m)}" data-id="${m.id}" ${bg(m)}><div class="nc-main"><h3>${m.title}</h3>${metric(m)}${_hasWk?`<p class="helper">이번 주 ${(+_wtot.toFixed(1))}km</p>`:(rc?`<p class="helper">최근: ${rc.replace(/</g,"&lt;")}</p>`:"")}</div><div class="run-chart"><div class="bars">${bars}</div><div class="days">${days}</div></div></button>`; };
+  const runningHTML=m=>{ const _rows=rowsOf(m)||[]; const _now=new Date(); const _sun=new Date(_now.getFullYear(),_now.getMonth(),_now.getDate()-_now.getDay()); const _km=[0,0,0,0,0,0,0]; _rows.forEach(r=>{ const pd=parseDate(String((r&&r.date)||"")); if(!pd) return; const _di=Math.round((new Date(pd.getFullYear(),pd.getMonth(),pd.getDate())-_sun)/86400000); if(_di>=0&&_di<7){ _km[_di]+=parseFloat(r.dist)||0; } }); const _mx=Math.max.apply(null,_km.concat(0.001)); const _wtot=_km.reduce((a,b)=>a+b,0); const _wcount=_rows.filter(r=>{ const pd=parseDate(String((r&&r.date)||"")); if(!pd) return false; const _di=Math.round((new Date(pd.getFullYear(),pd.getMonth(),pd.getDate())-_sun)/86400000); return _di>=0&&_di<7; }).length; const _hasWk=_wcount>0; const bars=_km.map(v=>{ const h=v>0?Math.max(14,Math.round(v/_mx*100)):0; return `<span class="bar" style="height:${h}%${v<=0?";opacity:.22":""}"></span>`; }).join(""); const days=["일","월","화","수","목","금","토"].map((d,i)=>`<span${i===_now.getDay()?" class=\"rd-today\"":""}>${d}</span>`).join(""); const rc=recentTitles(m,1); return `<button class="card running${zeroOf(m)}" data-id="${m.id}" ${bg(m)}><div class="nc-main"><h3>${m.title}</h3>${metric(m)}${_hasWk?`<p class="helper">이번 주 ${_wcount}회</p>`:(rc?`<p class="helper">최근: ${rc.replace(/</g,"&lt;")}</p>`:"")}</div><div class="run-chart"><div class="bars">${bars}</div><div class="days">${days}</div></div></button>`; };
   const foodHTML=m=>{ const rc=recentTitles(m,2); const vis=coversOf(m).length?`<div class="food-photos">${coverCells(m,"food-photo")}</div>`:`<span class="nc-glyph coll-glyph">${iconOf(m)}</span>`; return `<button class="card food${zeroOf(m)}" data-id="${m.id}" ${bg(m)}><div class="nc-main"><h3>${m.title}</h3>${metric(m)}${rc?`<p class="helper">최근: ${rc.replace(/</g,"&lt;")}</p>`:""}</div>${vis}</button>`; };
   const cycleHTML=m=>`<button class="card mini-card cycle${zeroOf(m)}" data-id="${m.id}" ${bg(m)}><div class="nc-main"><h3>${m.title}</h3><div class="metric"><b class="ndc" data-cnt="${m.id}">${pdHomeLabel()}</b></div></div><span class="moon"></span></button>`;
   const diaryHTML=m=>{ const rc=recentTitles(m,1); return `<button class="card mini-card diary${zeroOf(m)}" data-id="${m.id}" ${bg(m)}><div class="nc-main"><h3>${m.title}</h3>${metric(m)}${rc?`<p class="helper">${rc.slice(0,16).replace(/</g,"&lt;")}</p>`:""}</div><span class="pen"><svg viewBox="0 0 48 48"><path d="m15 34-2 9 9-3 17-24c1.8-2.5 1.2-6-1.3-7.8s-6-1.2-7.8 1.3z"/><path d="m27 14 9 6M16 34l6 5"/></svg></span></button>`; };
@@ -2960,7 +2986,7 @@ function quoteCard(r){
   const esc=x=>String(x==null?"":x).replace(/</g,"&lt;");
   const tagsArr=Array.isArray(r.tags)?r.tags:(r.tags==null||r.tags===""?[]:String(r.tags).split(",").map(x=>x.trim()).filter(Boolean));
   const tags=tagsArr.map(t=>`<span class="tag">${esc(t)}</span>`).join("");
-  return `<button class="card qcard" data-id="${r._id}"><div class="qtext"><span class="qmark">❝</span>${esc(r.title)}</div><div class="qmeta">${r.author?`<span class="qauthor">— ${esc(r.author)}</span>`:""}${tags?`<span class="qtags">${tags}</span>`:""}</div></button>`;
+  return `<button class="card qcard" data-id="${r._id}"><div class="qtext"><span class="qmark">❝</span>${esc(r.title)}</div><div class="qmeta">${r.status==="찜"?`<span class="qjjim">★ 찜</span>`:""}${r.author?`<span class="qauthor">— ${esc(r.author)}</span>`:""}${tags?`<span class="qtags">${tags}</span>`:""}</div></button>`;
 }
 function travelCard(r){
   const esc=x=>String(x==null?"":x).replace(/</g,"&lt;"), eq=x=>String(x==null?"":x).replace(/"/g,"&quot;");
@@ -2999,7 +3025,7 @@ function scrapCard(r){
   return `<button class="card sccard sc-text" data-id="${r._id}">${(chip||dtHtml)?`<div class="sc-topline">${chip}${dtHtml}</div>`:""}<div class="sc-title">${title}</div>${content}${tagsHtml}</button>`;
 }
 function srcMiniHTML(r){ var v=r.source==null?"":String(r.source).trim(); return v?'<span class="reclbl">출처</span><span class="rbadge">'+v.replace(/</g,"&lt;")+'</span>':""; }
-function recMiniHTML(r){ var _id=(typeof state!=="undefined"&&state.domain)||""; var l=String(r.recommend||"").split(/[\/,]+/).map(function(x){return x.trim();}).filter(Boolean); if(!l.length && _id && typeof ndRecVals==="function"){ try{ l=ndRecVals(r,_id); }catch(e){} } var _r=l.length?('<span class="reclbl">추천</span>'+l.map(function(t){return '<span class="rbadge">'+String(t).replace(/</g,"&lt;")+'</span>';}).join("")):""; return _r+srcMiniHTML(r); }
+function recMiniHTML(r){ var _id=(typeof state!=="undefined"&&state.domain)||""; var l=String(r.recommend||"").split(/[\/,]+/).map(function(x){return x.trim();}).filter(Boolean); if(!l.length && _id && typeof ndRecVals==="function"){ try{ l=ndRecVals(r,_id); }catch(e){} } return srcMiniHTML(r); }
 function recipeDetailBody(r){
   var esc=function(x){return String(x==null?"":x).replace(/</g,"&lt;");};
   var ing=Array.isArray(r.ingredients)?r.ingredients:String(r.ingredients||"").split(/[,\n]/);
@@ -3018,20 +3044,31 @@ function recipeDetailBody(r){
 function recipeCard(r){ var esc=function(x){return String(x==null?"":x).replace(/</g,"&lt;");};
   var cov=r.cover||r._cover;
   var img=cov?('<div class="rc-img"><img src="'+String(cov).replace(/"/g,"&quot;")+'" alt="" loading="lazy"></div>'):'<div class="rc-img rc-noimg" data-ac="'+esc(r.title).replace(/"/g,"&quot;")+'">🍳</div>';
-  var meta=[r.kind,(r.time?r.time+"분":""),r.level].filter(Boolean).map(esc).join(" · ");
-  var rating=(r.rating!=null&&r.rating!=="")?'<span class="rc-star">★ '+esc(r.rating)+'</span>':"";
-  var status=(r.status==="찜")?'<span class="rc-jjim">찜</span>':(r.status?'<span class="rc-status">'+esc(r.status)+'</span>':"");
-  var _jj=(r.status==="찜")?' <span class="rc-jjim">찜</span>':((r.status&&r.status!=="일반")?' <span class="rc-status">'+esc(r.status)+'</span>':"");
-  return '<button class="card rccard" data-id="'+String(r._id).replace(/"/g,"&quot;")+'">'+img+'<div class="rc-body"><div class="rc-title">'+esc(r.title)+_jj+'</div>'+recipeDetailBody(r)+'</div></button>'; }
+  var badges=[r.kind,(r.time?r.time+"분":""),r.level].filter(Boolean).map(function(x){return '<span class="rc-b">'+esc(x)+'</span>';}).join("");
+  var rating=(r.rating!=null&&r.rating!=="")?'<span class="rc-b rc-star">★ '+esc(r.rating)+'</span>':"";
+  var jj=(r.status==="찜")?'<span class="rc-b rc-jjim">찜</span>':((r.status&&r.status!=="일반"&&r.status!=="찜")?'<span class="rc-b rc-status">'+esc(r.status)+'</span>':"");
+  var ing=Array.isArray(r.ingredients)?r.ingredients:String(r.ingredients||"").split(/[,\n]/);
+  ing=ing.map(function(x){return String(x).trim();}).filter(Boolean).slice(0,5);
+  var ingHTML=ing.length?'<div class="rc-ing">'+ing.map(function(x){return '<span>'+esc(x)+'</span>';}).join("")+'</div>':"";
+  return '<button class="card rccard" data-id="'+String(r._id).replace(/"/g,"&quot;")+'">'+img+'<div class="rc-body"><div class="rc-title">'+esc(r.title)+'</div><div class="rc-badges">'+badges+rating+jj+'</div>'+ingHTML+'</div></button>'; }
+function foodListCard(r){ var esc=function(x){return String(x==null?"":x).replace(/</g,"&lt;");};
+  var cov=r.cover||r._cover;
+  var img=cov?('<div class="fl-img"><img src="'+String(cov).replace(/"/g,"&quot;")+'" alt="" loading="lazy"></div>'):'<div class="fl-img fl-noimg" data-ac="'+esc(r.title).replace(/"/g,"&quot;")+'">🍽</div>';
+  var st=r.status; var stcls=st==="다녀옴"?"s-done":st==="가볼곳"?"s-plan":st==="찜"?"s-pick":"";
+  var stb=st?'<span class="fl-st '+stcls+'">'+esc(st)+'</span>':"";
+  var rating=(r.rating!=null&&r.rating!=="")?'<span class="fl-star">★ '+esc(r.rating)+'</span>':"";
+  var meta=[r.kind,r.place].filter(Boolean).map(esc).join(" · ");
+  var menu=(r.menu&&String(r.menu).trim())?'<div class="fl-menu">🍜 '+esc(r.menu)+'</div>':"";
+  return '<button class="card foodcard" data-id="'+String(r._id).replace(/"/g,"&quot;")+'">'+img+'<div class="fl-body"><div class="fl-title">'+esc(r.title||"맛집")+stb+'</div>'+((meta||rating)?'<div class="fl-meta">'+meta+rating+'</div>':"")+menu+srcMiniHTML(r)+'</div></button>'; }
 /* 자동 커버: 사진 없는 카드를 위키피디아 이미지로 채움(제목 기준, localStorage 캐시) */
 var ndACache=null;
 function _ndAC(){ if(ndACache) return ndACache; try{ ndACache=JSON.parse(store.getItem("nd.autocover")||"{}"); }catch(e){ ndACache={}; } return ndACache; }
 function _ndACsave(){ try{ store.setItem("nd.autocover", JSON.stringify(ndACache||{})); }catch(e){} }
-function _ndACset(el,src){ if(!el) return; el.classList.remove("rc-noimg"); el.innerHTML='<img src="'+String(src).replace(/"/g,"&quot;")+'" alt="" loading="lazy">'; }
+function _ndACset(el,src){ if(!el) return; el.classList.remove("rc-noimg"); el.classList.remove("fl-noimg"); el.innerHTML='<img src="'+String(src).replace(/"/g,"&quot;")+'" alt="" loading="lazy">'; }
 async function ndWikiImg(title){ var langs=["ko","en"], t=String(title||"").trim(); if(!t) return ""; for(var i=0;i<langs.length;i++){ try{ var url="https://"+langs[i]+".wikipedia.org/w/api.php?action=query&titles="+encodeURIComponent(t)+"&prop=pageimages&piprop=thumbnail&pithumbsize=500&format=json&redirects=1&origin=*"; var d=await fetch(url).then(function(r){return r.json();}); var pages=(d.query&&d.query.pages)||{}; for(var k in pages){ var th=pages[k].thumbnail; if(th&&th.source) return th.source; } }catch(e){} } return ""; }
 var AUTO_COVER_CATS={recipes:1, food:1, culture:1, cellar:1};
-function ndAutoCover(){ try{ var cache=_ndAC(); var io=new IntersectionObserver(function(ents,obs){ ents.forEach(function(e){ if(!e.isIntersecting) return; var el=e.target; obs.unobserve(el); var t=el.getAttribute("data-ac"); if(!t) return; var key="r|"+t; if(cache[key]==="0") return; if(cache[key]){ _ndACset(el,cache[key]); return; } ndWikiImg(t).then(function(src){ cache[key]=src||"0"; _ndACsave(); if(src&&document.body.contains(el)) _ndACset(el,src); }); }); },{rootMargin:"400px"}); document.querySelectorAll(".rc-img[data-ac], .thumb[data-ac]").forEach(function(el){ io.observe(el); }); }catch(e){} }
-function renderCard(m, r, no){ if(m.id==="recipes") return recipeCard(r); if(m.id==="books") return bookCard(r); if(m.id==="quote") return quoteCard(r); if(m.id==="travel") return travelCard(r); if(m.id==="albums") return albumCard(r); if(m.id==="scrap") return scrapCard(r); const c=m.card;
+function ndAutoCover(){ try{ var cache=_ndAC(); var io=new IntersectionObserver(function(ents,obs){ ents.forEach(function(e){ if(!e.isIntersecting) return; var el=e.target; obs.unobserve(el); var t=el.getAttribute("data-ac"); if(!t) return; var key="r|"+t; if(cache[key]==="0") return; if(cache[key]){ _ndACset(el,cache[key]); return; } ndWikiImg(t).then(function(src){ cache[key]=src||"0"; _ndACsave(); if(src&&document.body.contains(el)) _ndACset(el,src); }); }); },{rootMargin:"400px"}); document.querySelectorAll(".rc-img[data-ac], .fl-img[data-ac], .thumb[data-ac]").forEach(function(el){ io.observe(el); }); }catch(e){} }
+function renderCard(m, r, no){ if(m.id==="recipes") return recipeCard(r); if(m.id==="food") return foodListCard(r); if(m.id==="books") return bookCard(r); if(m.id==="quote") return quoteCard(r); if(m.id==="travel") return travelCard(r); if(m.id==="albums") return albumCard(r); if(m.id==="scrap") return scrapCard(r); const c=m.card;
   if(c.kind==="wallet") return walletCard(r);
   if(c.kind==="specimen"){ const meta=c.meta(r);
     const traw=r[c.tags]; const _tarr0=Array.isArray(traw)?traw:(traw==null||traw===""?[]:String(traw).split(",").map(x=>x.trim()).filter(Boolean));   // 쉼표 문자열도 개별 태그로
