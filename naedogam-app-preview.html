@@ -296,7 +296,7 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
   .mv-memo{ font-size:12px; color:#a8894e; line-height:1.45; margin-top:5px; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
   #list:has(.qcard){ display:flex; flex-direction:column; gap:8px; }
   .qcard .qjjim{ color:#e0a86a; font-size:11px; font-weight:800; margin-right:7px; }
-  /* v289β #3#5 레시피·맛집 가로형 카드 + 손글씨체(Gaegu) */
+  /* v290β #3#5 레시피·맛집 가로형 카드 + 손글씨체(Gaegu) */
   #list .rccard{ display:flex; align-items:stretch; gap:0; padding:0; }
   .rccard .rc-img{ flex:0 0 116px; width:116px; aspect-ratio:1/1; }
   .rccard .rc-body{ flex:1; min-width:0; padding:11px 13px 12px; display:flex; flex-direction:column; gap:7px; font-family:'Gaegu',var(--sans); }
@@ -320,6 +320,20 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
   .foodcard .fl-star{ color:#d9770a; font-weight:700; margin-left:8px; }
   .foodcard .fl-menu{ font-size:13.5px; color:var(--ink-soft); margin-top:5px; font-family:'Gaegu',var(--sans); }
   [data-theme="dark"] .foodcard .fl-img{ background:var(--line-soft); }
+  /* v290β 육아일기 카드피드 */
+  #list:has(.bbcard){ display:flex; flex-direction:column; gap:16px; }
+  #list .bbcard{ display:block; padding:0; overflow:hidden; border:none; border-radius:20px; background:var(--card); box-shadow:0 3px 14px rgba(0,0,0,.10); text-align:left; cursor:pointer; }
+  .bbcard .bb-img{ width:100%; aspect-ratio:4/3; overflow:hidden; background:linear-gradient(135deg,#ffe3ee,#fff0e0); display:flex; align-items:center; justify-content:center; font-size:56px; }
+  .bbcard .bb-img img{ width:100%; height:100%; object-fit:cover; display:block; }
+  .bbcard .bb-body{ padding:14px 17px 17px; font-family:'Gaegu',var(--sans); }
+  .bbcard .bb-top{ display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+  .bbcard .bb-date{ font-size:13px; color:var(--ink-soft); font-family:var(--sans); }
+  .bbcard .bb-age{ background:#ffe3ee; color:#d6337a; font-weight:700; padding:2px 10px; border-radius:999px; font-size:12px; font-family:var(--sans); }
+  .bbcard .bb-mood{ font-size:15px; }
+  .bbcard .bb-title{ font-size:22px; font-weight:700; color:var(--ink); line-height:1.25; margin-top:7px; font-family:'Gaegu',var(--sans); }
+  .bbcard .bb-mile{ display:inline-block; margin-top:9px; font-size:14px; color:#d6337a; background:#fff0f5; border:1px dashed #f0b6cf; border-radius:11px; padding:4px 12px; font-family:'Gaegu',var(--sans); }
+  .bbcard .bb-content{ margin-top:11px; font-size:16.5px; line-height:1.75; color:var(--ink); white-space:pre-wrap; font-family:'Gaegu',var(--sans); }
+  [data-theme="dark"] .bbcard .bb-mile{ background:rgba(214,51,122,.12); border-color:rgba(214,51,122,.4); color:#f0a0c4; }
   #list .qcard{ display:flex; flex-direction:column; align-items:stretch; text-align:left; background:var(--card); border:1px solid var(--line); border-radius:14px; padding:14px 14px 15px; cursor:pointer; width:100%; }
   .qmark{ font-family:var(--serif); font-size:20px; color:#E0483F; opacity:.5; margin-right:5px; vertical-align:-2px; }
   .qtext{ font-family:var(--serif); font-size:15px; line-height:1.75; color:var(--ink); margin:0 0 10px; width:100%; word-break:keep-all; }
@@ -1053,16 +1067,16 @@ body{ background:radial-gradient(circle at 50% -10%, rgba(102,78,57,.16), transp
 
 .tabs .tab .tabico{ color:#dfd5c7 !important; width:19px !important; height:19px !important; opacity:1 !important; }
 .tabs .tab[aria-selected="true"] .tabico{ color:#fff6e8 !important; }
-/* v289β: 서브 탭 = 홈 탭과 완전 동일 구현(.ndh-tab). 아이콘 크기를 스코프 밖에서도 보장 */
+/* v290β: 서브 탭 = 홈 탭과 완전 동일 구현(.ndh-tab). 아이콘 크기를 스코프 밖에서도 보장 */
 .ndh-tab .ci-svg{ width:19px !important; height:19px !important; }
 .ndh-tab .emj{ font-size:17px; height:19px; line-height:19px; display:inline-flex; align-items:center; justify-content:center; }
-/* v289β ⑧ 소개 = naedogam.com 라이트(크림+빨강) 고정 — 다크앱 안에서도 */
+/* v290β ⑧ 소개 = naedogam.com 라이트(크림+빨강) 고정 — 다크앱 안에서도 */
 .ndAbout{ --ink:#2b2622; --ink-soft:#7c736b; --card:#ffffff; --line:#e7e0d8; --accent:#E0483F; background:#faf7f3; color:#2b2622; border:1px solid #efe7dd; border-radius:16px; padding:16px 14px 22px; margin:2px 0 4px; -webkit-font-smoothing:antialiased; }
 .ndAbout .ab-card{ background:#fff; padding:15px 17px; margin-bottom:11px; border-radius:13px; }
 .ndAbout p{ line-height:1.9 !important; }
 .ndAbout h2{ margin:16px 0 14px !important; }
 .ndAbout table td, .ndAbout table th{ padding:11px 9px !important; line-height:1.55; }
-/* v289β ⑦ 인사이트 카드 색 강조 복원(다크에서 무채색으로 눌린 것) */
+/* v290β ⑦ 인사이트 카드 색 강조 복원(다크에서 무채색으로 눌린 것) */
 [data-theme="dark"] .insLight .insCard{ border-left:3px solid var(--line); }
 [data-theme="dark"] .insLight #insWrap{ border-left-color:#e0a86a; }
 [data-theme="dark"] .insLight #insMirror{ border-left-color:#d98fb0; }
@@ -1082,7 +1096,7 @@ body{ background:radial-gradient(circle at 50% -10%, rgba(102,78,57,.16), transp
         <svg class="brandmark" width="40" height="30" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg>
         <span class="brandwm"><span class="bwm-ko">내도감</span><span class="bwm-en">NAEDOGAM</span></span>
       </button>
-      <span class="mhver">v289β</span>
+      <span class="mhver">v290β</span>
       <span class="spacer"></span>
       <span class="src-chip" id="srcChip" style="display:none">데모</span>
       <button class="icon-btn" id="searchToggle" type="button" style="display:none">🔍</button>
@@ -1357,6 +1371,22 @@ const MANIFESTS = {
     card:{ kind:"data", thumb:"📔",
            title:r=>`${r.date}${r.title?" · "+r.title:""}`,
            kv:[{k:"기분",f:"mood"},{k:"날씨",f:"weather"}] } },
+  baby:{ id:"baby", title:"육아일기", icon:"👶", vol:"卷21", canAdd:true,
+    source:{ type:"sheet", tab:"육아일기" },
+    fields:[ {k:"date",sheet:"날짜",label:"날짜",type:"date",today:true},
+             {k:"title",sheet:"제목",label:"제목",type:"text",full:true},
+             {k:"content",sheet:"내용",label:"오늘의 육아 이야기",type:"textarea",rows:5},
+             {k:"age",sheet:"개월수",label:"개월수(예: 12개월)",type:"text"},
+             {k:"milestone",sheet:"기념",label:"오늘의 발달·기념(예: 첫걸음마)",type:"text"},
+             {k:"mood",sheet:"기분",label:"오늘 기분",type:"select",options:["","😊 방긋","😴 쿨쿨","😭 응애","😋 냠냠","🤗 폭풍성장"]},
+             {k:"tags",sheet:"태그",label:"태그(쉼표로 여러 개)",type:"tags"},
+             {k:"cover",sheet:"사진",label:"사진",type:"image"} ],
+    search:["title","content","milestone","tags","age"],
+    dateSort:"date", newestFirst:true,
+    activity:{ df:"date", when:r=>true, label:"육아일기", name:r=>r.title||r.date },
+    stats:[ {label:"기록",type:"count",c:"#e879a6"} ],
+    card:{ kind:"specimen", thumb:"👶", title:function(r){ return (r.date?(_isoOf(r.date)||r.date):"")+(r.title?" · "+r.title:""); } } },
+
 
   /* 정기구독: 매달·매년 빠져나가는 구독을 한눈에. 월/연 환산 합계까지. */
   subs:{ id:"subs", title:"정기결제", icon:"🔄", vol:"卷7", canAdd:true,
@@ -2147,7 +2177,7 @@ function openDomain(id){ if(id==="mbti"){ openMbti(); return; } if(id==="period"
 
 /* 홈: 켜둔 카테고리를 카드로. 건수는 한 번 열어본 분야만 표시(홈을 빠르게 유지). */
 function ndDeep(h){ if(typeof h!=="string"||h.charAt(0)!=="#") h="#8a7a6a"; var n=parseInt(h.slice(1),16),r=(n>>16)&255,g=(n>>8)&255,b=n&255; function d(x,f){return Math.round(x*f);} return "linear-gradient(145deg,rgb("+d(r,.5)+","+d(g,.5)+","+d(b,.5)+"),rgb("+d(r,.28)+","+d(g,.28)+","+d(b,.28)+"))"; }
-var ND_LOGO_HTML='<div class="ndh-brand"><svg width="47" height="35" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg><div class="ndh-wm"><b>내도감</b><small>NAEDOGAM</small></div><span class="mhver ndh-ver">v289β</span></div><button class="ndh-sync" type="button" title="동기화" aria-label="동기화" onclick="try{syncNow()}catch(e){}">↻</button>';
+var ND_LOGO_HTML='<div class="ndh-brand"><svg width="47" height="35" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg><div class="ndh-wm"><b>내도감</b><small>NAEDOGAM</small></div><span class="mhver ndh-ver">v290β</span></div><button class="ndh-sync" type="button" title="동기화" aria-label="동기화" onclick="try{syncNow()}catch(e){}">↻</button>';
 /* 홈 카드 크기: wide(넓게=한 줄 전체) · half(보통=한 줄 2개) · mini(작게=하단 3칸). 기본값=프리셋 */
 var ND_PRESET_SIZE={running:"wide",food:"wide",recipes:"wide",movies:"half",books:"half",period:"half",diary:"half",travel:"half",mountains:"half",culture:"half",albums:"half",cellar:"half",scrap:"half",wish:"half",gift:"half",pet:"half"};
 function getHomeSizes(){ try{ return JSON.parse(store.getItem("nd.homesize")||"{}")||{}; }catch(e){ return {}; } }
@@ -3041,6 +3071,17 @@ function recipeDetailBody(r){
   var memoHTML=(r.memo&&String(r.memo).trim())?sec("📝 메모·후기",'<div style="font-size:13.5px;color:var(--ink-soft);line-height:1.6;white-space:pre-wrap">'+esc(r.memo)+'</div>'):"";
   return '<div style="padding:2px 2px 6px">'+badgeHTML+sec("🧂 재료",ingHTML)+sec("👩‍🍳 만드는 법",stepHTML)+memoHTML+'</div>';
 }
+function babyCard(r){ var esc=function(x){return String(x==null?"":x).replace(/</g,"&lt;");};
+  var cov=r.cover||r._cover;
+  var img=cov?('<div class="bb-img"><img src="'+String(cov).replace(/"/g,"&quot;")+'" alt="" loading="lazy"></div>'):'<div class="bb-img bb-noimg">👶</div>';
+  var date=r.date?(_isoOf(r.date)||String(r.date).slice(0,10)):"";
+  var age=r.age?'<span class="bb-age">'+esc(r.age)+'</span>':"";
+  var mood=r.mood?'<span class="bb-mood">'+esc(r.mood)+'</span>':"";
+  var mile=(r.milestone&&String(r.milestone).trim())?'<div class="bb-mile">🎉 '+esc(r.milestone)+'</div>':"";
+  var content=esc(r.content||"");
+  var contentHTML=content?'<div class="bb-content">'+content+'</div>':"";
+  return '<button class="card bbcard" data-id="'+String(r._id).replace(/"/g,"&quot;")+'">'+img+'<div class="bb-body"><div class="bb-top">'+(date?'<span class="bb-date">'+esc(date)+'</span>':"")+age+mood+'</div>'+(r.title?'<div class="bb-title">'+esc(r.title)+'</div>':"")+mile+contentHTML+'</div></button>';
+}
 function recipeCard(r){ var esc=function(x){return String(x==null?"":x).replace(/</g,"&lt;");};
   var cov=r.cover||r._cover;
   var img=cov?('<div class="rc-img"><img src="'+String(cov).replace(/"/g,"&quot;")+'" alt="" loading="lazy"></div>'):'<div class="rc-img rc-noimg" data-ac="'+esc(r.title).replace(/"/g,"&quot;")+'">🍳</div>';
@@ -3068,7 +3109,7 @@ function _ndACset(el,src){ if(!el) return; el.classList.remove("rc-noimg"); el.c
 async function ndWikiImg(title){ var langs=["ko","en"], t=String(title||"").trim(); if(!t) return ""; for(var i=0;i<langs.length;i++){ try{ var url="https://"+langs[i]+".wikipedia.org/w/api.php?action=query&titles="+encodeURIComponent(t)+"&prop=pageimages&piprop=thumbnail&pithumbsize=500&format=json&redirects=1&origin=*"; var d=await fetch(url).then(function(r){return r.json();}); var pages=(d.query&&d.query.pages)||{}; for(var k in pages){ var th=pages[k].thumbnail; if(th&&th.source) return th.source; } }catch(e){} } return ""; }
 var AUTO_COVER_CATS={recipes:1, food:1, culture:1, cellar:1};
 function ndAutoCover(){ try{ var cache=_ndAC(); var io=new IntersectionObserver(function(ents,obs){ ents.forEach(function(e){ if(!e.isIntersecting) return; var el=e.target; obs.unobserve(el); var t=el.getAttribute("data-ac"); if(!t) return; var key="r|"+t; if(cache[key]==="0") return; if(cache[key]){ _ndACset(el,cache[key]); return; } ndWikiImg(t).then(function(src){ cache[key]=src||"0"; _ndACsave(); if(src&&document.body.contains(el)) _ndACset(el,src); }); }); },{rootMargin:"400px"}); document.querySelectorAll(".rc-img[data-ac], .fl-img[data-ac], .thumb[data-ac]").forEach(function(el){ io.observe(el); }); }catch(e){} }
-function renderCard(m, r, no){ if(m.id==="recipes") return recipeCard(r); if(m.id==="food") return foodListCard(r); if(m.id==="books") return bookCard(r); if(m.id==="quote") return quoteCard(r); if(m.id==="travel") return travelCard(r); if(m.id==="albums") return albumCard(r); if(m.id==="scrap") return scrapCard(r); const c=m.card;
+function renderCard(m, r, no){ if(m.id==="recipes") return recipeCard(r); if(m.id==="food") return foodListCard(r); if(m.id==="baby") return babyCard(r); if(m.id==="books") return bookCard(r); if(m.id==="quote") return quoteCard(r); if(m.id==="travel") return travelCard(r); if(m.id==="albums") return albumCard(r); if(m.id==="scrap") return scrapCard(r); const c=m.card;
   if(c.kind==="wallet") return walletCard(r);
   if(c.kind==="specimen"){ const meta=c.meta(r);
     const traw=r[c.tags]; const _tarr0=Array.isArray(traw)?traw:(traw==null||traw===""?[]:String(traw).split(",").map(x=>x.trim()).filter(Boolean));   // 쉼표 문자열도 개별 태그로
