@@ -296,7 +296,7 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
   .mv-memo{ font-size:12px; color:#a8894e; line-height:1.45; margin-top:5px; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
   #list:has(.qcard){ display:flex; flex-direction:column; gap:8px; }
   .qcard .qjjim{ color:#e0a86a; font-size:11px; font-weight:800; margin-right:7px; }
-  /* v295β #3#5 레시피·맛집 가로형 카드 + 손글씨체(Gaegu) */
+  /* v296β #3#5 레시피·맛집 가로형 카드 + 손글씨체(Gaegu) */
   #list .rccard{ display:flex; align-items:stretch; gap:0; padding:0; }
   .rccard .rc-img{ flex:0 0 116px; width:116px; aspect-ratio:1/1; }
   .rccard .rc-body{ flex:1; min-width:0; padding:11px 13px 12px; display:flex; flex-direction:column; gap:7px; font-family:'Gaegu',var(--sans); }
@@ -320,13 +320,13 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
   .foodcard .fl-star{ color:#d9770a; font-weight:700; margin-left:8px; }
   .foodcard .fl-menu{ font-size:13.5px; color:var(--ink-soft); margin-top:5px; font-family:'Gaegu',var(--sans); }
   [data-theme="dark"] .foodcard .fl-img{ background:var(--line-soft); }
-  /* v295β 생리주기 인페이지 */
+  /* v296β 생리주기 인페이지 */
   .pdInlineBar{ display:flex; align-items:center; justify-content:space-between; margin:2px 0 12px; }
   .pdInlineBar .pdTitle{ font-size:17px; font-weight:800; color:var(--ink); }
   .pdBig.pdBigSm{ width:auto; font-size:13.5px; padding:8px 15px; margin:0; }
   .pdBody.pdInline{ max-height:none; overflow:visible; border-radius:16px; }
   .wcard.mbInline{ max-width:none; padding:0 2px; }
-  /* v295β MBTI 검사 몰입 오버레이 */
+  /* v296β MBTI 검사 몰입 오버레이 */
   .mbTestOv{ position:fixed; inset:0; z-index:200; display:flex; flex-direction:column; background:linear-gradient(180deg,#1b1916,#0d0d0c); color:#f4f1ff; }
   .mbTestOv .mbTestTop{ display:flex; align-items:center; justify-content:space-between; padding:calc(16px + env(safe-area-inset-top)) 18px 10px; }
   .mbTestOv .mbQuit{ background:none; border:none; color:#b8ab97; font-size:14px; font-weight:700; cursor:pointer; padding:4px 2px; }
@@ -342,7 +342,7 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
   .mbTestOv .mbQuitYes{ background:rgba(224,72,63,.18); border-color:rgba(224,72,63,.4); text-align:center; }
   .mbTestOv .mbQuitNo{ text-align:center; }
   .mbStartGhost{ background:transparent!important; border:1px solid var(--line)!important; color:var(--ink-soft)!important; }
-  /* v295β 육아일기 카드피드 */
+  /* v296β 육아일기 카드피드 */
   #list:has(.bbcard){ display:flex; flex-direction:column; gap:16px; }
   #list .bbcard{ display:block; padding:0; overflow:hidden; border:none; border-radius:20px; background:var(--card); box-shadow:0 3px 14px rgba(0,0,0,.10); text-align:left; cursor:pointer; }
   .bbcard .bb-img{ width:100%; aspect-ratio:4/3; overflow:hidden; background:linear-gradient(135deg,#ffe3ee,#fff0e0); display:flex; align-items:center; justify-content:center; font-size:56px; }
@@ -645,6 +645,20 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
   .tier-ben{ flex:1 1 auto; min-width:0; padding:8px 10px; border:1px solid var(--line); border-radius:8px; font-size:14px; font-family:inherit; resize:vertical; box-sizing:border-box; }
   .tier-del{ flex:0 0 auto; border:1px solid var(--line); background:var(--line-soft); border-radius:8px; width:32px; height:36px; cursor:pointer; color:var(--ink-soft); font-size:13px; }
   .tier-add{ margin-top:9px; border:1px dashed var(--line); background:none; border-radius:9px; padding:9px; cursor:pointer; color:var(--ink-soft); font-size:13px; width:100%; }
+  /* v296β 건강검진 결과 항목 행 */
+  .lab-head{ display:flex; gap:6px; font-size:11.5px; color:var(--sub); margin:2px 0 5px; padding:0 2px; }
+  .lab-head .lab-h1{ flex:2; } .lab-head .lab-h2{ flex:1; } .lab-head .lab-h3{ flex:1; } .lab-head .lab-hx{ flex:0 0 26px; }
+  .rf-labrows{ display:flex; flex-direction:column; gap:6px; }
+  .lab-row{ display:flex; gap:6px; align-items:center; }
+  .lab-row input{ border:1px solid var(--line); border-radius:8px; padding:8px 9px; font-size:14px; font-family:inherit; box-sizing:border-box; min-width:0; background:var(--card); color:var(--ink); }
+  .lab-row .lab-item{ flex:2; } .lab-row .lab-val{ flex:1; } .lab-row .lab-norm{ flex:1; }
+  .lab-row .lab-del{ flex:0 0 26px; background:none; border:none; color:var(--sub); cursor:pointer; font-size:14px; padding:0; }
+  .lab-add{ margin-top:8px; border:1px dashed var(--line); background:none; border-radius:9px; padding:9px; cursor:pointer; color:var(--ink-soft); font-size:13.5px; width:100%; }
+  .lab-detail{ display:flex; flex-direction:column; gap:4px; }
+  .lab-drow{ font-size:14.5px; line-height:1.5; }
+  .lab-drow .lab-dv{ color:#0891b2; font-weight:700; margin-left:4px; }
+  .lab-drow .lab-dn{ color:var(--sub); font-size:12.5px; }
+  [data-theme="dark"] .lab-drow .lab-dv{ color:#38bdf8; }
   .lnkico{ width:15px; height:15px; vertical-align:-3px; margin-right:5px; border-radius:3px; }
   .mvlinks .btn{ text-decoration:none; text-align:center; flex:1; }
   .dfoot{ display:flex; gap:8px; padding:6px 18px 18px; flex-wrap:wrap; }
@@ -1089,16 +1103,16 @@ body{ background:radial-gradient(circle at 50% -10%, rgba(102,78,57,.16), transp
 
 .tabs .tab .tabico{ color:#dfd5c7 !important; width:19px !important; height:19px !important; opacity:1 !important; }
 .tabs .tab[aria-selected="true"] .tabico{ color:#fff6e8 !important; }
-/* v295β: 서브 탭 = 홈 탭과 완전 동일 구현(.ndh-tab). 아이콘 크기를 스코프 밖에서도 보장 */
+/* v296β: 서브 탭 = 홈 탭과 완전 동일 구현(.ndh-tab). 아이콘 크기를 스코프 밖에서도 보장 */
 .ndh-tab .ci-svg{ width:19px !important; height:19px !important; }
 .ndh-tab .emj{ font-size:17px; height:19px; line-height:19px; display:inline-flex; align-items:center; justify-content:center; }
-/* v295β ⑧ 소개 = naedogam.com 라이트(크림+빨강) 고정 — 다크앱 안에서도 */
+/* v296β ⑧ 소개 = naedogam.com 라이트(크림+빨강) 고정 — 다크앱 안에서도 */
 .ndAbout{ --ink:#2b2622; --ink-soft:#7c736b; --card:#ffffff; --line:#e7e0d8; --accent:#E0483F; background:#faf7f3; color:#2b2622; border:1px solid #efe7dd; border-radius:16px; padding:16px 14px 22px; margin:2px 0 4px; -webkit-font-smoothing:antialiased; }
 .ndAbout .ab-card{ background:#fff; padding:15px 17px; margin-bottom:11px; border-radius:13px; }
 .ndAbout p{ line-height:1.9 !important; }
 .ndAbout h2{ margin:16px 0 14px !important; }
 .ndAbout table td, .ndAbout table th{ padding:11px 9px !important; line-height:1.55; }
-/* v295β ⑦ 인사이트 카드 색 강조 복원(다크에서 무채색으로 눌린 것) */
+/* v296β ⑦ 인사이트 카드 색 강조 복원(다크에서 무채색으로 눌린 것) */
 [data-theme="dark"] .insLight .insCard{ border-left:3px solid var(--line); }
 [data-theme="dark"] .insLight #insWrap{ border-left-color:#e0a86a; }
 [data-theme="dark"] .insLight #insMirror{ border-left-color:#d98fb0; }
@@ -1118,7 +1132,7 @@ body{ background:radial-gradient(circle at 50% -10%, rgba(102,78,57,.16), transp
         <svg class="brandmark" width="40" height="30" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg>
         <span class="brandwm"><span class="bwm-ko">내도감</span><span class="bwm-en">NAEDOGAM</span></span>
       </button>
-      <span class="mhver">v295β</span>
+      <span class="mhver">v296β</span>
       <span class="spacer"></span>
       <span class="src-chip" id="srcChip" style="display:none">데모</span>
       <button class="icon-btn" id="searchToggle" type="button" style="display:none">🔍</button>
@@ -1763,17 +1777,18 @@ const MANIFESTS = {
   /* 건강검진: 검사 항목·수치·정상범위 기록. 검사일로 활동 반영. */
   checkup:{ id:"checkup", title:"건강검진", icon:"🩺", vol:"卷22", canAdd:true,
     source:{ type:"sheet", tab:"건강검진" },
-    fields:[ {k:"item",sheet:"항목",label:"항목",type:"text"},
+    fields:[ {k:"name",sheet:"검사명",label:"검사명",type:"text",full:true},
              {k:"date",sheet:"검사일",label:"검사일",type:"date"},
-             {k:"value",sheet:"수치",label:"수치",type:"text"},
-             {k:"range",sheet:"정상범위",label:"정상범위",type:"text"},
              {k:"hospital",sheet:"병원",label:"병원",type:"text"},
+             {k:"results",sheet:"결과항목",label:"결과 항목 (항목·수치·정상)",type:"labrows"},
+             {k:"cover",sheet:"사진",label:"결과지 사진",type:"image"},
              {k:"memo",sheet:"메모",label:"메모",type:"textarea"} ],
-    search:["item","value","hospital","memo"],
-    activity:{ df:"date", when:r=>true, label:"건강검진", name:r=>r.item },
+    search:["name","hospital","memo","results","item"],
+    activity:{ df:"date", when:r=>true, label:"건강검진", name:r=>r.name||r.item },
     stats:[ {label:"전체",type:"count"} ],
-    card:{ kind:"data", title:r=>r.item||"(제목 없음)",
-           kv:[{k:"검사일",f:"date"},{k:"수치",f:"value"},{k:"정상범위",f:"range"},{k:"병원",f:"hospital"}] } }
+    card:{ kind:"specimen", thumb:"🩺", memo:"memo",
+           title:function(r){ return r.name||r.item||"(검사)"; },
+           meta:function(r){ var d=r.date?(_isoOf(r.date)||r.date):""; var n=0; try{ var a=JSON.parse(r.results||"[]"); if(Array.isArray(a)) n=a.filter(function(x){return x&&(x.item||x.value);}).length; }catch(e){} if(!n && r.item) n=1; return [d, r.hospital, (n?n+"개 항목":"")].filter(Boolean).join(" · "); } } }
 };
 
 /* ── 배포용: 영화·차계부를 표준 nd 카테고리로 재정의(신규 사용자용 깨끗한 버전). 개인앱은 영향 없음. ── */
@@ -2201,7 +2216,7 @@ function openDomain(id){ if(id==="mbti"){ openMbti(); return; } if(id==="period"
 
 /* 홈: 켜둔 카테고리를 카드로. 건수는 한 번 열어본 분야만 표시(홈을 빠르게 유지). */
 function ndDeep(h){ if(typeof h!=="string"||h.charAt(0)!=="#") h="#8a7a6a"; var n=parseInt(h.slice(1),16),r=(n>>16)&255,g=(n>>8)&255,b=n&255; function d(x,f){return Math.round(x*f);} return "linear-gradient(145deg,rgb("+d(r,.5)+","+d(g,.5)+","+d(b,.5)+"),rgb("+d(r,.28)+","+d(g,.28)+","+d(b,.28)+"))"; }
-var ND_LOGO_HTML='<div class="ndh-brand"><svg width="47" height="35" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg><div class="ndh-wm"><b>내도감</b><small>NAEDOGAM</small></div><span class="mhver ndh-ver">v295β</span></div><button class="ndh-sync" type="button" title="동기화" aria-label="동기화" onclick="try{syncNow()}catch(e){}">↻</button>';
+var ND_LOGO_HTML='<div class="ndh-brand"><svg width="47" height="35" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg><div class="ndh-wm"><b>내도감</b><small>NAEDOGAM</small></div><span class="mhver ndh-ver">v296β</span></div><button class="ndh-sync" type="button" title="동기화" aria-label="동기화" onclick="try{syncNow()}catch(e){}">↻</button>';
 /* 홈 카드 크기: wide(넓게=한 줄 전체) · half(보통=한 줄 2개) · mini(작게=하단 3칸). 기본값=프리셋 */
 var ND_PRESET_SIZE={running:"wide",food:"wide",recipes:"wide",movies:"half",books:"half",period:"half",diary:"half",travel:"half",mountains:"half",culture:"half",albums:"half",cellar:"half",scrap:"half",wish:"half",gift:"half",pet:"half"};
 function getHomeSizes(){ try{ return JSON.parse(store.getItem("nd.homesize")||"{}")||{}; }catch(e){ return {}; } }
@@ -3216,6 +3231,9 @@ function openDetail(m, r){ _navSet(m, r);
     if(FT[k]==="tiers"){ const arr=parseTiers({tiers:v}); if(!arr.length) return "";
       return arr.map(t=>{ const mn=String(t.min==null?"":t.min).trim(); const bl=String(t.benefits||"").split(/\n+/).map(x=>x.trim()).filter(Boolean);
         return `<div class="drow"><span class="k">${mn?mn+"만원↑":"기본"}</span><span>${bl.map(b=>String(b).replace(/</g,"&lt;")).join("<br>")||"—"}</span></div>`; }).join(""); }
+    if(FT[k]==="labrows"){ let arr=[]; try{ arr=JSON.parse(v||"[]"); }catch(e){} if(!Array.isArray(arr)||!arr.length) return "";
+      const _e=x=>String(x==null?"":x).replace(/</g,"&lt;");
+      return `<div class="drow drow-lab"><span class="k">${LBL[k]||k}</span><span class="lab-detail">`+arr.map(t=>`<span class="lab-drow"><b>${_e(t.item)}</b> <span class="lab-dv">${_e(t.value)}</span>${t.normal?` <span class="lab-dn">(정상 ${_e(t.normal)})</span>`:""}</span>`).join("")+`</span></div>`; }
     if(FT[k]==="date"){ return `<div class="drow"><span class="k">${LBL[k]||k}</span><span>${_isoOf(v)||(v==null||v===""?"—":v)}</span></div>`; }
     if((k==="link"||k==="url"||/^https?:\/\//i.test(String(v)))&&v!=null&&v!==""){ const _u=(/^https?:\/\//i.test(String(v))?String(v):"https://"+String(v)).replace(/"/g,"&quot;"); return `<div class="drow"><span class="k">${LBL[k]||k}</span><span><a class="dlink" href="${_u}" target="_blank" rel="noopener">🔗 열기</a></span></div>`; }
     return `<div class="drow"><span class="k">${LBL[k]||k}</span><span>${Array.isArray(v)?v.join(", "):v===null?"—":v===true?"예":v===false?"아니오":(typeof v==="number"&&k!=="year"&&!/연도/.test(LBL[k]||"")?v.toLocaleString():v)}</span></div>`; }).join(""); if(m.id==="recipes") rows=recipeDetailBody(r);
@@ -3623,11 +3641,19 @@ function openRecordForm(m, existing, prefill){
       const rowH=t=>`<div class="tier-row"><div class="tier-min"><input type="number" inputmode="numeric" class="tier-min-in" value="${String(t.min==null?'':t.min).replace(/"/g,'&quot;')}" placeholder="30"><span class="tier-min-suf">만원↑</span></div><textarea class="tier-ben" rows="3" placeholder="혜택 (줄바꿈으로 여러 개)">${esc2(t.benefits)}</textarea><button type="button" class="tier-del" title="이 구간 삭제">✕</button></div>`;
       return `<label>${ndFL(f)}</label><div class="rf-tiers" data-k="${f.k}">${arr.map(rowH).join("")}</div><button type="button" class="tier-add" data-k="${f.k}">＋ 실적 구간 추가</button>`;
     }
+    if(f.type==="labrows"){
+      let arr=[]; try{ arr=JSON.parse(val||"[]"); if(!Array.isArray(arr)) arr=[]; }catch(e){ arr=[]; }
+      if(!arr.length && existing && (existing.item||existing.value||existing.range)) arr=[{item:existing.item||"",value:existing.value||"",normal:existing.range||""}];
+      if(!arr.length) arr=[{item:"",value:"",normal:""}];
+      const esc3=x=>String(x==null?"":x).replace(/"/g,'&quot;');
+      const rowH=t=>`<div class="lab-row"><input class="lab-item" placeholder="항목 (예: 총콜레스테롤)" value="${esc3(t.item)}"><input class="lab-val" placeholder="수치" value="${esc3(t.value)}"><input class="lab-norm" placeholder="정상" value="${esc3(t.normal)}"><button type="button" class="lab-del" title="이 줄 삭제">✕</button></div>`;
+      return `<label>${ndFL(f)}</label><div class="lab-head"><span class="lab-h1">항목</span><span class="lab-h2">수치</span><span class="lab-h3">정상</span><span class="lab-hx"></span></div><div class="rf-labrows" data-k="${f.k}">${arr.map(rowH).join("")}</div><button type="button" class="lab-add" data-k="${f.k}">＋ 항목 추가</button>`;
+    }
     if(f.money||f.comma){ const nz=(val==null||val===""||isNaN(Number(val)))?"":Number(val).toLocaleString(); return `<label>${ndFL(f)}</label><input class="rf" data-k="${f.k}" data-type="money" inputmode="numeric" value="${nz}" autocomplete="off" />`; }
     const v = (f.type==="tags" && Array.isArray(val)) ? val.join(", ") : (val==null?"":val);
     return `<label>${ndFL(f)}</label><input class="rf" data-k="${f.k}" data-type="${f.type}" value="${String(v).replace(/"/g,'&quot;')}" placeholder="${ndFP(f)}" autocomplete="off" />`;
   };
-  const _wcls=f=> f.third?"rff-third":f.full?"rff-full":(f.half?"rff-half":(f.type==="bool"?"rff-bool":((f.type==="textarea"||f.type==="image"||f.type==="rating"||f.type==="seg")?"rff-full":"rff-half")));
+  const _wcls=f=> f.third?"rff-third":f.full?"rff-full":(f.half?"rff-half":(f.type==="bool"?"rff-bool":((f.type==="textarea"||f.type==="image"||f.type==="rating"||f.type==="seg"||f.type==="labrows"||f.type==="tiers")?"rff-full":"rff-half")));
   const body=fields.map(f=>`<div class="rff ${_wcls(f)}">${_cell(f)}</div>`).join("");
   d.innerHTML=`<div class="dhead"><h3>${m.title} ${isEdit?'수정':'추가'}</h3><button class="dclose-x" onclick="this.closest('dialog').close()" aria-label="닫기">✕</button></div><div class="dbody set rfgrid">${body}
     <div class="rff-full" style="display:flex;gap:8px;margin-top:18px;flex:1 1 100%">
@@ -3643,6 +3669,13 @@ function openRecordForm(m, existing, prefill){
     const wireRow=rw=>{ const del=rw.querySelector(".tier-del"); if(del) del.onclick=()=>{ if(box.querySelectorAll(".tier-row").length>1) rw.remove(); else { rw.querySelector(".tier-min-in").value=""; rw.querySelector(".tier-ben").value=""; } }; };
     box.querySelectorAll(".tier-row").forEach(wireRow);
     if(addBtn) addBtn.onclick=()=>{ const tp=document.createElement("template"); tp.innerHTML=rowTpl; const nr=tp.content.firstChild; box.appendChild(nr); wireRow(nr); const mi=nr.querySelector(".tier-min-in"); if(mi) mi.focus(); };
+  });
+  d.querySelectorAll(".rf-labrows").forEach(box=>{
+    const addBtn = box.parentNode.querySelector(`.lab-add[data-k="${box.dataset.k}"]`);
+    const rowTpl='<div class="lab-row"><input class="lab-item" placeholder="항목 (예: 총콜레스테롤)"><input class="lab-val" placeholder="수치"><input class="lab-norm" placeholder="정상"><button type="button" class="lab-del" title="이 줄 삭제">✕</button></div>';
+    const wireRow=rw=>{ const del=rw.querySelector(".lab-del"); if(del) del.onclick=()=>{ if(box.querySelectorAll(".lab-row").length>1) rw.remove(); else { rw.querySelectorAll("input").forEach(i=>i.value=""); } }; };
+    box.querySelectorAll(".lab-row").forEach(wireRow);
+    if(addBtn) addBtn.onclick=()=>{ const tp=document.createElement("template"); tp.innerHTML=rowTpl; const nr=tp.content.firstChild; box.appendChild(nr); wireRow(nr); const mi=nr.querySelector(".lab-item"); if(mi) mi.focus(); };
   });
   d.querySelectorAll('input[data-type="money"]').forEach(inp=>{ inp.addEventListener("input",()=>{ const raw=inp.value.replace(/[^0-9]/g,""); inp.value=raw?Number(raw).toLocaleString():""; }); });
   d.querySelectorAll(".rf-starbox").forEach(box=>{ const inp=box.querySelector("input.rf"), numEl=box.querySelector(".rf-star-num");
@@ -3679,6 +3712,9 @@ function openRecordForm(m, existing, prefill){
     fields.forEach(f=>{
       if(f.type==="bool"){ row[f.k]=d.querySelector(`.rf-bool[data-k="${f.k}"]`).classList.contains("on"); return; }
       if(f.type==="seg"){ const sel=d.querySelector(`.rf-seg[data-k="${f.k}"] .rf-segbtn.on`); row[f.k]=sel?sel.dataset.v:""; return; }
+      if(f.type==="labrows"){ const box=d.querySelector(`.rf-labrows[data-k="${f.k}"]`);
+        const arr=box?[...box.querySelectorAll(".lab-row")].map(rw=>({item:(rw.querySelector(".lab-item").value||"").trim(), value:(rw.querySelector(".lab-val").value||"").trim(), normal:(rw.querySelector(".lab-norm").value||"").trim()})).filter(t=>t.item||t.value||t.normal):[];
+        row[f.k]=JSON.stringify(arr); return; }
       if(f.type==="tiers"){ const box=d.querySelector(`.rf-tiers[data-k="${f.k}"]`);
         const arr=box?[...box.querySelectorAll(".tier-row")].map(rw=>({min:(rw.querySelector(".tier-min-in").value||"").trim(), benefits:(rw.querySelector(".tier-ben").value||"").replace(/\s+$/,"")})).filter(t=>t.min!==""||t.benefits!==""):[];
         row[f.k]=JSON.stringify(arr); return; }
