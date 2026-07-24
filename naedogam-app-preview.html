@@ -298,7 +298,7 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
   .mv-memo{ font-size:12px; color:#a8894e; line-height:1.45; margin-top:5px; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
   #list:has(.qcard){ display:flex; flex-direction:column; gap:8px; }
   .qcard .qjjim{ color:#e0a86a; font-size:11px; font-weight:800; margin-right:7px; }
-  /* v307β #3#5 레시피·맛집 가로형 카드 + 손글씨체(Gaegu) */
+  /* v308β #3#5 레시피·맛집 가로형 카드 + 손글씨체(Gaegu) */
   #list .rccard{ display:flex; align-items:stretch; gap:0; padding:0; }
   .rccard .rc-img{ flex:0 0 116px; width:116px; aspect-ratio:1/1; }
   .rccard .rc-body{ flex:1; min-width:0; padding:11px 13px 12px; display:flex; flex-direction:column; gap:7px; font-family:'Gaegu',var(--sans); }
@@ -322,13 +322,13 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
   .foodcard .fl-star{ color:#d9770a; font-weight:700; margin-left:8px; }
   .foodcard .fl-menu{ font-size:13.5px; color:var(--ink-soft); margin-top:5px; font-family:'Gaegu',var(--sans); }
   [data-theme="dark"] .foodcard .fl-img{ background:var(--line-soft); }
-  /* v307β 생리주기 인페이지 */
+  /* v308β 생리주기 인페이지 */
   .pdInlineBar{ display:flex; align-items:center; justify-content:space-between; margin:2px 0 12px; }
   .pdInlineBar .pdTitle{ font-size:17px; font-weight:800; color:var(--ink); }
   .pdBig.pdBigSm{ width:auto; font-size:13.5px; padding:8px 15px; margin:0; }
   .pdBody.pdInline{ max-height:none; overflow:visible; border-radius:16px; }
   .wcard.mbInline{ max-width:none; padding:0 2px; }
-  /* v307β MBTI 검사 몰입 오버레이 */
+  /* v308β MBTI 검사 몰입 오버레이 */
   .mbTestOv{ position:fixed; inset:0; z-index:200; display:flex; flex-direction:column; background:linear-gradient(180deg,#1b1916,#0d0d0c); color:#f4f1ff; }
   .mbTestOv .mbTestTop{ display:flex; align-items:center; justify-content:space-between; padding:calc(16px + env(safe-area-inset-top)) 18px 10px; }
   .mbTestOv .mbQuit{ background:none; border:none; color:#b8ab97; font-size:14px; font-weight:700; cursor:pointer; padding:4px 2px; }
@@ -344,7 +344,7 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
   .mbTestOv .mbQuitYes{ background:rgba(224,72,63,.18); border-color:rgba(224,72,63,.4); text-align:center; }
   .mbTestOv .mbQuitNo{ text-align:center; }
   .mbStartGhost{ background:transparent!important; border:1px solid var(--line)!important; color:var(--ink-soft)!important; }
-  /* v307β 육아일기 카드피드 */
+  /* v308β 육아일기 카드피드 */
   #list:has(.bbcard){ display:flex; flex-direction:column; gap:16px; }
   #list .bbcard{ display:block; padding:0; overflow:hidden; border:none; border-radius:20px; background:var(--card); box-shadow:0 3px 14px rgba(0,0,0,.10); text-align:left; cursor:pointer; }
   .bbcard .bb-img{ width:100%; aspect-ratio:4/3; overflow:hidden; background:linear-gradient(135deg,#ffe3ee,#fff0e0); display:flex; align-items:center; justify-content:center; font-size:56px; }
@@ -647,7 +647,7 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
   .tier-ben{ flex:1 1 auto; min-width:0; padding:8px 10px; border:1px solid var(--line); border-radius:8px; font-size:14px; font-family:inherit; resize:vertical; box-sizing:border-box; }
   .tier-del{ flex:0 0 auto; border:1px solid var(--line); background:var(--line-soft); border-radius:8px; width:32px; height:36px; cursor:pointer; color:var(--ink-soft); font-size:13px; }
   .tier-add{ margin-top:9px; border:1px dashed var(--line); background:none; border-radius:9px; padding:9px; cursor:pointer; color:var(--ink-soft); font-size:13px; width:100%; }
-  /* v307β 건강검진 결과 항목 행 */
+  /* v308β 건강검진 결과 항목 행 */
   .lab-head{ display:flex; gap:6px; font-size:11.5px; color:var(--sub); margin:2px 0 5px; padding:0 2px; }
   .lab-head .lab-h1{ flex:2; } .lab-head .lab-h2{ flex:1; } .lab-head .lab-h3{ flex:1; } .lab-head .lab-hx{ flex:0 0 26px; }
   .rf-labrows{ display:flex; flex-direction:column; gap:6px; }
@@ -882,6 +882,25 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
 .aistrip .ms-b b{color:#fff}
 .aistrip .ms-go{font-size:12px;color:#fff;opacity:.92;font-weight:800;white-space:nowrap}
 .aistrip:active{transform:translateY(1px)}
+.undisc-sec{margin-top:28px;border-top:1px dashed var(--line);padding-top:16px}
+.undisc-head{display:flex;align-items:center;gap:9px;font-size:14px;font-weight:800;color:var(--ink-soft);margin-bottom:12px;flex-wrap:wrap}
+.undisc-head b{color:#7c3aed}
+.undisc-head .undisc-prog{flex:1;min-width:70px;height:7px;background:rgba(124,92,255,.12);border-radius:99px;overflow:hidden}
+.undisc-head .undisc-prog i{display:block;height:100%;background:linear-gradient(90deg,#7c5cff,#ff6fae);transition:width .4s}
+.undisc-head small{font-size:11.5px;color:var(--sub);font-weight:800;white-space:nowrap}
+.undisc-done{background:linear-gradient(90deg,rgba(124,92,255,.12),rgba(255,111,174,.10));border:1px solid rgba(124,92,255,.3);border-radius:12px;padding:12px 14px;font-size:14px;font-weight:800;color:#7c3aed;margin-bottom:12px;text-align:center}
+.undisc-grid{display:flex;flex-direction:column;gap:8px}
+.undisc{display:flex;align-items:center;gap:11px;width:100%;text-align:left;background:repeating-linear-gradient(45deg,rgba(124,92,255,.045),rgba(124,92,255,.045) 9px,transparent 9px,transparent 18px);border:1px dashed var(--line);border-radius:12px;padding:11px 13px;cursor:pointer;color:var(--ink);font:inherit;filter:grayscale(.35);opacity:.9;transition:filter .2s,opacity .2s,transform .1s}
+.undisc:hover{filter:none;opacity:1}
+.undisc:active{transform:translateY(1px)}
+.undisc .ud-q{flex:0 0 36px;height:36px;display:flex;align-items:center;justify-content:center;background:rgba(124,92,255,.10);border-radius:9px;font-size:19px;font-weight:800;color:var(--ink-soft);opacity:.7}
+.undisc .ud-b{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+.undisc .ud-t{font-size:14.5px;font-weight:700;color:var(--ink);opacity:.78;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.undisc .ud-s{font-size:12px;color:var(--sub);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.undisc .ud-add{flex:0 0 auto;font-size:12.5px;font-weight:800;color:#7c3aed;background:rgba(124,92,255,.12);padding:6px 12px;border-radius:99px}
+.undisc.catching{opacity:.35;pointer-events:none}
+.undisc-more{text-align:center;font-size:12.5px;color:var(--sub);margin-top:10px;font-weight:600}
+[data-theme="dark"] .undisc .ud-q{background:rgba(255,255,255,.08)}
 .aiShare{position:fixed;left:-9999px;top:0;width:480px;box-sizing:border-box;background:linear-gradient(160deg,#1c1636,#0d0a1f);color:#f4f1ff;padding:38px 34px 30px;font-family:Pretendard,"Apple SD Gothic Neo","Noto Sans KR",system-ui,sans-serif}
 .aiShare .as-logo{font-size:12px;letter-spacing:2.5px;color:#c9b8ff;opacity:.85}
 .aiShare .as-title{font-size:30px;font-weight:800;line-height:1.25;margin:10px 0 6px;background:linear-gradient(90deg,#c9b8ff,#ff9ecb);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
@@ -1124,16 +1143,16 @@ body{ background:radial-gradient(circle at 50% -10%, rgba(102,78,57,.16), transp
 
 .tabs .tab .tabico{ color:#dfd5c7 !important; width:19px !important; height:19px !important; opacity:1 !important; }
 .tabs .tab[aria-selected="true"] .tabico{ color:#fff6e8 !important; }
-/* v307β: 서브 탭 = 홈 탭과 완전 동일 구현(.ndh-tab). 아이콘 크기를 스코프 밖에서도 보장 */
+/* v308β: 서브 탭 = 홈 탭과 완전 동일 구현(.ndh-tab). 아이콘 크기를 스코프 밖에서도 보장 */
 .ndh-tab .ci-svg{ width:19px !important; height:19px !important; }
 .ndh-tab .emj{ font-size:17px; height:19px; line-height:19px; display:inline-flex; align-items:center; justify-content:center; }
-/* v307β ⑧ 소개 = naedogam.com 라이트(크림+빨강) 고정 — 다크앱 안에서도 */
+/* v308β ⑧ 소개 = naedogam.com 라이트(크림+빨강) 고정 — 다크앱 안에서도 */
 .ndAbout{ --ink:#2b2622; --ink-soft:#7c736b; --card:#ffffff; --line:#e7e0d8; --accent:#E0483F; background:#faf7f3; color:#2b2622; border:1px solid #efe7dd; border-radius:16px; padding:16px 14px 22px; margin:2px 0 4px; -webkit-font-smoothing:antialiased; }
 .ndAbout .ab-card{ background:#fff; padding:15px 17px; margin-bottom:11px; border-radius:13px; }
 .ndAbout p{ line-height:1.9 !important; }
 .ndAbout h2{ margin:16px 0 14px !important; }
 .ndAbout table td, .ndAbout table th{ padding:11px 9px !important; line-height:1.55; }
-/* v307β ⑦ 인사이트 카드 색 강조 복원(다크에서 무채색으로 눌린 것) */
+/* v308β ⑦ 인사이트 카드 색 강조 복원(다크에서 무채색으로 눌린 것) */
 [data-theme="dark"] .insLight .insCard{ border-left:3px solid var(--line); }
 [data-theme="dark"] .insLight #insWrap{ border-left-color:#e0a86a; }
 [data-theme="dark"] .insLight #insMirror{ border-left-color:#d98fb0; }
@@ -1153,7 +1172,7 @@ body{ background:radial-gradient(circle at 50% -10%, rgba(102,78,57,.16), transp
         <svg class="brandmark" width="40" height="30" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg>
         <span class="brandwm"><span class="bwm-ko">내도감</span><span class="bwm-en">NAEDOGAM</span></span>
       </button>
-      <span class="mhver">v307β</span>
+      <span class="mhver">v308β</span>
       <span class="spacer"></span>
       <span class="src-chip" id="srcChip" style="display:none">데모</span>
       <button class="icon-btn" id="searchToggle" type="button" style="display:none">🔍</button>
@@ -2238,7 +2257,7 @@ function openDomain(id){ if(id==="mbti"){ openMbti(); return; } if(id==="period"
 
 /* 홈: 켜둔 카테고리를 카드로. 건수는 한 번 열어본 분야만 표시(홈을 빠르게 유지). */
 function ndDeep(h){ if(typeof h!=="string"||h.charAt(0)!=="#") h="#8a7a6a"; var n=parseInt(h.slice(1),16),r=(n>>16)&255,g=(n>>8)&255,b=n&255; function d(x,f){return Math.round(x*f);} return "linear-gradient(145deg,rgb("+d(r,.5)+","+d(g,.5)+","+d(b,.5)+"),rgb("+d(r,.28)+","+d(g,.28)+","+d(b,.28)+"))"; }
-var ND_LOGO_HTML='<div class="ndh-brand"><svg width="47" height="35" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg><div class="ndh-wm"><b>내도감</b><small>NAEDOGAM</small></div><span class="mhver ndh-ver">v307β</span></div><button class="ndh-sync" type="button" title="동기화" aria-label="동기화" onclick="try{syncNow()}catch(e){}">↻</button>';
+var ND_LOGO_HTML='<div class="ndh-brand"><svg width="47" height="35" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg><div class="ndh-wm"><b>내도감</b><small>NAEDOGAM</small></div><span class="mhver ndh-ver">v308β</span></div><button class="ndh-sync" type="button" title="동기화" aria-label="동기화" onclick="try{syncNow()}catch(e){}">↻</button>';
 /* 홈 카드 크기: wide(넓게=한 줄 전체) · half(보통=한 줄 2개) · mini(작게=하단 3칸). 기본값=프리셋 */
 var ND_PRESET_SIZE={running:"wide",food:"wide",recipes:"wide",movies:"half",books:"half",period:"half",diary:"half",travel:"half",mountains:"half",culture:"half",albums:"half",cellar:"half",scrap:"half",wish:"half",gift:"half",pet:"half"};
 function getHomeSizes(){ try{ return JSON.parse(store.getItem("nd.homesize")||"{}")||{}; }catch(e){ return {}; } }
@@ -3941,6 +3960,32 @@ function renderTravelMap(m, base){
     }catch(e){ box.innerHTML='<div class="count" style="padding:30px 10px">지도 표시 오류.</div>'; console.error(e); }
   });
 }
+var RECO_LISTS_CACHE={};
+async function _insUndiscovered(m){
+  try{
+    if(typeof RECO_LISTS==="undefined" || !RECO_LISTS[m.id]) return;
+    var lists=RECO_LISTS_CACHE[m.id];
+    if(!lists){ lists=await recoLists(m.id); RECO_LISTS_CACHE[m.id]=lists||[]; lists=RECO_LISTS_CACHE[m.id]; }
+    if(state.domain!==m.id) return; if(!lists.length) return;
+    var have=CACHE[m.id]||state.rows||loadPersist(m.id)||[];
+    var hk=recoHaveKeys(m.id, have);
+    var seen={}, undis=[];
+    lists.forEach(function(l){ (l.items||[]).forEach(function(it){ var v; try{ v=recoView(m.id,it); }catch(e){ return; } var key=recoNorm(v.key||v.title||""); if(!key||seen[key]) return; seen[key]=1; if(!recoIsHave(m.id,it,hk)){ undis.push({it:it,v:v}); } }); });
+    var totalReco=Object.keys(seen).length; if(!totalReco) return;
+    var collected=totalReco-undis.length; var pct=Math.round(collected/totalReco*100);
+    var _esc=function(x){return String(x==null?"":x).replace(/&/g,"&amp;").replace(/</g,"&lt;");};
+    var SHOWMAX=60;
+    var cards=undis.slice(0,SHOWMAX).map(function(o,i){ return '<button class="undisc" data-ui="'+i+'"><span class="ud-q">?</span><span class="ud-b"><span class="ud-t">'+_esc(o.v.title)+'</span>'+(o.v.sub?'<span class="ud-s">'+_esc(o.v.sub)+'</span>':'')+'</span><span class="ud-add">＋ 담기</span></button>'; }).join("");
+    var moreTxt=undis.length>SHOWMAX?'<div class="undisc-more">…외 '+(undis.length-SHOWMAX)+'개 더 발견 대기중</div>':'';
+    var doneMsg=(undis.length===0)?'<div class="undisc-done">✨ 이 도감을 다 채웠어요! (완성 '+totalReco+'개)</div>':'';
+    var html='<div class="undisc-sec"><div class="undisc-head"><span>🔍 아직 발견 못한 것 <b>'+undis.length+'</b></span><span class="undisc-prog"><i style="width:'+pct+'%"></i></span><small>'+collected+'/'+totalReco+' · '+pct+'%</small></div>'+doneMsg+'<div class="undisc-grid">'+cards+'</div>'+moreTxt+'</div>';
+    var listEl=document.getElementById("list"); if(!listEl) return;
+    if(state.domain!==m.id) return;
+    var old=listEl.querySelector(".undisc-sec"); if(old) old.remove();
+    listEl.insertAdjacentHTML("beforeend", html);
+    listEl.querySelectorAll(".undisc[data-ui]").forEach(function(b){ b.onclick=async function(){ var o=undis[+b.dataset.ui]; if(!o) return; b.classList.add("catching"); try{ await recoAddOne(m,o.it); try{ ndToast("✨ 발견! ‘"+o.v.title+"’ 도감에 담았어요"); }catch(e){} state.rows=applyComputed(m,(CACHE[m.id]||[]).map(function(r){return Object.assign({_id:r._id||crypto.randomUUID()},r);})); paintDomain(m); }catch(e){ b.classList.remove("catching"); try{ ndToast(e.message||"담기 실패"); }catch(_){} } }; });
+  }catch(e){}
+}
 function paintDomain(m){   // state.rows를 화면에 그림 (데이터 다시 안 받고 재렌더 가능)
   const pk=$("#picker"); pk.style.alignItems=""; pk.style.overflow=""; pk.style.justifyContent="";     // 공유 UI 초기화
   $("#stats").className="stats"; $("#stats").style.display=""; $("#scope").style.flexDirection=""; $("#scope").style.overflow=""; $("#scope").style.justifyContent=""; $("#scope").classList.remove("scopetabs"); $("#count").classList.remove("countrow"); $("#count").style.display="";
@@ -4002,6 +4047,7 @@ function paintDomain(m){   // state.rows를 화면에 그림 (데이터 다시 �
   if(m.id==="running") loadCovers(m,"place");
   if(m.id==="subs") loadSubsCovers(m);
   if(m.id==="books") lazyBookInfo();
+  if(!state.query){ try{ _insUndiscovered(m); }catch(e){} }
 }
 
 /* ── 영화 목록: 통계 클릭 필터 + 정렬 + 추천/스트리밍 뱃지 + 포스터(보일 때만 로드) + 더보기 ── */
