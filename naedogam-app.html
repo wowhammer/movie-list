@@ -45,7 +45,9 @@ const CONFIG = {
   GOOGLE_BOOKS_KEY: 'AIzaSyDlhk8ALyDYozjN3Snq6dnmj2KWz7gPezI',
   // 영화 검색(TMDB) — 기존 영화앱과 같은 값
   TMDB_KEY: '0b9515d29e91abc6465d342963c92482',
-  TMDB_BASE: 'https://api.themoviedb.org/3'
+  TMDB_BASE: 'https://api.themoviedb.org/3',
+  // AI 내러티브 페르소나 프록시(구글 앱스스크립트 웹앱 URL). 비우면 기능 자동 숨김.
+  AI_PROXY_URL: 'https://script.google.com/macros/s/AKfycbxe5cRLsrhA7KQTiqISuac9JklzNIDsko6Tz_91jlMqu6wIMy9V9eycRlDN2WHcnKkE/exec'
 };
 try { document.title = CONFIG.APP_NAME; } catch(e){}
 </script>
@@ -296,7 +298,7 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
   .mv-memo{ font-size:12px; color:#a8894e; line-height:1.45; margin-top:5px; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
   #list:has(.qcard){ display:flex; flex-direction:column; gap:8px; }
   .qcard .qjjim{ color:#e0a86a; font-size:11px; font-weight:800; margin-right:7px; }
-  /* v299β #3#5 레시피·맛집 가로형 카드 + 손글씨체(Gaegu) */
+  /* v302β #3#5 레시피·맛집 가로형 카드 + 손글씨체(Gaegu) */
   #list .rccard{ display:flex; align-items:stretch; gap:0; padding:0; }
   .rccard .rc-img{ flex:0 0 116px; width:116px; aspect-ratio:1/1; }
   .rccard .rc-body{ flex:1; min-width:0; padding:11px 13px 12px; display:flex; flex-direction:column; gap:7px; font-family:'Gaegu',var(--sans); }
@@ -320,13 +322,13 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
   .foodcard .fl-star{ color:#d9770a; font-weight:700; margin-left:8px; }
   .foodcard .fl-menu{ font-size:13.5px; color:var(--ink-soft); margin-top:5px; font-family:'Gaegu',var(--sans); }
   [data-theme="dark"] .foodcard .fl-img{ background:var(--line-soft); }
-  /* v299β 생리주기 인페이지 */
+  /* v302β 생리주기 인페이지 */
   .pdInlineBar{ display:flex; align-items:center; justify-content:space-between; margin:2px 0 12px; }
   .pdInlineBar .pdTitle{ font-size:17px; font-weight:800; color:var(--ink); }
   .pdBig.pdBigSm{ width:auto; font-size:13.5px; padding:8px 15px; margin:0; }
   .pdBody.pdInline{ max-height:none; overflow:visible; border-radius:16px; }
   .wcard.mbInline{ max-width:none; padding:0 2px; }
-  /* v299β MBTI 검사 몰입 오버레이 */
+  /* v302β MBTI 검사 몰입 오버레이 */
   .mbTestOv{ position:fixed; inset:0; z-index:200; display:flex; flex-direction:column; background:linear-gradient(180deg,#1b1916,#0d0d0c); color:#f4f1ff; }
   .mbTestOv .mbTestTop{ display:flex; align-items:center; justify-content:space-between; padding:calc(16px + env(safe-area-inset-top)) 18px 10px; }
   .mbTestOv .mbQuit{ background:none; border:none; color:#b8ab97; font-size:14px; font-weight:700; cursor:pointer; padding:4px 2px; }
@@ -342,7 +344,7 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
   .mbTestOv .mbQuitYes{ background:rgba(224,72,63,.18); border-color:rgba(224,72,63,.4); text-align:center; }
   .mbTestOv .mbQuitNo{ text-align:center; }
   .mbStartGhost{ background:transparent!important; border:1px solid var(--line)!important; color:var(--ink-soft)!important; }
-  /* v299β 육아일기 카드피드 */
+  /* v302β 육아일기 카드피드 */
   #list:has(.bbcard){ display:flex; flex-direction:column; gap:16px; }
   #list .bbcard{ display:block; padding:0; overflow:hidden; border:none; border-radius:20px; background:var(--card); box-shadow:0 3px 14px rgba(0,0,0,.10); text-align:left; cursor:pointer; }
   .bbcard .bb-img{ width:100%; aspect-ratio:4/3; overflow:hidden; background:linear-gradient(135deg,#ffe3ee,#fff0e0); display:flex; align-items:center; justify-content:center; font-size:56px; }
@@ -645,7 +647,7 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
   .tier-ben{ flex:1 1 auto; min-width:0; padding:8px 10px; border:1px solid var(--line); border-radius:8px; font-size:14px; font-family:inherit; resize:vertical; box-sizing:border-box; }
   .tier-del{ flex:0 0 auto; border:1px solid var(--line); background:var(--line-soft); border-radius:8px; width:32px; height:36px; cursor:pointer; color:var(--ink-soft); font-size:13px; }
   .tier-add{ margin-top:9px; border:1px dashed var(--line); background:none; border-radius:9px; padding:9px; cursor:pointer; color:var(--ink-soft); font-size:13px; width:100%; }
-  /* v299β 건강검진 결과 항목 행 */
+  /* v302β 건강검진 결과 항목 행 */
   .lab-head{ display:flex; gap:6px; font-size:11.5px; color:var(--sub); margin:2px 0 5px; padding:0 2px; }
   .lab-head .lab-h1{ flex:2; } .lab-head .lab-h2{ flex:1; } .lab-head .lab-h3{ flex:1; } .lab-head .lab-hx{ flex:0 0 26px; }
   .rf-labrows{ display:flex; flex-direction:column; gap:6px; }
@@ -800,6 +802,11 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
 .wft{font-size:11px;color:#b9b2e0}.wfm{font-size:15px;font-weight:800;color:#fff}
 .wquote{font-size:16px;font-weight:700;color:#fff;margin-top:12px;line-height:1.5}
 .winsight{background:rgba(255,255,255,.04);border-left:3px solid #ffd66b;border-radius:0 12px 12px 0;padding:14px 16px;font-size:14px;line-height:1.7;color:#efeaff}
+.waiPick{display:flex;gap:6px;margin:6px 0 2px;flex-wrap:wrap}
+.waiP{flex:1;min-width:60px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.14);color:#cfc7ef;border-radius:999px;padding:7px 8px;font-size:12.5px;font-weight:700;cursor:pointer}
+.waiP.on{background:#ffd66b;border-color:#ffd66b;color:#2a2140}
+.waiBtn{background:linear-gradient(90deg,#7c5cff,#ff6fae)!important;border:none!important;color:#fff!important}
+.waiOut{white-space:pre-wrap}
 .wfoot{text-align:center;padding:26px 0 8px;color:#b9b2e0;font-size:11px}
 .wfoot b{color:#ffd66b}
 
@@ -1103,16 +1110,16 @@ body{ background:radial-gradient(circle at 50% -10%, rgba(102,78,57,.16), transp
 
 .tabs .tab .tabico{ color:#dfd5c7 !important; width:19px !important; height:19px !important; opacity:1 !important; }
 .tabs .tab[aria-selected="true"] .tabico{ color:#fff6e8 !important; }
-/* v299β: 서브 탭 = 홈 탭과 완전 동일 구현(.ndh-tab). 아이콘 크기를 스코프 밖에서도 보장 */
+/* v302β: 서브 탭 = 홈 탭과 완전 동일 구현(.ndh-tab). 아이콘 크기를 스코프 밖에서도 보장 */
 .ndh-tab .ci-svg{ width:19px !important; height:19px !important; }
 .ndh-tab .emj{ font-size:17px; height:19px; line-height:19px; display:inline-flex; align-items:center; justify-content:center; }
-/* v299β ⑧ 소개 = naedogam.com 라이트(크림+빨강) 고정 — 다크앱 안에서도 */
+/* v302β ⑧ 소개 = naedogam.com 라이트(크림+빨강) 고정 — 다크앱 안에서도 */
 .ndAbout{ --ink:#2b2622; --ink-soft:#7c736b; --card:#ffffff; --line:#e7e0d8; --accent:#E0483F; background:#faf7f3; color:#2b2622; border:1px solid #efe7dd; border-radius:16px; padding:16px 14px 22px; margin:2px 0 4px; -webkit-font-smoothing:antialiased; }
 .ndAbout .ab-card{ background:#fff; padding:15px 17px; margin-bottom:11px; border-radius:13px; }
 .ndAbout p{ line-height:1.9 !important; }
 .ndAbout h2{ margin:16px 0 14px !important; }
 .ndAbout table td, .ndAbout table th{ padding:11px 9px !important; line-height:1.55; }
-/* v299β ⑦ 인사이트 카드 색 강조 복원(다크에서 무채색으로 눌린 것) */
+/* v302β ⑦ 인사이트 카드 색 강조 복원(다크에서 무채색으로 눌린 것) */
 [data-theme="dark"] .insLight .insCard{ border-left:3px solid var(--line); }
 [data-theme="dark"] .insLight #insWrap{ border-left-color:#e0a86a; }
 [data-theme="dark"] .insLight #insMirror{ border-left-color:#d98fb0; }
@@ -1132,7 +1139,7 @@ body{ background:radial-gradient(circle at 50% -10%, rgba(102,78,57,.16), transp
         <svg class="brandmark" width="40" height="30" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg>
         <span class="brandwm"><span class="bwm-ko">내도감</span><span class="bwm-en">NAEDOGAM</span></span>
       </button>
-      <span class="mhver">v299β</span>
+      <span class="mhver">v302β</span>
       <span class="spacer"></span>
       <span class="src-chip" id="srcChip" style="display:none">데모</span>
       <button class="icon-btn" id="searchToggle" type="button" style="display:none">🔍</button>
@@ -2217,7 +2224,7 @@ function openDomain(id){ if(id==="mbti"){ openMbti(); return; } if(id==="period"
 
 /* 홈: 켜둔 카테고리를 카드로. 건수는 한 번 열어본 분야만 표시(홈을 빠르게 유지). */
 function ndDeep(h){ if(typeof h!=="string"||h.charAt(0)!=="#") h="#8a7a6a"; var n=parseInt(h.slice(1),16),r=(n>>16)&255,g=(n>>8)&255,b=n&255; function d(x,f){return Math.round(x*f);} return "linear-gradient(145deg,rgb("+d(r,.5)+","+d(g,.5)+","+d(b,.5)+"),rgb("+d(r,.28)+","+d(g,.28)+","+d(b,.28)+"))"; }
-var ND_LOGO_HTML='<div class="ndh-brand"><svg width="47" height="35" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg><div class="ndh-wm"><b>내도감</b><small>NAEDOGAM</small></div><span class="mhver ndh-ver">v299β</span></div><button class="ndh-sync" type="button" title="동기화" aria-label="동기화" onclick="try{syncNow()}catch(e){}">↻</button>';
+var ND_LOGO_HTML='<div class="ndh-brand"><svg width="47" height="35" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg><div class="ndh-wm"><b>내도감</b><small>NAEDOGAM</small></div><span class="mhver ndh-ver">v302β</span></div><button class="ndh-sync" type="button" title="동기화" aria-label="동기화" onclick="try{syncNow()}catch(e){}">↻</button>';
 /* 홈 카드 크기: wide(넓게=한 줄 전체) · half(보통=한 줄 2개) · mini(작게=하단 3칸). 기본값=프리셋 */
 var ND_PRESET_SIZE={running:"wide",food:"wide",recipes:"wide",movies:"half",books:"half",period:"half",diary:"half",travel:"half",mountains:"half",culture:"half",albums:"half",cellar:"half",scrap:"half",wish:"half",gift:"half",pet:"half"};
 function getHomeSizes(){ try{ return JSON.parse(store.getItem("nd.homesize")||"{}")||{}; }catch(e){ return {}; } }
@@ -4929,10 +4936,28 @@ function wrapCardHTML(S){
     sec.push('<div class="wsec"><div class="wh2">🏔 몸으로 쓴 기록</div><div class="wgrid">'+body+'</div>'+q+'</div>'); }
   // 인사이트
   sec.push('<div class="wsec"><div class="wh2">💡 결산 인사이트</div><div class="winsight">당신은 <b>‘담는 힘’</b>이 강한 사람이에요. 이제 <b>‘경험하는 속도’</b>만 붙으면, 이 도감은 세상에 하나뿐인 <b>당신의 인생 지도</b>가 됩니다.</div></div>');
+  if(CONFIG.AI_PROXY_URL){ sec.push('<div class="wsec"><div class="wh2">✨ AI가 써주는 내 이야기</div>'+'<div class="waiPick"><button class="waiP on" data-p="warm" onclick="ndAISetPersona(this)">따뜻</button><button class="waiP" data-p="witty" onclick="ndAISetPersona(this)">위트</button><button class="waiP" data-p="coach" onclick="ndAISetPersona(this)">코치</button><button class="waiP" data-p="poetic" onclick="ndAISetPersona(this)">서정</button></div>'+'<button class="wsave waiBtn" id="wAiBtn" onclick="ndAIWrite()" style="width:100%;margin-top:10px;padding:12px">✨ AI가 내 도감 이야기 써주기</button>'+'<div class="winsight waiOut" id="wAiOut" style="display:none;margin-top:12px"></div></div>'); }
   sec.push('<div class="wfoot">지금 이 순간 내 데이터로 자동 생성됨 · <b>내도감</b></div>');
   return sec.join("");
 }
 function _wToday(){ try{ var t=state&&state._now?state._now:null; }catch(e){} var d=new Date(); return d.getFullYear()+"."+String(d.getMonth()+1).padStart(2,"0")+"."+String(d.getDate()).padStart(2,"0"); }
+function _wAiSummary(ids, data){ try{ var arr=[]; (ids||[]).forEach(function(id){ var m=MANIFESTS[id]; var rows=(data&&data[id])||[]; if(m&&rows.length){ arr.push({t:(m.title||id), n:rows.length}); } }); arr.sort(function(a,b){ return b.n-a.n; }); var top=arr.slice(0,7).map(function(x){ return x.t+' '+x.n+'건'; }); if(!top.length) return ''; return '가장 많이 모은 것: '+top.join(', ')+'.'; }catch(e){ return ''; } }
+function ndAISetPersona(el){ try{ window.__wAiPersona=el.getAttribute('data-p'); var box=el.parentNode; box.querySelectorAll('.waiP').forEach(function(b){ b.classList.remove('on'); }); el.classList.add('on'); }catch(e){} }
+async function ndAIWrite(){
+  var out=document.getElementById('wAiOut'); var btn=document.getElementById('wAiBtn');
+  if(!CONFIG.AI_PROXY_URL){ return; }
+  var persona=window.__wAiPersona||'warm'; var summary=window.__wSummary||'';
+  if(!summary){ if(out){ out.style.display=''; out.textContent='아직 담긴 기록이 없어요.'; } return; }
+  if(out){ out.style.display=''; out.textContent='✨ AI가 당신의 이야기를 쓰는 중…'; }
+  if(btn){ btn.disabled=true; }
+  try{
+    var r=await fetch(CONFIG.AI_PROXY_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({persona:persona,title:'올해의 나의 도감',lang:'한국어',data:summary})});
+    var j=await r.json();
+    if(j&&j.ok&&j.text){ var _t=String(j.text).replace(/&/g,'&amp;').replace(/</g,'&lt;'); _t=_t.replace(/^\s*\*\*[^*\n]+\*\*\s*\n+/,''); _t=_t.replace(/\*\*([^*\n]+)\*\*/g,'<b>$1</b>'); _t=_t.replace(/\n{2,}/g,'<br><br>').replace(/\n/g,'<br>'); out.innerHTML=_t; }
+    else { out.textContent='AI 생성 실패: '+((j&&j.error)||'알 수 없음'); }
+  }catch(e){ if(out) out.textContent='AI 호출 실패: '+e.message; }
+  if(btn){ btn.disabled=false; btn.textContent='✨ 다시 쓰기'; }
+}
 async function openWrapped(){
   var old=document.getElementById("wrapDlg"); if(old) old.remove();
   var dlg=document.createElement("dialog"); dlg.id="wrapDlg"; dlg.className="wrapDlg";
@@ -4945,7 +4970,7 @@ async function openWrapped(){
   var build=function(id,raw){ var m=MANIFESTS[id]; data[id]=applyComputed(m,(raw||[]).map(function(r){return Object.assign({_id:r._id||crypto.randomUUID()},r);})); };
   var had={};
   ids.forEach(function(id){ had[id]=!!CACHE[id]; var raw=CACHE[id]||loadPersist(id); if(raw&&!CACHE[id])CACHE[id]=raw; build(id,raw||[]); });
-  var draw=function(){ var S=wrapStats(ids,data); var card=document.getElementById("wrapCard"); if(card){ if(!S.total){ card.innerHTML='<div class="wloading">아직 담긴 기록이 없어요.<br>추천리스트에서 담거나 +로 추가해보세요.</div>'; } else { card.innerHTML=wrapCardHTML(S); } } };
+  var draw=function(){ var S=wrapStats(ids,data); try{ window.__wSummary=_wAiSummary(ids,data); }catch(e){} var card=document.getElementById("wrapCard"); if(card){ if(!S.total){ card.innerHTML='<div class="wloading">아직 담긴 기록이 없어요.<br>추천리스트에서 담거나 +로 추가해보세요.</div>'; } else { card.innerHTML=wrapCardHTML(S); } } };
   draw();
   var todo=ids.filter(function(id){return !had[id];});
   if(todo.length){ await Promise.all(todo.map(async function(id){ try{ var fresh=await sourceFor(MANIFESTS[id]).list(id); CACHE[id]=fresh; savePersist(id,fresh); build(id,fresh); }catch(e){} })); if(dlg.open) draw(); }
