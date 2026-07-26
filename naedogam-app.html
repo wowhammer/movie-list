@@ -425,7 +425,7 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
   .mvinfo{ flex:1; min-width:0; }
   .mv-titlerow{ display:flex; justify-content:space-between; align-items:baseline; gap:8px; }
   .mv-title{ font-family:var(--sans); font-size:15px; font-weight:600; color:#1a1a1a; line-height:1.35; word-break:keep-all; overflow-wrap:break-word; }
-  .mv-year{ font-family:var(--sans); font-size:12px; color:#aaa; white-space:nowrap; flex-shrink:0; }
+  .mv-year{ font-family:var(--sans); font-size:12px; color:#aaa; white-space:nowrap; flex-shrink:1; min-width:0; overflow:hidden; text-overflow:ellipsis; max-width:62%; }
   .mv-orig{ font-family:var(--sans); font-size:11px; color:#bbb; margin-top:2px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
   .mv-sub{ font-family:var(--sans); font-size:12px; color:#888; margin-top:5px; line-height:1.5; }
   .mv-sub .plink{ color:#555; border-bottom:1px dashed #bbb; text-decoration:none; cursor:pointer; }
@@ -1172,7 +1172,7 @@ body{ background:radial-gradient(circle at 50% -10%, rgba(102,78,57,.16), transp
         <svg class="brandmark" width="40" height="30" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg>
         <span class="brandwm"><span class="bwm-ko">내도감</span><span class="bwm-en">NAEDOGAM</span></span>
       </button>
-      <span class="mhver">v309β</span>
+      <span class="mhver">v310β</span>
       <span class="spacer"></span>
       <span class="src-chip" id="srcChip" style="display:none">데모</span>
       <button class="icon-btn" id="searchToggle" type="button" style="display:none">🔍</button>
@@ -2257,7 +2257,7 @@ function openDomain(id){ if(id==="mbti"){ openMbti(); return; } if(id==="period"
 
 /* 홈: 켜둔 카테고리를 카드로. 건수는 한 번 열어본 분야만 표시(홈을 빠르게 유지). */
 function ndDeep(h){ if(typeof h!=="string"||h.charAt(0)!=="#") h="#8a7a6a"; var n=parseInt(h.slice(1),16),r=(n>>16)&255,g=(n>>8)&255,b=n&255; function d(x,f){return Math.round(x*f);} return "linear-gradient(145deg,rgb("+d(r,.5)+","+d(g,.5)+","+d(b,.5)+"),rgb("+d(r,.28)+","+d(g,.28)+","+d(b,.28)+"))"; }
-var ND_LOGO_HTML='<div class="ndh-brand"><svg width="47" height="35" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg><div class="ndh-wm"><b>내도감</b><small>NAEDOGAM</small></div><span class="mhver ndh-ver">v309β</span></div><button class="ndh-sync" type="button" title="동기화" aria-label="동기화" onclick="try{syncNow()}catch(e){}">↻</button>';
+var ND_LOGO_HTML='<div class="ndh-brand"><svg width="47" height="35" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg><div class="ndh-wm"><b>내도감</b><small>NAEDOGAM</small></div><span class="mhver ndh-ver">v310β</span></div><button class="ndh-sync" type="button" title="동기화" aria-label="동기화" onclick="try{syncNow()}catch(e){}">↻</button>';
 /* 홈 카드 크기: wide(넓게=한 줄 전체) · half(보통=한 줄 2개) · mini(작게=하단 3칸). 기본값=프리셋 */
 var ND_PRESET_SIZE={running:"wide",food:"wide",recipes:"wide",movies:"half",books:"half",period:"half",diary:"half",travel:"half",mountains:"half",culture:"half",albums:"half",cellar:"half",scrap:"half",wish:"half",gift:"half",pet:"half"};
 function getHomeSizes(){ try{ return JSON.parse(store.getItem("nd.homesize")||"{}")||{}; }catch(e){ return {}; } }
@@ -2287,14 +2287,14 @@ function renderHome(){
   const coverCells=(m,cls)=>{ const cs=coversOf(m); let h=""; for(let i=0;i<cs.length&&i<3;i++){ h+= `<span class="${cls}" style="background-image:url('${esc(cs[i])}')"></span>`; } return h; };
   const metric=m=>`<div class="metric"><b class="ndc" data-cnt="${m.id}">${cntNum(m)}</b><i>${unitOf(m)}</i></div>`;
 
-  const collHTML=m=>{ const vis=coversOf(m).length?`<div class="covers">${coverCells(m,"cover")}</div>`:`<span class="nc-glyph coll-glyph">${iconOf(m)}</span>`; return `<button class="card collection-card${zeroOf(m)}" data-id="${m.id}" ${bg(m)}><div><h3>${m.title}</h3>${metric(m)}</div>${vis}</button>`; };
+  const collHTML=m=>{ const rc=recentTitles(m,2); const vis=coversOf(m).length?`<div class="covers">${coverCells(m,"cover")}</div>`:`<span class="nc-glyph coll-glyph">${iconOf(m)}</span>`; return `<button class="card collection-card${zeroOf(m)}" data-id="${m.id}" ${bg(m)}><div><h3>${m.title}</h3>${metric(m)}${rc?`<p class="helper">최근: ${rc.replace(/</g,"&lt;")}</p>`:""}</div>${vis}</button>`; };
   const runningHTML=m=>{ const _rows=rowsOf(m)||[]; const _now=new Date(); const _sun=new Date(_now.getFullYear(),_now.getMonth(),_now.getDate()-_now.getDay()); const _km=[0,0,0,0,0,0,0]; _rows.forEach(r=>{ const pd=parseDate(String((r&&r.date)||"")); if(!pd) return; const _di=Math.round((new Date(pd.getFullYear(),pd.getMonth(),pd.getDate())-_sun)/86400000); if(_di>=0&&_di<7){ _km[_di]+=parseFloat(r.dist)||0; } }); const _mx=Math.max.apply(null,_km.concat(0.001)); const _wtot=_km.reduce((a,b)=>a+b,0); const _wcount=_rows.filter(r=>{ const pd=parseDate(String((r&&r.date)||"")); if(!pd) return false; const _di=Math.round((new Date(pd.getFullYear(),pd.getMonth(),pd.getDate())-_sun)/86400000); return _di>=0&&_di<7; }).length; const _hasWk=_wcount>0; const bars=_km.map(v=>{ const h=v>0?Math.max(14,Math.round(v/_mx*100)):0; return `<span class="bar" style="height:${h}%${v<=0?";opacity:.22":""}"></span>`; }).join(""); const days=["일","월","화","수","목","금","토"].map((d,i)=>`<span${i===_now.getDay()?" class=\"rd-today\"":""}>${d}</span>`).join(""); const rc=recentTitles(m,1); return `<button class="card running${zeroOf(m)}" data-id="${m.id}" ${bg(m)}><div class="nc-main"><h3>${m.title}</h3>${metric(m)}${_hasWk?`<p class="helper">이번 주 ${_wcount}회</p>`:(rc?`<p class="helper">최근: ${rc.replace(/</g,"&lt;")}</p>`:"")}</div><div class="run-chart"><div class="bars">${bars}</div><div class="days">${days}</div></div></button>`; };
   const foodHTML=m=>{ const rc=recentTitles(m,2); const vis=coversOf(m).length?`<div class="food-photos">${coverCells(m,"food-photo")}</div>`:`<span class="nc-glyph coll-glyph">${iconOf(m)}</span>`; return `<button class="card food${zeroOf(m)}" data-id="${m.id}" ${bg(m)}><div class="nc-main"><h3>${m.title}</h3>${metric(m)}${rc?`<p class="helper">최근: ${rc.replace(/</g,"&lt;")}</p>`:""}</div>${vis}</button>`; };
   const cycleHTML=m=>`<button class="card mini-card cycle${zeroOf(m)}" data-id="${m.id}" ${bg(m)}><div class="nc-main"><h3>${m.title}</h3><div class="metric"><b class="ndc" data-cnt="${m.id}">${pdHomeLabel()}</b></div></div><span class="moon"></span></button>`;
   const diaryHTML=m=>{ const rc=recentTitles(m,1); return `<button class="card mini-card diary${zeroOf(m)}" data-id="${m.id}" ${bg(m)}><div class="nc-main"><h3>${m.title}</h3>${metric(m)}${rc?`<p class="helper">${rc.slice(0,16).replace(/</g,"&lt;")}</p>`:""}</div><span class="pen"><svg viewBox="0 0 48 48"><path d="m15 34-2 9 9-3 17-24c1.8-2.5 1.2-6-1.3-7.8s-6-1.2-7.8 1.3z"/><path d="m27 14 9 6M16 34l6 5"/></svg></span></button>`; };
   const miniHTML=m=>`<button class="card small-card${zeroOf(m)}" data-id="${m.id}" ${bg(m)}><span class="mi">${iconOf(m)}</span><div><h3>${m.title}</h3><strong class="ndc" data-cnt="${m.id}">${cntNum(m)}</strong></div></button>`;
   // 크기별 렌더러: 카테고리 성격(nat)에 맞춰 넓게/보통 카드 생성
-  const wideStat=m=>{ const rc=recentTitles(m,2); return `<button class="card food${zeroOf(m)}" data-id="${m.id}" ${bg(m)}><div class="nc-main"><h3>${m.title}</h3>${metric(m)}${rc?`<p class="helper">최근: ${rc.replace(/</g,"&lt;")}</p>`:""}</div><span class="nc-glyph coll-glyph">${iconOf(m)}</span></button>`; };
+  const wideStat=m=>{ const rc=recentTitles(m,3); return `<button class="card food${zeroOf(m)}" data-id="${m.id}" ${bg(m)}><div class="nc-main"><h3>${m.title}</h3>${metric(m)}${rc?`<p class="helper">최근: ${rc.replace(/</g,"&lt;")}</p>`:""}</div><span class="nc-glyph coll-glyph">${iconOf(m)}</span></button>`; };
   const wideCard=m=>{ const nat=ndNat(m.id); if(nat==="run") return runningHTML(m); if(nat==="food") return foodHTML(m); return coversOf(m).length?foodHTML(m):wideStat(m); };
   const halfCard=m=>{ const nat=ndNat(m.id); if(nat==="cycle") return cycleHTML(m); if(nat==="diary") return diaryHTML(m); return collHTML(m); };
 
@@ -4093,7 +4093,7 @@ function movieCard(r, no){
     + ((r.rating!=null&&r.rating!=="")?`<span class="wb" style="background:#fef3c7;color:#b45309">★ ${r.rating}</span>`:"")
     + (r.rewatch?`<span class="wb wb-R">다시볼것</span>`:"")
     + (r.pick?`<span class="wb wb-P">찜</span>`:"");
-  const yc = [r.year, r.country, (r.tmdbRating!=null&&r.tmdbRating!==""?("⭐"+r.tmdbRating):"")].filter(Boolean).join(" · ");
+  const yc = [r.year, (String(r.country||"").split(/[,，]/)[0].trim()), (r.tmdbRating!=null&&r.tmdbRating!==""?("⭐"+r.tmdbRating):"")].filter(Boolean).join(" · ");
   const dir = personSpan(r.director,"director");
   const actorFirst = (r.actors||"").split(/[,，]/)[0].trim();
   const act = actorFirst ? personSpan(actorFirst,"actor") : "";
@@ -4577,7 +4577,7 @@ async function openAIStory(){
     +'<div class="wsec" style="border-bottom:none">'
     +'<div class="wpp" style="margin-bottom:10px">말투를 고르고 버튼을 누르면, AI가 당신의 도감을 이야기로 써줘요.</div>'
     +'<div class="waiPick"><button class="waiP on" data-p="warm" onclick="ndAISetPersona(this)">따뜻</button><button class="waiP" data-p="witty" onclick="ndAISetPersona(this)">위트</button><button class="waiP" data-p="coach" onclick="ndAISetPersona(this)">코치</button><button class="waiP" data-p="poetic" onclick="ndAISetPersona(this)">서정</button></div>'
-    +'<label class="waiDiary" style="display:flex;align-items:center;gap:7px;margin-top:10px;font-size:13px;color:#6b6580;cursor:pointer"><input type="checkbox" id="aiDiaryChk" style="width:16px;height:16px;accent-color:#7c3aed"> 일기 내용도 포함해서 써주기 <span style="opacity:.65">(내 Gemini로 전송)</span></label>'+'<button class="wsave waiBtn" id="wAiBtn" onclick="ndAIWrite()" style="width:100%;margin-top:12px;padding:13px">✨ AI가 내 도감 이야기 써주기</button>'
+    +'<label class="waiDiary" style="display:flex;align-items:flex-start;gap:7px;margin-top:10px;font-size:13px;color:#6b6580;cursor:pointer"><input type="checkbox" id="aiDiaryChk" style="width:16px;height:16px;accent-color:#7c3aed;margin-top:2px"><span>일기 내용도 포함해서 써주기<span style="display:block;font-size:11px;opacity:.75;margin-top:2px;font-weight:400">일기는 오직 AI가 당신의 이야기를 쓰는 데만 쓰여요. 앱에 저장하거나 어디에도 공개하지 않아요.</span></span></label>'+'<button class="wsave waiBtn" id="wAiBtn" onclick="ndAIWrite()" style="width:100%;margin-top:12px;padding:13px">✨ AI가 내 도감 이야기 써주기</button>'
     +'<div class="winsight waiOut" id="wAiOut" style="display:none;margin-top:14px"></div>'+'<button class="wsave" id="wAiSave" onclick="_aiExport()" style="display:none;width:100%;margin-top:10px;padding:12px">📷 이미지로 저장 (SNS 공유)</button>'
     +'</div></div></div>';
   document.body.appendChild(dlg); dlg.showModal();
@@ -5117,11 +5117,24 @@ function _buildLifeContext(ids, data){
 }
 function _wAiSummary(ids, data){ try{ var arr=[]; (ids||[]).forEach(function(id){ var m=MANIFESTS[id]; var rows=(data&&data[id])||[]; if(m&&rows.length){ arr.push({t:(m.title||id), n:rows.length}); } }); arr.sort(function(a,b){ return b.n-a.n; }); var top=arr.slice(0,7).map(function(x){ return x.t+' '+x.n+'개'; }); if(!top.length) return ''; return '[중요 안내] 아래 숫자는 사용자가 앱 "내도감"에 담아둔(수집·기록한) 항목 수예요. 실제로 모두 경험/방문/완료했다는 뜻이 아닙니다. 그러니 "올랐다/다녀왔다/떠났다/봤다"처럼 실제 경험으로 단정하지 말고, "모았다/담았다/기록했다/골랐다"처럼 수집의 관점으로 표현해 주세요.\n\n도감에 담은 항목: '+top.join(', ')+'.'; }catch(e){ return ''; } }
 function ndAISetPersona(el){ try{ window.__wAiPersona=el.getAttribute('data-p'); var box=el.parentNode; box.querySelectorAll('.waiP').forEach(function(b){ b.classList.remove('on'); }); el.classList.add('on'); }catch(e){} }
+function _aiLivedCount(){
+  try{
+    var g=function(id){ try{ return (window.CACHE&&CACHE[id])||loadPersist(id)||[]; }catch(e){ return []; } };
+    var run=g('running').length;
+    var climbed=g('mountains').filter(function(r){ return r.climbed===true||r.climbed==='TRUE'||r.climbed==='true'; }).length;
+    var bkt=g('bucket').filter(function(r){ return r.status==='달성'||r.status==='하는중'; }).length;
+    var dia=g('diary').length;
+    var mb=(typeof _mbtiSaved==='function')&&_mbtiSaved(); var mbHas=!!(mb&&((mb.latest&&mb.latest.type)||mb.type));
+    return run+climbed+bkt+dia+(mbHas?1:0);
+  }catch(e){ return 999; }
+}
 async function ndAIWrite(){
   var out=document.getElementById('wAiOut'); var btn=document.getElementById('wAiBtn');
   if(!CONFIG.AI_PROXY_URL){ return; }
   var persona=window.__wAiPersona||'warm'; var summary=window.__wSummary||'';
   if(!summary){ if(out){ out.style.display=''; out.textContent='아직 담긴 기록이 없어요.'; } return; }
+  var _lv=(typeof _aiLivedCount==='function')?_aiLivedCount():999;
+  if(_lv<12){ if(out){ out.style.display=''; out.innerHTML='<div style="line-height:1.65;text-align:left">아직은 당신을 담기엔 흔적이 조금 부족해요.<br>당신이 직접 남긴 기록(러닝·등산·일기·이룬 것 등)이 <b>12개</b>쯤 쌓이면, AI가 “당신은 이런 사람이에요”를 그려낼 수 있어요.<br><br>· <b>MBTI</b>를 한 번 해보시고<br>· <b>일기</b>에 오늘 하루를 남겨보세요 <span style="opacity:.7">(원하시면 그 내밀한 이야기까지 AI와 나눌 수 있어요 · 선택)</span><br><br><span style="opacity:.7">지금 '+_lv+' / 12</span></div>'; } if(btn){ btn.disabled=false; btn.textContent='✨ AI가 내 도감 이야기 써주기'; } return; }
   if(out){ out.style.display=''; out.textContent='✨ AI가 당신의 이야기를 쓰는 중…'; }
   if(btn){ btn.disabled=true; }
   try{
@@ -6025,6 +6038,7 @@ $("#dashBtn").addEventListener("click",openDashboard);
 $("#addBtn").addEventListener("click",()=>{ const m=MANIFESTS[state.domain]; if(!m?.canAdd) return;
   if(state.domain==="movies" && !CONFIG.DEPLOY) openAddMovie();
   else if(state.domain==="books") openAddBook();
+  else if(state.domain==="diary"){ var _d=new Date(); var _t=_d.getFullYear()+'-'+String(_d.getMonth()+1).padStart(2,'0')+'-'+String(_d.getDate()).padStart(2,'0'); var _ex=(state.rows||[]).filter(function(r){ return (typeof _isoOf==='function'?_isoOf(r.date):r.date)===_t; })[0]; if(_ex){ try{ if(typeof ndToast==='function') ndToast('오늘 일기를 이어서 수정해요'); else if(typeof toast==='function') toast('오늘 일기를 이어서 수정해요'); }catch(e){} openRecordForm(m, _ex); } else openRecordForm(m, null); }
   else openRecordForm(m, null); });
 
 /* ── 샘플 데이터(데모 전용; 실사용 시 구글 시트에서 옴) ── */
