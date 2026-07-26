@@ -1172,7 +1172,7 @@ body{ background:radial-gradient(circle at 50% -10%, rgba(102,78,57,.16), transp
         <svg class="brandmark" width="40" height="30" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg>
         <span class="brandwm"><span class="bwm-ko">내도감</span><span class="bwm-en">NAEDOGAM</span></span>
       </button>
-      <span class="mhver">v308β</span>
+      <span class="mhver">v309β</span>
       <span class="spacer"></span>
       <span class="src-chip" id="srcChip" style="display:none">데모</span>
       <button class="icon-btn" id="searchToggle" type="button" style="display:none">🔍</button>
@@ -2257,7 +2257,7 @@ function openDomain(id){ if(id==="mbti"){ openMbti(); return; } if(id==="period"
 
 /* 홈: 켜둔 카테고리를 카드로. 건수는 한 번 열어본 분야만 표시(홈을 빠르게 유지). */
 function ndDeep(h){ if(typeof h!=="string"||h.charAt(0)!=="#") h="#8a7a6a"; var n=parseInt(h.slice(1),16),r=(n>>16)&255,g=(n>>8)&255,b=n&255; function d(x,f){return Math.round(x*f);} return "linear-gradient(145deg,rgb("+d(r,.5)+","+d(g,.5)+","+d(b,.5)+"),rgb("+d(r,.28)+","+d(g,.28)+","+d(b,.28)+"))"; }
-var ND_LOGO_HTML='<div class="ndh-brand"><svg width="47" height="35" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg><div class="ndh-wm"><b>내도감</b><small>NAEDOGAM</small></div><span class="mhver ndh-ver">v308β</span></div><button class="ndh-sync" type="button" title="동기화" aria-label="동기화" onclick="try{syncNow()}catch(e){}">↻</button>';
+var ND_LOGO_HTML='<div class="ndh-brand"><svg width="47" height="35" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg><div class="ndh-wm"><b>내도감</b><small>NAEDOGAM</small></div><span class="mhver ndh-ver">v309β</span></div><button class="ndh-sync" type="button" title="동기화" aria-label="동기화" onclick="try{syncNow()}catch(e){}">↻</button>';
 /* 홈 카드 크기: wide(넓게=한 줄 전체) · half(보통=한 줄 2개) · mini(작게=하단 3칸). 기본값=프리셋 */
 var ND_PRESET_SIZE={running:"wide",food:"wide",recipes:"wide",movies:"half",books:"half",period:"half",diary:"half",travel:"half",mountains:"half",culture:"half",albums:"half",cellar:"half",scrap:"half",wish:"half",gift:"half",pet:"half"};
 function getHomeSizes(){ try{ return JSON.parse(store.getItem("nd.homesize")||"{}")||{}; }catch(e){ return {}; } }
@@ -4577,21 +4577,23 @@ async function openAIStory(){
     +'<div class="wsec" style="border-bottom:none">'
     +'<div class="wpp" style="margin-bottom:10px">말투를 고르고 버튼을 누르면, AI가 당신의 도감을 이야기로 써줘요.</div>'
     +'<div class="waiPick"><button class="waiP on" data-p="warm" onclick="ndAISetPersona(this)">따뜻</button><button class="waiP" data-p="witty" onclick="ndAISetPersona(this)">위트</button><button class="waiP" data-p="coach" onclick="ndAISetPersona(this)">코치</button><button class="waiP" data-p="poetic" onclick="ndAISetPersona(this)">서정</button></div>'
-    +'<button class="wsave waiBtn" id="wAiBtn" onclick="ndAIWrite()" style="width:100%;margin-top:12px;padding:13px">✨ AI가 내 도감 이야기 써주기</button>'
+    +'<label class="waiDiary" style="display:flex;align-items:center;gap:7px;margin-top:10px;font-size:13px;color:#6b6580;cursor:pointer"><input type="checkbox" id="aiDiaryChk" style="width:16px;height:16px;accent-color:#7c3aed"> 일기 내용도 포함해서 써주기 <span style="opacity:.65">(내 Gemini로 전송)</span></label>'+'<button class="wsave waiBtn" id="wAiBtn" onclick="ndAIWrite()" style="width:100%;margin-top:12px;padding:13px">✨ AI가 내 도감 이야기 써주기</button>'
     +'<div class="winsight waiOut" id="wAiOut" style="display:none;margin-top:14px"></div>'+'<button class="wsave" id="wAiSave" onclick="_aiExport()" style="display:none;width:100%;margin-top:10px;padding:12px">📷 이미지로 저장 (SNS 공유)</button>'
     +'</div></div></div>';
   document.body.appendChild(dlg); dlg.showModal();
   dlg.addEventListener("click",function(e){ if(e.target===dlg) dlg.close(); });
   var _bk=document.getElementById("aiBack"); if(_bk) _bk.onclick=function(){ dlg.close(); openInsight(); };
   if(!window.__wAiPersona) window.__wAiPersona="warm";
+  var _dc=document.getElementById("aiDiaryChk"); if(_dc){ try{ _dc.checked=(store.getItem("nd.aiDiaryOn")!=="0"); }catch(e){ _dc.checked=true; } _dc.onchange=function(){ try{ store.setItem("nd.aiDiaryOn", _dc.checked?"1":"0"); }catch(e){} try{ if(window.__aiCtx) window.__wSummary=_buildLifeContext(window.__aiCtx.ids,window.__aiCtx.data); }catch(e){} }; }
   var ids=getActive().filter(function(id){return MANIFESTS[id];});
   var data={};
   var build=function(id,raw){ var m=MANIFESTS[id]; data[id]=applyComputed(m,(raw||[]).map(function(r){return Object.assign({_id:r._id||crypto.randomUUID()},r);})); };
   var had={};
   ids.forEach(function(id){ had[id]=!!CACHE[id]; var raw=CACHE[id]||loadPersist(id); if(raw&&!CACHE[id])CACHE[id]=raw; build(id,raw||[]); });
-  try{ window.__wSummary=_wAiSummary(ids,data); }catch(e){}
+  try{ window.__wSummary=_buildLifeContext(ids,data); }catch(e){}
+  window.__aiCtx={ids:ids,data:data};
   var todo=ids.filter(function(id){return !had[id];});
-  if(todo.length){ await Promise.all(todo.map(async function(id){ try{ var fresh=await sourceFor(MANIFESTS[id]).list(id); CACHE[id]=fresh; savePersist(id,fresh); build(id,fresh); }catch(e){} })); try{ window.__wSummary=_wAiSummary(ids,data); }catch(e){} }
+  if(todo.length){ await Promise.all(todo.map(async function(id){ try{ var fresh=await sourceFor(MANIFESTS[id]).list(id); CACHE[id]=fresh; savePersist(id,fresh); build(id,fresh); }catch(e){} })); try{ window.__wSummary=_buildLifeContext(ids,data); }catch(e){} }
 }
 function mbtiHistoryHTML(){
   var s=_mbtiSaved(); if(!s||!s.history||s.history.length<2) return "";
@@ -5053,6 +5055,66 @@ function wrapCardHTML(S){
   return sec.join("");
 }
 function _wToday(){ try{ var t=state&&state._now?state._now:null; }catch(e){} var d=new Date(); return d.getFullYear()+"."+String(d.getMonth()+1).padStart(2,"0")+"."+String(d.getDate()).padStart(2,"0"); }
+var AI_WITNESS_STEER='너는 이 사람 옆에서 오래 지켜본, 다정하지만 정직한 목격자야. 아래는 이 사람이 실제로 살아낸 흔적(일기·성격·꾸준함·다녀온 곳·이룬 것)이야. 이걸 읽고 "당신은 이런 사람이에요"를 채점이 아니라 발견처럼 들려줘.\n지킬 것(말투 프리셋보다 이 규칙이 항상 우선):\n- 반드시 5~6문장, 하나의 자연스러운 문단으로. 한두 문장으로 짧게 끊지 마.\n- 아래 주어진 흔적만 근거로. 없는 활동·취미·사건을 새로 지어내지 마(일기에 적힌 내용은 근거로 써도 됨).\n- 숫자를 나열하지 말고 그 숫자 뒤의 사람을 봐. (예: "5번 뛰었다"가 아니라 "비 오는 날에도 운동화 끈을 맨 사람")\n- 자책보다 흔적이 더 정직하고 다정하다는 걸 알려주듯, 위로가 아니라 스스로도 몰랐던 자기 모습을 발견하게 하는 통찰로.\n- 말투(따뜻/위트/코치/서정)는 문장의 색깔만 바꿀 뿐, 길이·근거·따뜻한 발견의 결은 위 규칙을 항상 지켜.\n- 따뜻한 한국어 존댓말. "당신"이라고 불러.\n\n';
+/* ① 재료 수집기 — 실제 산 나(한 것)에 무게. 담은 것 아님. (내도감_영혼_박제) */
+function _buildLifeContext(ids, data){
+  try{
+    var L=[];
+    var has=function(id){ return (data&&data[id]&&data[id].length)?data[id]:null; };
+    var norm=function(s){ return String(s==null?"":s).replace(/\s+/g,' ').trim(); };
+    var cut=function(s,n){ s=norm(s); return s.length>n ? s.slice(0,n)+'…' : s; };
+    var iso=function(d){ try{ return (typeof _isoOf==='function' && _isoOf(d)) || String(d||''); }catch(e){ return String(d||''); } };
+    try{
+      var mbRaw=(typeof _mbtiSaved==='function')?_mbtiSaved():null;
+      var mb=mbRaw&&(mbRaw.latest||(mbRaw.type?mbRaw:null));
+      if(mb&&mb.type){
+        var AXL={EI:['외향','내향'],SN:['감각','직관'],TF:['사고','감정'],JP:['판단','인식']};
+        var A=mb.axes||{}, axArr=[];
+        ['EI','SN','TF','JP'].forEach(function(k){ var x=A[k]; if(x&&x.letter){ var left=(x.letter===x.a); axArr.push(AXL[k][left?0:1]+(x.pct?(' '+x.pct+'%'):'')); } });
+        L.push('[성격] 스스로 규정한 나: '+mb.type+(mb.nick?' ('+mb.nick+')':'')+(axArr.length?(' — '+axArr.join(', ')):''));
+      }
+    }catch(e){}
+    var run=has('running');
+    if(run){
+      var rd=run.map(function(r){ return iso(r.date); }).filter(Boolean).sort();
+      var totalDist=run.reduce(function(a,r){ return a+(parseFloat(r.dist)||0); },0);
+      var now=new Date(), wk4=new Date(now.getTime()-28*864e5);
+      var recent4=rd.filter(function(d){ var t=new Date(d); return !isNaN(t)&&t>=wk4; }).length;
+      var uniq=[]; rd.forEach(function(d){ if(uniq[uniq.length-1]!==d) uniq.push(d); });
+      var streak=uniq.length?1:0, best=streak;
+      for(var i=1;i<uniq.length;i++){ var gap=Math.round((new Date(uniq[i])-new Date(uniq[i-1]))/864e5); if(gap===1){ streak++; if(streak>best) best=streak; } else streak=1; }
+      var wp=run.slice().sort(function(a,b){ return String(iso(b.date)).localeCompare(String(iso(a.date))); }).filter(function(r){ return norm(r.pace); });
+      var pace=wp.length?norm(wp[0].pace):'';
+      L.push('[꾸준함·한 것] 러닝을 '+run.length+'번 실제로 뛰었고 누적 '+(Math.round(totalDist*10)/10)+'km. 최근 4주에 '+recent4+'번'+(best>1?(', 최장 '+best+'일 연속'):'')+'.'+(pace?(' 최근 페이스 '+pace):''));
+    }
+    var mtn=has('mountains');
+    if(mtn){
+      var went=mtn.filter(function(r){ return r.climbed===true||r.climbed==='TRUE'||r.climbed==='true'; });
+      if(went.length){
+        var regs={}; went.forEach(function(r){ var g=norm(r.region); if(g) regs[g]=(regs[g]||0)+1; });
+        var regArr=Object.keys(regs).sort(function(a,b){ return regs[b]-regs[a]; }).slice(0,4);
+        var names=went.map(function(r){ return norm(r.title); }).filter(Boolean).slice(0,6);
+        L.push('[다녀옴·한 것] 산을 '+went.length+'번 실제로 다녀왔다'+(names.length?(': '+names.join(', ')):'')+(regArr.length?(' (자주 간 곳: '+regArr.join(', ')+')'):''));
+      }
+    }
+    var bkt=has('bucket');
+    if(bkt){
+      var done=bkt.filter(function(r){ return r.status==='달성'; }).map(function(r){ return norm(r.title); }).filter(Boolean);
+      var doing=bkt.filter(function(r){ return r.status==='하는중'; }).map(function(r){ return norm(r.title); }).filter(Boolean);
+      if(done.length) L.push('[이룬 것·한 것] 버킷리스트에서 실제로 이룬 것: '+done.slice(0,8).join(', '));
+      if(doing.length) L.push('[하는 중] 지금 향해 가는 중: '+doing.slice(0,5).join(', '));
+    }
+    var diaryOn=true; try{ diaryOn=(store.getItem('nd.aiDiaryOn')!=='0'); }catch(e){}
+    var dia=has('diary');
+    if(dia&&diaryOn){
+      var ds=dia.slice().sort(function(a,b){ return String(iso(b.date)).localeCompare(String(iso(a.date))); });
+      var picks=ds.slice(0,10).map(function(r){ var body=cut(r.content||r.nddaily||r.title, 90); var mood=norm(r.mood); return body?('· '+(iso(r.date)||'')+(mood?(' ['+mood+']'):'')+' '+body):''; }).filter(Boolean);
+      if(picks.length) L.push('[일기·내 마음] 최근 일기에서 사용자가 직접 쓴 문장들:\n'+picks.join('\n'));
+    }
+    if(!L.length){ try{ return _wAiSummary(ids,data); }catch(_e){ return ''; } }
+    return L.join('\n\n');  /* 재료만 전달 — 톤은 프록시 프롬프트가 담당(누수 방지) */
+  }catch(e){ try{ return _wAiSummary(ids,data); }catch(_e){ return ''; } }
+}
 function _wAiSummary(ids, data){ try{ var arr=[]; (ids||[]).forEach(function(id){ var m=MANIFESTS[id]; var rows=(data&&data[id])||[]; if(m&&rows.length){ arr.push({t:(m.title||id), n:rows.length}); } }); arr.sort(function(a,b){ return b.n-a.n; }); var top=arr.slice(0,7).map(function(x){ return x.t+' '+x.n+'개'; }); if(!top.length) return ''; return '[중요 안내] 아래 숫자는 사용자가 앱 "내도감"에 담아둔(수집·기록한) 항목 수예요. 실제로 모두 경험/방문/완료했다는 뜻이 아닙니다. 그러니 "올랐다/다녀왔다/떠났다/봤다"처럼 실제 경험으로 단정하지 말고, "모았다/담았다/기록했다/골랐다"처럼 수집의 관점으로 표현해 주세요.\n\n도감에 담은 항목: '+top.join(', ')+'.'; }catch(e){ return ''; } }
 function ndAISetPersona(el){ try{ window.__wAiPersona=el.getAttribute('data-p'); var box=el.parentNode; box.querySelectorAll('.waiP').forEach(function(b){ b.classList.remove('on'); }); el.classList.add('on'); }catch(e){} }
 async function ndAIWrite(){
@@ -5082,7 +5144,7 @@ async function openWrapped(){
   var build=function(id,raw){ var m=MANIFESTS[id]; data[id]=applyComputed(m,(raw||[]).map(function(r){return Object.assign({_id:r._id||crypto.randomUUID()},r);})); };
   var had={};
   ids.forEach(function(id){ had[id]=!!CACHE[id]; var raw=CACHE[id]||loadPersist(id); if(raw&&!CACHE[id])CACHE[id]=raw; build(id,raw||[]); });
-  var draw=function(){ var S=wrapStats(ids,data); try{ window.__wSummary=_wAiSummary(ids,data); }catch(e){} var card=document.getElementById("wrapCard"); if(card){ if(!S.total){ card.innerHTML='<div class="wloading">아직 담긴 기록이 없어요.<br>추천리스트에서 담거나 +로 추가해보세요.</div>'; } else { card.innerHTML=wrapCardHTML(S); } } };
+  var draw=function(){ var S=wrapStats(ids,data); try{ window.__wSummary=_buildLifeContext(ids,data); }catch(e){} var card=document.getElementById("wrapCard"); if(card){ if(!S.total){ card.innerHTML='<div class="wloading">아직 담긴 기록이 없어요.<br>추천리스트에서 담거나 +로 추가해보세요.</div>'; } else { card.innerHTML=wrapCardHTML(S); } } };
   draw();
   var todo=ids.filter(function(id){return !had[id];});
   if(todo.length){ await Promise.all(todo.map(async function(id){ try{ var fresh=await sourceFor(MANIFESTS[id]).list(id); CACHE[id]=fresh; savePersist(id,fresh); build(id,fresh); }catch(e){} })); if(dlg.open) draw(); }
