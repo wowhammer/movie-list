@@ -1183,7 +1183,7 @@ body{ background:radial-gradient(circle at 50% -10%, rgba(102,78,57,.16), transp
         <svg class="brandmark" width="40" height="30" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg>
         <span class="brandwm"><span class="bwm-ko">내도감</span><span class="bwm-en">NAEDOGAM</span></span>
       </button>
-      <span class="mhver">v312β</span>
+      <span class="mhver">v313β</span>
       <span class="spacer"></span>
       <span class="src-chip" id="srcChip" style="display:none">데모</span>
       <button class="icon-btn" id="searchToggle" type="button" style="display:none">🔍</button>
@@ -2277,7 +2277,7 @@ function openDomain(id){ if(id==="mbti"){ openMbti(); return; } if(id==="period"
 
 /* 홈: 켜둔 카테고리를 카드로. 건수는 한 번 열어본 분야만 표시(홈을 빠르게 유지). */
 function ndDeep(h){ if(typeof h!=="string"||h.charAt(0)!=="#") h="#8a7a6a"; var n=parseInt(h.slice(1),16),r=(n>>16)&255,g=(n>>8)&255,b=n&255; function d(x,f){return Math.round(x*f);} return "linear-gradient(145deg,rgb("+d(r,.5)+","+d(g,.5)+","+d(b,.5)+"),rgb("+d(r,.28)+","+d(g,.28)+","+d(b,.28)+"))"; }
-var ND_LOGO_HTML='<div class="ndh-brand"><svg width="47" height="35" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg><div class="ndh-wm"><b>내도감</b><small>NAEDOGAM</small></div><span class="mhver ndh-ver">v312β</span></div><button class="ndh-sync" type="button" title="동기화" aria-label="동기화" onclick="try{syncNow()}catch(e){}">↻</button>';
+var ND_LOGO_HTML='<div class="ndh-brand"><svg width="47" height="35" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg><div class="ndh-wm"><b>내도감</b><small>NAEDOGAM</small></div><span class="mhver ndh-ver">v313β</span></div><button class="ndh-sync" type="button" title="동기화" aria-label="동기화" onclick="try{syncNow()}catch(e){}">↻</button>';
 /* 홈 카드 크기: wide(넓게=한 줄 전체) · half(보통=한 줄 2개) · mini(작게=하단 3칸). 기본값=프리셋 */
 var ND_PRESET_SIZE={running:"wide",food:"wide",recipes:"wide",movies:"half",books:"half",period:"half",diary:"half",travel:"half",mountains:"half",culture:"half",albums:"half",cellar:"half",scrap:"half",wish:"half",gift:"half",pet:"half"};
 function getHomeSizes(){ try{ return JSON.parse(store.getItem("nd.homesize")||"{}")||{}; }catch(e){ return {}; } }
@@ -6000,11 +6000,37 @@ function openAbout(){ const d=$("#add");
   if(!d.open) d.showModal();
 }
 
+function _ndOpenExternal(hintEl){
+  var ua=(navigator.userAgent||"").toLowerCase(), isiOS=/iphone|ipad|ipod/.test(ua), url=location.href;
+  if(isiOS){
+    var ok=false;
+    try{ if(navigator.clipboard&&navigator.clipboard.writeText){ navigator.clipboard.writeText(url); ok=true; } }catch(e){}
+    if(!ok){ try{ var t=document.createElement("textarea"); t.value=url; t.style.position="fixed"; t.style.left="-9999px"; document.body.appendChild(t); t.focus(); t.select(); document.execCommand("copy"); t.remove(); ok=true; }catch(e){} }
+    var msg=(ok?"\u2705 \ub9c1\ud06c\ub97c \ubcf5\uc0ac\ud588\uc5b4\uc694! ":"")+"<b>\uc0ac\ud30c\ub9ac</b>\ub97c \uc5f4\uc5b4 \uc8fc\uc18c\ucc3d\uc5d0 \ubd99\uc5ec\ub123\uac70\ub098, \uc774 \ud654\uba74 <b>\uc624\ub978\ucabd \uc544\ub798 \uc0ac\ud30c\ub9ac \uc544\uc774\ucf58</b>\uc744 \ub20c\ub7ec \uc5ec\uc138\uc694.";
+    if(hintEl) hintEl.innerHTML=msg; else { try{ alert(msg.replace(/<[^>]+>/g,"")); }catch(e){} }
+  } else {
+    var intent="intent://"+location.host+location.pathname+location.search+"#Intent;scheme=https;package=com.android.chrome;S.browser_fallback_url="+encodeURIComponent(url)+";end";
+    try{ location.href=intent; }catch(e){}
+    setTimeout(function(){ if(hintEl) hintEl.innerHTML="\ud06c\ub86c\uc774 \uc548 \uc5f4\ub9ac\uba74 \uc624\ub978\ucabd \uc704 <b>\u22ee \u2192 \ub2e4\ub978 \ube0c\ub77c\uc6b0\uc800\ub85c \uc5f4\uae30</b>\ub85c \uc5ec\uc138\uc694."; }, 1800);
+  }
+}
+function _ndGateInApp(gb,gm){
+  try{
+    var isiOS=/iphone|ipad|ipod/.test((navigator.userAgent||"").toLowerCase());
+    if(gb) gb.style.display="none";
+    gm.innerHTML='<div style="color:#ffd9a0;font-size:12.5px;margin-bottom:11px;line-height:1.6">\u26a0\ufe0f \uce74\ud1a1\u00b7\uc778\uc2a4\ud0c0 \ub4f1 <b>\uc778\uc571 \ube0c\ub77c\uc6b0\uc800</b>\ub77c \uad6c\uae00 \ub85c\uadf8\uc778\uc774 \ub9c9\ud600\uc694.<br>\uc544\ub798 \ubc84\ud2bc\uc73c\ub85c '+(isiOS?"\uc0ac\ud30c\ub9ac":"\ud06c\ub86c")+'\uc5d0\uc11c \uc5f4\uc5b4 \uc8fc\uc138\uc694.</div>';
+    var ob=document.createElement("button");
+    ob.textContent=isiOS?"\ud83d\udccb \ub9c1\ud06c \ubcf5\uc0ac \u2192 \uc0ac\ud30c\ub9ac\uc5d0\uc11c \uc5f4\uae30":"\ud83c\udf10 \ud06c\ub86c\uc73c\ub85c \uc5f4\uae30";
+    ob.style.cssText="background:#fff;color:#201c16;border:none;border-radius:10px;padding:13px 24px;font-size:15px;font-weight:700;cursor:pointer";
+    var hint=document.createElement("div"); hint.style.cssText="font-size:12px;color:#c6b9a6;margin-top:11px;line-height:1.55";
+    ob.onclick=function(){ _ndOpenExternal(hint); };
+    gm.appendChild(ob); gm.appendChild(hint);
+  }catch(e){}
+}
 function isInAppBrowser(){ const ua=(navigator.userAgent||"").toLowerCase(); return /kakaotalk|instagram|fban|fbav|fb_iab|line\/|naver|whale|daumapps|band|snapchat|musical_ly|tiktok|everytime/.test(ua); }
 async function boot(){
   if(CONFIG.DEPLOY){ const gate=$("#gate"),gb=$("#gateBtn"),gm=$("#gateMsg");
     if(gate){ gate.style.display="flex";
-      if(isInAppBrowser() && gm){ gm.innerHTML='⚠️ 카톡·인스타 등 <b>인앱 브라우저</b>에서는 구글 로그인이 막혀요.<br>오른쪽 위 <b>⋮(또는 공유) → 다른 브라우저로 열기</b>(크롬·사파리)로 열어 주세요.'; gm.style.color='#c2410c'; gm.style.lineHeight='1.6'; }
       const onOk=async()=>{ try{ await loadCustomManifests(); }catch(e){} gate.style.display="none"; { var _rb2=document.getElementById("ndReconn"); if(_rb2) _rb2.remove(); } if(state.view==="home") renderHome(); else if(state.view==="domain"){ renderTabs(); loadAndRender(); } };
       gb.onclick=async()=>{ gb.disabled=true; gm.textContent="구글 연결 중… (팝업을 허용해 주세요)";
         try{ await sheetSrc().ensureReady(); await onOk(); }
@@ -6015,14 +6041,22 @@ async function boot(){
           var _ib=$("#introBtn"), _isk=$("#introSkip"), _bd=$("#introBody");
           if(_bd) _bd.innerHTML=aboutBodyHTML();
           _intro.style.display="block";
-          if(_ib) _ib.onclick=function(){ try{ if(_isk&&_isk.checked) store.setItem("nd.introSeen","1"); }catch(e){} _intro.style.display="none"; if(gb) gb.click(); };
+          if(_ib){ if(isInAppBrowser()){
+              var _ios3=/iphone|ipad|ipod/.test((navigator.userAgent||"").toLowerCase());
+              _ib.textContent=_ios3?"\ud83d\udccb \ub9c1\ud06c \ubcf5\uc0ac \u2192 \uc0ac\ud30c\ub9ac\uc5d0\uc11c \uc2dc\uc791\ud558\uae30":"\ud83c\udf10 \ud06c\ub86c\uc73c\ub85c \uc5f4\uc5b4\uc11c \uc2dc\uc791\ud558\uae30";
+              var _ih=document.createElement("div"); _ih.style.cssText="font-size:12px;color:var(--ink-soft,#c6b9a6);margin-top:10px;text-align:center;line-height:1.55"; if(_ib.parentNode) _ib.parentNode.appendChild(_ih);
+              _ib.onclick=function(){ _ndOpenExternal(_ih); };
+            } else {
+              _ib.onclick=function(){ try{ if(_isk&&_isk.checked) store.setItem("nd.introSeen","1"); }catch(e){} _intro.style.display="none"; if(gb) gb.click(); };
+            } }
         }
       }catch(e){}
       const S=sheetSrc();
       if(S.token){ gm.textContent="자동 연결 중…"; gb.style.display="none";   /* 저장된 유효 토큰 → 로그인 없이 바로 */
         S.ensureReady().then(onOk).catch(()=>{ S.token=null; try{store.removeItem("nd.tok");}catch(e){} S.ensureReadySilent().then(onOk).catch(()=>{ gb.style.display=""; gm.textContent=""; }); }); }
       else if(S.ssId){ gm.textContent="자동 연결 중…"; gb.style.display="none";   /* 반환 사용자: 조용히 재연결 */
-        S.ensureReadySilent().then(onOk).catch(()=>{ gb.style.display=""; gm.textContent=""; }); }
+        S.ensureReadySilent().then(onOk).catch(()=>{ gb.style.display=""; gm.textContent=""; if(isInAppBrowser()) _ndGateInApp(gb,gm); }); }
+      else if(isInAppBrowser() && gm){ _ndGateInApp(gb,gm); }
     } }
   loadCachedCustomManifests();   // 캐시로 즉시 표시(빠름)
   // 첫 화면은 홈(켜둔 카테고리 카드 격자). 처음엔 비어 있고, 설정에서 카테고리를 켜면 카드가 생김.
