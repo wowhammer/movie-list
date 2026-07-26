@@ -1179,7 +1179,7 @@ body{ background:radial-gradient(circle at 50% -10%, rgba(102,78,57,.16), transp
         <svg class="brandmark" width="40" height="30" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg>
         <span class="brandwm"><span class="bwm-ko">내도감</span><span class="bwm-en">NAEDOGAM</span></span>
       </button>
-      <span class="mhver">v314β</span>
+      <span class="mhver">v315β</span>
       <span class="spacer"></span>
       <span class="src-chip" id="srcChip" style="display:none">데모</span>
       <button class="icon-btn" id="searchToggle" type="button" style="display:none">🔍</button>
@@ -2273,7 +2273,7 @@ function openDomain(id){ if(id==="mbti"){ openMbti(); return; } if(id==="period"
 
 /* 홈: 켜둔 카테고리를 카드로. 건수는 한 번 열어본 분야만 표시(홈을 빠르게 유지). */
 function ndDeep(h){ if(typeof h!=="string"||h.charAt(0)!=="#") h="#8a7a6a"; var n=parseInt(h.slice(1),16),r=(n>>16)&255,g=(n>>8)&255,b=n&255; function d(x,f){return Math.round(x*f);} return "linear-gradient(145deg,rgb("+d(r,.5)+","+d(g,.5)+","+d(b,.5)+"),rgb("+d(r,.28)+","+d(g,.28)+","+d(b,.28)+"))"; }
-var ND_LOGO_HTML='<div class="ndh-brand"><svg width="47" height="35" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg><div class="ndh-wm"><b>내도감</b><small>NAEDOGAM</small></div><span class="mhver ndh-ver">v314β</span></div><button class="ndh-sync" type="button" title="동기화" aria-label="동기화" onclick="try{syncNow()}catch(e){}">↻</button>';
+var ND_LOGO_HTML='<div class="ndh-brand"><svg width="47" height="35" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg><div class="ndh-wm"><b>내도감</b><small>NAEDOGAM</small></div><span class="mhver ndh-ver">v315β</span></div><button class="ndh-sync" type="button" title="동기화" aria-label="동기화" onclick="try{syncNow()}catch(e){}">↻</button>';
 /* 홈 카드 크기: wide(넓게=한 줄 전체) · half(보통=한 줄 2개) · mini(작게=하단 3칸). 기본값=프리셋 */
 var ND_PRESET_SIZE={running:"wide",food:"wide",recipes:"wide",movies:"half",books:"half",period:"half",diary:"half",travel:"half",mountains:"half",culture:"half",albums:"half",cellar:"half",scrap:"half",wish:"half",gift:"half",pet:"half"};
 function getHomeSizes(){ try{ return JSON.parse(store.getItem("nd.homesize")||"{}")||{}; }catch(e){ return {}; } }
@@ -5144,6 +5144,12 @@ function _aiLivedCount(){
     return run+climbed+bkt+dia+(mbHas?1:0);
   }catch(e){ return 999; }
 }
+var AI_LIMIT_PER_WEEK = 1;   // 주당 AI 글쓰기 허용 횟수(비용 보호) · 필요 시 숫자만 조정
+function _aiWeekKey(d){ d=d||new Date(); var x=new Date(d.getFullYear(),d.getMonth(),d.getDate()); x.setDate(x.getDate()-x.getDay()); return x.getFullYear()+'-'+String(x.getMonth()+1).padStart(2,'0')+'-'+String(x.getDate()).padStart(2,'0'); }
+function _aiUsage(){ try{ var o=JSON.parse(store.getItem('nd.aiUse')||'{}'); return (o&&typeof o==='object')?o:{}; }catch(e){ return {}; } }
+function _aiCanWrite(){ try{ if(store.getItem('nd.aiNoLimit')==='1') return true; var u=_aiUsage(); return !(u.wk===_aiWeekKey() && (u.n||0)>=AI_LIMIT_PER_WEEK); }catch(e){ return true; } }
+function _aiRecordUse(){ try{ var wk=_aiWeekKey(), u=_aiUsage(); if(u.wk!==wk){ u={wk:wk,n:0}; } u.n=(u.n||0)+1; store.setItem('nd.aiUse', JSON.stringify(u)); }catch(e){} }
+function _aiNextReset(){ try{ var nx=new Date(); nx.setDate(nx.getDate()+(7-nx.getDay())); return '\uc77c\uc694\uc77c('+(nx.getMonth()+1)+'\uc6d4 '+nx.getDate()+'\uc77c)'; }catch(e){ return '\ub2e4\uc74c \uc8fc'; } }
 async function ndAIWrite(){
   var out=document.getElementById('wAiOut'); var btn=document.getElementById('wAiBtn');
   if(!CONFIG.AI_PROXY_URL){ return; }
@@ -5151,12 +5157,18 @@ async function ndAIWrite(){
   if(!summary){ if(out){ out.style.display=''; out.textContent='아직 담긴 기록이 없어요.'; } return; }
   var _lv=(typeof _aiLivedCount==='function')?_aiLivedCount():999;
   if(_lv<12){ if(out){ out.style.display=''; out.innerHTML='<div style="line-height:1.65;text-align:left">아직은 당신을 담기엔 흔적이 조금 부족해요.<br>당신이 직접 남긴 기록(러닝·등산·일기·이룬 것 등)이 <b>12개</b>쯤 쌓이면, AI가 “당신은 이런 사람이에요”를 그려낼 수 있어요.<br><br>· <b>MBTI</b>를 한 번 해보시고<br>· <b>일기</b>에 오늘 하루를 남겨보세요 <span style="opacity:.7">(원하시면 그 내밀한 이야기까지 AI와 나눌 수 있어요 · 선택)</span><br><br><span style="opacity:.7">지금 '+_lv+' / 12</span></div>'; } if(btn){ btn.disabled=false; btn.textContent='✨ AI가 내 도감 이야기 써주기'; } return; }
+  if(typeof _aiCanWrite==='function' && !_aiCanWrite()){
+    var _nx=(typeof _aiNextReset==='function')?_aiNextReset():'다음 주';
+    if(out){ out.style.display=''; out.innerHTML='<div style="line-height:1.7;text-align:left">이번 주 <b>나를 담은 글</b>은 이미 완성했어요. ✨<br>매주 한 편씩, 천천히 쌓아가는 게 더 특별하니까요.<br><br><span style="opacity:.75">다음 글은 <b>'+_nx+'</b>부터 써드릴 수 있어요.</span></div>'; }
+    if(btn){ btn.disabled=false; btn.textContent='✨ 이번 주 글 완성 · 다음 주에 만나요'; }
+    return;
+  }
   if(out){ out.style.display=''; out.textContent='✨ AI가 당신의 이야기를 쓰는 중…'; }
   if(btn){ btn.disabled=true; }
   try{
     var r=await fetch(CONFIG.AI_PROXY_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({persona:persona,title:'내가 모아온 나',lang:'한국어',data:summary})});
     var j=await r.json();
-    if(j&&j.ok&&j.text){ var _raw=String(j.text).replace(/^\s*\*\*[^*\n]+\*\*\s*\n+/,'').replace(/\*\*([^*\n]+)\*\*/g,'$1'); _raw=_aiTrimIncomplete(_raw); window.__aiLastText=_raw; var _t=_raw.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/\n{2,}/g,'<br><br>').replace(/\n/g,'<br>'); out.innerHTML=_t; var _sv=document.getElementById("wAiSave"); if(_sv) _sv.style.display=""; }
+    if(j&&j.ok&&j.text){ var _raw=String(j.text).replace(/^\s*\*\*[^*\n]+\*\*\s*\n+/,'').replace(/\*\*([^*\n]+)\*\*/g,'$1'); _raw=_aiTrimIncomplete(_raw); window.__aiLastText=_raw; if(typeof _aiRecordUse==="function") _aiRecordUse(); var _t=_raw.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/\n{2,}/g,'<br><br>').replace(/\n/g,'<br>'); out.innerHTML=_t; var _sv=document.getElementById("wAiSave"); if(_sv) _sv.style.display=""; }
     else { out.textContent='AI 생성 실패: '+((j&&j.error)||'알 수 없음'); }
   }catch(e){ if(out) out.textContent='AI 호출 실패: '+e.message; }
   if(btn){ btn.disabled=false; btn.textContent='✨ 다시 쓰기'; }
