@@ -5112,7 +5112,7 @@ function _buildLifeContext(ids, data){
       if(picks.length) L.push('[일기·내 마음] 최근 일기에서 사용자가 직접 쓴 문장들:\n'+picks.join('\n'));
     }
     if(!L.length){ try{ return _wAiSummary(ids,data); }catch(_e){ return ''; } }
-    return AI_WITNESS_STEER+L.join('\n\n');
+    return L.join('\n\n');  /* 재료만 전달 — 톤은 프록시 프롬프트가 담당(누수 방지) */
   }catch(e){ try{ return _wAiSummary(ids,data); }catch(_e){ return ''; } }
 }
 function _wAiSummary(ids, data){ try{ var arr=[]; (ids||[]).forEach(function(id){ var m=MANIFESTS[id]; var rows=(data&&data[id])||[]; if(m&&rows.length){ arr.push({t:(m.title||id), n:rows.length}); } }); arr.sort(function(a,b){ return b.n-a.n; }); var top=arr.slice(0,7).map(function(x){ return x.t+' '+x.n+'개'; }); if(!top.length) return ''; return '[중요 안내] 아래 숫자는 사용자가 앱 "내도감"에 담아둔(수집·기록한) 항목 수예요. 실제로 모두 경험/방문/완료했다는 뜻이 아닙니다. 그러니 "올랐다/다녀왔다/떠났다/봤다"처럼 실제 경험으로 단정하지 말고, "모았다/담았다/기록했다/골랐다"처럼 수집의 관점으로 표현해 주세요.\n\n도감에 담은 항목: '+top.join(', ')+'.'; }catch(e){ return ''; } }
