@@ -1179,7 +1179,7 @@ body{ background:radial-gradient(circle at 50% -10%, rgba(102,78,57,.16), transp
         <svg class="brandmark" width="40" height="30" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg>
         <span class="brandwm"><span class="bwm-ko">내도감</span><span class="bwm-en">NAEDOGAM</span></span>
       </button>
-      <span class="mhver">v319β</span>
+      <span class="mhver">v320β</span>
       <span class="spacer"></span>
       <span class="src-chip" id="srcChip" style="display:none">데모</span>
       <button class="icon-btn" id="searchToggle" type="button" style="display:none">🔍</button>
@@ -1938,6 +1938,35 @@ class GoogleSheetDataSource {
       body:JSON.stringify({properties:{title:"내도감 Data"}, sheets:tabs})});
     this.ssId=d.spreadsheetId; store.setItem("nd.ssId",this.ssId);
   }
+  async _ensurePhotoFolder(){
+    if(this._photoFolderId) return this._photoFolderId;
+    var cached=null; try{ cached=store.getItem("nd.photoFolderId"); }catch(e){}
+    if(cached){ this._photoFolderId=cached; return cached; }
+    try{
+      var q=encodeURIComponent("name='내도감 사진' and mimeType='application/vnd.google-apps.folder' and trashed=false");
+      var f=await this._api("https://www.googleapis.com/drive/v3/files?spaces=drive&q="+q+"&fields=files(id,name)");
+      if(f&&f.files&&f.files.length){ this._photoFolderId=f.files[0].id; try{ store.setItem("nd.photoFolderId",this._photoFolderId); }catch(e){} return this._photoFolderId; }
+    }catch(e){}
+    var d=await this._api("https://www.googleapis.com/drive/v3/files",{method:"POST", body:JSON.stringify({name:"내도감 사진", mimeType:"application/vnd.google-apps.folder"})});
+    this._photoFolderId=d.id; try{ store.setItem("nd.photoFolderId",this._photoFolderId); }catch(e){} return this._photoFolderId;
+  }
+  async _driveUpload(blob,name,folderId){
+    folderId=folderId||await this._ensurePhotoFolder();
+    var meta={ name:name, parents:[folderId] };
+    var fd=new FormData();
+    fd.append("metadata", new Blob([JSON.stringify(meta)],{type:"application/json"}));
+    fd.append("file", blob);
+    var res=await fetch("https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id",{ method:"POST", headers:{ Authorization:"Bearer "+this.token }, body:fd });
+    if(!res.ok){ throw new Error("업로드 "+res.status+": "+(await res.text()).slice(0,120)); }
+    var j=await res.json(); return j.id;
+  }
+  async _driveBlobUrl(fileId){
+    this._blobCache=this._blobCache||{};
+    if(this._blobCache[fileId]) return this._blobCache[fileId];
+    var res=await fetch("https://www.googleapis.com/drive/v3/files/"+encodeURIComponent(fileId)+"?alt=media",{ headers:{ Authorization:"Bearer "+this.token } });
+    if(!res.ok){ throw new Error("다운로드 "+res.status); }
+    var b=await res.blob(); var u=URL.createObjectURL(b); this._blobCache[fileId]=u; return u;
+  }
   async _tabTitles(){
     const d=await this._api(`https://sheets.googleapis.com/v4/spreadsheets/${this.ssId}?fields=sheets.properties.title`);
     return (d.sheets||[]).map(s=>s.properties.title);
@@ -2273,7 +2302,7 @@ function openDomain(id){ if(id==="mbti"){ openMbti(); return; } if(id==="period"
 
 /* 홈: 켜둔 카테고리를 카드로. 건수는 한 번 열어본 분야만 표시(홈을 빠르게 유지). */
 function ndDeep(h){ if(typeof h!=="string"||h.charAt(0)!=="#") h="#8a7a6a"; var n=parseInt(h.slice(1),16),r=(n>>16)&255,g=(n>>8)&255,b=n&255; function d(x,f){return Math.round(x*f);} return "linear-gradient(145deg,rgb("+d(r,.5)+","+d(g,.5)+","+d(b,.5)+"),rgb("+d(r,.28)+","+d(g,.28)+","+d(b,.28)+"))"; }
-var ND_LOGO_HTML='<div class="ndh-brand"><svg width="47" height="35" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg><div class="ndh-wm"><b>내도감</b><small>NAEDOGAM</small></div><span class="mhver ndh-ver">v319β</span></div><button class="ndh-sync" type="button" title="동기화" aria-label="동기화" onclick="try{syncNow()}catch(e){}">↻</button>';
+var ND_LOGO_HTML='<div class="ndh-brand"><svg width="47" height="35" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg><div class="ndh-wm"><b>내도감</b><small>NAEDOGAM</small></div><span class="mhver ndh-ver">v320β</span></div><button class="ndh-sync" type="button" title="동기화" aria-label="동기화" onclick="try{syncNow()}catch(e){}">↻</button>';
 /* 홈 카드 크기: wide(넓게=한 줄 전체) · half(보통=한 줄 2개) · mini(작게=하단 3칸). 기본값=프리셋 */
 var ND_PRESET_SIZE={running:"wide",food:"wide",recipes:"wide",movies:"half",books:"half",period:"half",diary:"half",travel:"half",mountains:"half",culture:"half",albums:"half",cellar:"half",scrap:"half",wish:"half",gift:"half",pet:"half"};
 function getHomeSizes(){ try{ return JSON.parse(store.getItem("nd.homesize")||"{}")||{}; }catch(e){ return {}; } }
@@ -5318,6 +5347,31 @@ async function ndRestore(file){
     if(btn){ btn.textContent=t0; btn.disabled=false; }
   }
 }
+async function ndPhotoSpike(){
+  var out=document.getElementById("ndSpikeOut");
+  function log(m){ if(out){ out.style.display=""; out.innerHTML+=m+"<br>"; } }
+  if(out) out.innerHTML="";
+  var btn=document.getElementById("ndSpikeBtn"); var t0=btn?btn.textContent:"";
+  try{
+    if(btn){ btn.disabled=true; btn.textContent="테스트 중…"; }
+    var S=sheetSrc();
+    if(!S || typeof S._driveUpload!=="function"){ log("❌ 이 로그인 방식에선 드라이브 저장을 못 써요 (구글 로그인 필요)."); return; }
+    await S.ensureReady(); log("① 로그인·토큰 OK");
+    var fid=await S._ensurePhotoFolder(); log("② '내도감 사진' 폴더 OK");
+    var cv=document.createElement("canvas"); cv.width=80; cv.height=80;
+    var c=cv.getContext("2d"); c.fillStyle="#e0483f"; c.fillRect(0,0,80,80); c.fillStyle="#fff"; c.font="bold 13px sans-serif"; c.fillText("내도감",13,46);
+    var blob=await new Promise(function(r){ cv.toBlob(r,"image/jpeg",0.85); });
+    log("③ 테스트 이미지 생성 ("+blob.size+"B)");
+    var id=await S._driveUpload(blob,"내도감_테스트_"+Date.now()+".jpg",fid); log("④ 드라이브 업로드 OK");
+    var url=await S._driveBlobUrl(id); log("⑤ 인증 fetch OK");
+    var img=document.createElement("img"); img.src=url; img.alt="test"; img.style.cssText="width:80px;height:80px;border-radius:10px;border:1px solid #ccc;display:block;margin-top:8px"; if(out) out.appendChild(img);
+    log("<b style='color:#0a0'>✅ 전부 성공 — 아래 붉은 사각형이 보이면 드라이브 저장·표시 모두 됩니다.</b>");
+  }catch(e){
+    log("<b style='color:#c00'>❌ 실패: "+((e&&e.message)||e)+"</b>");
+  }finally{
+    if(btn){ btn.textContent=t0; btn.disabled=false; }
+  }
+}
 async function ndFullBackup(){
   var btn=document.getElementById("ndBkExport"); var t0=btn?btn.textContent:"";
   var d=new Date(), ymd=d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
@@ -5460,6 +5514,12 @@ function renderSettingsBody(d){
       <button class="btn ghost" id="ndBkImport" type="button">⬆ 백업에서 복원</button>
       <input type="file" id="ndBkFile" accept=".json,application/json" style="display:none">
     </div>
+    <h4 id="spkSection">사진 드라이브 저장 테스트 (개발용)</h4>
+    <div class="hint">Phase 0 실측 — 눌러서 드라이브에 테스트 사진 1장을 올리고 인증으로 다시 불러와 아래에 표시해요. <b>붉은 사각형이 뜨면 성공</b>. (드라이브에 작은 테스트 파일 1개가 생겨요)</div>
+    <div class="io-row">
+      <button class="btn ghost" id="ndSpikeBtn" type="button">🧪 사진 저장 테스트</button>
+    </div>
+    <div id="ndSpikeOut" style="display:none;font-size:12px;line-height:1.7;margin-top:6px;color:var(--ink,#333)"></div>
     <h4>구글 계정 · 개인 설정</h4>
     <div class="hint">모든 데이터는 내 구글시트 하나에 탭으로 모입니다.</div>
     <button class="btn ghost" id="relinkSheet" type="button" style="margin-top:12px">🔗 시트 다시 연결 (다른 기기와 맞추기)</button>
@@ -5486,6 +5546,7 @@ function renderSettingsBody(d){
     var _bkx=$("#ndBkExport"); if(_bkx) _bkx.onclick=()=>ndFullBackup();
     var _bki=$("#ndBkImport"), _bkf=$("#ndBkFile");
     if(_bki&&_bkf){ _bki.onclick=()=>_bkf.click(); _bkf.onchange=(ev)=>{ var f=ev.target.files&&ev.target.files[0]; if(f) ndRestore(f); ev.target.value=""; }; }
+    var _spk=$("#ndSpikeBtn"); if(_spk) _spk.onclick=()=>ndPhotoSpike();
     const _sm=$("#ioSample"); if(_sm) _sm.onclick=()=>sampleCSV(_sel.value);
     if(_im) _im.onclick=()=>{ if(_fi) _fi.click(); };
     if(_fi) _fi.onchange=e=>{ const file=e.target.files&&e.target.files[0]; if(!file) return; const rd=new FileReader(); rd.onload=()=>{ const rows=csvToRows(_sel.value, String(rd.result||"")); doImport(_sel.value, rows); _fi.value=""; }; rd.readAsText(file,"utf-8"); }; }
