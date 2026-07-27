@@ -1042,6 +1042,9 @@ body.home-dark .bnav-i.on .bnav-ic svg{ stroke:#f6eddf !important; }
 .cat-mrow .sz-seg .szb:first-child{ border-left:0; }
 .cat-mrow .sz-seg .szb.on{ background:#e0483f; color:#fff; }
 .cat-hd{ display:flex; justify-content:space-between; align-items:center; padding:0 4px 7px; margin-top:2px; font-size:11px; font-weight:700; color:var(--sub); letter-spacing:-.01em; opacity:.92; }
+.rf-checks{ display:flex; flex-wrap:wrap; gap:7px; margin-top:6px; }
+.rf-chk{ background:var(--card); border:1px solid var(--line); color:var(--ink); border-radius:20px; padding:7px 13px; font-size:13px; font-weight:600; cursor:pointer; }
+.rf-chk.on{ background:#e0483f; border-color:#e0483f; color:#fff; }
 
 /* === 다크 통일 보정: 변수 안 쓰는 하드코딩 라이트 컴포넌트 (구조/글자만, 의미색은 유지) === */
 /* 1) 어두운 글자 → 밝게 */
@@ -1196,7 +1199,7 @@ body{ background:radial-gradient(circle at 50% -10%, rgba(102,78,57,.16), transp
         <svg class="brandmark" width="40" height="30" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg>
         <span class="brandwm"><span class="bwm-ko">내도감</span><span class="bwm-en">NAEDOGAM</span></span>
       </button>
-      <span class="mhver">v353β</span>
+      <span class="mhver">v354β</span>
       <span class="spacer"></span>
       <span class="src-chip" id="srcChip" style="display:none">데모</span>
       <button class="icon-btn" id="searchToggle" type="button" style="display:none">🔍</button>
@@ -1323,7 +1326,7 @@ const MANIFESTS = {
              {k:"director",sheet:"감독",label:"감독",type:"text"},
              {k:"actors",sheet:"배우",label:"배우",type:"text"},
              {k:"country",sheet:"국적",label:"국적",type:"text"},
-             {k:"streaming",sheet:"스트리밍",label:"스트리밍(쉼표로 여러 개)",type:"tags"},
+             {k:"streaming",sheet:"스트리밍",label:"스트리밍",type:"checks",options:["넷플릭스","디즈니+","티빙","왓챠","웨이브","쿠팡플레이","Apple TV+","아마존 프라임","라프텔"]},
              {k:"recommend",sheet:"추천",label:"추천",type:"text"},{k:"source",sheet:"출처",label:"출처",type:"text"},
              {k:"review",sheet:"코멘트",label:"코멘트",type:"text"} ],
     stats:[ {label:"전체",type:"count",sf:""},
@@ -1879,9 +1882,9 @@ if(typeof CONFIG!=="undefined" && CONFIG.DEPLOY){
              {k:"pick",sheet:"찜",label:"찜",type:"bool"},
              {k:"rating",sheet:"평점",label:"내 평점(선택)",type:"rating"},
              {k:"tmdbRating",sheet:"TMDB평점",label:"TMDB 평점(자동)",type:"number"},
-             {k:"streaming",sheet:"스트리밍",label:"스트리밍(쉼표로 여러 개)",type:"tags"},
+             {k:"streaming",sheet:"스트리밍",label:"스트리밍",type:"checks",options:["넷플릭스","디즈니+","티빙","왓챠","웨이브","쿠팡플레이","Apple TV+","아마존 프라임","라프텔"]},
              {k:"recommend",sheet:"추천",label:"추천",type:"text"},{k:"source",sheet:"출처",label:"출처",type:"text"},
-             {k:"review",sheet:"코멘트",label:"코멘트",type:"textarea",full:true},
+             {k:"review",sheet:"코멘트",label:"감상평",type:"textarea",full:true},
              {k:"watchDate",sheet:"본날",label:"본날(봤음이면 자동 오늘)",type:"date"} ],
     search:["title","director","actors","recommend"],
     activity:{ df:"watchDate", when:r=>!!r.watched, label:"영화", name:r=>r.title },
@@ -2290,7 +2293,7 @@ function openDomain(id){ if(id==="mbti"){ openMbti(); return; } if(id==="period"
 
 /* 홈: 켜둔 카테고리를 카드로. 건수는 한 번 열어본 분야만 표시(홈을 빠르게 유지). */
 function ndDeep(h){ if(typeof h!=="string"||h.charAt(0)!=="#") h="#8a7a6a"; var n=parseInt(h.slice(1),16),r=(n>>16)&255,g=(n>>8)&255,b=n&255; function d(x,f){return Math.max(0,Math.min(255,Math.round(x*f)));} var d1="rgb("+d(r,.46)+","+d(g,.46)+","+d(b,.46)+")", d2="rgb("+d(r,.20)+","+d(g,.20)+","+d(b,.20)+")", gl="rgba("+r+","+g+","+b+",.16)"; return "radial-gradient(circle at 18% 14%,"+gl+",transparent 46%),linear-gradient(145deg,"+d1+","+d2+")"; }
-var ND_LOGO_HTML='<div class="ndh-brand"><svg width="47" height="35" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg><div class="ndh-wm"><b>내도감</b><small>NAEDOGAM</small></div><span class="mhver ndh-ver">v353β</span></div><button class="ndh-sync" type="button" title="동기화" aria-label="동기화" onclick="try{syncNow()}catch(e){}">↻</button>';
+var ND_LOGO_HTML='<div class="ndh-brand"><svg width="47" height="35" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg><div class="ndh-wm"><b>내도감</b><small>NAEDOGAM</small></div><span class="mhver ndh-ver">v354β</span></div><button class="ndh-sync" type="button" title="동기화" aria-label="동기화" onclick="try{syncNow()}catch(e){}">↻</button>';
 /* 홈 카드 크기: wide(넓게=한 줄 전체) · half(보통=한 줄 2개) · mini(작게=하단 3칸). 기본값=프리셋 */
 var ND_PRESET_SIZE={running:"wide",food:"wide",recipes:"wide",movies:"half",books:"half",period:"half",diary:"half",travel:"half",mountains:"half",culture:"half",albums:"half",cellar:"half",scrap:"half",wish:"half",gift:"half",pet:"half"};
 function getHomeSizes(){ try{ return JSON.parse(store.getItem("nd.homesize")||"{}")||{}; }catch(e){ return {}; } }
@@ -3677,6 +3680,31 @@ async function toggleMovieDeploy(m, r, key){
   try{ await sheetSrc().update(m.id, r._id, r); }
   catch(e){ r[key]=prevVal; r.watchDate=prevDate; if(it){ it[key]=prevVal; it.watchDate=prevDate; } if(arr) savePersist(m.id, arr); _movBtnRefresh(r, key); if(state.domain===m.id) paintDomain(m); alert("저장 실패: "+e.message); }
 }
+function movieMemoEdit(m,r){
+  var d=document.getElementById("detail"); if(!d) return;
+  if(d.querySelector("#mMemoBox")){ var ex=d.querySelector("#mMemoTa"); if(ex) ex.focus(); return; }
+  var box=document.createElement("div"); box.id="mMemoBox"; box.style.cssText="margin:0 18px 12px";
+  box.innerHTML='<textarea id="mMemoTa" rows="4" style="width:100%;box-sizing:border-box;font:inherit;font-size:14px;line-height:1.6;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:var(--card);color:var(--ink)" placeholder="이 영화 감상평을 남겨보세요"></textarea><div style="display:flex;gap:8px;margin-top:8px"><button type="button" class="btn" id="mMemoSave" style="flex:1">저장</button><button type="button" class="btn ghost" id="mMemoCancel">취소</button></div>';
+  var host=d.querySelector(".mvreview");
+  if(host){ host.replaceWith(box); }
+  else { var anc=d.querySelector(".mvover")||d.querySelector(".drate"); if(anc&&anc.parentNode){ anc.parentNode.insertBefore(box, anc.nextSibling); } else { d.appendChild(box); } }
+  var ta=box.querySelector("#mMemoTa"); ta.value=(r.review==null?"":String(r.review)); ta.focus();
+  box.querySelector("#mMemoSave").onclick=function(){ setMovieReviewDeploy(m,r,ta.value); };
+  box.querySelector("#mMemoCancel").onclick=function(){ var html=r.review?'<div class="mvreview"><b>📝 내 감상평</b><br>'+String(r.review).replace(/</g,"&lt;")+'</div>':''; if(html){ var t=document.createElement("div"); t.innerHTML=html; box.replaceWith(t.firstChild); } else { box.remove(); } };
+}
+async function setMovieReviewDeploy(m,r,v){
+  var prev=r.review; r.review=(v&&String(v).trim())?v:"";
+  var arr=CACHE[m.id]; var it=arr&&arr.find(function(x){return String(x._id)===String(r._id);}); if(it){ it.review=r.review; } if(arr) savePersist(m.id,arr);
+  var d=document.getElementById("detail");
+  if(d){ var box=d.querySelector("#mMemoBox");
+    var html=r.review?'<div class="mvreview"><b>📝 내 감상평</b><br>'+String(r.review).replace(/</g,"&lt;")+'</div>':'';
+    if(box){ if(html){ var t=document.createElement("div"); t.innerHTML=html; box.replaceWith(t.firstChild); } else { box.remove(); } }
+    var mm=d.querySelector("#mMemo"); if(mm) mm.textContent=r.review?'✏ 감상평 수정':'✏ 감상평';
+  }
+  if(state.domain===m.id) requestAnimationFrame(function(){ paintDomain(m); });
+  try{ await sheetSrc().update(m.id,r._id,r); }
+  catch(e){ r.review=prev; if(it){ it.review=prev; } if(arr) savePersist(m.id,arr); alert("저장 실패: "+((e&&e.message)||e)); }
+}
 async function openMovieDetailDeploy(m, r){
   const d=$("#detail");
   const people=[personSpan(r.director,"director"), personSpan(r.actors,"actor")].filter(Boolean).join(' <span style="color:var(--line)">/</span> ');
@@ -3694,7 +3722,7 @@ async function openMovieDetailDeploy(m, r){
     </div>
     <div class="drate"><span class="drate-l">내 별점</span> ${myStarsHTML(r.rating)}</div>
     <div class="mvover" id="mvOver">줄거리 불러오는 중…</div>
-    ${r.review?`<div class="mvreview"><b>📝 내 코멘트</b><br>${String(r.review).replace(/</g,"&lt;")}</div>`:""}
+    ${r.review?`<div class="mvreview"><b>📝 내 감상평</b><br>${String(r.review).replace(/</g,"&lt;")}</div>`:""}
     <div class="mvlinks">
       <a class="btn ghost" id="lnkTMDB" target="_blank" rel="noopener">🎬 TMDB</a>
       <a class="btn ghost" target="_blank" rel="noopener" href="https://pedia.watcha.com/ko/search?query=${encodeURIComponent(r.title||"")}">🍿 왓챠</a>
@@ -3704,11 +3732,13 @@ async function openMovieDetailDeploy(m, r){
       <button class="btn ${r.watched?'':'ghost'}" id="mW">${r.watched?'✓ 봤음':'봤음'}</button>
       <button class="btn ${r.rewatch?'':'ghost'}" id="mR">${r.rewatch?'✓ 다시볼것':'다시볼것'}</button>
       <button class="btn ${r.pick?'':'ghost'}" id="mP">${r.pick?'✓ 찜':'찜'}</button>
+      <button class="btn ghost" id="mMemo">${r.review?'✏ 감상평 수정':'✏ 감상평'}</button>
     </div>`;
   if(!d.open) d.showModal();
   $("#mW").onclick=()=>toggleMovieDeploy(m,r,"watched");
   $("#mR").onclick=()=>toggleMovieDeploy(m,r,"rewatch");
   $("#mP").onclick=()=>toggleMovieDeploy(m,r,"pick");
+  var _mm=$("#mMemo"); if(_mm) _mm.onclick=function(){ movieMemoEdit(m,r); };
   d.querySelectorAll(".ms-hit,.ms-clear").forEach(function(el){ el.onclick=function(){ setMovieRatingDeploy(m,r,parseFloat(el.dataset.val)); }; });
   $("#dEdit").onclick=()=>{ d.close(); openRecordForm(m, r); };
   $("#dDel").onclick=()=>deleteRecord(m, r);
@@ -3738,7 +3768,7 @@ async function openMovieDetail(m, r){
       </div>
     </div>
     <div class="mvover" id="mvOver">줄거리 불러오는 중…</div>
-    ${r.review?`<div class="mvreview"><b>📝 내 코멘트</b><br>${r.review}</div>`:""}
+    ${r.review?`<div class="mvreview"><b>📝 내 감상평</b><br>${r.review}</div>`:""}
     <div class="mvlinks">
       <a class="btn ghost" id="lnkTMDB" target="_blank" rel="noopener">🎬 TMDB</a>
       <a class="btn ghost" target="_blank" rel="noopener" href="https://pedia.watcha.com/ko/search?query=${encodeURIComponent(r.title||"")}">🍿 왓챠</a>
@@ -3939,10 +3969,12 @@ function openRecordForm(m, existing, prefill){
       return `<label>${ndFL(f)}</label><div class="lab-head"><span class="lab-h1">항목</span><span class="lab-h2">수치</span><span class="lab-h3">정상</span><span class="lab-hx"></span></div><div class="rf-labrows" data-k="${f.k}">${arr.map(rowH).join("")}</div><button type="button" class="lab-add" data-k="${f.k}">＋ 항목 추가</button>`;
     }
     if(f.money||f.comma){ const nz=(val==null||val===""||isNaN(Number(val)))?"":Number(val).toLocaleString(); return `<label>${ndFL(f)}</label><input class="rf" data-k="${f.k}" data-type="money" inputmode="numeric" value="${nz}" autocomplete="off" />`; }
+    if(f.type==="checks"){ var _arr=Array.isArray(val)?val.map(String):(val?String(val).split(",").map(function(x){return x.trim();}).filter(Boolean):[]);
+      return `<label>${ndFL(f)}</label><div class="rf-checks" data-k="${f.k}">`+(f.options||[]).map(function(o){ var _on=_arr.indexOf(o)>=0; return '<button type="button" class="rf-chk'+(_on?' on':'')+'" data-v="'+String(o).replace(/"/g,"&quot;")+'">'+o+'</button>'; }).join("")+`</div>`; }
     const v = (f.type==="tags" && Array.isArray(val)) ? val.join(", ") : (val==null?"":val);
     return `<label>${ndFL(f)}</label><input class="rf" data-k="${f.k}" data-type="${f.type}" value="${String(v).replace(/"/g,'&quot;')}" placeholder="${ndFP(f)}" autocomplete="off" />`;
   };
-  const _wcls=f=> f.third?"rff-third":f.full?"rff-full":(f.half?"rff-half":(f.type==="bool"?"rff-bool":((f.type==="textarea"||f.type==="image"||f.type==="rating"||f.type==="seg"||f.type==="labrows"||f.type==="tiers")?"rff-full":"rff-half")));
+  const _wcls=f=> f.third?"rff-third":f.full?"rff-full":(f.half?"rff-half":(f.type==="bool"?"rff-bool":((f.type==="textarea"||f.type==="image"||f.type==="rating"||f.type==="seg"||f.type==="labrows"||f.type==="tiers"||f.type==="checks")?"rff-full":"rff-half")));
   const body=fields.map(f=>`<div class="rff ${_wcls(f)}">${_cell(f)}</div>`).join("");
   d.innerHTML=`<div class="dhead"><h3>${m.title} ${isEdit?'수정':'추가'}</h3><button class="dclose-x" onclick="this.closest('dialog').close()" aria-label="닫기">✕</button></div><div class="dbody set rfgrid">${body}
     <div class="rff-full" style="display:flex;gap:8px;margin-top:18px;flex:1 1 100%">
@@ -3952,6 +3984,7 @@ function openRecordForm(m, existing, prefill){
   if(m.id==="movies" && CONFIG.DEPLOY) tmdbAttachDeploy(d);
   d.querySelectorAll(".rf-bool").forEach(b=>b.onclick=()=>{ b.classList.toggle("on"); });
   d.querySelectorAll(".rf-seg").forEach(seg=>seg.querySelectorAll(".rf-segbtn").forEach(b=>b.onclick=()=>{ const was=b.classList.contains("on"); seg.querySelectorAll(".rf-segbtn").forEach(x=>x.classList.remove("on")); if(!was) b.classList.add("on"); }));
+  d.querySelectorAll(".rf-checks .rf-chk").forEach(function(b){ b.onclick=function(){ b.classList.toggle("on"); }; });
   d.querySelectorAll(".rf-tiers").forEach(box=>{
     const addBtn = box.parentNode.querySelector(`.tier-add[data-k="${box.dataset.k}"]`);
     const rowTpl='<div class="tier-row"><div class="tier-min"><input type="number" inputmode="numeric" class="tier-min-in" placeholder="30"><span class="tier-min-suf">만원↑</span></div><textarea class="tier-ben" rows="3" placeholder="혜택 (줄바꿈으로 여러 개)"></textarea><button type="button" class="tier-del" title="이 구간 삭제">✕</button></div>';
@@ -4018,6 +4051,7 @@ function openRecordForm(m, existing, prefill){
         const arr=box?[...box.querySelectorAll(".tier-row")].map(rw=>({min:(rw.querySelector(".tier-min-in").value||"").trim(), benefits:(rw.querySelector(".tier-ben").value||"").replace(/\s+$/,"")})).filter(t=>t.min!==""||t.benefits!==""):[];
         row[f.k]=JSON.stringify(arr); return; }
       if(f.type==="image"){ row[f.k]=d.querySelector(`.rf-imgval[data-k="${f.k}"]`).value; return; }
+      if(f.type==="checks"){ var _cb=d.querySelector('.rf-checks[data-k="'+f.k+'"]'); row[f.k]=_cb?[].slice.call(_cb.querySelectorAll(".rf-chk.on")).map(function(x){return x.dataset.v;}):[]; return; }
       const el=d.querySelector(`.rf[data-k="${f.k}"]`); let v=el.value;
       if(f.type==="number"||f.type==="rating"){ if(f.money||f.comma) v=String(v).replace(/[^0-9.]/g,""); v = (v===""?null:Number(v)); }
       if(f.type==="tags")   v = v.split(",").map(s=>s.trim()).filter(Boolean);
@@ -5806,7 +5840,7 @@ function renderSettingsBody(d){
     </div>
     <div class="set-sec" data-sec="cat">
     <div class="hint" style="margin-bottom:6px">순서·크기·표시를 바꾸면 홈에 바로 반영돼요.</div>
-    <div class="cat-hd"><span>≡ 끌어서 순서</span><span>크기(넓·보·작) · 표시 →</span></div>
+    <div class="cat-hd"><span>≡ 끌어서 순서</span><span>크기(넓게·보통·작게) · 표시 →</span></div>
     <div class="ord-list" id="catList">${act.map(arow).join("")}</div>
     ${inact.length?`<div class="hint" style="margin-top:12px;color:var(--sub)">꺼진 카테고리 · 켜면 홈에 추가</div>${inact.map(irow).join("")}`:""}
     <button class="btn ghost" id="catNew" type="button" style="margin-top:14px">＋ 내 카테고리 만들기</button>
