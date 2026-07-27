@@ -1195,7 +1195,7 @@ body{ background:radial-gradient(circle at 50% -10%, rgba(102,78,57,.16), transp
         <svg class="brandmark" width="40" height="30" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg>
         <span class="brandwm"><span class="bwm-ko">내도감</span><span class="bwm-en">NAEDOGAM</span></span>
       </button>
-      <span class="mhver">v341β</span>
+      <span class="mhver">v342β</span>
       <span class="spacer"></span>
       <span class="src-chip" id="srcChip" style="display:none">데모</span>
       <button class="icon-btn" id="searchToggle" type="button" style="display:none">🔍</button>
@@ -2289,7 +2289,7 @@ function openDomain(id){ if(id==="mbti"){ openMbti(); return; } if(id==="period"
 
 /* 홈: 켜둔 카테고리를 카드로. 건수는 한 번 열어본 분야만 표시(홈을 빠르게 유지). */
 function ndDeep(h){ if(typeof h!=="string"||h.charAt(0)!=="#") h="#8a7a6a"; var n=parseInt(h.slice(1),16),r=(n>>16)&255,g=(n>>8)&255,b=n&255; function d(x,f){return Math.max(0,Math.min(255,Math.round(x*f)));} var d1="rgb("+d(r,.46)+","+d(g,.46)+","+d(b,.46)+")", d2="rgb("+d(r,.20)+","+d(g,.20)+","+d(b,.20)+")", gl="rgba("+r+","+g+","+b+",.16)"; return "radial-gradient(circle at 18% 14%,"+gl+",transparent 46%),linear-gradient(145deg,"+d1+","+d2+")"; }
-var ND_LOGO_HTML='<div class="ndh-brand"><svg width="47" height="35" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg><div class="ndh-wm"><b>내도감</b><small>NAEDOGAM</small></div><span class="mhver ndh-ver">v341β</span></div><button class="ndh-sync" type="button" title="동기화" aria-label="동기화" onclick="try{syncNow()}catch(e){}">↻</button>';
+var ND_LOGO_HTML='<div class="ndh-brand"><svg width="47" height="35" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg><div class="ndh-wm"><b>내도감</b><small>NAEDOGAM</small></div><span class="mhver ndh-ver">v342β</span></div><button class="ndh-sync" type="button" title="동기화" aria-label="동기화" onclick="try{syncNow()}catch(e){}">↻</button>';
 /* 홈 카드 크기: wide(넓게=한 줄 전체) · half(보통=한 줄 2개) · mini(작게=하단 3칸). 기본값=프리셋 */
 var ND_PRESET_SIZE={running:"wide",food:"wide",recipes:"wide",movies:"half",books:"half",period:"half",diary:"half",travel:"half",mountains:"half",culture:"half",albums:"half",cellar:"half",scrap:"half",wish:"half",gift:"half",pet:"half"};
 function getHomeSizes(){ try{ return JSON.parse(store.getItem("nd.homesize")||"{}")||{}; }catch(e){ return {}; } }
@@ -6458,6 +6458,28 @@ function _ndGateInApp(gb,gm){
   }catch(e){}
 }
 function isInAppBrowser(){ const ua=(navigator.userAgent||"").toLowerCase(); return /kakaotalk|instagram|fban|fbav|fb_iab|line\/|naver|whale|daumapps|band|snapchat|musical_ly|tiktok|everytime/.test(ua); }
+var deferredInstallPrompt=null;
+try{ window.addEventListener("beforeinstallprompt", function(e){ e.preventDefault(); deferredInstallPrompt=e; try{ ndShowInstall("android"); }catch(_){} });
+  window.addEventListener("appinstalled", function(){ deferredInstallPrompt=null; try{ store.setItem("nd.installDismiss","1"); }catch(_){} var b=document.getElementById("ndInstallBar"); if(b) b.style.display="none"; }); }catch(_){}
+function _ndStandalone(){ try{ return (window.matchMedia&&matchMedia("(display-mode: standalone)").matches)||navigator.standalone===true; }catch(e){ return false; } }
+function ndShowInstall(mode){ try{ if(_ndStandalone()) return; try{ if(store.getItem("nd.installDismiss")) return; }catch(_){}
+  if(typeof isInAppBrowser==="function" && isInAppBrowser()) return;
+  var bar=document.getElementById("ndInstallBar"); if(!bar) return;
+  var go=document.getElementById("ndInstallGo"), sub=document.getElementById("ndInstallSub");
+  if(mode==="ios"){ if(go) go.style.display="none"; if(sub) sub.innerHTML="사파리 아래 <b style=\"color:#e6dccd\">공유</b> 버튼 → <b style=\"color:#e6dccd\">홈 화면에 추가</b>"; }
+  else { if(go) go.style.display=""; if(sub) sub.textContent="앱처럼 전체화면으로 쓸 수 있어요."; }
+  bar.style.display="flex"; }catch(e){} }
+function ndInstallInit(){ try{
+  var bar=document.getElementById("ndInstallBar"); if(!bar) return;
+  var x=document.getElementById("ndInstallX"); if(x) x.onclick=function(){ bar.style.display="none"; try{ store.setItem("nd.installDismiss","1"); }catch(_){} };
+  var go=document.getElementById("ndInstallGo"); if(go) go.onclick=function(){ if(!deferredInstallPrompt) return; try{ deferredInstallPrompt.prompt(); Promise.resolve(deferredInstallPrompt.userChoice).then(function(c){ if(c&&c.outcome==="accepted"){ bar.style.display="none"; } deferredInstallPrompt=null; }); }catch(e){} };
+  if(_ndStandalone()) return;
+  if(typeof isInAppBrowser==="function" && isInAppBrowser()) return;
+  var ua=(navigator.userAgent||"").toLowerCase();
+  var isIOS=/iphone|ipad|ipod/.test(ua), iosOther=/crios|fxios|edgios|opios/.test(ua);
+  if(isIOS && !iosOther){ ndShowInstall("ios"); }
+  else if(deferredInstallPrompt){ ndShowInstall("android"); }
+}catch(e){} }
 async function boot(){
   if(CONFIG.DEPLOY){ const gate=$("#gate"),gb=$("#gateBtn"),gm=$("#gateMsg");
     if(gate){ gate.style.display="flex";
@@ -6569,6 +6591,7 @@ const SAMPLE = {
 ["detail","person","settings","rec","dash","catbuilder","catedit"].forEach(id=>{ const dg=document.getElementById(id);
   if(dg) dg.addEventListener("click",e=>{ if(e.target===dg) dg.close(); }); });
 boot();
+try{ ndInstallInit(); }catch(e){}
 try{ _ndPicBoot(); }catch(e){}
 try{ _ndDevBoot(); }catch(e){}
 </script>
@@ -6664,5 +6687,14 @@ try{ _ndDevBoot(); }catch(e){}
  <button class="bnav-i" data-nav="insight"><span class="bnav-ic"><svg viewBox="0 0 24 24"><path d="M12 3.5l1.7 4.8 4.8 1.7-4.8 1.7L12 16.5l-1.7-4.8L5.5 10l4.8-1.7z"/></svg></span>인사이트</button>
  <button class="bnav-i" data-nav="settings"><span class="bnav-ic"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></span>설정</button>
 </nav>
+<div id="ndInstallBar" style="position:fixed;left:50%;transform:translateX(-50%);bottom:calc(env(safe-area-inset-bottom) + 76px);z-index:70;width:calc(100% - 22px);max-width:520px;display:none;align-items:center;gap:10px;padding:11px 12px 11px 14px;border-radius:16px;background:linear-gradient(145deg,#2a2320,#1b1611);border:1px solid rgba(238,224,205,.18);box-shadow:0 16px 36px rgba(0,0,0,.42)">
+  <span style="font-size:21px;flex:0 0 auto">📲</span>
+  <div style="flex:1;min-width:0">
+    <div style="font-size:14px;font-weight:800;color:#f6eddf;letter-spacing:-.02em">홈 화면에 추가</div>
+    <div id="ndInstallSub" style="font-size:11.5px;color:#c6b9a6;margin-top:2px;line-height:1.4">앱처럼 전체화면으로 쓸 수 있어요.</div>
+  </div>
+  <button id="ndInstallGo" type="button" style="flex:0 0 auto;background:#e0483f;color:#fff;border:none;border-radius:11px;padding:9px 14px;font-size:14px;font-weight:800;cursor:pointer">추가</button>
+  <button id="ndInstallX" type="button" aria-label="닫기" style="flex:0 0 auto;background:transparent;border:none;color:#9c9081;font-size:17px;line-height:1;cursor:pointer;padding:4px 6px">✕</button>
+</div>
 </body>
 </html>
