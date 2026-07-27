@@ -1179,7 +1179,7 @@ body{ background:radial-gradient(circle at 50% -10%, rgba(102,78,57,.16), transp
         <svg class="brandmark" width="40" height="30" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg>
         <span class="brandwm"><span class="bwm-ko">내도감</span><span class="bwm-en">NAEDOGAM</span></span>
       </button>
-      <span class="mhver">v330β</span>
+      <span class="mhver">v331β</span>
       <span class="spacer"></span>
       <span class="src-chip" id="srcChip" style="display:none">데모</span>
       <button class="icon-btn" id="searchToggle" type="button" style="display:none">🔍</button>
@@ -2273,7 +2273,7 @@ function openDomain(id){ if(id==="mbti"){ openMbti(); return; } if(id==="period"
 
 /* 홈: 켜둔 카테고리를 카드로. 건수는 한 번 열어본 분야만 표시(홈을 빠르게 유지). */
 function ndDeep(h){ if(typeof h!=="string"||h.charAt(0)!=="#") h="#8a7a6a"; var n=parseInt(h.slice(1),16),r=(n>>16)&255,g=(n>>8)&255,b=n&255; function d(x,f){return Math.round(x*f);} return "linear-gradient(145deg,rgb("+d(r,.5)+","+d(g,.5)+","+d(b,.5)+"),rgb("+d(r,.28)+","+d(g,.28)+","+d(b,.28)+"))"; }
-var ND_LOGO_HTML='<div class="ndh-brand"><svg width="47" height="35" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg><div class="ndh-wm"><b>내도감</b><small>NAEDOGAM</small></div><span class="mhver ndh-ver">v330β</span></div><button class="ndh-sync" type="button" title="동기화" aria-label="동기화" onclick="try{syncNow()}catch(e){}">↻</button>';
+var ND_LOGO_HTML='<div class="ndh-brand"><svg width="47" height="35" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg><div class="ndh-wm"><b>내도감</b><small>NAEDOGAM</small></div><span class="mhver ndh-ver">v331β</span></div><button class="ndh-sync" type="button" title="동기화" aria-label="동기화" onclick="try{syncNow()}catch(e){}">↻</button>';
 /* 홈 카드 크기: wide(넓게=한 줄 전체) · half(보통=한 줄 2개) · mini(작게=하단 3칸). 기본값=프리셋 */
 var ND_PRESET_SIZE={running:"wide",food:"wide",recipes:"wide",movies:"half",books:"half",period:"half",diary:"half",travel:"half",mountains:"half",culture:"half",albums:"half",cellar:"half",scrap:"half",wish:"half",gift:"half",pet:"half"};
 function getHomeSizes(){ try{ return JSON.parse(store.getItem("nd.homesize")||"{}")||{}; }catch(e){ return {}; } }
@@ -2319,6 +2319,22 @@ function ndCatPicker(mode){
   };
   var cl=wrap.querySelector("#ndPickClose"); if(cl) cl.onclick=function(){ wrap.remove(); };
 }
+function ndCollectionWall(){
+  var covers=[];
+  try{ (getActive()||[]).forEach(function(id){ var m=MANIFESTS[id]; if(!m) return; var a=(window.CACHE&&CACHE[id])||loadPersist(id)||[]; for(var i=a.length-1;i>=0;i--){ var c=a[i]&&(a[i].cover||a[i]._cover); if(c) covers.push(c); } }); }catch(e){}
+  var esc=function(u){ return String(u).replace(/'/g,"%27").replace(/"/g,"&quot;"); };
+  var old=document.getElementById("ndWall"); if(old) old.remove();
+  if(!document.getElementById("ndWallCss")){ var st=document.createElement("style"); st.id="ndWallCss"; st.textContent=".ndwall-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:5px;padding:6px 12px 48px}@media(min-width:520px){.ndwall-grid{grid-template-columns:repeat(4,1fr)}}.ndwall-t{display:block;width:100%;aspect-ratio:3/4;background-size:cover;background-position:center;background-color:rgba(255,255,255,.05);border-radius:9px}"; document.head.appendChild(st); }
+  var tiles=covers.length ? covers.map(function(c){ return '<span class="ndwall-t" style="background-image:url(\''+esc(c)+'\')"></span>'; }).join("") : '<div style="grid-column:1/-1;text-align:center;color:var(--ink-soft,#c6b9a6);padding:56px 20px;line-height:1.75">아직 모은 표지가 없어요.<br>사진·표지가 있는 걸 기록하면<br>여기 벽이 채워져요.</div>';
+  var wrap=document.createElement("div"); wrap.id="ndWall";
+  wrap.style.cssText="position:fixed;inset:0;z-index:214;background:var(--paper,#16130f);overflow:auto;-webkit-overflow-scrolling:touch";
+  wrap.innerHTML='<div style="position:sticky;top:0;z-index:2;background:var(--paper,#16130f);padding:calc(14px + env(safe-area-inset-top)) 14px 12px;display:flex;align-items:center;gap:10px;box-shadow:0 6px 16px rgba(0,0,0,.25)">'
+    +'<button id="ndWallClose" type="button" style="background:transparent;border:none;color:var(--ink,#f6eddf);font-size:26px;line-height:1;cursor:pointer;padding:0 6px">‹</button>'
+    +'<div><div style="font-size:18px;font-weight:800;color:var(--ink,#f6eddf);letter-spacing:-.03em">내가 모아온 것들</div><div style="font-size:12.5px;color:var(--ink-soft,#c6b9a6);margin-top:2px">표지·사진 '+covers.length+'개</div></div></div>'
+    +'<div class="ndwall-grid">'+tiles+'</div>';
+  document.body.appendChild(wrap);
+  wrap.querySelector("#ndWallClose").onclick=function(){ wrap.remove(); };
+}
 function renderHome(){
   const active = getActive().map(id=>MANIFESTS[id]).filter(Boolean);
   const home=$("#home");
@@ -2356,8 +2372,8 @@ function renderHome(){
   // 히어로
   const totalItems = active.reduce((s,m)=>{const a=rowsOf(m);return s+(a?a.length:0);},0);
   const allCovers=[]; active.forEach(m=>{ coversOf(m).forEach(c=>{ if(allCovers.length<3) allCovers.push(c); }); });
-  const heroFan = `<div class="fan${allCovers.length?"":" fan-empty"}">`+[0,1,2].map(i=> allCovers[i]?`<span style="background-image:url('${esc(allCovers[i])}')"></span>`:`<span></span>`).join("")+`</div>`;
-  const heroCard = `<article class="card hero"><div class="nc-main"><p class="eyebrow">지금까지 수집</p><div class="metric"><b id="ndHeroTotal">${fmt(totalItems)}</b><i>개</i></div><p class="helper">${active.length}개 카테고리 · 오늘도 기록 중</p></div>${heroFan}</article>`;
+  const heroFan = allCovers.length ? (`<div class="fan">`+[0,1,2].map(i=> allCovers[i]?`<span style="background-image:url('${esc(allCovers[i])}')"></span>`:`<span></span>`).join("")+`</div>`) : "";
+  const heroCard = `<article class="card hero" id="ndHeroCard" style="cursor:pointer"><div class="nc-main"><p class="eyebrow">지금까지 수집</p><div class="metric"><b id="ndHeroTotal">${fmt(totalItems)}</b><i>개</i></div><p class="helper">${active.length}개 카테고리 · 눌러서 <b style="opacity:.92">모아온 것 보기 ›</b></p></div>${heroFan}</article>`;
 
   // 표시 순서 = 설정에서 정한 순서(getActive) 그대로. 크기(넓게/보통/작게)가 폭을 결정.
   // 넓게=한 줄 전체 / 보통=한 줄 2개 / 작게=한 줄 3개. 크기가 바뀌는 지점에서 줄을 끊음.
@@ -2375,6 +2391,7 @@ function renderHome(){
   home.innerHTML=`<div class="ndhome"><div class="ndh-top">${ND_LOGO_HTML}</div>${tabs}<div class="ndh-dash">${heroCard}${(CONFIG.AI_PROXY_URL?'<button class="aistrip" onclick="openAIStory()"><span class="ms-ic">✨</span><span class="ms-b"><b>AI가 써주는 내 이야기</b> · 한 편의 글로</span><span class="ms-go">써보기 →</span></button>':'')}${out}<button class="card" id="ndAddCatCard" type="button" style="display:flex;align-items:center;justify-content:center;gap:8px;min-height:60px;border:1.5px dashed rgba(238,224,205,.3);background:transparent;color:var(--ink-soft,#c6b9a6);font-size:15px;font-weight:700;cursor:pointer;grid-column:1/-1;margin-top:2px">＋ 새 도감 추가</button></div></div>`;
   home.querySelectorAll(".card[data-id],.ndh-tab[data-id]").forEach(b=>b.onclick=()=>openDomain(b.dataset.id));
   { var _ac=home.querySelector("#ndAddCatCard"); if(_ac) _ac.onclick=function(){ ndCatPicker("add"); }; }
+  { var _hc=home.querySelector("#ndHeroCard"); if(_hc) _hc.onclick=function(){ ndCollectionWall(); }; }
 
   { const _need=active.filter(m=>{ const _st=(Date.now()-(Number(store.getItem(persistKey(m.id)+"|t")||0)))>NDCACHE_TTL; return !((CACHE[m.id]||loadPersist(m.id)) && !_st); }).map(m=>m.id);
     const _hero=()=>{ const el=home.querySelector("#ndHeroTotal"); if(el){ let t=0; active.forEach(m=>{ const a=CACHE[m.id]||loadPersist(m.id); if(a) t+=a.length; }); el.textContent=fmt(t); } };
