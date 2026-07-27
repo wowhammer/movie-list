@@ -1179,7 +1179,7 @@ body{ background:radial-gradient(circle at 50% -10%, rgba(102,78,57,.16), transp
         <svg class="brandmark" width="40" height="30" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg>
         <span class="brandwm"><span class="bwm-ko">내도감</span><span class="bwm-en">NAEDOGAM</span></span>
       </button>
-      <span class="mhver">v321β</span>
+      <span class="mhver">v322β</span>
       <span class="spacer"></span>
       <span class="src-chip" id="srcChip" style="display:none">데모</span>
       <button class="icon-btn" id="searchToggle" type="button" style="display:none">🔍</button>
@@ -2273,7 +2273,7 @@ function openDomain(id){ if(id==="mbti"){ openMbti(); return; } if(id==="period"
 
 /* 홈: 켜둔 카테고리를 카드로. 건수는 한 번 열어본 분야만 표시(홈을 빠르게 유지). */
 function ndDeep(h){ if(typeof h!=="string"||h.charAt(0)!=="#") h="#8a7a6a"; var n=parseInt(h.slice(1),16),r=(n>>16)&255,g=(n>>8)&255,b=n&255; function d(x,f){return Math.round(x*f);} return "linear-gradient(145deg,rgb("+d(r,.5)+","+d(g,.5)+","+d(b,.5)+"),rgb("+d(r,.28)+","+d(g,.28)+","+d(b,.28)+"))"; }
-var ND_LOGO_HTML='<div class="ndh-brand"><svg width="47" height="35" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg><div class="ndh-wm"><b>내도감</b><small>NAEDOGAM</small></div><span class="mhver ndh-ver">v321β</span></div><button class="ndh-sync" type="button" title="동기화" aria-label="동기화" onclick="try{syncNow()}catch(e){}">↻</button>';
+var ND_LOGO_HTML='<div class="ndh-brand"><svg width="47" height="35" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg><div class="ndh-wm"><b>내도감</b><small>NAEDOGAM</small></div><span class="mhver ndh-ver">v322β</span></div><button class="ndh-sync" type="button" title="동기화" aria-label="동기화" onclick="try{syncNow()}catch(e){}">↻</button>';
 /* 홈 카드 크기: wide(넓게=한 줄 전체) · half(보통=한 줄 2개) · mini(작게=하단 3칸). 기본값=프리셋 */
 var ND_PRESET_SIZE={running:"wide",food:"wide",recipes:"wide",movies:"half",books:"half",period:"half",diary:"half",travel:"half",mountains:"half",culture:"half",albums:"half",cellar:"half",scrap:"half",wish:"half",gift:"half",pet:"half"};
 function getHomeSizes(){ try{ return JSON.parse(store.getItem("nd.homesize")||"{}")||{}; }catch(e){ return {}; } }
@@ -3235,6 +3235,19 @@ function _ndACsave(){ try{ store.setItem("nd.autocover", JSON.stringify(ndACache
 function _ndACset(el,src){ if(!el) return; el.classList.remove("rc-noimg"); el.classList.remove("fl-noimg"); el.innerHTML='<img src="'+String(src).replace(/"/g,"&quot;")+'" alt="" loading="lazy">'; }
 async function ndWikiImg(title){ var langs=["ko","en"], t=String(title||"").trim(); if(!t) return ""; for(var i=0;i<langs.length;i++){ try{ var url="https://"+langs[i]+".wikipedia.org/w/api.php?action=query&titles="+encodeURIComponent(t)+"&prop=pageimages&piprop=thumbnail&pithumbsize=500&format=json&redirects=1&origin=*"; var d=await fetch(url).then(function(r){return r.json();}); var pages=(d.query&&d.query.pages)||{}; for(var k in pages){ var th=pages[k].thumbnail; if(th&&th.source) return th.source; } }catch(e){} } return ""; }
 var AUTO_COVER_CATS={recipes:1, food:1, culture:1, cellar:1};
+var _NDPX="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7";
+var _ndPicIO=null;
+function _ndPicIOget(){ if(_ndPicIO) return _ndPicIO; try{ _ndPicIO=new IntersectionObserver(function(ents,obs){ ents.forEach(function(e){ if(!e.isIntersecting) return; obs.unobserve(e.target); _ndPicResolve(e.target); }); },{rootMargin:"300px"}); }catch(e){ _ndPicIO=null; } return _ndPicIO; }
+async function _ndPicResolve(el){ try{ var isImg=el.tagName==="IMG"; var fid=isImg?el.getAttribute("data-dpic"):el.getAttribute("data-dpic-bg"); if(!fid) return; var S=sheetSrc(); if(!S||typeof S._driveBlobUrl!=="function") return; var url=await S._driveBlobUrl(fid); if(isImg){ el.src=url; } else { el.style.backgroundImage="url('"+url+"')"; } }catch(e){} }
+function _ndPicScan(root){ try{ if(!root||root.nodeType!==1) return;
+    var imgs=[]; if(root.tagName==="IMG" && /^drive:/.test(root.getAttribute("src")||"")) imgs.push(root);
+    if(root.querySelectorAll) root.querySelectorAll('img[src^="drive:"]').forEach(function(x){ imgs.push(x); });
+    imgs.forEach(function(im){ var fid=(im.getAttribute("src")||"").slice(6); if(!fid) return; im.setAttribute("data-dpic",fid); im.src=_NDPX; var io=_ndPicIOget(); if(io) io.observe(im); else _ndPicResolve(im); });
+    var bgs=[]; if(root.getAttribute && /drive:/.test(root.getAttribute("style")||"")) bgs.push(root);
+    if(root.querySelectorAll) root.querySelectorAll('[style*="drive:"]').forEach(function(x){ bgs.push(x); });
+    bgs.forEach(function(el){ if(el.getAttribute("data-dpic-bg")) return; var st=el.getAttribute("style")||""; var m=st.match(/drive:([A-Za-z0-9_-]+)/); if(!m) return; el.setAttribute("data-dpic-bg",m[1]); el.style.backgroundImage="none"; var io=_ndPicIOget(); if(io) io.observe(el); else _ndPicResolve(el); });
+  }catch(e){} }
+function _ndPicBoot(){ try{ _ndPicScan(document.body); var mo=new MutationObserver(function(muts){ muts.forEach(function(mu){ if(mu.addedNodes) mu.addedNodes.forEach(function(n){ if(n.nodeType===1) _ndPicScan(n); }); }); }); mo.observe(document.body,{childList:true,subtree:true}); }catch(e){} }
 function ndAutoCover(){ try{ var cache=_ndAC(); var io=new IntersectionObserver(function(ents,obs){ ents.forEach(function(e){ if(!e.isIntersecting) return; var el=e.target; obs.unobserve(el); var t=el.getAttribute("data-ac"); if(!t) return; var key="r|"+t; if(cache[key]==="0") return; if(cache[key]){ _ndACset(el,cache[key]); return; } ndWikiImg(t).then(function(src){ cache[key]=src||"0"; _ndACsave(); if(src&&document.body.contains(el)) _ndACset(el,src); }); }); },{rootMargin:"400px"}); document.querySelectorAll(".rc-img[data-ac], .fl-img[data-ac], .thumb[data-ac]").forEach(function(el){ io.observe(el); }); }catch(e){} }
 function renderCard(m, r, no){ if(m.id==="recipes") return recipeCard(r); if(m.id==="food") return foodListCard(r); if(m.id==="baby") return babyCard(r); if(m.id==="books") return bookCard(r); if(m.id==="quote") return quoteCard(r); if(m.id==="travel") return travelCard(r); if(m.id==="albums") return albumCard(r); if(m.id==="scrap") return scrapCard(r); const c=m.card;
   if(c.kind==="wallet") return walletCard(r);
@@ -3776,12 +3789,22 @@ function openRecordForm(m, existing, prefill){
   }
   const _encImg=(file,k)=>{ if(!file||!/^image\//.test(file.type||"")) return;
     const rd=new FileReader(); rd.onload=()=>{ const img=new Image(); img.onload=()=>{
-      let mx=880, q=0.72;
-      const enc=()=>{ const sc=Math.min(1,mx/Math.max(img.width,img.height)); const cv=document.createElement("canvas"); cv.width=Math.max(1,Math.round(img.width*sc)); cv.height=Math.max(1,Math.round(img.height*sc)); cv.getContext("2d").drawImage(img,0,0,cv.width,cv.height); try{ return cv.toDataURL("image/jpeg",q); }catch(e){ return rd.result; } };
-      let url=enc();
-      while(url.length>49000 && (mx>160 || q>0.34)){ if(q>0.44) q-=0.07; else mx-=60; url=enc(); }
-      d.querySelector(`.rf-imgval[data-k="${k}"]`).value=url;
-      const pv=d.querySelector(`.rf-imgprev[data-k="${k}"]`); pv.src=url; pv.style.display="";
+      const toURL=(mx,q)=>{ const sc=Math.min(1,mx/Math.max(img.width,img.height)); const cv=document.createElement("canvas"); cv.width=Math.max(1,Math.round(img.width*sc)); cv.height=Math.max(1,Math.round(img.height*sc)); cv.getContext("2d").drawImage(img,0,0,cv.width,cv.height); try{ return cv.toDataURL("image/jpeg",q); }catch(e){ return rd.result; } };
+      let bmx=880,bq=0.72, b64=toURL(bmx,bq);
+      while(b64.length>49000 && (bmx>160 || bq>0.34)){ if(bq>0.44) bq-=0.07; else bmx-=60; b64=toURL(bmx,bq); }
+      const valEl=d.querySelector(`.rf-imgval[data-k="${k}"]`);
+      const pv=d.querySelector(`.rf-imgprev[data-k="${k}"]`);
+      if(pv){ pv.src=b64; pv.style.display=""; }
+      if(valEl) valEl.value=b64;
+      (async()=>{ try{
+        const S=sheetSrc();
+        if(!S || typeof S._driveUpload!=="function") return;
+        if(valEl && valEl.dataset) valEl.dataset.uploading="1";
+        const hiURL=toURL(1280,0.82);
+        const blob=await (await fetch(hiURL)).blob();
+        const id=await S._driveUpload(blob, "ndimg_"+Date.now()+".jpg");
+        if(valEl){ valEl.value="drive:"+id; if(valEl.dataset) delete valEl.dataset.uploading; }
+      }catch(e){ if(valEl&&valEl.dataset) delete valEl.dataset.uploading; } })();
     }; img.src=rd.result; }; rd.readAsDataURL(file); };
   d.querySelectorAll(".rf-imgfile").forEach(inp=>inp.onchange=ev=>_encImg(ev.target.files&&ev.target.files[0], inp.dataset.k));
   d.querySelectorAll(".rf-imgzone").forEach(z=>{ const k=z.dataset.k;
@@ -6262,6 +6285,7 @@ const SAMPLE = {
 ["detail","person","settings","rec","dash","catbuilder","catedit"].forEach(id=>{ const dg=document.getElementById(id);
   if(dg) dg.addEventListener("click",e=>{ if(e.target===dg) dg.close(); }); });
 boot();
+try{ _ndPicBoot(); }catch(e){}
 </script>
 
 <!-- 내도감 뒤로가기(Android 백버튼) 처리 v180 -->
