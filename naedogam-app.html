@@ -1195,7 +1195,7 @@ body{ background:radial-gradient(circle at 50% -10%, rgba(102,78,57,.16), transp
         <svg class="brandmark" width="40" height="30" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg>
         <span class="brandwm"><span class="bwm-ko">내도감</span><span class="bwm-en">NAEDOGAM</span></span>
       </button>
-      <span class="mhver">v346β</span>
+      <span class="mhver">v347β</span>
       <span class="spacer"></span>
       <span class="src-chip" id="srcChip" style="display:none">데모</span>
       <button class="icon-btn" id="searchToggle" type="button" style="display:none">🔍</button>
@@ -2289,7 +2289,7 @@ function openDomain(id){ if(id==="mbti"){ openMbti(); return; } if(id==="period"
 
 /* 홈: 켜둔 카테고리를 카드로. 건수는 한 번 열어본 분야만 표시(홈을 빠르게 유지). */
 function ndDeep(h){ if(typeof h!=="string"||h.charAt(0)!=="#") h="#8a7a6a"; var n=parseInt(h.slice(1),16),r=(n>>16)&255,g=(n>>8)&255,b=n&255; function d(x,f){return Math.max(0,Math.min(255,Math.round(x*f)));} var d1="rgb("+d(r,.46)+","+d(g,.46)+","+d(b,.46)+")", d2="rgb("+d(r,.20)+","+d(g,.20)+","+d(b,.20)+")", gl="rgba("+r+","+g+","+b+",.16)"; return "radial-gradient(circle at 18% 14%,"+gl+",transparent 46%),linear-gradient(145deg,"+d1+","+d2+")"; }
-var ND_LOGO_HTML='<div class="ndh-brand"><svg width="47" height="35" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg><div class="ndh-wm"><b>내도감</b><small>NAEDOGAM</small></div><span class="mhver ndh-ver">v346β</span></div><button class="ndh-sync" type="button" title="동기화" aria-label="동기화" onclick="try{syncNow()}catch(e){}">↻</button>';
+var ND_LOGO_HTML='<div class="ndh-brand"><svg width="47" height="35" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg><div class="ndh-wm"><b>내도감</b><small>NAEDOGAM</small></div><span class="mhver ndh-ver">v347β</span></div><button class="ndh-sync" type="button" title="동기화" aria-label="동기화" onclick="try{syncNow()}catch(e){}">↻</button>';
 /* 홈 카드 크기: wide(넓게=한 줄 전체) · half(보통=한 줄 2개) · mini(작게=하단 3칸). 기본값=프리셋 */
 var ND_PRESET_SIZE={running:"wide",food:"wide",recipes:"wide",movies:"half",books:"half",period:"half",diary:"half",travel:"half",mountains:"half",culture:"half",albums:"half",cellar:"half",scrap:"half",wish:"half",gift:"half",pet:"half"};
 function getHomeSizes(){ try{ return JSON.parse(store.getItem("nd.homesize")||"{}")||{}; }catch(e){ return {}; } }
@@ -2514,13 +2514,7 @@ class GSheetSource {
     setTimeout(()=>fin(rej,new Error("silent_timeout")),4500);
   }); }
   async ensureReadySilent(){ await this._authSilent(); await this._ensureSpreadsheet(); try{ await this._tidyStructure(); }catch(e){} return true; }
-  _auth(){ return new Promise((res,rej)=>{
-    gisReady(9000).then(()=>{
-      const tc=google.accounts.oauth2.initTokenClient({ client_id:this.clientId, scope:"https://www.googleapis.com/auth/drive.file",
-        callback:r=>{ if(r&&r.error) return rej(new Error("로그인 실패: "+r.error)); this.token=r.access_token; try{ store.setItem("nd.tok",r.access_token); store.setItem("nd.tokExp",String(Date.now()+((r.expires_in||3600)*1000)-60000)); }catch(e){} res(); } });
-      tc.requestAccessToken();
-    }).catch(()=>rej(new Error("구글 로그인을 불러오지 못했어요. 인터넷을 확인하거나, 크롬·사파리 등 기본 브라우저에서 열어 주세요. (카카오톡·인스타 등 인앱 브라우저에서는 구글 로그인이 막혀요.)")));
-  }); }
+  _auth(){ try{ _gAuthRedirect("select_account"); }catch(e){} return new Promise(function(){}); }
   async _api(url,opt={}){
     const res=await fetch(url,{...opt,headers:{Authorization:"Bearer "+this.token,"Content-Type":"application/json",...(opt.headers||{})}});
     if(res.ok){ var _rb=document.getElementById("ndReconn"); if(_rb) _rb.remove(); }
@@ -6491,13 +6485,50 @@ function ndInstallInit(){ try{
   if(isIOS && !iosOther){ ndShowInstall("ios"); }
   else if(deferredInstallPrompt){ ndShowInstall("android"); }
 }catch(e){} }
+function _gAuthRedirect(promptMode){
+  try{
+    var cid=CONFIG.GOOGLE_CLIENT_ID;
+    var redir=location.origin+location.pathname;
+    var st=Math.random().toString(36).slice(2)+Math.random().toString(36).slice(2);
+    try{ store.setItem("nd.oauthState", st); }catch(e){}
+    var u="https://accounts.google.com/o/oauth2/v2/auth"
+      +"?client_id="+encodeURIComponent(cid)
+      +"&redirect_uri="+encodeURIComponent(redir)
+      +"&response_type=token"
+      +"&scope="+encodeURIComponent("https://www.googleapis.com/auth/drive.file")
+      +"&include_granted_scopes=true"
+      +"&state="+encodeURIComponent(st)
+      +"&prompt="+encodeURIComponent(promptMode||"select_account");
+    location.href=u;
+  }catch(e){}
+}
+function _gConsumeHash(){
+  try{
+    var h=(location.hash||"").replace(/^#/,"");
+    if(!h) return false;
+    var p={}; h.split("&").forEach(function(kv){ var i=kv.indexOf("="); if(i>0){ p[decodeURIComponent(kv.slice(0,i))]=decodeURIComponent(kv.slice(i+1)); } });
+    if(p.error){ try{ history.replaceState(null,"",location.pathname+location.search); }catch(e){} return false; }
+    if(!p.access_token) return false;
+    var want=""; try{ want=store.getItem("nd.oauthState")||""; }catch(e){}
+    if(want && p.state && p.state!==want) return false;
+    var exp=parseInt(p.expires_in||"3600",10);
+    try{ store.setItem("nd.tok", p.access_token); store.setItem("nd.tokExp", String(Date.now()+exp*1000-60000)); }catch(e){}
+    try{ store.removeItem("nd.oauthState"); }catch(e){}
+    try{ history.replaceState(null,"",location.pathname+location.search); }catch(e){}
+    return true;
+  }catch(e){ return false; }
+}
 async function boot(){
+  var _reAuthed=false; try{ _reAuthed=_gConsumeHash(); }catch(e){}
   if(CONFIG.DEPLOY){ const gate=$("#gate"),gb=$("#gateBtn"),gm=$("#gateMsg");
     if(gate){ gate.style.display="flex";
       const onOk=async()=>{ try{ await loadCustomManifests(); }catch(e){} gate.style.display="none"; { var _rb2=document.getElementById("ndReconn"); if(_rb2) _rb2.remove(); } try{ if(!getActive().length && !store.getItem("nd.onboarded")){ ndCatPicker("onboard"); } }catch(e){} if(state.view==="home") renderHome(); else if(state.view==="domain"){ renderTabs(); loadAndRender(); } };
       gb.onclick=async()=>{ gb.disabled=true; gm.textContent="구글 연결 중… (팝업을 허용해 주세요)";
         try{ await sheetSrc().ensureReady(); await onOk(); }
         catch(e){ gb.disabled=false; gm.textContent="실패: "+((e&&e.message)||e); } };
+      if(_reAuthed){ gb.disabled=true; gm.textContent="구글 연결 중…";
+        try{ await sheetSrc().ensureReady(); await onOk(); }
+        catch(e){ gb.disabled=false; gm.textContent="실패: "+((e&&e.message)||e); } }
       try{ var _seen=false; try{ _seen=store.getItem("nd.introSeen")==="1"; }catch(_e){}
         var _S0=sheetSrc(), _intro=$("#intro");
         if(_intro && !_seen && !_S0.token && !_S0.ssId){
