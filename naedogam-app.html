@@ -948,6 +948,18 @@ body.home-dark .bnav-i.on .bnav-ic svg{ stroke:#f6eddf !important; }
 .ndhome .helper{ margin:9px 0 0; overflow:hidden; color:#e5dbcd; font-size:13px; font-weight:600; letter-spacing:-.045em; line-height:1.4; text-overflow:ellipsis; white-space:nowrap; }
 
 .ndhome .hero{ display:grid; grid-template-columns:minmax(0,1.12fr) minmax(112px,.88fr); align-items:center; min-height:88px; padding:12px 16px; background:radial-gradient(circle at 90% 10%,rgba(108,79,128,.25),transparent 46%),linear-gradient(135deg,#35283e,#1d1924); }
+.hero.hero-thin{ grid-template-columns:1fr auto; min-height:58px; padding:11px 15px; }
+.hero-thin .eyebrow{ font-size:12.5px; font-weight:720; opacity:.72; margin:0 0 3px; }
+.hero-thin .hero-line{ display:flex; align-items:baseline; gap:5px; min-width:0; }
+.hero-thin .hero-line b{ font-size:27px; font-weight:820; letter-spacing:-.05em; line-height:1; }
+.hero-thin .hero-line i{ font-size:13.5px; font-weight:700; font-style:normal; color:#eee1d1; }
+.hero-thin .hero-sub{ font-size:12px; font-weight:600; opacity:.72; margin-left:3px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.hero-thin .fan{ width:96px; height:52px; margin-left:auto; }
+.hero-thin .fan span{ width:34px; height:46px; top:4px; }
+.hero-thin .fan span:nth-child(1){ left:4px; }
+.hero-thin .fan span:nth-child(2){ left:30px; }
+.hero-thin .fan span:nth-child(3){ left:56px; }
+.small-card .mi-cov{ display:block; width:32px; height:42px; border-radius:7px; background-size:cover; background-position:center; box-shadow:0 3px 8px rgba(0,0,0,.28); }
 .ndhome .hero .metric b{ font-size:33px; }
 .ndhome .fan{ position:relative; width:128px; height:78px; margin-left:auto; }
 .ndhome .fan span{ position:absolute; top:7px; width:48px; height:68px; border:1px solid rgba(255,255,255,.15); border-radius:8px; background-size:cover; background-position:center; background-color:#4a4038; box-shadow:0 10px 17px rgba(0,0,0,.32); }
@@ -1179,7 +1191,7 @@ body{ background:radial-gradient(circle at 50% -10%, rgba(102,78,57,.16), transp
         <svg class="brandmark" width="40" height="30" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg>
         <span class="brandwm"><span class="bwm-ko">내도감</span><span class="bwm-en">NAEDOGAM</span></span>
       </button>
-      <span class="mhver">v331β</span>
+      <span class="mhver">v332β</span>
       <span class="spacer"></span>
       <span class="src-chip" id="srcChip" style="display:none">데모</span>
       <button class="icon-btn" id="searchToggle" type="button" style="display:none">🔍</button>
@@ -2273,7 +2285,7 @@ function openDomain(id){ if(id==="mbti"){ openMbti(); return; } if(id==="period"
 
 /* 홈: 켜둔 카테고리를 카드로. 건수는 한 번 열어본 분야만 표시(홈을 빠르게 유지). */
 function ndDeep(h){ if(typeof h!=="string"||h.charAt(0)!=="#") h="#8a7a6a"; var n=parseInt(h.slice(1),16),r=(n>>16)&255,g=(n>>8)&255,b=n&255; function d(x,f){return Math.round(x*f);} return "linear-gradient(145deg,rgb("+d(r,.5)+","+d(g,.5)+","+d(b,.5)+"),rgb("+d(r,.28)+","+d(g,.28)+","+d(b,.28)+"))"; }
-var ND_LOGO_HTML='<div class="ndh-brand"><svg width="47" height="35" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg><div class="ndh-wm"><b>내도감</b><small>NAEDOGAM</small></div><span class="mhver ndh-ver">v331β</span></div><button class="ndh-sync" type="button" title="동기화" aria-label="동기화" onclick="try{syncNow()}catch(e){}">↻</button>';
+var ND_LOGO_HTML='<div class="ndh-brand"><svg width="47" height="35" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg><div class="ndh-wm"><b>내도감</b><small>NAEDOGAM</small></div><span class="mhver ndh-ver">v332β</span></div><button class="ndh-sync" type="button" title="동기화" aria-label="동기화" onclick="try{syncNow()}catch(e){}">↻</button>';
 /* 홈 카드 크기: wide(넓게=한 줄 전체) · half(보통=한 줄 2개) · mini(작게=하단 3칸). 기본값=프리셋 */
 var ND_PRESET_SIZE={running:"wide",food:"wide",recipes:"wide",movies:"half",books:"half",period:"half",diary:"half",travel:"half",mountains:"half",culture:"half",albums:"half",cellar:"half",scrap:"half",wish:"half",gift:"half",pet:"half"};
 function getHomeSizes(){ try{ return JSON.parse(store.getItem("nd.homesize")||"{}")||{}; }catch(e){ return {}; } }
@@ -2363,7 +2375,7 @@ function renderHome(){
   const foodHTML=m=>{ const rc=recentTitles(m,2); const vis=coversOf(m).length?`<div class="food-photos">${coverCells(m,"food-photo")}</div>`:`<span class="nc-glyph coll-glyph">${iconOf(m)}</span>`; return `<button class="card food${zeroOf(m)}" data-id="${m.id}" ${bg(m)}><div class="nc-main"><h3>${m.title}</h3>${metric(m)}${rc?`<p class="helper">최근: ${rc.replace(/</g,"&lt;")}</p>`:""}</div>${vis}</button>`; };
   const cycleHTML=m=>`<button class="card mini-card cycle${zeroOf(m)}" data-id="${m.id}" ${bg(m)}><div class="nc-main"><h3>${m.title}</h3><div class="metric"><b class="ndc" data-cnt="${m.id}">${pdHomeLabel()}</b></div></div><span class="moon"></span></button>`;
   const diaryHTML=m=>{ const rc=recentTitles(m,1); return `<button class="card mini-card diary${zeroOf(m)}" data-id="${m.id}" ${bg(m)}><div class="nc-main"><h3>${m.title}</h3>${metric(m)}${rc?`<p class="helper">${rc.slice(0,16).replace(/</g,"&lt;")}</p>`:""}</div><span class="pen"><svg viewBox="0 0 48 48"><path d="m15 34-2 9 9-3 17-24c1.8-2.5 1.2-6-1.3-7.8s-6-1.2-7.8 1.3z"/><path d="m27 14 9 6M16 34l6 5"/></svg></span></button>`; };
-  const miniHTML=m=>`<button class="card small-card${zeroOf(m)}" data-id="${m.id}" ${bg(m)}><span class="mi">${iconOf(m)}</span><div><h3>${m.title}</h3><strong class="ndc" data-cnt="${m.id}">${cntNum(m)}</strong></div></button>`;
+  const miniHTML=m=>`<button class="card small-card${zeroOf(m)}" data-id="${m.id}" ${bg(m)}><span class="mi">${coversOf(m).length?`<i class="mi-cov" style="background-image:url('${esc(coversOf(m)[0])}')"></i>`:iconOf(m)}</span><div><h3>${m.title}</h3><strong class="ndc" data-cnt="${m.id}">${cntNum(m)}</strong></div></button>`;
   // 크기별 렌더러: 카테고리 성격(nat)에 맞춰 넓게/보통 카드 생성
   const wideStat=m=>{ const rc=recentTitles(m,3); return `<button class="card food${zeroOf(m)}" data-id="${m.id}" ${bg(m)}><div class="nc-main"><h3>${m.title}</h3>${metric(m)}${rc?`<p class="helper">최근: ${rc.replace(/</g,"&lt;")}</p>`:""}</div><span class="nc-glyph coll-glyph">${iconOf(m)}</span></button>`; };
   const wideCard=m=>{ const nat=ndNat(m.id); if(nat==="run") return runningHTML(m); if(nat==="food") return foodHTML(m); return coversOf(m).length?foodHTML(m):wideStat(m); };
@@ -2373,7 +2385,7 @@ function renderHome(){
   const totalItems = active.reduce((s,m)=>{const a=rowsOf(m);return s+(a?a.length:0);},0);
   const allCovers=[]; active.forEach(m=>{ coversOf(m).forEach(c=>{ if(allCovers.length<3) allCovers.push(c); }); });
   const heroFan = allCovers.length ? (`<div class="fan">`+[0,1,2].map(i=> allCovers[i]?`<span style="background-image:url('${esc(allCovers[i])}')"></span>`:`<span></span>`).join("")+`</div>`) : "";
-  const heroCard = `<article class="card hero" id="ndHeroCard" style="cursor:pointer"><div class="nc-main"><p class="eyebrow">지금까지 수집</p><div class="metric"><b id="ndHeroTotal">${fmt(totalItems)}</b><i>개</i></div><p class="helper">${active.length}개 카테고리 · 눌러서 <b style="opacity:.92">모아온 것 보기 ›</b></p></div>${heroFan}</article>`;
+  const heroCard = `<article class="card hero hero-thin" id="ndHeroCard" style="cursor:pointer"><div class="nc-main"><p class="eyebrow">지금까지 수집</p><div class="hero-line"><b id="ndHeroTotal">${fmt(totalItems)}</b><i>개</i><span class="hero-sub">· ${active.length}개 · 모아온 것 보기 ›</span></div></div>${heroFan}</article>`;
 
   // 표시 순서 = 설정에서 정한 순서(getActive) 그대로. 크기(넓게/보통/작게)가 폭을 결정.
   // 넓게=한 줄 전체 / 보통=한 줄 2개 / 작게=한 줄 3개. 크기가 바뀌는 지점에서 줄을 끊음.
