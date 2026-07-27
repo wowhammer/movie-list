@@ -1195,7 +1195,7 @@ body{ background:radial-gradient(circle at 50% -10%, rgba(102,78,57,.16), transp
         <svg class="brandmark" width="40" height="30" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg>
         <span class="brandwm"><span class="bwm-ko">내도감</span><span class="bwm-en">NAEDOGAM</span></span>
       </button>
-      <span class="mhver">v345β</span>
+      <span class="mhver">v346β</span>
       <span class="spacer"></span>
       <span class="src-chip" id="srcChip" style="display:none">데모</span>
       <button class="icon-btn" id="searchToggle" type="button" style="display:none">🔍</button>
@@ -2289,7 +2289,7 @@ function openDomain(id){ if(id==="mbti"){ openMbti(); return; } if(id==="period"
 
 /* 홈: 켜둔 카테고리를 카드로. 건수는 한 번 열어본 분야만 표시(홈을 빠르게 유지). */
 function ndDeep(h){ if(typeof h!=="string"||h.charAt(0)!=="#") h="#8a7a6a"; var n=parseInt(h.slice(1),16),r=(n>>16)&255,g=(n>>8)&255,b=n&255; function d(x,f){return Math.max(0,Math.min(255,Math.round(x*f)));} var d1="rgb("+d(r,.46)+","+d(g,.46)+","+d(b,.46)+")", d2="rgb("+d(r,.20)+","+d(g,.20)+","+d(b,.20)+")", gl="rgba("+r+","+g+","+b+",.16)"; return "radial-gradient(circle at 18% 14%,"+gl+",transparent 46%),linear-gradient(145deg,"+d1+","+d2+")"; }
-var ND_LOGO_HTML='<div class="ndh-brand"><svg width="47" height="35" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg><div class="ndh-wm"><b>내도감</b><small>NAEDOGAM</small></div><span class="mhver ndh-ver">v345β</span></div><button class="ndh-sync" type="button" title="동기화" aria-label="동기화" onclick="try{syncNow()}catch(e){}">↻</button>';
+var ND_LOGO_HTML='<div class="ndh-brand"><svg width="47" height="35" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg><div class="ndh-wm"><b>내도감</b><small>NAEDOGAM</small></div><span class="mhver ndh-ver">v346β</span></div><button class="ndh-sync" type="button" title="동기화" aria-label="동기화" onclick="try{syncNow()}catch(e){}">↻</button>';
 /* 홈 카드 크기: wide(넓게=한 줄 전체) · half(보통=한 줄 2개) · mini(작게=하단 3칸). 기본값=프리셋 */
 var ND_PRESET_SIZE={running:"wide",food:"wide",recipes:"wide",movies:"half",books:"half",period:"half",diary:"half",travel:"half",mountains:"half",culture:"half",albums:"half",cellar:"half",scrap:"half",wish:"half",gift:"half",pet:"half"};
 function getHomeSizes(){ try{ return JSON.parse(store.getItem("nd.homesize")||"{}")||{}; }catch(e){ return {}; } }
@@ -5334,6 +5334,7 @@ function _buildLifeContext(ids, data){
         L.push('[성격] 스스로 규정한 나: '+mb.type+(mb.nick?' ('+mb.nick+')':'')+(axArr.length?(' — '+axArr.join(', ')):''));
       }
     }catch(e){}
+    try{ var _hasP=false; for(var _i=0;_i<L.length;_i++){ if(L[_i].indexOf('[성격]')===0){_hasP=true;break;} } if(!_hasP){ var _md=has('mbti'); if(_md){ var _lm=_md[_md.length-1]||{}; var _ty=norm(_lm.type||_lm['유형']); var _nk=norm(_lm.nick||_lm['별칭']); if(_ty) L.push('[성격] 스스로 규정한 나: '+_ty+(_nk?(' ('+_nk+')'):'')); } } }catch(e){}
     var run=has('running');
     if(run){
       var rd=run.map(function(r){ return iso(r.date); }).filter(Boolean).sort();
@@ -5363,6 +5364,8 @@ function _buildLifeContext(ids, data){
       var doing=bkt.filter(function(r){ return r.status==='하는중'; }).map(function(r){ return norm(r.title); }).filter(Boolean);
       if(done.length) L.push('[이룬 것·한 것] 버킷리스트에서 실제로 이룬 것: '+done.slice(0,8).join(', '));
       if(doing.length) L.push('[하는 중] 지금 향해 가는 중: '+doing.slice(0,5).join(', '));
+      var pend=bkt.filter(function(r){ return r.status!=='달성'&&r.status!=='하는중'; }).map(function(r){ return norm(r.title); }).filter(Boolean);
+      if(pend.length) L.push('[버킷리스트·꿈] 언젠가 이루려 적어둔 것: '+pend.slice(0,8).join(', '));
     }
     var diaryOn=true; try{ diaryOn=(store.getItem('nd.aiDiaryOn')!=='0'); }catch(e){}
     var dia=has('diary');
@@ -5384,7 +5387,7 @@ function _aiLivedCount(){
     var climbed=g('mountains').filter(function(r){ return r.climbed===true||r.climbed==='TRUE'||r.climbed==='true'; }).length;
     var bkt=g('bucket').filter(function(r){ return r.status==='달성'||r.status==='하는중'; }).length;
     var dia=g('diary').length;
-    var mb=(typeof _mbtiSaved==='function')&&_mbtiSaved(); var mbHas=!!(mb&&((mb.latest&&mb.latest.type)||mb.type));
+    var mb=(typeof _mbtiSaved==='function')&&_mbtiSaved(); var mbHas=(!!(mb&&((mb.latest&&mb.latest.type)||mb.type)))||g('mbti').length>0;
     return run+climbed+bkt+dia+(mbHas?1:0);
   }catch(e){ return 999; }
 }
@@ -5392,10 +5395,10 @@ function _aiNudgeHTML(){
   try{
     var g=function(id){ try{ return (window.CACHE&&CACHE[id])||loadPersist(id)||[]; }catch(e){ return []; } };
     var run=g('running').length;
-    var climbed=g('mountains').filter(function(r){ return r.climbed===true||r.climbed==='TRUE'||r.climbed==='true'; }).length;
-    var bkt=g('bucket').filter(function(r){ return r.status==='달성'||r.status==='하는중'; }).length;
+    var climbed=g('mountains').length;
+    var bkt=g('bucket').length;
     var dia=g('diary').length;
-    var mb=(typeof _mbtiSaved==='function')&&_mbtiSaved(); var mbHas=!!(mb&&((mb.latest&&mb.latest.type)||mb.type));
+    var mb=(typeof _mbtiSaved==='function')&&_mbtiSaved(); var mbHas=(!!(mb&&((mb.latest&&mb.latest.type)||mb.type)))||g('mbti').length>0;
     var tips=[];
     if(!dia) tips.push("<b>일기</b>에 오늘 하루를 남겨보세요.");
     if(!bkt) tips.push("<b>버킷리스트</b>에 하나 적어보세요 — 다음엔 그 도전도 써드릴게요.");
