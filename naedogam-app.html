@@ -1179,7 +1179,7 @@ body{ background:radial-gradient(circle at 50% -10%, rgba(102,78,57,.16), transp
         <svg class="brandmark" width="40" height="30" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg>
         <span class="brandwm"><span class="bwm-ko">내도감</span><span class="bwm-en">NAEDOGAM</span></span>
       </button>
-      <span class="mhver">v318β</span>
+      <span class="mhver">v319β</span>
       <span class="spacer"></span>
       <span class="src-chip" id="srcChip" style="display:none">데모</span>
       <button class="icon-btn" id="searchToggle" type="button" style="display:none">🔍</button>
@@ -2273,7 +2273,7 @@ function openDomain(id){ if(id==="mbti"){ openMbti(); return; } if(id==="period"
 
 /* 홈: 켜둔 카테고리를 카드로. 건수는 한 번 열어본 분야만 표시(홈을 빠르게 유지). */
 function ndDeep(h){ if(typeof h!=="string"||h.charAt(0)!=="#") h="#8a7a6a"; var n=parseInt(h.slice(1),16),r=(n>>16)&255,g=(n>>8)&255,b=n&255; function d(x,f){return Math.round(x*f);} return "linear-gradient(145deg,rgb("+d(r,.5)+","+d(g,.5)+","+d(b,.5)+"),rgb("+d(r,.28)+","+d(g,.28)+","+d(b,.28)+"))"; }
-var ND_LOGO_HTML='<div class="ndh-brand"><svg width="47" height="35" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg><div class="ndh-wm"><b>내도감</b><small>NAEDOGAM</small></div><span class="mhver ndh-ver">v318β</span></div><button class="ndh-sync" type="button" title="동기화" aria-label="동기화" onclick="try{syncNow()}catch(e){}">↻</button>';
+var ND_LOGO_HTML='<div class="ndh-brand"><svg width="47" height="35" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg><div class="ndh-wm"><b>내도감</b><small>NAEDOGAM</small></div><span class="mhver ndh-ver">v319β</span></div><button class="ndh-sync" type="button" title="동기화" aria-label="동기화" onclick="try{syncNow()}catch(e){}">↻</button>';
 /* 홈 카드 크기: wide(넓게=한 줄 전체) · half(보통=한 줄 2개) · mini(작게=하단 3칸). 기본값=프리셋 */
 var ND_PRESET_SIZE={running:"wide",food:"wide",recipes:"wide",movies:"half",books:"half",period:"half",diary:"half",travel:"half",mountains:"half",culture:"half",albums:"half",cellar:"half",scrap:"half",wish:"half",gift:"half",pet:"half"};
 function getHomeSizes(){ try{ return JSON.parse(store.getItem("nd.homesize")||"{}")||{}; }catch(e){ return {}; } }
@@ -5320,6 +5320,14 @@ async function ndRestore(file){
 }
 async function ndFullBackup(){
   var btn=document.getElementById("ndBkExport"); var t0=btn?btn.textContent:"";
+  var d=new Date(), ymd=d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
+  var fname="내도감_백업_"+ymd+".json";
+  var handle=null, useFS=(typeof window.showSaveFilePicker==="function");
+  if(useFS){
+    try{
+      handle=await window.showSaveFilePicker({ suggestedName:fname, types:[{description:"내도감 백업 (JSON)", accept:{"application/json":[".json"]}}] });
+    }catch(e){ if(e && e.name==="AbortError"){ return; } useFS=false; }
+  }
   try{
     if(btn){ btn.disabled=true; btn.textContent="백업 준비 중…"; }
     var S=sheetSrc();
@@ -5328,15 +5336,18 @@ async function ndFullBackup(){
     var counts={}, total=0;
     Object.keys(data).forEach(function(k){ var n=(data[k]||[]).length; counts[k]=n; total+=n; });
     var verEl=document.querySelector(".mhver"); var ver=verEl?verEl.textContent:"";
-    var payload={ app:"\ub0b4\ub3c4\uac10", type:"full-backup", version:ver, exportedAt:new Date().toISOString(), counts:counts, data:data };
+    var payload={ app:"내도감", type:"full-backup", version:ver, exportedAt:new Date().toISOString(), counts:counts, data:data };
     var blob=new Blob([JSON.stringify(payload)],{type:"application/json"});
-    var url=URL.createObjectURL(blob);
-    var d=new Date(), ymd=d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
-    var a=document.createElement("a"); a.href=url; a.download="\ub0b4\ub3c4\uac10_\ubc31\uc5c5_"+ymd+".json"; document.body.appendChild(a); a.click(); a.remove();
-    setTimeout(function(){ try{ URL.revokeObjectURL(url); }catch(e){} },4000);
-    if(btn){ btn.textContent="\u2705 "+total+"\uac74 \ubc31\uc5c5 \uc644\ub8cc"; setTimeout(function(){ btn.textContent=t0; btn.disabled=false; },2800); }
+    if(useFS && handle){
+      var w=await handle.createWritable(); await w.write(blob); await w.close();
+    } else {
+      var url=URL.createObjectURL(blob);
+      var a=document.createElement("a"); a.href=url; a.download=fname; document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(function(){ try{ URL.revokeObjectURL(url); }catch(e){} },4000);
+    }
+    if(btn){ btn.textContent="✅ "+total+"건 백업 완료"; setTimeout(function(){ btn.textContent=t0; btn.disabled=false; },2800); }
   }catch(e){
-    try{ alert("\ubc31\uc5c5 \uc2e4\ud328: "+((e&&e.message)||e)); }catch(_){}
+    try{ alert("백업 실패: "+((e&&e.message)||e)); }catch(_){}
     if(btn){ btn.textContent=t0; btn.disabled=false; }
   }
 }
