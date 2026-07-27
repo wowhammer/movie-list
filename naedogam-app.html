@@ -960,8 +960,8 @@ body.home-dark .bnav-i.on .bnav-ic svg{ stroke:#f6eddf !important; }
 .ndhome .collection-card{ display:flex; flex-direction:column; justify-content:space-between; min-height:150px; padding:15px 15px 13px; }
 .ndhome .collection-card .metric{ margin-top:5px; }
 .ndhome .collection-card .metric b{ font-size:39px; }
-.ndhome .covers{ display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:6px; height:58px; margin-top:10px; width:100%; }
-.ndhome .cover{ border-radius:7px; background-size:cover; background-position:center; background-color:#3a332c; border:1px solid rgba(255,245,230,.21); box-shadow:0 8px 12px rgba(0,0,0,.24); }
+.ndhome .covers{ display:flex; gap:6px; height:82px; margin-top:10px; width:100%; overflow:hidden; }
+.ndhome .cover{ flex:0 0 auto; height:100%; aspect-ratio:2/3; border-radius:7px; background-size:cover; background-position:center; background-color:#3a332c; border:1px solid rgba(255,245,230,.21); box-shadow:0 8px 12px rgba(0,0,0,.24); }
 .ndhome .cover-e{ background:rgba(255,255,255,.06); box-shadow:none; }
 
 .ndhome .running{ display:grid; grid-template-columns:minmax(0,1fr) 145px; align-items:center; min-height:120px; padding:16px 18px; }
@@ -986,7 +986,7 @@ body.home-dark .bnav-i.on .bnav-ic svg{ stroke:#f6eddf !important; }
 
 .ndhome .food{ display:grid; grid-template-columns:minmax(0,.78fr) minmax(170px,1.22fr); align-items:center; min-height:111px; padding:15px 15px 14px; }
 .ndhome .food .metric b{ font-size:39px; }
-.ndhome .food-photos{ display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:7px; height:67px; width:100%; }
+.ndhome .food-photos{ display:flex; gap:6px; height:82px; width:100%; overflow:hidden; }
 .art-movie.an1{background:radial-gradient(circle at 48% 82%,#17130f 0 12%,transparent 13%),radial-gradient(circle at 30% 72%,#342117 0 8%,transparent 9%),radial-gradient(circle at 62% 60%,#4a2a18 0 10%,transparent 11%),linear-gradient(145deg,#d17c30,#492014 68%,#1e1712);}
 .art-movie.an2{background:repeating-linear-gradient(0deg,transparent 0 8px,rgba(255,89,52,.18) 9px 10px),linear-gradient(155deg,#9a3923,#351a19 72%,#161415);}
 .art-movie.an3{background:radial-gradient(ellipse at 70% 25%,rgba(230,185,111,.55),transparent 22%),linear-gradient(145deg,#805433,#2b251f 58%,#181b18);}
@@ -997,7 +997,9 @@ body.home-dark .bnav-i.on .bnav-ic svg{ stroke:#f6eddf !important; }
 .art-food.an1{background:linear-gradient(0deg,rgba(17,12,8,.35),transparent 42%),repeating-linear-gradient(90deg,#473323 0 7px,#261d18 8px 15px);}
 .art-food.an2{background:radial-gradient(circle at 50% 56%,#352014 0 17%,#ab6c31 18% 27%,#4b2b19 29% 41%,transparent 43%),linear-gradient(145deg,#936f3b,#3d2819);}
 .art-food.an3{background:radial-gradient(ellipse at 52% 45%,rgba(238,203,155,.78) 0 23%,transparent 24%),linear-gradient(145deg,#9c7753,#4a3325 62%,#271f1a);}
-.ndhome .food-photo{ border-radius:8px; background-size:cover; background-position:center; background-color:#3a332c; border:1px solid rgba(255,241,220,.2); box-shadow:0 7px 12px rgba(0,0,0,.22); }
+.ndhome .food-photo{ flex:0 0 auto; height:100%; aspect-ratio:2/3; border-radius:8px; background-size:cover; background-position:center; background-color:#3a332c; border:1px solid rgba(255,241,220,.2); box-shadow:0 7px 12px rgba(0,0,0,.22); }
+    .covers:empty,.food-photos:empty{ display:none; }
+    .nd-pfill:not(:empty) ~ .pf-glyph{ display:none !important; }
 
 .ndhome .small-card{ display:flex; flex-direction:column; justify-content:space-between; min-height:86px; padding:13px 12px; border-radius:22px; }
 .ndhome .small-card .mi{ display:inline-flex; }
@@ -1190,7 +1192,7 @@ body{ background:radial-gradient(circle at 50% -10%, rgba(102,78,57,.16), transp
         <svg class="brandmark" width="40" height="30" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg>
         <span class="brandwm"><span class="bwm-ko">내도감</span><span class="bwm-en">NAEDOGAM</span></span>
       </button>
-      <span class="mhver">v337β</span>
+      <span class="mhver">v338β</span>
       <span class="spacer"></span>
       <span class="src-chip" id="srcChip" style="display:none">데모</span>
       <button class="icon-btn" id="searchToggle" type="button" style="display:none">🔍</button>
@@ -2284,7 +2286,7 @@ function openDomain(id){ if(id==="mbti"){ openMbti(); return; } if(id==="period"
 
 /* 홈: 켜둔 카테고리를 카드로. 건수는 한 번 열어본 분야만 표시(홈을 빠르게 유지). */
 function ndDeep(h){ if(typeof h!=="string"||h.charAt(0)!=="#") h="#8a7a6a"; var n=parseInt(h.slice(1),16),r=(n>>16)&255,g=(n>>8)&255,b=n&255; function d(x,f){return Math.max(0,Math.min(255,Math.round(x*f)));} var d1="rgb("+d(r,.46)+","+d(g,.46)+","+d(b,.46)+")", d2="rgb("+d(r,.20)+","+d(g,.20)+","+d(b,.20)+")", gl="rgba("+r+","+g+","+b+",.16)"; return "radial-gradient(circle at 18% 14%,"+gl+",transparent 46%),linear-gradient(145deg,"+d1+","+d2+")"; }
-var ND_LOGO_HTML='<div class="ndh-brand"><svg width="47" height="35" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg><div class="ndh-wm"><b>내도감</b><small>NAEDOGAM</small></div><span class="mhver ndh-ver">v337β</span></div><button class="ndh-sync" type="button" title="동기화" aria-label="동기화" onclick="try{syncNow()}catch(e){}">↻</button>';
+var ND_LOGO_HTML='<div class="ndh-brand"><svg width="47" height="35" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg><div class="ndh-wm"><b>내도감</b><small>NAEDOGAM</small></div><span class="mhver ndh-ver">v338β</span></div><button class="ndh-sync" type="button" title="동기화" aria-label="동기화" onclick="try{syncNow()}catch(e){}">↻</button>';
 /* 홈 카드 크기: wide(넓게=한 줄 전체) · half(보통=한 줄 2개) · mini(작게=하단 3칸). 기본값=프리셋 */
 var ND_PRESET_SIZE={running:"wide",food:"wide",recipes:"wide",movies:"half",books:"half",period:"half",diary:"half",travel:"half",mountains:"half",culture:"half",albums:"half",cellar:"half",scrap:"half",wish:"half",gift:"half",pet:"half"};
 function getHomeSizes(){ try{ return JSON.parse(store.getItem("nd.homesize")||"{}")||{}; }catch(e){ return {}; } }
@@ -2350,13 +2352,15 @@ async function _tmdbPoster(title){ var K=(typeof CONFIG!=="undefined"&&CONFIG.TM
 async function _gbookCover(title){ if(!title) return null; try{ var K=(typeof CONFIG!=="undefined"&&CONFIG.GOOGLE_BOOKS_KEY)||""; var u="https://www.googleapis.com/books/v1/volumes?q="+encodeURIComponent(title)+(K?("&key="+K):"")+"&maxResults=1&country=KR"; var r=await fetch(u); if(!r.ok) return null; var j=await r.json(); var il=j.items&&j.items[0]&&j.items[0].volumeInfo&&j.items[0].volumeInfo.imageLinks; if(!il) return ""; var img=il.thumbnail||il.smallThumbnail||""; if(!img) return ""; return img.replace(/^http:/,"https:").replace(/&edge=curl/,""); }catch(e){ return null; } }
 async function ndPoster(kind,title){ var key="nd.pv."+kind+":"+title; try{ var c=store.getItem(key); if(c!==null) return c; }catch(e){} var url = kind==="movie" ? await _tmdbPoster(title) : (kind==="book" ? await _gbookCover(title) : null); if(url===null) return null; try{ store.setItem(key,url); }catch(e){} return url; }
 function ndLoadPosters(){ try{
-  var jobs=[["movies","movie",".art-movie"],["books","book",".art-book"]];
-  jobs.forEach(function(job){ var id=job[0], kind=job[1], sel=job[2];
-    var card=document.querySelector('.card[data-id="'+id+'"]'); if(!card) return;
-    var tiles=card.querySelectorAll(sel); if(!tiles.length) return;
-    var rows=(window.CACHE&&CACHE[id])||(typeof loadPersist==="function"&&loadPersist(id))||[]; var titles=[];
-    for(var i=rows.length-1;i>=0&&titles.length<tiles.length;i--){ var t=rows[i]&&(rows[i].title||rows[i].name); if(t) titles.push(String(t)); }
-    for(var j=0;j<tiles.length&&j<titles.length;j++){ (function(tile,title){ ndPoster(kind,title).then(function(url){ if(url){ tile.style.backgroundImage="url(\""+url+"\")"; tile.style.backgroundSize="cover"; tile.style.backgroundPosition="center"; tile.classList.add("has-poster"); } }); })(tiles[j],titles[j]); }
+  document.querySelectorAll('.nd-pfill[data-cat]').forEach(function(cont){
+    if(cont.getAttribute('data-done')) return; cont.setAttribute('data-done','1');
+    var id=cont.getAttribute('data-cat'); var kind=(id==='books')?'book':'movie';
+    var cls=cont.classList.contains('food-photos')?'food-photo':'cover';
+    var rows=(window.CACHE&&CACHE[id])||(typeof loadPersist==='function'&&loadPersist(id))||[];
+    var titles=[]; for(var i=rows.length-1;i>=0&&titles.length<8;i--){ var t=rows[i]&&(rows[i].title||rows[i].name); if(t) titles.push(String(t)); }
+    Promise.all(titles.map(function(t){ return ndPoster(kind,t); })).then(function(urls){
+      urls.forEach(function(url){ if(url){ var sp=document.createElement('span'); sp.className=cls; sp.style.backgroundImage='url("'+url+'")'; cont.appendChild(sp); } });
+    });
   });
 }catch(e){} }
 function renderHome(){
@@ -2370,7 +2374,7 @@ function renderHome(){
     $("#emptyAdd").onclick=function(){ ndCatPicker("onboard"); }; return;
   }
   const rowsOf=m=> CACHE[m.id]||loadPersist(m.id)||null;
-  const coversOf=m=>{ const a=rowsOf(m); const out=[]; if(a){ for(let i=a.length-1;i>=0&&out.length<3;i--){ const c=a[i]&&(a[i].cover||a[i]._cover); if(c) out.push(c);} } return out; };
+  const coversOf=m=>{ const a=rowsOf(m); const out=[]; if(a){ for(let i=a.length-1;i>=0&&out.length<8;i--){ const c=a[i]&&(a[i].cover||a[i]._cover); if(c) out.push(c);} } return out; };
   const UNIT={movies:"편",books:"권",mountains:"봉",running:"회",diary:"편",travel:"곳",food:"곳",recipes:"개",culture:"편",albums:"장",subs:"개",cards:"개",carlog:"건",wish:"개",bucket:"개",quote:"개",gift:"개",insurance:"개",scrap:"개",cellar:"병",meds:"개",checkup:"건",assets:"개",pet:""};
   const unitOf=m=> UNIT[m.id]!=null?UNIT[m.id]:"개";
   const cntNum=m=>{ const a=rowsOf(m); return a?`${fmt(a.length)}`:""; };
@@ -2379,22 +2383,23 @@ function renderHome(){
   const bg=m=>`style="background:${ND_GRAD[m.id]||ndDeep(colOf(m))}"`;
   const zeroOf=m=>{ const a=rowsOf(m); return (a&&a.length===0)?" nc-zero":""; };
   const recentTitles=(m,k)=>{ const a=rowsOf(m); if(!a||!a.length) return ""; const out=[]; for(let i=a.length-1;i>=0&&out.length<k;i--){ const t=a[i]&&(a[i].title||a[i].name); if(t) out.push(String(t)); } return out.join(" · "); };
-  const coverCells=(m,cls)=>{ const cs=coversOf(m); let h=""; for(let i=0;i<cs.length&&i<3;i++){ h+= `<span class="${cls}" style="background-image:url('${esc(cs[i])}')"></span>`; } return h; };
+  const coverCells=(m,cls)=>{ const cs=coversOf(m); let h=""; for(let i=0;i<cs.length&&i<8;i++){ h+= `<span class="${cls}" style="background-image:url('${esc(cs[i])}')"></span>`; } return h; };
   const _decoGrad=function(c,i){ if(typeof c!=="string"||c.charAt(0)!=="#") c="#8a7a6a"; var n=parseInt(c.slice(1),16),r=(n>>16)&255,g=(n>>8)&255,b=n&255; var mix=function(x,t,p){return Math.round(x+(t-x)*p);}; var lp=[.40,.26,.52][i%3], dp=[.30,.22,.26][i%3]; var top="rgb("+mix(r,255,lp)+","+mix(g,255,lp)+","+mix(b,255,lp)+")"; var bot="rgb("+Math.round(r*dp)+","+Math.round(g*dp)+","+Math.round(b*dp)+")"; var ang=[152,168,140][i%3]; return "linear-gradient(180deg,rgba(255,255,255,.15),transparent 40%),linear-gradient("+ang+"deg,"+top+","+bot+")"; };
   const _artKind=function(m){ var id=m.id; if(id==="movies") return "movie"; if(id==="books") return "book"; if(id==="food"||id==="recipes") return "food"; return ""; };
   const decoCells=function(m,cls){ var kind=_artKind(m); var h=""; if(kind){ for(var i=1;i<=3;i++){ h+='<span class="'+cls+' art-'+kind+' an'+i+'"></span>'; } return h; } var c=colOf(m); for(var i=0;i<3;i++){ h+='<span class="'+cls+'" style="background:'+_decoGrad(c,i)+'"></span>'; } return h; };
+  const _posterCat=function(m){ var id=m.id; return (id==="movies"||id==="books")?id:""; };
   const _hasRows=function(m){ var a=rowsOf(m); return !!(a&&a.length); };
   const metric=m=>`<div class="metric"><b class="ndc" data-cnt="${m.id}">${cntNum(m)}</b><i>${unitOf(m)}</i></div>`;
 
-  const collHTML=m=>{ const rc=recentTitles(m,2); const vis=coversOf(m).length?`<div class="covers">${coverCells(m,"cover")}</div>`:(_hasRows(m)?`<div class="covers">${decoCells(m,"cover")}</div>`:`<span class="nc-glyph coll-glyph">${iconOf(m)}</span>`); return `<button class="card collection-card${zeroOf(m)}" data-id="${m.id}" ${bg(m)}><div><h3>${m.title}</h3>${metric(m)}${rc?`<p class="helper">최근: ${rc.replace(/</g,"&lt;")}</p>`:""}</div>${vis}</button>`; };
+  const collHTML=m=>{ const rc=recentTitles(m,2); const vis=coversOf(m).length?`<div class="covers">${coverCells(m,"cover")}</div>`:((_posterCat(m)&&_hasRows(m))?`<div class="covers nd-pfill" data-cat="${m.id}"></div><span class="nc-glyph coll-glyph pf-glyph">${iconOf(m)}</span>`:`<span class="nc-glyph coll-glyph">${iconOf(m)}</span>`); return `<button class="card collection-card${zeroOf(m)}" data-id="${m.id}" ${bg(m)}><div><h3>${m.title}</h3>${metric(m)}${rc?`<p class="helper">최근: ${rc.replace(/</g,"&lt;")}</p>`:""}</div>${vis}</button>`; };
   const runningHTML=m=>{ const _rows=rowsOf(m)||[]; const _now=new Date(); const _sun=new Date(_now.getFullYear(),_now.getMonth(),_now.getDate()-_now.getDay()); const _km=[0,0,0,0,0,0,0]; _rows.forEach(r=>{ const pd=parseDate(String((r&&r.date)||"")); if(!pd) return; const _di=Math.round((new Date(pd.getFullYear(),pd.getMonth(),pd.getDate())-_sun)/86400000); if(_di>=0&&_di<7){ _km[_di]+=parseFloat(r.dist)||0; } }); const _mx=Math.max.apply(null,_km.concat(0.001)); const _wtot=_km.reduce((a,b)=>a+b,0); const _wcount=_rows.filter(r=>{ const pd=parseDate(String((r&&r.date)||"")); if(!pd) return false; const _di=Math.round((new Date(pd.getFullYear(),pd.getMonth(),pd.getDate())-_sun)/86400000); return _di>=0&&_di<7; }).length; const _hasWk=_wcount>0; const bars=_km.map(v=>{ const h=v>0?Math.max(14,Math.round(v/_mx*100)):0; return `<span class="bar" style="height:${h}%${v<=0?";opacity:.22":""}"></span>`; }).join(""); const days=["일","월","화","수","목","금","토"].map((d,i)=>`<span${i===_now.getDay()?" class=\"rd-today\"":""}>${d}</span>`).join(""); const rc=recentTitles(m,1); return `<button class="card running${zeroOf(m)}" data-id="${m.id}" ${bg(m)}><div class="nc-main"><h3>${m.title}</h3>${metric(m)}${_hasWk?`<p class="helper">이번 주 ${_wcount}회</p>`:(rc?`<p class="helper">최근: ${rc.replace(/</g,"&lt;")}</p>`:"")}</div><div class="run-chart"><div class="bars">${bars}</div><div class="days">${days}</div></div></button>`; };
-  const foodHTML=m=>{ const rc=recentTitles(m,2); const vis=coversOf(m).length?`<div class="food-photos">${coverCells(m,"food-photo")}</div>`:(_hasRows(m)?`<div class="food-photos">${decoCells(m,"food-photo")}</div>`:`<span class="nc-glyph coll-glyph">${iconOf(m)}</span>`); return `<button class="card food${zeroOf(m)}" data-id="${m.id}" ${bg(m)}><div class="nc-main"><h3>${m.title}</h3>${metric(m)}${rc?`<p class="helper">최근: ${rc.replace(/</g,"&lt;")}</p>`:""}</div>${vis}</button>`; };
+  const foodHTML=m=>{ const rc=recentTitles(m,2); const vis=coversOf(m).length?`<div class="food-photos">${coverCells(m,"food-photo")}</div>`:((_posterCat(m)&&_hasRows(m))?`<div class="food-photos nd-pfill" data-cat="${m.id}"></div><span class="nc-glyph coll-glyph pf-glyph">${iconOf(m)}</span>`:`<span class="nc-glyph coll-glyph">${iconOf(m)}</span>`); return `<button class="card food${zeroOf(m)}" data-id="${m.id}" ${bg(m)}><div class="nc-main"><h3>${m.title}</h3>${metric(m)}${rc?`<p class="helper">최근: ${rc.replace(/</g,"&lt;")}</p>`:""}</div>${vis}</button>`; };
   const cycleHTML=m=>`<button class="card mini-card cycle${zeroOf(m)}" data-id="${m.id}" ${bg(m)}><div class="nc-main"><h3>${m.title}</h3><div class="metric"><b class="ndc" data-cnt="${m.id}">${pdHomeLabel()}</b></div></div><span class="moon"></span></button>`;
   const diaryHTML=m=>{ const rc=recentTitles(m,1); return `<button class="card mini-card diary${zeroOf(m)}" data-id="${m.id}" ${bg(m)}><div class="nc-main"><h3>${m.title}</h3>${metric(m)}${rc?`<p class="helper">${rc.slice(0,16).replace(/</g,"&lt;")}</p>`:""}</div><span class="pen"><svg viewBox="0 0 48 48"><path d="m15 34-2 9 9-3 17-24c1.8-2.5 1.2-6-1.3-7.8s-6-1.2-7.8 1.3z"/><path d="m27 14 9 6M16 34l6 5"/></svg></span></button>`; };
   const miniHTML=m=>`<button class="card small-card${zeroOf(m)}" data-id="${m.id}" ${bg(m)}><span class="mi">${coversOf(m).length?`<i class="mi-cov" style="background-image:url('${esc(coversOf(m)[0])}')"></i>`:iconOf(m)}</span><div><h3>${m.title}</h3><strong class="ndc" data-cnt="${m.id}">${cntNum(m)}</strong></div></button>`;
   // 크기별 렌더러: 카테고리 성격(nat)에 맞춰 넓게/보통 카드 생성
   const wideStat=m=>{ const rc=recentTitles(m,3); return `<button class="card food${zeroOf(m)}" data-id="${m.id}" ${bg(m)}><div class="nc-main"><h3>${m.title}</h3>${metric(m)}${rc?`<p class="helper">최근: ${rc.replace(/</g,"&lt;")}</p>`:""}</div><span class="nc-glyph coll-glyph">${iconOf(m)}</span></button>`; };
-  const wideCard=m=>{ const nat=ndNat(m.id); if(nat==="run") return runningHTML(m); return foodHTML(m); };
+  const wideCard=m=>{ const nat=ndNat(m.id); if(nat==="run") return runningHTML(m); if(coversOf(m).length||_posterCat(m)) return foodHTML(m); return wideStat(m); };
   const halfCard=m=>{ const nat=ndNat(m.id); if(nat==="cycle") return cycleHTML(m); if(nat==="diary") return diaryHTML(m); return collHTML(m); };
 
   // 히어로
