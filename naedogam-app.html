@@ -1179,7 +1179,7 @@ body{ background:radial-gradient(circle at 50% -10%, rgba(102,78,57,.16), transp
         <svg class="brandmark" width="40" height="30" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg>
         <span class="brandwm"><span class="bwm-ko">내도감</span><span class="bwm-en">NAEDOGAM</span></span>
       </button>
-      <span class="mhver">v317β</span>
+      <span class="mhver">v318β</span>
       <span class="spacer"></span>
       <span class="src-chip" id="srcChip" style="display:none">데모</span>
       <button class="icon-btn" id="searchToggle" type="button" style="display:none">🔍</button>
@@ -2273,7 +2273,7 @@ function openDomain(id){ if(id==="mbti"){ openMbti(); return; } if(id==="period"
 
 /* 홈: 켜둔 카테고리를 카드로. 건수는 한 번 열어본 분야만 표시(홈을 빠르게 유지). */
 function ndDeep(h){ if(typeof h!=="string"||h.charAt(0)!=="#") h="#8a7a6a"; var n=parseInt(h.slice(1),16),r=(n>>16)&255,g=(n>>8)&255,b=n&255; function d(x,f){return Math.round(x*f);} return "linear-gradient(145deg,rgb("+d(r,.5)+","+d(g,.5)+","+d(b,.5)+"),rgb("+d(r,.28)+","+d(g,.28)+","+d(b,.28)+"))"; }
-var ND_LOGO_HTML='<div class="ndh-brand"><svg width="47" height="35" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg><div class="ndh-wm"><b>내도감</b><small>NAEDOGAM</small></div><span class="mhver ndh-ver">v317β</span></div><button class="ndh-sync" type="button" title="동기화" aria-label="동기화" onclick="try{syncNow()}catch(e){}">↻</button>';
+var ND_LOGO_HTML='<div class="ndh-brand"><svg width="47" height="35" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg><div class="ndh-wm"><b>내도감</b><small>NAEDOGAM</small></div><span class="mhver ndh-ver">v318β</span></div><button class="ndh-sync" type="button" title="동기화" aria-label="동기화" onclick="try{syncNow()}catch(e){}">↻</button>';
 /* 홈 카드 크기: wide(넓게=한 줄 전체) · half(보통=한 줄 2개) · mini(작게=하단 3칸). 기본값=프리셋 */
 var ND_PRESET_SIZE={running:"wide",food:"wide",recipes:"wide",movies:"half",books:"half",period:"half",diary:"half",travel:"half",mountains:"half",culture:"half",albums:"half",cellar:"half",scrap:"half",wish:"half",gift:"half",pet:"half"};
 function getHomeSizes(){ try{ return JSON.parse(store.getItem("nd.homesize")||"{}")||{}; }catch(e){ return {}; } }
@@ -5283,6 +5283,41 @@ function renderDash(ids, data){
   b.querySelectorAll("[data-dv]").forEach(x=>x.onclick=()=>{ dashView=x.dataset.dv; renderDash(ids,data); });
   b.querySelectorAll("[data-dp]").forEach(x=>x.onclick=()=>{ dashPeriod=x.dataset.dp; renderDash(ids,data); });
 }
+async function ndRestore(file){
+  var btn=document.getElementById("ndBkImport"); var t0=btn?btn.textContent:"";
+  try{
+    var text=await file.text();
+    var payload; try{ payload=JSON.parse(text); }catch(e){ alert("파일을 읽을 수 없어요 (JSON 형식이 아니에요)."); return; }
+    if(!payload || payload.type!=="full-backup" || !payload.data){ alert("올바른 내도감 백업 파일이 아니에요."); return; }
+    if(btn){ btn.disabled=true; btn.textContent="복원 준비 중…"; }
+    var S=sheetSrc();
+    var ids=Object.keys(payload.data).filter(function(id){ var m=MANIFESTS[id]; return m && m.source && m.source.tab; });
+    var current=await S.listMany(ids);
+    var plan={}, total=0;
+    ids.forEach(function(id){
+      var have={}; (current[id]||[]).forEach(function(r){ if(r&&r._id!=null&&r._id!=="") have[String(r._id)]=1; });
+      var add=(payload.data[id]||[]).filter(function(r){ return r && r._id!=null && r._id!=="" && !have[String(r._id)]; });
+      if(add.length){ plan[id]=add; total+=add.length; }
+    });
+    if(btn){ btn.textContent=t0; btn.disabled=false; }
+    if(!total){ alert("복원할 새 항목이 없어요.\n(백업의 모든 항목이 이미 시트에 있어요)"); return; }
+    var lines=Object.keys(plan).map(function(id){ return "· "+MANIFESTS[id].title+": "+plan[id].length+"건"; }).join("\n");
+    if(!confirm("병합 복원 — 시트에 없는 "+total+"건만 추가하고, 기존 데이터는 건드리지 않아요.\n\n"+lines+"\n\n진행할까요?")) return;
+    if(btn){ btn.disabled=true; }
+    var ok=0, fail=0, done=0;
+    for(var id in plan){
+      for(var i=0;i<plan[id].length;i++){
+        done++; if(btn) btn.textContent="복원 중… "+done+" / "+total;
+        try{ await S.upsert(id, plan[id][i]); ok++; }catch(e){ fail++; console.error("restore",id,e); }
+      }
+    }
+    if(btn){ btn.textContent=t0; btn.disabled=false; }
+    alert("복원 완료: "+ok+"건 추가"+(fail?(" ("+fail+"건 실패)"):"")+".\n새로고침하면 반영돼요.");
+  }catch(e){
+    try{ alert("복원 실패: "+((e&&e.message)||e)); }catch(_){}
+    if(btn){ btn.textContent=t0; btn.disabled=false; }
+  }
+}
 async function ndFullBackup(){
   var btn=document.getElementById("ndBkExport"); var t0=btn?btn.textContent:"";
   try{
@@ -5408,9 +5443,11 @@ function renderSettingsBody(d){
       <input type="file" id="ioFile" accept=".csv,text/csv" style="display:none">
     </div>
     <h4 id="bkSection">전체 백업 (JSON)</h4>
-    <div class="hint">모든 카테고리를 <b>하나의 JSON 파일</b>로 폰에 저장해요. 시트가 잘못돼도 이 파일로 되살릴 수 있어요. (사진 포함 · 읽기만 하므로 안전)</div>
+    <div class="hint">모든 카테고리를 <b>하나의 JSON 파일</b>로 폰에 저장해요. 시트가 잘못돼도 이 파일로 되살릴 수 있어요. (사진 포함 · 읽기만 하므로 안전) <b>복원</b>은 안전 병합(시트에 없는 것만 추가, 기존 데이터 유지)이에요.</div>
     <div class="io-row">
       <button class="btn ghost" id="ndBkExport" type="button">⬇ 전체 백업 (JSON)</button>
+      <button class="btn ghost" id="ndBkImport" type="button">⬆ 백업에서 복원</button>
+      <input type="file" id="ndBkFile" accept=".json,application/json" style="display:none">
     </div>
     <h4>구글 계정 · 개인 설정</h4>
     <div class="hint">모든 데이터는 내 구글시트 하나에 탭으로 모입니다.</div>
@@ -5436,6 +5473,8 @@ function renderSettingsBody(d){
   { const _sel=$("#ioCat"), _fi=$("#ioFile"), _xp=$("#ioExport"), _im=$("#ioImport");
     if(_xp) _xp.onclick=()=>exportCSV(_sel.value);
     var _bkx=$("#ndBkExport"); if(_bkx) _bkx.onclick=()=>ndFullBackup();
+    var _bki=$("#ndBkImport"), _bkf=$("#ndBkFile");
+    if(_bki&&_bkf){ _bki.onclick=()=>_bkf.click(); _bkf.onchange=(ev)=>{ var f=ev.target.files&&ev.target.files[0]; if(f) ndRestore(f); ev.target.value=""; }; }
     const _sm=$("#ioSample"); if(_sm) _sm.onclick=()=>sampleCSV(_sel.value);
     if(_im) _im.onclick=()=>{ if(_fi) _fi.click(); };
     if(_fi) _fi.onchange=e=>{ const file=e.target.files&&e.target.files[0]; if(!file) return; const rd=new FileReader(); rd.onload=()=>{ const rows=csvToRows(_sel.value, String(rd.result||"")); doImport(_sel.value, rows); _fi.value=""; }; rd.readAsText(file,"utf-8"); }; }
