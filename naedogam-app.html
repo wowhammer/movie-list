@@ -1179,7 +1179,7 @@ body{ background:radial-gradient(circle at 50% -10%, rgba(102,78,57,.16), transp
         <svg class="brandmark" width="40" height="30" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg>
         <span class="brandwm"><span class="bwm-ko">내도감</span><span class="bwm-en">NAEDOGAM</span></span>
       </button>
-      <span class="mhver">v323β</span>
+      <span class="mhver">v324β</span>
       <span class="spacer"></span>
       <span class="src-chip" id="srcChip" style="display:none">데모</span>
       <button class="icon-btn" id="searchToggle" type="button" style="display:none">🔍</button>
@@ -2273,7 +2273,7 @@ function openDomain(id){ if(id==="mbti"){ openMbti(); return; } if(id==="period"
 
 /* 홈: 켜둔 카테고리를 카드로. 건수는 한 번 열어본 분야만 표시(홈을 빠르게 유지). */
 function ndDeep(h){ if(typeof h!=="string"||h.charAt(0)!=="#") h="#8a7a6a"; var n=parseInt(h.slice(1),16),r=(n>>16)&255,g=(n>>8)&255,b=n&255; function d(x,f){return Math.round(x*f);} return "linear-gradient(145deg,rgb("+d(r,.5)+","+d(g,.5)+","+d(b,.5)+"),rgb("+d(r,.28)+","+d(g,.28)+","+d(b,.28)+"))"; }
-var ND_LOGO_HTML='<div class="ndh-brand"><svg width="47" height="35" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg><div class="ndh-wm"><b>내도감</b><small>NAEDOGAM</small></div><span class="mhver ndh-ver">v323β</span></div><button class="ndh-sync" type="button" title="동기화" aria-label="동기화" onclick="try{syncNow()}catch(e){}">↻</button>';
+var ND_LOGO_HTML='<div class="ndh-brand"><svg width="47" height="35" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg><div class="ndh-wm"><b>내도감</b><small>NAEDOGAM</small></div><span class="mhver ndh-ver">v324β</span></div><button class="ndh-sync" type="button" title="동기화" aria-label="동기화" onclick="try{syncNow()}catch(e){}">↻</button>';
 /* 홈 카드 크기: wide(넓게=한 줄 전체) · half(보통=한 줄 2개) · mini(작게=하단 3칸). 기본값=프리셋 */
 var ND_PRESET_SIZE={running:"wide",food:"wide",recipes:"wide",movies:"half",books:"half",period:"half",diary:"half",travel:"half",mountains:"half",culture:"half",albums:"half",cellar:"half",scrap:"half",wish:"half",gift:"half",pet:"half"};
 function getHomeSizes(){ try{ return JSON.parse(store.getItem("nd.homesize")||"{}")||{}; }catch(e){ return {}; } }
@@ -2499,15 +2499,39 @@ class GSheetSource {
     return rows.map(row=>{ const o={}; for(const kh in row){ const ek=inv[ndNorm(kh)]||kh; const val=coerce(row[kh]); if(o[ek]===undefined||o[ek]===null||o[ek]==="") o[ek]=val; } var _oo=clean?clean(o):o; return _oo; }).filter(Boolean); }
   async _ensureRootFolder(){
     if(this._ndFolderId) return this._ndFolderId;
-    var cached=null; try{ cached=store.getItem("nd.ndFolderId"); }catch(e){}
-    if(cached){ this._ndFolderId=cached; return cached; }
+    if(this._rootP) return this._rootP;
+    var self=this;
+    this._rootP=(async function(){
+      var cached=null; try{ cached=store.getItem("nd.ndFolderId"); }catch(e){}
+      var list=[];
+      try{
+        var q=encodeURIComponent("name='내도감' and mimeType='application/vnd.google-apps.folder' and trashed=false");
+        var f=await self._api("https://www.googleapis.com/drive/v3/files?spaces=drive&q="+q+"&fields=files(id,name)&orderBy=createdTime");
+        list=(f&&f.files)||[];
+      }catch(e){}
+      var id;
+      if(!list.length){
+        var d=await self._api("https://www.googleapis.com/drive/v3/files",{method:"POST", body:JSON.stringify({name:"내도감", mimeType:"application/vnd.google-apps.folder"})});
+        id=d.id;
+      } else {
+        id=(cached && list.some(function(x){return x.id===cached;})) ? cached : list[0].id;
+        var others=list.filter(function(x){return x.id!==id;});
+        for(var i=0;i<others.length;i++){ try{ await self._mergeFolder(others[i].id, id); }catch(e){} }
+      }
+      self._ndFolderId=id; try{ store.setItem("nd.ndFolderId",id); }catch(e){}
+      return id;
+    })();
+    try{ return await this._rootP; } finally { this._rootP=null; }
+  }
+  async _mergeFolder(fromId, toId){
     try{
-      var q=encodeURIComponent("name='내도감' and mimeType='application/vnd.google-apps.folder' and trashed=false");
-      var f=await this._api("https://www.googleapis.com/drive/v3/files?spaces=drive&q="+q+"&fields=files(id,name)");
-      if(f&&f.files&&f.files.length){ this._ndFolderId=f.files[0].id; try{ store.setItem("nd.ndFolderId",this._ndFolderId); }catch(e){} return this._ndFolderId; }
+      if(!fromId||!toId||fromId===toId) return;
+      var q=encodeURIComponent("'"+fromId+"' in parents and trashed=false");
+      var f=await this._api("https://www.googleapis.com/drive/v3/files?spaces=drive&q="+q+"&fields=files(id)");
+      var kids=(f&&f.files)||[];
+      for(var i=0;i<kids.length;i++){ await this._moveInto(kids[i].id, toId); }
+      await this._api("https://www.googleapis.com/drive/v3/files/"+fromId,{method:"PATCH", body:JSON.stringify({trashed:true})});
     }catch(e){}
-    var d=await this._api("https://www.googleapis.com/drive/v3/files",{method:"POST", body:JSON.stringify({name:"내도감", mimeType:"application/vnd.google-apps.folder"})});
-    this._ndFolderId=d.id; try{ store.setItem("nd.ndFolderId",this._ndFolderId); }catch(e){} return this._ndFolderId;
   }
   async _moveInto(fileId, folderId){
     try{
@@ -2521,14 +2545,19 @@ class GSheetSource {
     }catch(e){}
   }
   async _tidyStructure(){
-    try{
-      if(store.getItem("nd.tidied")==="1") return;
-      var fid=await this._ensureRootFolder();
-      if(this.ssId) await this._moveInto(this.ssId, fid);
-      var pf=null; try{ pf=store.getItem("nd.photoFolderId"); }catch(e){}
-      if(pf) await this._moveInto(pf, fid);
-      try{ store.setItem("nd.tidied","1"); }catch(e){}
-    }catch(e){}
+    try{ if(store.getItem("nd.tidied2")==="1") return; }catch(e){}
+    if(this._tidyP) return this._tidyP;
+    var self=this;
+    this._tidyP=(async function(){
+      try{
+        var fid=await self._ensureRootFolder();
+        if(self.ssId) await self._moveInto(self.ssId, fid);
+        var pf=null; try{ pf=store.getItem("nd.photoFolderId"); }catch(e){}
+        if(pf) await self._moveInto(pf, fid);
+        try{ store.setItem("nd.tidied2","1"); }catch(e){}
+      }catch(e){}
+    })();
+    return this._tidyP;
   }
   async _ensurePhotoFolder(){
     if(this._photoFolderId) return this._photoFolderId;
