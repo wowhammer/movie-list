@@ -1230,7 +1230,7 @@ body{ background:radial-gradient(circle at 50% -10%, rgba(102,78,57,.16), transp
         <svg class="brandmark" width="40" height="30" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg>
         <span class="brandwm"><span class="bwm-ko">내도감</span><span class="bwm-en">NAEDOGAM</span></span>
       </button>
-      <span class="mhver">v359β</span>
+      <span class="mhver">v360β</span>
       <span class="spacer"></span>
       <span class="src-chip" id="srcChip" style="display:none">데모</span>
       <button class="icon-btn" id="searchToggle" type="button" style="display:none">🔍</button>
@@ -2277,7 +2277,7 @@ function expandCustomManifest(spec){
     source:{ type:"sheet", tab: spec.tab || spec.title || spec.id },
     fields,
     search: textKeys.length?textKeys:(fields[0]?[fields[0].k]:[]),
-    stats:[ {label:"전체", type:"count"} ],
+    stats: (function(){ var _st=[{label:"전체", type:"count"}]; var _mf=fields.find(function(f){return f.money;}); if(_mf) _st.push({label:"합계", type:"sum", field:_mf.k, unit:"원", c:"#c2410c"}); return _st; })(),
     card:{ kind:"data", title: titleOf, kv }
   };
   if(dateF){ man.activity={ df:dateF.k, when:r=>true, label:spec.title||spec.id, name:titleOf }; man.dateSort=dateF.k; }
@@ -2324,7 +2324,7 @@ function openDomain(id){ if(id==="mbti"){ openMbti(); return; } if(id==="period"
 
 /* 홈: 켜둔 카테고리를 카드로. 건수는 한 번 열어본 분야만 표시(홈을 빠르게 유지). */
 function ndDeep(h){ if(typeof h!=="string"||h.charAt(0)!=="#") h="#8a7a6a"; var n=parseInt(h.slice(1),16),r=(n>>16)&255,g=(n>>8)&255,b=n&255; function d(x,f){return Math.max(0,Math.min(255,Math.round(x*f)));} var d1="rgb("+d(r,.46)+","+d(g,.46)+","+d(b,.46)+")", d2="rgb("+d(r,.20)+","+d(g,.20)+","+d(b,.20)+")", gl="rgba("+r+","+g+","+b+",.16)"; return "radial-gradient(circle at 18% 14%,"+gl+",transparent 46%),linear-gradient(145deg,"+d1+","+d2+")"; }
-var ND_LOGO_HTML='<div class="ndh-brand"><svg width="47" height="35" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg><div class="ndh-wm"><b>내도감</b><small>NAEDOGAM</small></div><span class="mhver ndh-ver">v359β</span></div><button class="ndh-sync" type="button" title="동기화" aria-label="동기화" onclick="try{syncNow()}catch(e){}">↻</button>';
+var ND_LOGO_HTML='<div class="ndh-brand"><svg width="47" height="35" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg><div class="ndh-wm"><b>내도감</b><small>NAEDOGAM</small></div><span class="mhver ndh-ver">v360β</span></div><button class="ndh-sync" type="button" title="동기화" aria-label="동기화" onclick="try{syncNow()}catch(e){}">↻</button>';
 /* 홈 카드 크기: wide(넓게=한 줄 전체) · half(보통=한 줄 2개) · mini(작게=하단 3칸). 기본값=프리셋 */
 var ND_PRESET_SIZE={running:"wide",food:"wide",recipes:"wide",movies:"half",books:"half",period:"half",diary:"half",travel:"half",mountains:"half",culture:"half",albums:"half",cellar:"half",scrap:"half",wish:"half",gift:"half",pet:"half"};
 function getHomeSizes(){ try{ return JSON.parse(store.getItem("nd.homesize")||"{}")||{}; }catch(e){ return {}; } }
@@ -2420,7 +2420,7 @@ function _ndTodayQuote(){
 function _ndTodayCardHTML(otd){
   if(otd===undefined) otd=_ndOnThisDay();
   var q=_ndTodayQuote();
-  if((!otd||!otd.length) && !q) return "";
+  if(!otd||!otd.length) return "";
   var h='<div class="ndToday">';
   if(otd && otd.length){
     h+='<div class="ndToday-h ndToday-hrow">🕰 오늘의 회고<span class="ndToday-cnt">'+otd.length+'</span></div>';
@@ -2434,7 +2434,7 @@ function _ndTodayCardHTML(otd){
         +'<div class="otdMeta"><b>'+cat+'</b><span>'+t+'</span></div></div>';
     }).join("")+'</div>';
   }
-  if(q && q.text){ if(!otd||!otd.length){ h+='<div class="ndToday-h">❝ 오늘의 명언</div>'; } h+='<div class="ndToday-q'+((otd&&otd.length)?' ndToday-q2':'')+'">❝ '+String(q.text).replace(/</g,"&lt;")+(q.who?' <span>— '+String(q.who).replace(/</g,"&lt;")+'</span>':'')+'</div>'; }
+  /* v360: 홈 데일리 명언 카드 제거(공간 절약) */
   h+='</div>'; return h;
 }
 function _ndOtdNudgeHTML(otd){ try{
@@ -5690,7 +5690,7 @@ function chartYear(ids, ev){   // 최근 1년 · 일별 활동 히트맵(GitHub 
   }
   const W=ci*(cell+gap), H=14+7*(cell+gap)+4;
   const legend=`<div class="dash-legend" style="justify-content:flex-end"><span class="dash-lg">적음</span><span class="hm-k" style="background:#e9e7df"></span><span class="hm-k" style="background:#f5cdc9"></span><span class="hm-k" style="background:#ec8a84"></span><span class="hm-k" style="background:#E0483F"></span><span class="dash-lg">많음</span></div>`;
-  return `<div class="dash-note">최근 1년 · 활동 <b>${total}</b>건</div><div style="overflow-x:auto;-webkit-overflow-scrolling:touch"><svg viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" style="max-width:none;display:block">${mlab}${rects}</svg></div>${legend}`+
+  return `<div class="dash-note">최근 1년 · 활동 <b>${total}</b>건</div><div class="dash-yearscroll" style="overflow-x:auto;-webkit-overflow-scrolling:touch"><svg viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" style="max-width:none;display:block">${mlab}${rects}</svg></div>${legend}`+
     (total===0?`<div class="dash-names" style="color:var(--ink-soft);text-align:center;margin-top:8px">아직 날짜가 기록된 활동이 없어요</div>`:"");
 }
 function _dashTagField(m){
@@ -5719,7 +5719,7 @@ function renderDash(ids, data){
   if(dashView!=="summary"){
     const ev=dashEvents(ids,data);
     const _body=dashView==="month"?chartMonths(ids,ev):dashView==="calendar"?chartCalendar(ids,ev):dashView==="year"?chartYear(ids,ev):dashView==="tags"?chartTags(ids,data):chartTrend(ids,ev);
-    b.innerHTML=vsel + _body;
+    b.innerHTML=vsel + _body; if(dashView==="year"){ try{ var _ys=b.querySelector(".dash-yearscroll"); if(_ys) _ys.scrollLeft=_ys.scrollWidth; }catch(e){} }
     b.querySelectorAll("[data-dv]").forEach(x=>x.onclick=()=>{ dashView=x.dataset.dv; renderDash(ids,data); });
     return;
   }
@@ -6906,6 +6906,8 @@ try{ _ndDevBoot(); }catch(e){}
 #root[data-domain="diary"] .mood-select{ font-family:var(--sans); font-size:14px; padding:6px 12px; border:1px solid var(--line-soft); border-radius:999px; background:var(--card); color:var(--ink); }
 .catcard .body{ min-height:64px; }
 .catcard .body .kv{ display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
+.catcard .body .kv span{ margin-right:15px; line-height:1.75; }
+.catcard .body .kv span:last-child{ margin-right:0; }
 .catcard .body .meta{ display:-webkit-box; -webkit-line-clamp:1; -webkit-box-orient:vertical; overflow:hidden; }
 
 .catcard{ grid-template-columns:54px 1fr auto; align-items:start; gap:13px; }
