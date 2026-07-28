@@ -434,14 +434,20 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
   .catcard{ display:flex; gap:12px; align-items:flex-start; }
   .nd-seltop{ display:flex; justify-content:flex-end; gap:8px; margin-bottom:10px; }
   .nd-seltop button{ background:var(--card,#fff); border:1px solid var(--line,#e5e5e5); border-radius:9px; padding:7px 14px; font-size:13px; font-weight:700; color:var(--ink,#1a1a1a); cursor:pointer; }
-  .nd-seltop .nd-selstart{ color:#E0483F; border-color:rgba(224,72,63,.4); }
-  .card.nd-sel{ outline:2.5px solid #E0483F; outline-offset:-2px; }
-  .card.nd-sel::after{ content:"\2713"; position:absolute; top:7px; right:7px; width:22px; height:22px; background:#E0483F; color:#fff; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:800; z-index:4; box-shadow:0 1px 4px rgba(0,0,0,.25); }
+  .nd-seltop .nd-selstart{ color:#E0483F; border-color:rgba(224,72,63,.4); border-radius:999px; padding:8px 15px; box-shadow:0 1px 3px rgba(0,0,0,.06); }
+  .card.nd-sel{ outline:2.5px solid #E0483F; outline-offset:-2px; background:#fff6f5; }
+  #list.nd-selecting .card::before{ content:""; position:absolute; top:8px; left:8px; width:23px; height:23px; border-radius:50%; border:2px solid #cfc5b8; background:rgba(255,255,255,.92); z-index:6; box-sizing:border-box; }
+  #list.nd-selecting .card.nd-sel::before{ content:"\2713"; background:#E0483F; border-color:#E0483F; color:#fff; display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:900; }
   #ndSelBar{ position:fixed; left:50%; transform:translateX(-50%); bottom:calc(env(safe-area-inset-bottom) + 78px); z-index:80; display:flex; align-items:center; justify-content:space-between; gap:12px; width:calc(100% - 24px); max-width:440px; background:#232019; color:#f6eddf; border:1px solid rgba(238,224,205,.18); border-radius:14px; padding:11px 14px; box-shadow:0 16px 36px rgba(0,0,0,.42); }
   #ndSelBar .nd-selcnt{ font-size:14px; font-weight:800; }
   #ndSelBar .nd-selacts{ display:flex; gap:8px; }
   #ndSelBar .nd-selx{ background:transparent; border:1px solid rgba(238,224,205,.3); color:#c6b9a6; border-radius:10px; padding:8px 14px; font-size:13px; font-weight:700; cursor:pointer; }
   #ndSelBar .nd-seldel{ background:#E0483F; border:none; color:#fff; border-radius:10px; padding:8px 18px; font-size:14px; font-weight:800; cursor:pointer; }
+  .nd-selguide{ display:flex; align-items:center; justify-content:space-between; gap:10px; background:#2a2320; color:#f6eddf; border-radius:13px; padding:11px 14px; margin-bottom:14px; }
+  .nd-selguide .nd-gt{ font-size:14px; font-weight:800; line-height:1.3; }
+  .nd-selguide .nd-gt small{ display:block; font-size:11.5px; color:#c6b9a6; font-weight:600; margin-top:2px; }
+  .nd-selguide .nd-gacts{ display:flex; gap:7px; flex:0 0 auto; }
+  .nd-selguide .nd-gacts button{ background:rgba(255,255,255,.12); color:#f6eddf; border:none; border-radius:9px; padding:7px 12px; font-size:12.5px; font-weight:700; cursor:pointer; }
   .catcard .thumb{ width:52px; height:74px; }
   .cbadges{ display:flex; flex-wrap:wrap; gap:5px; margin-top:7px; align-items:center; }
   .cmemo{ font-size:11px; color:#a8894e; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; margin-top:4px; }
@@ -1265,7 +1271,7 @@ body{ background:radial-gradient(circle at 50% -10%, rgba(102,78,57,.16), transp
         <svg class="brandmark" width="40" height="30" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg>
         <span class="brandwm"><span class="bwm-ko">내도감</span><span class="bwm-en">NAEDOGAM</span></span>
       </button>
-      <span class="mhver">v367β</span>
+      <span class="mhver">v368β</span>
       <span class="spacer"></span>
       <span class="src-chip" id="srcChip" style="display:none">데모</span>
       <button class="icon-btn" id="searchToggle" type="button" style="display:none">🔍</button>
@@ -2359,7 +2365,7 @@ function openDomain(id){ if(id==="mbti"){ openMbti(); return; } if(id==="period"
 
 /* 홈: 켜둔 카테고리를 카드로. 건수는 한 번 열어본 분야만 표시(홈을 빠르게 유지). */
 function ndDeep(h){ if(typeof h!=="string"||h.charAt(0)!=="#") h="#8a7a6a"; var n=parseInt(h.slice(1),16),r=(n>>16)&255,g=(n>>8)&255,b=n&255; function d(x,f){return Math.max(0,Math.min(255,Math.round(x*f)));} var d1="rgb("+d(r,.46)+","+d(g,.46)+","+d(b,.46)+")", d2="rgb("+d(r,.20)+","+d(g,.20)+","+d(b,.20)+")", gl="rgba("+r+","+g+","+b+",.16)"; return "radial-gradient(circle at 18% 14%,"+gl+",transparent 46%),linear-gradient(145deg,"+d1+","+d2+")"; }
-var ND_LOGO_HTML='<div class="ndh-brand"><svg width="47" height="35" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg><div class="ndh-wm"><b>내도감</b><small>NAEDOGAM</small></div><span class="mhver ndh-ver">v367β</span></div><button class="ndh-sync" type="button" title="동기화" aria-label="동기화" onclick="try{syncNow()}catch(e){}">↻</button>';
+var ND_LOGO_HTML='<div class="ndh-brand"><svg width="47" height="35" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg><div class="ndh-wm"><b>내도감</b><small>NAEDOGAM</small></div><span class="mhver ndh-ver">v368β</span></div><button class="ndh-sync" type="button" title="동기화" aria-label="동기화" onclick="try{syncNow()}catch(e){}">↻</button>';
 /* 홈 카드 크기: wide(넓게=한 줄 전체) · half(보통=한 줄 2개) · mini(작게=하단 3칸). 기본값=프리셋 */
 var ND_PRESET_SIZE={running:"wide",food:"wide",recipes:"wide",movies:"half",books:"half",period:"half",diary:"half",travel:"half",mountains:"half",culture:"half",albums:"half",cellar:"half",scrap:"half",wish:"half",gift:"half",pet:"half"};
 function getHomeSizes(){ try{ return JSON.parse(store.getItem("nd.homesize")||"{}")||{}; }catch(e){ return {}; } }
@@ -4347,24 +4353,24 @@ function _ndSelBar(m){
   var bar=document.getElementById("ndSelBar");
   if(!m || !state.selMode){ if(bar) bar.remove(); return; }
   if(!bar){ bar=document.createElement("div"); bar.id="ndSelBar";
-    bar.innerHTML='<span class="nd-selcnt"></span><span class="nd-selacts"><button class="nd-selx" type="button">\ucde8\uc18c</button><button class="nd-seldel" type="button">\uc0ad\uc81c</button></span>';
+    bar.innerHTML='<span class="nd-selcnt"></span><span class="nd-selacts"><button class="nd-selx" type="button">\ucde8\uc18c</button><button class="nd-seldel" type="button">🗑 삭제</button></span>';
     document.body.appendChild(bar);
     bar.querySelector(".nd-selx").onclick=function(){ state.selMode=false; NDSEL.clear(); _ndSelBar(null); var _m=MANIFESTS[state.domain]; if(_m) paintDomain(_m); };
     bar.querySelector(".nd-seldel").onclick=function(){ var _m=MANIFESTS[state.domain]; if(_m) ndBulkDelete(_m); };
   }
   var n=NDSEL.size, db=bar.querySelector(".nd-seldel");
   bar.querySelector(".nd-selcnt").textContent=n+"\uac1c \uc120\ud0dd\ub428";
-  db.textContent="\uc0ad\uc81c"; db.style.opacity=n?"1":".45"; db.style.pointerEvents=n?"auto":"none";
+  db.textContent="🗑 삭제"; db.style.opacity=n?"1":".45"; db.style.pointerEvents=n?"auto":"none";
 }
 function ndApplySelectUI(m){
   var list=document.getElementById("list"); if(!list) return;
   var cards=list.querySelectorAll(".card");
   var _ab=document.getElementById("addBtn"); if(_ab) _ab.style.display = (state.selMode ? "none" : ((m&&m.canAdd) ? "flex" : "none"));
   if(!cards.length){ _ndSelBar(null); return; }
-  var top=document.createElement("div"); top.className="nd-seltop";
-  top.innerHTML = state.selMode
-    ? '<button class="nd-selall" type="button">\uc804\uccb4\uc120\ud0dd</button><button class="nd-selcancel" type="button">\ucde8\uc18c</button>'
-    : '<button class="nd-selstart" type="button">\u2713 \uc120\ud0dd</button>';
+  list.classList.toggle("nd-selecting", !!state.selMode);
+  var top=document.createElement("div");
+  if(state.selMode){ top.className="nd-selguide"; top.innerHTML='<div class="nd-gt">삭제할 항목을 탭하세요<small>탭할 때마다 선택돼요</small></div><div class="nd-gacts"><button class="nd-selall" type="button">전체</button><button class="nd-selcancel" type="button">취소</button></div>'; }
+  else{ top.className="nd-seltop"; top.innerHTML='<button class="nd-selstart" type="button">🗑 여러 개 삭제</button>'; }
   list.insertBefore(top, list.firstChild);
   var _ss=top.querySelector(".nd-selstart"); if(_ss) _ss.onclick=function(){ state.selMode=true; NDSEL.clear(); paintDomain(m); };
   var _sc=top.querySelector(".nd-selcancel"); if(_sc) _sc.onclick=function(){ state.selMode=false; NDSEL.clear(); _ndSelBar(null); paintDomain(m); };
