@@ -4,19 +4,38 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
 <script>
-/* v362: 홈화면 standalone으로 처음 켤 때 크롬이 뷰포트를 첫 렌더에 적용 안 해
-   PC폭(약 980px)으로 축소돼 보이는 안드로이드 PWA 버그 자동 보정.
-   = 수동 새로고침 없이도 뷰포트를 다시 적용해 모바일 폭으로 재배치. */
+/* v370: 안드로이드 PWA가 콜드스타트/백그라운드 복귀 때 뷰포트를 무시하고
+   PC폭(약 980px)으로 축소돼 보이는 버그 강한 보정.
+   - 메타를 "값만 변경"이 아니라 노드 통째 교체 + 강제 리플로우
+   - 실제 화면폭보다 레이아웃폭이 크게 벌어지면(=깨짐) 감지해서 재적용
+   - 앱 복귀(visibilitychange)·초반 몇 초 반복 감시까지 커버 */
 (function(){
   try{
     var VP='width=device-width, initial-scale=1, minimum-scale=1';
-    var set=function(c){ var m=document.querySelector('meta[name="viewport"]'); if(m) m.setAttribute('content',c); };
-    var kick=function(){ set(VP+', maximum-scale=1'); setTimeout(function(){ set(VP); }, 50); };
-    kick();                                                   /* 파싱 중 즉시(첫 페인트 전 적용 시도) */
-    if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', kick);
-    window.addEventListener('load', kick);
-    window.addEventListener('pageshow', function(){ kick(); });
-    window.addEventListener('orientationchange', function(){ setTimeout(kick, 120); });
+    function reapply(){
+      try{
+        var head=document.head||document.getElementsByTagName('head')[0]; if(!head) return;
+        var old=document.querySelector('meta[name="viewport"]'); if(old&&old.parentNode) old.parentNode.removeChild(old);
+        var m=document.createElement('meta'); m.name='viewport'; m.setAttribute('content', VP+', maximum-scale=1');
+        head.appendChild(m);
+        void document.documentElement.offsetWidth;                 /* 강제 리플로우 */
+        setTimeout(function(){ try{ m.setAttribute('content', VP); void document.documentElement.offsetWidth; }catch(e){} }, 30);
+      }catch(e){}
+    }
+    function broken(){                                             /* 레이아웃폭이 실기기폭보다 크게 벌어졌나 */
+      try{ var cw=document.documentElement.clientWidth||0;
+        var sw=(window.screen&&screen.width)?screen.width:(window.innerWidth||cw);
+        return sw>0 && cw > sw*1.4; }catch(e){ return false; }
+    }
+    function guard(){ if(broken()) reapply(); }
+    reapply();                                                     /* 파싱 중 즉시 1회 */
+    var n=0, iv=setInterval(function(){ guard(); if(++n>=12){ clearInterval(iv); } }, 300);  /* ~3.6초 감시 */
+    if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', guard);
+    window.addEventListener('load', guard);
+    window.addEventListener('pageshow', function(e){ if(e&&e.persisted) reapply(); else guard(); });
+    window.addEventListener('resize', guard);
+    window.addEventListener('orientationchange', function(){ setTimeout(reapply, 150); });
+    document.addEventListener('visibilitychange', function(){ if(!document.hidden){ setTimeout(guard, 50); setTimeout(guard, 400); } });
   }catch(e){}
 })();
 </script>
@@ -1272,7 +1291,7 @@ body{ background:radial-gradient(circle at 50% -10%, rgba(102,78,57,.16), transp
         <svg class="brandmark" width="40" height="30" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg>
         <span class="brandwm"><span class="bwm-ko">내도감</span><span class="bwm-en">NAEDOGAM</span></span>
       </button>
-      <span class="mhver">v369β</span>
+      <span class="mhver">v370β</span>
       <span class="spacer"></span>
       <span class="src-chip" id="srcChip" style="display:none">데모</span>
       <button class="icon-btn" id="searchToggle" type="button" style="display:none">🔍</button>
@@ -2366,7 +2385,7 @@ function openDomain(id){ if(id==="mbti"){ openMbti(); return; } if(id==="period"
 
 /* 홈: 켜둔 카테고리를 카드로. 건수는 한 번 열어본 분야만 표시(홈을 빠르게 유지). */
 function ndDeep(h){ if(typeof h!=="string"||h.charAt(0)!=="#") h="#8a7a6a"; var n=parseInt(h.slice(1),16),r=(n>>16)&255,g=(n>>8)&255,b=n&255; function d(x,f){return Math.max(0,Math.min(255,Math.round(x*f)));} var d1="rgb("+d(r,.46)+","+d(g,.46)+","+d(b,.46)+")", d2="rgb("+d(r,.20)+","+d(g,.20)+","+d(b,.20)+")", gl="rgba("+r+","+g+","+b+",.16)"; return "radial-gradient(circle at 18% 14%,"+gl+",transparent 46%),linear-gradient(145deg,"+d1+","+d2+")"; }
-var ND_LOGO_HTML='<div class="ndh-brand"><svg width="47" height="35" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg><div class="ndh-wm"><b>내도감</b><small>NAEDOGAM</small></div><span class="mhver ndh-ver">v369β</span></div><button class="ndh-sync" type="button" title="동기화" aria-label="동기화" onclick="try{syncNow()}catch(e){}">↻</button>';
+var ND_LOGO_HTML='<div class="ndh-brand"><svg width="47" height="35" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg><div class="ndh-wm"><b>내도감</b><small>NAEDOGAM</small></div><span class="mhver ndh-ver">v370β</span></div><button class="ndh-sync" type="button" title="동기화" aria-label="동기화" onclick="try{syncNow()}catch(e){}">↻</button>';
 /* 홈 카드 크기: wide(넓게=한 줄 전체) · half(보통=한 줄 2개) · mini(작게=하단 3칸). 기본값=프리셋 */
 var ND_PRESET_SIZE={running:"wide",food:"wide",recipes:"wide",movies:"half",books:"half",period:"half",diary:"half",travel:"half",mountains:"half",culture:"half",albums:"half",cellar:"half",scrap:"half",wish:"half",gift:"half",pet:"half"};
 function getHomeSizes(){ try{ return JSON.parse(store.getItem("nd.homesize")||"{}")||{}; }catch(e){ return {}; } }
@@ -4328,6 +4347,8 @@ async function deleteRecord(m, r){
 
 /* ── 선택 삭제(여러 개 한 번에) ── */
 var NDSEL = new Set();
+function ndExitSelect(){ try{ state.selMode=false; NDSEL.clear(); }catch(e){} var _b=document.getElementById("ndSelBar"); if(_b) _b.remove(); try{ var _m=MANIFESTS[state.domain]; if(_m) paintDomain(_m); }catch(e){} }
+try{ window.ndExitSelect=ndExitSelect; }catch(e){}
 async function _ndDelOne(m, r){
   if(m.id==="carlog"){ const S=sheetSrc(); await S.deleteRaw(S.tabOf("carlog"), r._id, S.idkeyOf("carlog")); }
   else if(m.id==="movies") await sheetSrc().deleteRaw(sheetSrc().tabOf("movies"), r.orig||r._id, "\uc6d0\uc81c");
@@ -4379,7 +4400,7 @@ function ndApplySelectUI(m){
     var _ndEnter=function(){ state.selMode=true; NDSEL.clear(); paintDomain(m); };
     var _cnt=document.getElementById("count"), _placed=false;
     if(_cnt && _cnt.classList.contains("countrow")){ var _sbn=_cnt.querySelector(".sort-btns");
-      if(_sbn && !_sbn.querySelector(".nd-selstart")){ var _be=document.createElement("button"); _be.type="button"; _be.className="sort-btn nd-selstart"; _be.title="여러 개 삭제"; _be.textContent="🗑"; _be.onclick=_ndEnter; _sbn.appendChild(_be); _placed=true; } }
+      if(_sbn && !_sbn.querySelector(".nd-selstart")){ var _be=document.createElement("button"); _be.type="button"; _be.className="sort-btn nd-selstart"; _be.title="여러 개 삭제"; _be.textContent="🗑 삭제"; _be.onclick=_ndEnter; _sbn.appendChild(_be); _placed=true; } }
     if(!_placed){ var _tb=document.createElement("div"); _tb.className="nd-seltop"; _tb.innerHTML='<button class="nd-selstart" type="button">🗑 여러 개 삭제</button>'; list.insertBefore(_tb, list.firstChild); var _ss=_tb.querySelector(".nd-selstart"); if(_ss) _ss.onclick=_ndEnter; }
   }
   cards.forEach(function(b,i){
@@ -6978,7 +6999,8 @@ try{ _ndDevBoot(); }catch(e){}
   var busy=false, trap=false;
   function anyDialog(){ return document.querySelector('dialog[open]'); }
   function domainOpen(){ var d=document.getElementById('domainView'); return !!(d && getComputedStyle(d).display!=='none'); }
-  function depth(){ if(anyDialog()) return 2; if(domainOpen()) return 1; return 0; }
+  function selOpen(){ return !!(document.getElementById('ndSelBar') || document.querySelector('#list.nd-selecting')); }
+  function depth(){ if(anyDialog()) return 3; if(selOpen()) return 2; if(domainOpen()) return 1; return 0; }
   function pushGuard(){ history.pushState({ndTrap:1}, ''); trap=true; }
   function sync(){
     if(busy) return;
@@ -6992,7 +7014,7 @@ try{ _ndDevBoot(); }catch(e){}
   window.addEventListener('popstate', function(){
     busy=true; trap=false;
     var d=depth();
-    if(d===2){
+    if(d===3){
       var dl=document.querySelectorAll('dialog[open]');
       var top=dl[dl.length-1];
       if(top){
@@ -7000,6 +7022,9 @@ try{ _ndDevBoot(); }catch(e){}
         var _step=_mb||_rb||((_wc&&/^\s*←/.test(_wc.textContent||''))?_wc:null);
         try{ if(_step) _step.click(); else top.close(); }catch(e){ try{ top.close(); }catch(_e){} }
       }
+      setTimeout(function(){ if(depth()>0){ pushGuard(); } busy=false; }, 0);
+    } else if(d===2){
+      try{ if(typeof ndExitSelect==='function') ndExitSelect(); }catch(e){}
       setTimeout(function(){ if(depth()>0){ pushGuard(); } busy=false; }, 0);
     } else if(d===1){
       try{ if(typeof goHome==='function') goHome(); }catch(e){}
