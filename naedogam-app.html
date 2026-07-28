@@ -2483,7 +2483,7 @@ async function _ndShareMemory(o){
   try{ ndToast("공유 카드 만드는 중…"); }catch(e){}
   var poster=o.cover||"";
   if(!poster && o.kind){ try{ poster=(await ndPoster(o.kind,o.title))||""; }catch(e){} }
-  var img=null; if(poster){ try{ img=await _ndLoadImg(poster); }catch(e){ img=null; } }
+  var img=null; if(poster){ var _hi=String(poster).replace("/t/p/w342/","/t/p/w500/"); var _px="https://images.weserv.nl/?url="+encodeURIComponent(_hi.replace(/^https?:\/\//,"")); try{ img=await _ndLoadImg(_px); }catch(e){ img=null; } if(!img){ try{ img=await _ndLoadImg(poster); }catch(e){ img=null; } } }
   var blob=await _ndDrawShareCard(o,img);
   if(!blob && img){ blob=await _ndDrawShareCard(o,null); }
   if(!blob){ try{ ndToast("이미지를 만들지 못했어요"); }catch(e){} return; }
