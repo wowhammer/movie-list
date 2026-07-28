@@ -1247,7 +1247,7 @@ body{ background:radial-gradient(circle at 50% -10%, rgba(102,78,57,.16), transp
         <svg class="brandmark" width="40" height="30" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg>
         <span class="brandwm"><span class="bwm-ko">내도감</span><span class="bwm-en">NAEDOGAM</span></span>
       </button>
-      <span class="mhver">v364β</span>
+      <span class="mhver">v365β</span>
       <span class="spacer"></span>
       <span class="src-chip" id="srcChip" style="display:none">데모</span>
       <button class="icon-btn" id="searchToggle" type="button" style="display:none">🔍</button>
@@ -2341,7 +2341,7 @@ function openDomain(id){ if(id==="mbti"){ openMbti(); return; } if(id==="period"
 
 /* 홈: 켜둔 카테고리를 카드로. 건수는 한 번 열어본 분야만 표시(홈을 빠르게 유지). */
 function ndDeep(h){ if(typeof h!=="string"||h.charAt(0)!=="#") h="#8a7a6a"; var n=parseInt(h.slice(1),16),r=(n>>16)&255,g=(n>>8)&255,b=n&255; function d(x,f){return Math.max(0,Math.min(255,Math.round(x*f)));} var d1="rgb("+d(r,.46)+","+d(g,.46)+","+d(b,.46)+")", d2="rgb("+d(r,.20)+","+d(g,.20)+","+d(b,.20)+")", gl="rgba("+r+","+g+","+b+",.16)"; return "radial-gradient(circle at 18% 14%,"+gl+",transparent 46%),linear-gradient(145deg,"+d1+","+d2+")"; }
-var ND_LOGO_HTML='<div class="ndh-brand"><svg width="47" height="35" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg><div class="ndh-wm"><b>내도감</b><small>NAEDOGAM</small></div><span class="mhver ndh-ver">v364β</span></div><button class="ndh-sync" type="button" title="동기화" aria-label="동기화" onclick="try{syncNow()}catch(e){}">↻</button>';
+var ND_LOGO_HTML='<div class="ndh-brand"><svg width="47" height="35" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg><div class="ndh-wm"><b>내도감</b><small>NAEDOGAM</small></div><span class="mhver ndh-ver">v365β</span></div><button class="ndh-sync" type="button" title="동기화" aria-label="동기화" onclick="try{syncNow()}catch(e){}">↻</button>';
 /* 홈 카드 크기: wide(넓게=한 줄 전체) · half(보통=한 줄 2개) · mini(작게=하단 3칸). 기본값=프리셋 */
 var ND_PRESET_SIZE={running:"wide",food:"wide",recipes:"wide",movies:"half",books:"half",period:"half",diary:"half",travel:"half",mountains:"half",culture:"half",albums:"half",cellar:"half",scrap:"half",wish:"half",gift:"half",pet:"half"};
 function getHomeSizes(){ try{ return JSON.parse(store.getItem("nd.homesize")||"{}")||{}; }catch(e){ return {}; } }
@@ -4179,15 +4179,8 @@ function openRecordForm(m, existing, prefill){
       const pv=d.querySelector(`.rf-imgprev[data-k="${k}"]`);
       if(pv){ pv.src=b64; pv.style.display=""; }
       if(valEl) valEl.value=b64;
-      (async()=>{ try{
-        const S=sheetSrc();
-        if(!S || typeof S._driveUpload!=="function") return;
-        if(valEl && valEl.dataset) valEl.dataset.uploading="1";
-        const hiURL=toURL(1280,0.82);
-        const blob=await (await fetch(hiURL)).blob();
-        const id=await S._driveUpload(blob, "ndimg_"+Date.now()+".jpg");
-        if(valEl){ valEl.value="drive:"+id; if(valEl.dataset) delete valEl.dataset.uploading; }
-      }catch(e){ if(valEl&&valEl.dataset) delete valEl.dataset.uploading; } })();
+      /* v365: 드라이브 업로드는 [저장] 시에만 → 첨부를 여러 번 바꿔도 이전 사진이 드라이브에 안 쌓임 */
+      try{ if(valEl && valEl.dataset) valEl.dataset.pending=toURL(1280,0.82); }catch(e){}
     }; img.src=rd.result; }; rd.readAsDataURL(file); };
   d.querySelectorAll(".rf-imgfile").forEach(inp=>inp.onchange=ev=>_encImg(ev.target.files&&ev.target.files[0], inp.dataset.k));
   d.querySelectorAll(".rf-imgzone").forEach(z=>{ const k=z.dataset.k;
@@ -4202,6 +4195,7 @@ function openRecordForm(m, existing, prefill){
     d.querySelectorAll("input.rf, textarea.rf").forEach(i=>i.blur());
     await new Promise(r=>setTimeout(r,60));
     const row = existing ? {...existing} : { _id: crypto.randomUUID() };
+    const _pendingImgs=[];
     fields.forEach(f=>{
       if(f.type==="bool"){ row[f.k]=d.querySelector(`.rf-bool[data-k="${f.k}"]`).classList.contains("on"); return; }
       if(f.type==="seg"){ const sel=d.querySelector(`.rf-seg[data-k="${f.k}"] .rf-segbtn.on`); row[f.k]=sel?sel.dataset.v:""; return; }
@@ -4211,7 +4205,7 @@ function openRecordForm(m, existing, prefill){
       if(f.type==="tiers"){ const box=d.querySelector(`.rf-tiers[data-k="${f.k}"]`);
         const arr=box?[...box.querySelectorAll(".tier-row")].map(rw=>({min:(rw.querySelector(".tier-min-in").value||"").trim(), benefits:(rw.querySelector(".tier-ben").value||"").replace(/\s+$/,"")})).filter(t=>t.min!==""||t.benefits!==""):[];
         row[f.k]=JSON.stringify(arr); return; }
-      if(f.type==="image"){ row[f.k]=d.querySelector(`.rf-imgval[data-k="${f.k}"]`).value; return; }
+      if(f.type==="image"){ var _iv=d.querySelector(`.rf-imgval[data-k="${f.k}"]`); if(_iv && _iv.dataset && _iv.dataset.pending && (_iv.value||"")){ _pendingImgs.push({k:f.k, hi:_iv.dataset.pending}); row[f.k]=_iv.value; } else { row[f.k]=_iv?_iv.value:""; } return; }
       if(f.type==="checks"){ var _cb=d.querySelector('.rf-checks[data-k="'+f.k+'"]'); row[f.k]=_cb?[].slice.call(_cb.querySelectorAll(".rf-chk.on")).map(function(x){return x.dataset.v;}):[]; return; }
       const el=d.querySelector(`.rf[data-k="${f.k}"]`); let v=el.value;
       if(f.type==="number"||f.type==="rating"){ if(f.money||f.comma) v=String(v).replace(/[^0-9.]/g,""); v = (v===""?null:Number(v)); }
@@ -4222,6 +4216,7 @@ function openRecordForm(m, existing, prefill){
     const btn=$("#rfSave"); btn.textContent="저장 중…"; btn.disabled=true;
     try{
       if(!existing && !ndConfirmDup(m.id, row)){ btn.textContent="저장"; btn.disabled=false; return; }
+      for(const _pi of _pendingImgs){ try{ const _S=sheetSrc(); if(_S && typeof _S._driveUpload==="function"){ const _b=await (await fetch(_pi.hi)).blob(); const _id=await _S._driveUpload(_b,"ndimg_"+Date.now()+".jpg"); row[_pi.k]="drive:"+_id; } }catch(_e){} }
       await saveRecord(m, row, existing);
       d.close(); afterSave(m, row);
     }catch(e){ btn.textContent="저장"; btn.disabled=false; alert("저장 실패: "+e.message); }
