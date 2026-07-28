@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>내도감 · 사용 통계</title>
+<style>
+  :root{ --bg:#16130f; --card:#232019; --ink:#f6eddf; --ink-soft:#c6b9a6; --line:#35302a; --brand:#E0483F; }
+  *{ box-sizing:border-box; }
+  body{ margin:0; background:var(--bg); color:var(--ink); font-family:-apple-system,'Apple SD Gothic Neo','Malgun Gothic',sans-serif; }
+  .wrap{ max-width:1100px; margin:0 auto; padding:18px 14px 40px; }
+  header{ display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin:6px 2px 16px; }
+  header h1{ font-size:20px; margin:0; letter-spacing:-.02em; }
+  header .dot{ width:9px; height:9px; border-radius:50%; background:var(--brand); box-shadow:0 0 0 4px rgba(224,72,63,.18); }
+  header .sub{ font-size:12.5px; color:var(--ink-soft); }
+  .btns{ display:flex; gap:8px; flex-wrap:wrap; margin:0 2px 14px; }
+  .btn{ display:inline-flex; align-items:center; gap:6px; text-decoration:none; font-size:13px; font-weight:700;
+        background:var(--card); color:var(--ink); border:1px solid var(--line); border-radius:10px; padding:9px 14px; }
+  .btn.brand{ background:var(--brand); border-color:var(--brand); color:#fff; }
+  .framewrap{ background:#fff; border-radius:14px; overflow:hidden; box-shadow:0 14px 34px rgba(0,0,0,.35); }
+  iframe{ display:block; width:100%; height:78vh; min-height:560px; border:0; }
+  .note{ font-size:12px; color:var(--ink-soft); line-height:1.7; margin:16px 4px 0; }
+  .note b{ color:var(--ink); }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <span class="dot"></span>
+      <h1>내도감 · 사용 통계</h1>
+      <span class="sub">Google Analytics 4 · 실시간 반영</span>
+    </header>
+
+    <div class="btns">
+      <a class="btn brand" href="https://analytics.google.com/analytics/web/#/a402557867p547385944/realtime/overview" target="_blank" rel="noopener">⚡ GA 실시간 보기</a>
+      <a class="btn" href="https://analytics.google.com/analytics/web/#/a402557867p547385944/reports/intelligenthome" target="_blank" rel="noopener">📈 GA 전체 보고서</a>
+      <a class="btn" href="https://lookerstudio.google.com/reporting/ff3df2ee-b6e7-4e88-b035-2d7dcbaea3fd" target="_blank" rel="noopener">✎ 대시보드 편집(지표 추가)</a>
+    </div>
+
+    <div class="framewrap">
+      <iframe title="내도감 사용 통계 대시보드"
+        src="https://lookerstudio.google.com/embed/reporting/ff3df2ee-b6e7-4e88-b035-2d7dcbaea3fd/page/Aiy4F"
+        allowfullscreen
+        sandbox="allow-storage-access-by-user-activation allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox"></iframe>
+    </div>
+
+    <div class="note">
+      <b>이 대시보드는 내 구글 계정(nicehammer@gmail.com)으로 로그인되어 있을 때 보입니다.</b><br>
+      · 활성 사용자·평균 사용시간 등 <b>누적 지표는 데이터 수집 시작 후 하루 정도</b> 지나야 채워져요. 지금 바로 보려면 위 <b>GA 실시간</b>을 누르세요.<br>
+      · 지표를 더 넣고 싶으면 <b>대시보드 편집</b>에서 오른쪽 필드를 끌어다 놓으면 여기 자동 반영됩니다.
+    </div>
+  </div>
+</body>
+</html>
