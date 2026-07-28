@@ -1295,7 +1295,7 @@ body{ background:radial-gradient(circle at 50% -10%, rgba(102,78,57,.16), transp
         <svg class="brandmark" width="40" height="30" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg>
         <span class="brandwm"><span class="bwm-ko">내도감</span><span class="bwm-en">NAEDOGAM</span></span>
       </button>
-      <span class="mhver">v372β</span>
+      <span class="mhver">v373β</span>
       <span class="spacer"></span>
       <span class="src-chip" id="srcChip" style="display:none">데모</span>
       <button class="icon-btn" id="searchToggle" type="button" style="display:none">🔍</button>
@@ -2389,7 +2389,7 @@ function openDomain(id){ if(id==="mbti"){ openMbti(); return; } if(id==="period"
 
 /* 홈: 켜둔 카테고리를 카드로. 건수는 한 번 열어본 분야만 표시(홈을 빠르게 유지). */
 function ndDeep(h){ if(typeof h!=="string"||h.charAt(0)!=="#") h="#8a7a6a"; var n=parseInt(h.slice(1),16),r=(n>>16)&255,g=(n>>8)&255,b=n&255; function d(x,f){return Math.max(0,Math.min(255,Math.round(x*f)));} var d1="rgb("+d(r,.46)+","+d(g,.46)+","+d(b,.46)+")", d2="rgb("+d(r,.20)+","+d(g,.20)+","+d(b,.20)+")", gl="rgba("+r+","+g+","+b+",.16)"; return "radial-gradient(circle at 18% 14%,"+gl+",transparent 46%),linear-gradient(145deg,"+d1+","+d2+")"; }
-var ND_LOGO_HTML='<div class="ndh-brand"><svg width="47" height="35" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg><div class="ndh-wm"><b>내도감</b><small>NAEDOGAM</small></div><span class="mhver ndh-ver">v372β</span></div><button class="ndh-sync" type="button" title="동기화" aria-label="동기화" onclick="try{syncNow()}catch(e){}">↻</button>';
+var ND_LOGO_HTML='<div class="ndh-brand"><svg width="47" height="35" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg><div class="ndh-wm"><b>내도감</b><small>NAEDOGAM</small></div><span class="mhver ndh-ver">v373β</span></div><button class="ndh-sync" type="button" title="동기화" aria-label="동기화" onclick="try{syncNow()}catch(e){}">↻</button>';
 /* 홈 카드 크기: wide(넓게=한 줄 전체) · half(보통=한 줄 2개) · mini(작게=하단 3칸). 기본값=프리셋 */
 var ND_PRESET_SIZE={running:"wide",food:"wide",recipes:"wide",movies:"half",books:"half",period:"half",diary:"half",travel:"half",mountains:"half",culture:"half",albums:"half",cellar:"half",scrap:"half",wish:"half",gift:"half",pet:"half"};
 function getHomeSizes(){ try{ return JSON.parse(store.getItem("nd.homesize")||"{}")||{}; }catch(e){ return {}; } }
@@ -6400,14 +6400,23 @@ async function saveCatEdit(d, id){
 
 /* ── 6. 부트: 저장된 Client ID 있으면 구글, 없으면 데모 ── */
 /* ── 책 추가: 구글 북스에서 제목 검색 → 저자·연도·표지 자동 채움 → 목록에 추가 ── */
+async function _fetchT(url, ms){
+  ms = ms || 8000;
+  if(typeof AbortController==="undefined") return fetch(url);
+  var ctl=new AbortController(), timedOut=false;
+  var t=setTimeout(function(){ timedOut=true; try{ctl.abort();}catch(e){} }, ms);
+  try{ return await fetch(url,{signal:ctl.signal}); }
+  catch(e){ if(timedOut) throw new Error("네트워크가 느려요. 잠시 후 다시 시도해 주세요."); throw e; }
+  finally{ clearTimeout(t); }
+}
 async function searchBooks(q){
   if(!q || !q.trim()) return [];
   var key = CONFIG.GOOGLE_BOOKS_KEY ? ("&key="+CONFIG.GOOGLE_BOOKS_KEY) : "";
   const url="https://www.googleapis.com/books/v1/volumes?maxResults=6&country=KR&q="+encodeURIComponent(q.trim())+key;
-  let res=await fetch(url);
+  let res=await _fetchT(url);
   if(res.status===429){                       // 너무 자주 불러 잠깐 막힘 → 1.2초 쉬고 한 번 더
     await new Promise(r=>setTimeout(r,1200));
-    res=await fetch(url);
+    res=await _fetchT(url);
   }
   if(res.status===429) throw new Error("검색이 잠깐 제한됐어요. 몇 초 뒤 다시 해보거나, 설정 안내대로 '책 검색 키'를 넣으면 해결됩니다.");
   if(!res.ok) throw new Error("HTTP "+res.status);
@@ -6432,11 +6441,12 @@ function openAddBook(){
   d.querySelectorAll(".st").forEach(b=>b.onclick=()=>{ addStatus=b.dataset.s;
     d.querySelectorAll(".st").forEach(x=>x.classList.toggle("on",x.dataset.s===addStatus)); });
   { const _ac=$("#addClose"); if(_ac) _ac.onclick=()=>d.close(); }
-  const bq=$("#bq"), bres=$("#bres"); let timer=null, results=[];
+  const bq=$("#bq"), bres=$("#bres"); let timer=null, results=[], seq=0;
   bq.addEventListener("input",()=>{ clearTimeout(timer); timer=setTimeout(async()=>{
     if(bq.value.trim().length<2){ bres.innerHTML=""; return; }   // 2글자부터 검색(호출 줄이기)
+    const _my=++seq;
     bres.innerHTML=`<div class="count">검색 중…</div>`;
-    try{ results=await searchBooks(bq.value);
+    try{ const _r=await searchBooks(bq.value); if(_my!==seq) return; results=_r;
       bres.innerHTML = results.length ? results.map((b,i)=>
         `<button class="card" data-i="${i}" style="grid-template-columns:auto 1fr">
           <span class="thumb">${b.cover?`<img src="${b.cover}" alt="">`:"📖"}</span>
@@ -6465,7 +6475,9 @@ async function addBook(b){
 async function searchMovies(q){
   if(!q || q.trim().length<2) return [];
   const url=`${CONFIG.TMDB_BASE}/search/movie?api_key=${CONFIG.TMDB_KEY}&language=ko-KR&query=${encodeURIComponent(q.trim())}`;
-  const res=await fetch(url);
+  let res=await _fetchT(url);
+  if(res.status===429){ await new Promise(r=>setTimeout(r,1000)); res=await _fetchT(url); }
+  if(res.status===429) throw new Error("검색이 잠깐 제한됐어요. 몇 초 뒤 다시 해보세요.");
   if(!res.ok) throw new Error("HTTP "+res.status);
   const d=await res.json();
   return (d.results||[]).slice(0,6).map(m=>({
@@ -6492,11 +6504,12 @@ function tmdbAttachDeploy(d){
     <input id="tmdbq" placeholder="영화 제목 입력…" autocomplete="off" />
     <div id="tmdbres" style="margin-top:8px;display:flex;flex-direction:column;gap:6px;max-height:260px;overflow:auto"></div>`;
   body.insertAdjacentElement("afterbegin", bar);
-  const q=bar.querySelector("#tmdbq"), res=bar.querySelector("#tmdbres"); let timer=null, results=[];
+  const q=bar.querySelector("#tmdbq"), res=bar.querySelector("#tmdbres"); let timer=null, results=[], seq=0;
   q.addEventListener("input",()=>{ clearTimeout(timer); timer=setTimeout(async()=>{
     if(q.value.trim().length<2){ res.innerHTML=""; return; }
+    const _my=++seq;
     res.innerHTML=`<div class="count">검색 중…</div>`;
-    try{ results=await searchMovies(q.value);
+    try{ const _r=await searchMovies(q.value); if(_my!==seq) return; results=_r;
       res.innerHTML = results.length ? results.map((mm,i)=>`<button type="button" class="card" data-i="${i}" style="grid-template-columns:auto 1fr;text-align:left"><span class="thumb">${mm.poster?`<img src="${mm.poster}" alt="">`:"🎞"}</span><span class="body"><h3 style="font-size:14px">${mm.kor}</h3><div class="meta">${[mm.year,mm.orig].filter(Boolean).join(" · ")}</div></span></button>`).join("") : `<div class="count">검색 결과가 없습니다.</div>`;
       res.querySelectorAll(".card").forEach(b=>b.onclick=()=>fillFromTmdb(d, results[+b.dataset.i], res));
     }catch(e){ res.innerHTML=`<div class="count">검색 실패: ${e.message}</div>`; }
@@ -6525,11 +6538,12 @@ function openAddMovie(){
   d.querySelectorAll(".st").forEach(b=>b.onclick=()=>{ addMovieStatus=b.dataset.s;
     d.querySelectorAll(".st").forEach(x=>x.classList.toggle("on",x.dataset.s===addMovieStatus)); });
   { const _ac=$("#addClose"); if(_ac) _ac.onclick=()=>d.close(); }
-  const mq=$("#mq"), mres=$("#mres"); let timer=null, results=[];
+  const mq=$("#mq"), mres=$("#mres"); let timer=null, results=[], seq=0;
   mq.addEventListener("input",()=>{ clearTimeout(timer); timer=setTimeout(async()=>{
     if(mq.value.trim().length<2){ mres.innerHTML=""; return; }
+    const _my=++seq;
     mres.innerHTML=`<div class="count">검색 중…</div>`;
-    try{ results=await searchMovies(mq.value);
+    try{ const _r=await searchMovies(mq.value); if(_my!==seq) return; results=_r;
       mres.innerHTML = results.length ? results.map((m,i)=>
         `<button class="card" data-i="${i}" style="grid-template-columns:auto 1fr">
           <span class="thumb">${m.poster?`<img src="${m.poster}" alt="">`:"🎞"}</span>
