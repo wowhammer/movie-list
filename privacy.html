@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>내도감 개인정보처리방침</title>
+<style>
+  :root{ --ink:#1a1a1a; --soft:#666; --line:#e5e5e5; --red:#E0483F; }
+  *{box-sizing:border-box}
+  body{ margin:0; background:#f5f5f5; color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Noto Sans KR",system-ui,sans-serif;
+    line-height:1.75; }
+  .wrap{ max-width:720px; margin:0 auto; padding:32px 20px 80px; }
+  h1{ font-size:24px; margin:0 0 4px; }
+  .sub{ color:var(--soft); font-size:13px; margin-bottom:28px; }
+  h2{ font-size:17px; margin:30px 0 8px; padding-top:14px; border-top:1px solid var(--line); }
+  p,li{ font-size:15px; }
+  ul{ padding-left:20px; }
+  a{ color:var(--red); }
+  .box{ background:#fff; border:1px solid var(--line); border-radius:10px; padding:14px 16px; margin:14px 0; font-size:14px; }
+  .foot{ margin-top:36px; color:var(--soft); font-size:13px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>내도감 개인정보처리방침</h1>
+  <div class="sub">시행일: 2026년 7월 29일</div>
+
+  <p>‘내도감’(이하 “서비스”)은 이용자가 자신의 영화·책·여행·일기 등 개인 기록을 <b>본인의 구글 드라이브</b>에 저장·관리하도록 돕는 개인용 기록 앱입니다. 본 방침은 서비스가 어떤 정보를 어떻게 다루는지 설명합니다.</p>
+
+  <h2>1. 수집·이용하는 정보</h2>
+  <ul>
+    <li><b>구글 계정 기본 정보</b> — 로그인한 계정을 식별하기 위한 이메일 주소 등. 로그인 유지 용도로만 사용합니다.</li>
+    <li><b>구글 드라이브 파일(앱이 만든 파일에 한함)</b> — 서비스는 <code>drive.file</code> 권한만 사용합니다. 즉 <b>내도감이 직접 만든 ‘내도감 Data’ 시트 파일만</b> 접근하며, 이용자의 다른 드라이브 파일·문서·사진은 볼 수 없습니다.</li>
+    <li><b>이용자가 입력한 기록</b> — 영화·책·여행·일기·자산 등 이용자가 직접 적은 내용. 이 데이터는 <b>이용자 본인의 구글 드라이브에만</b> 저장되며, 서비스 운영자는 이를 열람·수집하지 않습니다.</li>
+    <li><b>익명 사용 통계</b> — 서비스 개선을 위해 Google Analytics(GA4)로 화면 방문·기능 사용 횟수 등 익명 통계를 수집합니다. 이용자가 기록한 개인 내용(제목·본문 등)은 포함되지 않습니다.</li>
+  </ul>
+
+  <h2>2. 로그인 유지(인증 토큰) 처리</h2>
+  <div class="box">
+    한 번 로그인하면 매번 다시 로그인하지 않도록, 구글이 발급하는 <b>인증 토큰(리프레시 토큰)</b>을 서비스의 인증 서버(Cloudflare Workers)에 안전하게 보관합니다. 이 토큰은 <b>오직 이용자의 ‘내도감 Data’ 시트에 접근할 access token을 재발급</b>하는 데에만 쓰이며, 다른 목적에 사용하거나 제3자에게 제공하지 않습니다.
+  </div>
+
+  <h2>3. Google 이용자 데이터의 제한적 사용(Limited Use)</h2>
+  <p>내도감이 Google API로부터 받은 정보의 사용 및 다른 앱으로의 전송은 <a href="https://developers.google.com/terms/api-services-user-data-policy" target="_blank" rel="noopener">Google API Services User Data Policy</a>(제한적 사용 요건 포함)를 준수합니다. 구체적으로, Google 이용자 데이터는 이용자에게 서비스 기능을 제공하는 목적에만 사용하며, 광고 목적으로 사용하거나 판매하지 않습니다.</p>
+
+  <h2>4. 제3자 제공·판매</h2>
+  <p>서비스는 이용자의 개인 기록이나 구글 데이터를 제3자에게 <b>판매하거나 공유하지 않습니다.</b> 데이터는 이용자 본인의 구글 드라이브에 있으며, 통계는 익명으로만 처리됩니다.</p>
+
+  <h2>5. 데이터 보관·삭제 / 권한 철회</h2>
+  <ul>
+    <li>기록 데이터는 이용자의 구글 드라이브에 있으므로, <b>이용자가 언제든 해당 시트를 삭제</b>하면 함께 삭제됩니다.</li>
+    <li>로그인 연결(인증 토큰)은 <b>구글 계정 → 보안 → 서드파티 액세스</b>에서 ‘내도감’ 연결을 해제하면 즉시 무효화됩니다.</li>
+    <li>연결 해제 시 인증 서버에 보관된 토큰도 더 이상 사용되지 않습니다.</li>
+  </ul>
+
+  <h2>6. 아동 보호</h2>
+  <p>본 서비스는 만 14세 미만 아동을 대상으로 하지 않습니다.</p>
+
+  <h2>7. 방침 변경</h2>
+  <p>본 방침은 관련 법령이나 서비스 변경에 따라 수정될 수 있으며, 변경 시 본 페이지에 게시합니다.</p>
+
+  <h2>8. 문의</h2>
+  <p>개인정보 관련 문의: <a href="mailto:nicehammer@gmail.com">nicehammer@gmail.com</a></p>
+
+  <div class="foot">© 2026 내도감 (naedogam)</div>
+</div>
+</body>
+</html>
