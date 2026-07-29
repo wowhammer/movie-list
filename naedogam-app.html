@@ -134,7 +134,8 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
   .brandwm{ display:flex; flex-direction:column; align-items:flex-start; line-height:1; }
   .bwm-ko{ font-family:var(--sans); font-weight:800; font-size:20px; letter-spacing:.5px; color:#f6eddf; }
   .bwm-en{ font-family:var(--mono); font-size:8.5px; letter-spacing:.32em; color:#c9bcac; margin-top:3px; }
-  .mhver{ font-family:var(--mono); font-size:11px; font-weight:800; color:#E0483F; align-self:flex-end; margin:0 0 3px 5px; letter-spacing:.02em; background:rgba(224,72,63,.10); padding:1px 6px; border-radius:6px; }   /* 배포전: 적용여부 확인용으로 크게 (출시 때 축소) */
+  .mhver{ font-family:var(--mono); font-size:11px; font-weight:800; color:#E0483F; align-self:flex-end; margin:0 0 3px 5px; letter-spacing:.02em; background:rgba(224,72,63,.10); padding:1px 6px; border-radius:6px; }
+  body:not(.ndDevOn) .mhver{ color:transparent !important; background:transparent !important; border-color:transparent !important; box-shadow:none !important; -webkit-user-select:none; user-select:none; }  /* 버전배지: 개발자 모드에서만 보임(로고 옆 7번 탭 토글) */
   .mh-row .icon-btn{ background:transparent; border-color:#47413a; color:#cfcbc3; flex-shrink:0; }
   .brandbtn{ flex-shrink:0; }
   .mh-row .icon-btn:hover{ border-color:#f6eddf; color:#f6eddf; }
@@ -1300,7 +1301,7 @@ body{ background:radial-gradient(circle at 50% -10%, rgba(102,78,57,.16), transp
         <svg class="brandmark" width="40" height="30" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg>
         <span class="brandwm"><span class="bwm-ko">내도감</span><span class="bwm-en">NAEDOGAM</span></span>
       </button>
-      <span class="mhver">v387β</span>
+      <span class="mhver">v388β</span>
       <span class="spacer"></span>
       <span class="src-chip" id="srcChip" style="display:none">데모</span>
       <button class="icon-btn" id="searchToggle" type="button" style="display:none">🔍</button>
@@ -1344,7 +1345,7 @@ body{ background:radial-gradient(circle at 50% -10%, rgba(102,78,57,.16), transp
   <svg width="66" height="58" viewBox="18 26 70 56" aria-hidden="true" style="margin-bottom:10px"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg>
   <div style="font-size:21px;font-weight:700;margin-bottom:8px">내도감</div>
   <div style="font-size:13px;color:#a1a1aa;line-height:1.65;max-width:300px;margin-bottom:22px">구글로 로그인하면 <b style="color:#f6eddf">내 구글드라이브에 내 시트</b>가 자동으로 만들어지고, <b style="color:#f6eddf">모든 기록이 내 구글시트에 영원히 저장</b>됩니다. (앱이 만든 파일만 접근)</div>
-  <button id="gateBtn" style="background:#E0483F;color:#fff;border:none;border-radius:10px;padding:13px 26px;font-size:15px;font-weight:600;cursor:pointer">구글로 시작하기</button>
+  <button id="gateBtn" style="display:inline-flex;align-items:center;justify-content:center;gap:10px;background:#fff;color:#3c4043;border:1px solid #dadce0;border-radius:10px;padding:12px 22px;font-size:15px;font-weight:600;cursor:pointer;box-shadow:0 1px 2px rgba(0,0,0,.15)"><svg width="18" height="18" viewBox="0 0 48 48" aria-hidden="true"><path fill="#4285F4" d="M45.12 24.5c0-1.56-.14-3.06-.4-4.5H24v8.51h11.84c-.51 2.75-2.06 5.08-4.39 6.64v5.52h7.11c4.16-3.83 6.56-9.47 6.56-16.17z"/><path fill="#34A853" d="M24 46c5.94 0 10.92-1.97 14.56-5.33l-7.11-5.52c-1.97 1.32-4.49 2.1-7.45 2.1-5.73 0-10.58-3.87-12.31-9.07H4.34v5.7C7.96 41.07 15.4 46 24 46z"/><path fill="#FBBC05" d="M11.69 28.18C11.25 26.86 11 25.45 11 24s.25-2.86.69-4.18v-5.7H4.34C2.85 17.09 2 20.45 2 24s.85 6.91 2.34 9.88l7.35-5.7z"/><path fill="#EA4335" d="M24 10.75c3.23 0 6.13 1.11 8.41 3.29l6.31-6.31C34.91 4.18 29.93 2 24 2 15.4 2 7.96 6.93 4.34 14.12l7.35 5.7c1.73-5.2 6.58-9.07 12.31-9.07z"/></svg>Google로 로그인</button>
   <div id="gateMsg" style="font-size:12px;color:#a1a1aa;margin-top:14px;min-height:16px;max-width:300px"></div>
 </div>
 <div id="intro" style="display:none;position:fixed;inset:0;z-index:210;background:var(--paper,#16130f);overflow:auto;-webkit-overflow-scrolling:touch">
@@ -1352,7 +1353,7 @@ body{ background:radial-gradient(circle at 50% -10%, rgba(102,78,57,.16), transp
   <div style="position:fixed;left:0;right:0;bottom:0;background:linear-gradient(180deg,rgba(22,19,15,0),var(--paper,#16130f) 26%);padding:20px 16px calc(16px + env(safe-area-inset-bottom))">
     <div style="max-width:520px;margin:0 auto">
       <label style="display:flex;align-items:center;gap:8px;font-size:13px;color:var(--ink-soft,#c6b9a6);margin:0 0 11px;cursor:pointer;justify-content:center"><input type="checkbox" id="introSkip" style="width:16px;height:16px;accent-color:#E0483F"> 다시 보지 않기</label>
-      <button id="introBtn" style="width:100%;background:#E0483F;color:#fff;border:none;border-radius:12px;padding:16px;font-size:16px;font-weight:700;cursor:pointer">구글로 시작하기 →</button>
+      <button id="introBtn" style="width:100%;display:inline-flex;align-items:center;justify-content:center;gap:11px;background:#fff;color:#3c4043;border:1px solid #dadce0;border-radius:12px;padding:15px;font-size:16px;font-weight:600;cursor:pointer;box-shadow:0 1px 3px rgba(0,0,0,.2)"><svg width="20" height="20" viewBox="0 0 48 48" aria-hidden="true"><path fill="#4285F4" d="M45.12 24.5c0-1.56-.14-3.06-.4-4.5H24v8.51h11.84c-.51 2.75-2.06 5.08-4.39 6.64v5.52h7.11c4.16-3.83 6.56-9.47 6.56-16.17z"/><path fill="#34A853" d="M24 46c5.94 0 10.92-1.97 14.56-5.33l-7.11-5.52c-1.97 1.32-4.49 2.1-7.45 2.1-5.73 0-10.58-3.87-12.31-9.07H4.34v5.7C7.96 41.07 15.4 46 24 46z"/><path fill="#FBBC05" d="M11.69 28.18C11.25 26.86 11 25.45 11 24s.25-2.86.69-4.18v-5.7H4.34C2.85 17.09 2 20.45 2 24s.85 6.91 2.34 9.88l7.35-5.7z"/><path fill="#EA4335" d="M24 10.75c3.23 0 6.13 1.11 8.41 3.29l6.31-6.31C34.91 4.18 29.93 2 24 2 15.4 2 7.96 6.93 4.34 14.12l7.35 5.7c1.73-5.2 6.58-9.07 12.31-9.07z"/></svg>Google로 시작하기</button>
     </div>
   </div>
 </div>
@@ -2394,7 +2395,7 @@ function openDomain(id){ if(id==="mbti"){ openMbti(); return; } if(id==="period"
 
 /* 홈: 켜둔 카테고리를 카드로. 건수는 한 번 열어본 분야만 표시(홈을 빠르게 유지). */
 function ndDeep(h){ if(typeof h!=="string"||h.charAt(0)!=="#") h="#8a7a6a"; var n=parseInt(h.slice(1),16),r=(n>>16)&255,g=(n>>8)&255,b=n&255; function d(x,f){return Math.max(0,Math.min(255,Math.round(x*f)));} var d1="rgb("+d(r,.46)+","+d(g,.46)+","+d(b,.46)+")", d2="rgb("+d(r,.20)+","+d(g,.20)+","+d(b,.20)+")", gl="rgba("+r+","+g+","+b+",.16)"; return "radial-gradient(circle at 18% 14%,"+gl+",transparent 46%),linear-gradient(145deg,"+d1+","+d2+")"; }
-var ND_LOGO_HTML='<div class="ndh-brand"><svg width="47" height="35" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg><div class="ndh-wm"><b>내도감</b><small>NAEDOGAM</small></div><span class="mhver ndh-ver">v387β</span></div><button class="ndh-sync" type="button" title="동기화" aria-label="동기화" onclick="try{syncNow()}catch(e){}">↻</button>';
+var ND_LOGO_HTML='<div class="ndh-brand"><svg width="47" height="35" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg><div class="ndh-wm"><b>내도감</b><small>NAEDOGAM</small></div><span class="mhver ndh-ver">v388β</span></div><button class="ndh-sync" type="button" title="동기화" aria-label="동기화" onclick="try{syncNow()}catch(e){}">↻</button>';
 /* 홈 카드 크기: wide(넓게=한 줄 전체) · half(보통=한 줄 2개) · mini(작게=하단 3칸). 기본값=프리셋 */
 var ND_PRESET_SIZE={running:"wide",food:"wide",recipes:"wide",movies:"half",books:"half",period:"half",diary:"half",travel:"half",mountains:"half",culture:"half",albums:"half",cellar:"half",scrap:"half",wish:"half",gift:"half",pet:"half"};
 function getHomeSizes(){ try{ return JSON.parse(store.getItem("nd.homesize")||"{}")||{}; }catch(e){ return {}; } }
