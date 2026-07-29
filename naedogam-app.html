@@ -1301,7 +1301,7 @@ body{ background:radial-gradient(circle at 50% -10%, rgba(102,78,57,.16), transp
         <svg class="brandmark" width="40" height="30" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg>
         <span class="brandwm"><span class="bwm-ko">내도감</span><span class="bwm-en">NAEDOGAM</span></span>
       </button>
-      <span class="mhver">v388β</span>
+      <span class="mhver">v389β</span>
       <span class="spacer"></span>
       <span class="src-chip" id="srcChip" style="display:none">데모</span>
       <button class="icon-btn" id="searchToggle" type="button" style="display:none">🔍</button>
@@ -1341,7 +1341,7 @@ body{ background:radial-gradient(circle at 50% -10%, rgba(102,78,57,.16), transp
 <dialog id="rec"></dialog>
 <dialog id="dash"></dialog>
 <dialog id="catbuilder"></dialog>
-<div id="gate" style="display:none;position:fixed;inset:0;z-index:200;background:#201c16;color:#f6eddf;flex-direction:column;align-items:center;justify-content:center;padding:24px;text-align:center;font-family:var(--sans)">
+<div id="gate" style="display:none;position:fixed;inset:0;z-index:200;background:#201c16;color:#f6eddf;flex-direction:column;align-items:center;justify-content:flex-start;padding:max(9vh,48px) 24px 32px;overflow-y:auto;text-align:center;font-family:var(--sans)">
   <svg width="66" height="58" viewBox="18 26 70 56" aria-hidden="true" style="margin-bottom:10px"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg>
   <div style="font-size:21px;font-weight:700;margin-bottom:8px">내도감</div>
   <div style="font-size:13px;color:#a1a1aa;line-height:1.65;max-width:300px;margin-bottom:22px">구글로 로그인하면 <b style="color:#f6eddf">내 구글드라이브에 내 시트</b>가 자동으로 만들어지고, <b style="color:#f6eddf">모든 기록이 내 구글시트에 영원히 저장</b>됩니다. (앱이 만든 파일만 접근)</div>
@@ -1349,7 +1349,7 @@ body{ background:radial-gradient(circle at 50% -10%, rgba(102,78,57,.16), transp
   <div id="gateMsg" style="font-size:12px;color:#a1a1aa;margin-top:14px;min-height:16px;max-width:300px"></div>
 </div>
 <div id="intro" style="display:none;position:fixed;inset:0;z-index:210;background:var(--paper,#16130f);overflow:auto;-webkit-overflow-scrolling:touch">
-  <div id="introBody" style="max-width:520px;margin:0 auto;padding:18px 16px 132px"></div>
+  <div id="introBody" style="max-width:520px;margin:0 auto;padding:18px 16px 168px"></div>
   <div style="position:fixed;left:0;right:0;bottom:0;background:linear-gradient(180deg,rgba(22,19,15,0),var(--paper,#16130f) 26%);padding:20px 16px calc(16px + env(safe-area-inset-bottom))">
     <div style="max-width:520px;margin:0 auto">
       <label style="display:flex;align-items:center;gap:8px;font-size:13px;color:var(--ink-soft,#c6b9a6);margin:0 0 11px;cursor:pointer;justify-content:center"><input type="checkbox" id="introSkip" style="width:16px;height:16px;accent-color:#E0483F"> 다시 보지 않기</label>
@@ -2395,7 +2395,7 @@ function openDomain(id){ if(id==="mbti"){ openMbti(); return; } if(id==="period"
 
 /* 홈: 켜둔 카테고리를 카드로. 건수는 한 번 열어본 분야만 표시(홈을 빠르게 유지). */
 function ndDeep(h){ if(typeof h!=="string"||h.charAt(0)!=="#") h="#8a7a6a"; var n=parseInt(h.slice(1),16),r=(n>>16)&255,g=(n>>8)&255,b=n&255; function d(x,f){return Math.max(0,Math.min(255,Math.round(x*f)));} var d1="rgb("+d(r,.46)+","+d(g,.46)+","+d(b,.46)+")", d2="rgb("+d(r,.20)+","+d(g,.20)+","+d(b,.20)+")", gl="rgba("+r+","+g+","+b+",.16)"; return "radial-gradient(circle at 18% 14%,"+gl+",transparent 46%),linear-gradient(145deg,"+d1+","+d2+")"; }
-var ND_LOGO_HTML='<div class="ndh-brand"><svg width="47" height="35" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg><div class="ndh-wm"><b>내도감</b><small>NAEDOGAM</small></div><span class="mhver ndh-ver">v388β</span></div><button class="ndh-sync" type="button" title="동기화" aria-label="동기화" onclick="try{syncNow()}catch(e){}">↻</button>';
+var ND_LOGO_HTML='<div class="ndh-brand"><svg width="47" height="35" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg><div class="ndh-wm"><b>내도감</b><small>NAEDOGAM</small></div><span class="mhver ndh-ver">v389β</span></div><button class="ndh-sync" type="button" title="동기화" aria-label="동기화" onclick="try{syncNow()}catch(e){}">↻</button>';
 /* 홈 카드 크기: wide(넓게=한 줄 전체) · half(보통=한 줄 2개) · mini(작게=하단 3칸). 기본값=프리셋 */
 var ND_PRESET_SIZE={running:"wide",food:"wide",recipes:"wide",movies:"half",books:"half",period:"half",diary:"half",travel:"half",mountains:"half",culture:"half",albums:"half",cellar:"half",scrap:"half",wish:"half",gift:"half",pet:"half"};
 function getHomeSizes(){ try{ return JSON.parse(store.getItem("nd.homesize")||"{}")||{}; }catch(e){ return {}; } }
@@ -2408,7 +2408,7 @@ function ndCatPicker(mode){
   var old=document.getElementById("ndPick"); if(old) old.remove();
   var starters=ND_STARTERS.filter(function(id){return MANIFESTS[id]&&MANIFESTS[id].title;});
   var rest=Object.keys(MANIFESTS).filter(function(id){ return MANIFESTS[id]&&MANIFESTS[id].title && starters.indexOf(id)<0; });
-  var active=getActive(); var sel={}; if(mode!=="onboard"){ active.forEach(function(id){ sel[id]=true; }); }
+  var active=getActive(); var sel={}; if(mode!=="onboard"){ active.forEach(function(id){ sel[id]=true; }); } else { ["movies","books","diary"].forEach(function(id){ if(MANIFESTS[id]&&MANIFESTS[id].title) sel[id]=true; }); }
   if(!document.getElementById("ndPickCss")){ var st=document.createElement("style"); st.id="ndPickCss"; st.textContent=".ndpick-cell{display:flex;align-items:center;gap:10px;padding:14px 14px;border-radius:16px;border:1.5px solid rgba(238,224,205,.14);background:rgba(255,255,255,.03);color:var(--ink,#f6eddf);font-size:14.5px;font-weight:600;cursor:pointer;text-align:left}.ndpick-cell .pc-ic{font-size:21px;line-height:1;flex:0 0 auto}.ndpick-cell .pc-t{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.ndpick-cell .pc-ck{margin-left:auto;opacity:0;color:var(--brand,#e0483f);font-weight:900}.ndpick-cell.on{border-color:var(--brand,#e0483f);background:rgba(224,72,63,.12)}.ndpick-cell.on .pc-ck{opacity:1}.ndpick-div{display:flex;align-items:center;gap:10px;margin:24px 2px 6px;color:var(--ink-soft,#c6b9a6);font-size:12.5px;font-weight:700}.ndpick-div span.ln{flex:1;height:1px;background:rgba(238,224,205,.14)}"; document.head.appendChild(st); }
   var mk=function(id){ var m=MANIFESTS[id]; var on=!!sel[id]; return '<button class="ndpick-cell'+(on?" on":"")+'" data-id="'+id+'" type="button"><span class="pc-ic">'+(m.icon||"🗂")+'</span><span class="pc-t">'+((m.title||id)+"").replace(/</g,"&lt;")+'</span><span class="pc-ck">✓</span></button>'; };
   var gs="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px";
@@ -2419,7 +2419,7 @@ function ndCatPicker(mode){
   body+='<div style="text-align:center;color:var(--ink-soft,#c6b9a6);font-size:12px;margin:26px 8px 0;line-height:1.65;opacity:.9">나중에 추가하거나 빼시려면 언제든 <b style="color:var(--ink,#f6eddf)">설정</b>(또는 홈의 <b style="color:var(--ink,#f6eddf)">＋ 새 도감</b>)에서 하시면 됩니다.</div>';
   var wrap=document.createElement("div"); wrap.id="ndPick";
   wrap.style.cssText="position:fixed;inset:0;z-index:216;background:var(--paper,#16130f);overflow:auto;-webkit-overflow-scrolling:touch";
-  wrap.innerHTML='<div style="max-width:540px;margin:0 auto;padding:30px 18px 132px">'
+  wrap.innerHTML='<div style="max-width:540px;margin:0 auto;padding:30px 18px 168px">'
     +'<div style="text-align:center"><div style="font-size:22px;font-weight:800;color:var(--ink,#f6eddf);letter-spacing:-.04em">'+title+'</div><div style="font-size:13.5px;color:var(--ink-soft,#c6b9a6);margin-top:9px;line-height:1.65">'+sub+'</div></div>'
     +body+'</div>'
     +'<div style="position:fixed;left:0;right:0;bottom:0;background:linear-gradient(180deg,transparent,var(--paper,#16130f) 32%);padding:16px 18px calc(16px + env(safe-area-inset-bottom))"><div style="max-width:540px;margin:0 auto;display:flex;gap:10px">'
@@ -2659,6 +2659,7 @@ function openSearch(){
   inp.addEventListener("input",function(){ clearTimeout(t); t=setTimeout(function(){ runHomeSearch(inp.value); },200); });
   d.querySelector(".nsClose").onclick=function(){ d.close(); };
   d.querySelector("#homeSearchRes").addEventListener("click",function(e){ if(e.target.closest&&e.target.closest(".hs-item")) setTimeout(function(){ d.close(); },0); });
+  _ndSearchHome();
   setTimeout(function(){ try{ inp.focus(); }catch(e){} },80);
 }
 /* 분야가 선언한 source.type 에 따라 출처를 고른다.
@@ -2668,10 +2669,18 @@ function _hsMeta(m,r){ try{
   if(m.card&&m.card.kind==="specimen"&&m.card.meta) return m.card.meta(r)||"";
   if(m.card&&m.card.kv) return m.card.kv.map(c=>(r[c.f]!=null&&r[c.f]!=="")?`${c.k} ${typeof r[c.f]==="number"?fmt(r[c.f]):r[c.f]}${c.u?" "+c.u:""}`:"").filter(Boolean).slice(0,2).join(" · ");
 }catch(e){} return ""; }
+function _ndSearchHome(){
+  var res=document.getElementById("homeSearchRes"); if(!res) return;
+  if(!document.getElementById("ndSHomeCss")){ var st=document.createElement("style"); st.id="ndSHomeCss"; st.textContent="#ndSearchDlg .hs-hint{color:#9a8f80;font-size:13.5px;padding:6px 2px 2px}#ndSearchDlg .hs-shlabel{color:#7d7469;font-size:12px;font-weight:700;margin:16px 2px 8px}#ndSearchDlg .hs-shortcuts{display:flex;flex-wrap:wrap;gap:8px}#ndSearchDlg .hs-shortcut{background:#211e1a;border:1px solid rgba(238,224,205,.14);color:#f6eddf;border-radius:999px;padding:9px 14px;font-size:14px;font-weight:600;cursor:pointer}"; document.head.appendChild(st); }
+  var acts=[]; try{ acts=getActive(); }catch(e){}
+  var chips=acts.filter(function(id){return MANIFESTS[id]&&MANIFESTS[id].title;}).map(function(id){ var m=MANIFESTS[id]; return '<button type="button" class="hs-shortcut" data-cat="'+id+'">'+(m.icon||"\ud83d\udcc2")+" "+String(m.title).replace(/</g,"&lt;")+"</button>"; }).join("");
+  res.innerHTML='<div class="hs-hint">\uc81c\ubaa9\u00b7\uc774\ub984\uc73c\ub85c \ucc3e\uc544\ubcf4\uc138\uc694.</div>'+(chips?'<div class="hs-shlabel">\ubc14\ub85c\uac00\uae30</div><div class="hs-shortcuts">'+chips+"</div>":"");
+  res.querySelectorAll(".hs-shortcut").forEach(function(b){ b.onclick=function(){ var id=b.getAttribute("data-cat"); var dlg=document.getElementById("ndSearchDlg"); if(dlg){ try{ dlg.close(); }catch(e){} } try{ openDomain(id); }catch(e){} }; });
+}
 function runHomeSearch(q){
   q=(q||"").trim().toLowerCase();
   const res=$("#homeSearchRes"); if(!res) return;
-  if(!q){ res.innerHTML=""; res.style.display="none"; return; }
+  if(!q){ res.style.display=""; _ndSearchHome(); return; }
   res.style.display="";
   const active=getActive().map(id=>MANIFESTS[id]).filter(Boolean);
   let html="", pending=0;
