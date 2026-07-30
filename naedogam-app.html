@@ -272,7 +272,7 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
   .wm-legend b{ color:var(--accent); font-weight:700; }
   .wm-dot{ display:inline-block; width:10px; height:10px; border-radius:50%; vertical-align:-1px; margin-right:2px; }
   .wm-done{ background:#E0483F; } .wm-plan{ background:#f0a83a; }
-  #list:has(.tvcard){ display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+  #list:has(.tvcard){ display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px; align-items:start; }   /* v403: 1fr은 내용에 끌려 한 칸이 찌그러짐 → minmax(0,1fr) */
   #list:has(.rccard){ display:flex; flex-direction:column; gap:14px; }
   #list .rccard{ display:block; padding:0; overflow:hidden; border:none; border-radius:16px; background:var(--card); box-shadow:0 2px 8px rgba(0,0,0,.08); text-align:left; cursor:pointer; transition:transform .12s ease, box-shadow .15s ease; }
   #list .rccard:active{ transform:scale(.98); }
@@ -287,16 +287,16 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
   .rccard .rc-star{ background:#fff4e0; color:#d9770a; font-size:11px; font-weight:800; padding:2px 8px; border-radius:999px; }
   .rccard .rc-jjim{ background:#ffe3ea; color:#e03e63; font-size:11px; font-weight:800; padding:2px 8px; border-radius:999px; }
   .rccard .rc-status{ background:var(--line-soft); color:var(--ink-soft); font-size:11px; font-weight:700; padding:2px 8px; border-radius:999px; }
-  #list .tvcard{ display:block; padding:0; overflow:hidden; border:none; border-radius:14px; background:var(--card); box-shadow:0 1px 4px rgba(0,0,0,.09); text-align:left; cursor:pointer; }
+  #list .tvcard{ display:block; padding:0; overflow:hidden; min-width:0; max-width:100%; border:none; border-radius:14px; background:var(--card); box-shadow:0 1px 4px rgba(0,0,0,.09); text-align:left; cursor:pointer; }
   .tvcard .tv-cover{ position:relative; width:100%; aspect-ratio:16/10; background:#e9e7df; }
   .tvcard .tv-cover img{ width:100%; height:100%; object-fit:cover; display:block; }
   .tvcard .tv-nocover{ display:flex; align-items:center; justify-content:center; height:100%; font-size:34px; opacity:.45; }
   .tvcard .tv-badge{ position:absolute; top:9px; left:9px; padding:2px 9px; border-radius:20px; font-size:11px; font-weight:700; color:#fff; box-shadow:0 1px 3px rgba(0,0,0,.25); }
   .tvcard .tv-badge.b-done{ background:#16a34a; } .tvcard .tv-badge.b-plan{ background:#c2410c; } .tvcard .tv-badge.b-pick{ background:#d4a017; }
-  .tvcard .tv-body{ padding:10px 12px 12px; }
-  .tvcard .tv-title{ font-size:15px; font-weight:700; color:var(--ink); margin:0 0 3px; line-height:1.35; word-break:keep-all; }
-  .tvcard .tv-meta{ font-size:12px; color:var(--ink-soft); line-height:1.45; }
-  .tvcard .tv-foot{ display:flex; align-items:center; gap:6px; margin-top:7px; flex-wrap:wrap; }
+  .tvcard .tv-body{ padding:10px 12px 12px; min-width:0; }
+  .tvcard .tv-title{ font-size:15px; font-weight:700; color:var(--ink); margin:0 0 3px; line-height:1.35; word-break:keep-all; overflow-wrap:anywhere; }
+  .tvcard .tv-meta{ font-size:12px; color:var(--ink-soft); line-height:1.45; overflow-wrap:anywhere; }
+  .tvcard .tv-foot{ display:flex; align-items:center; gap:6px; margin-top:7px; flex-wrap:wrap; min-width:0; }
   .tvcard .tv-star{ color:#e0a020; font-size:12px; font-weight:700; }
   .tvcard .tv-spot{ font-size:10.5px; color:var(--ink-soft); background:var(--paper); border:1px solid var(--line); border-radius:9px; padding:1px 7px; }
   #list:has(.abcard){ display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:9px; }
@@ -1301,7 +1301,7 @@ body{ background:radial-gradient(circle at 50% -10%, rgba(102,78,57,.16), transp
         <svg class="brandmark" width="40" height="30" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg>
         <span class="brandwm"><span class="bwm-ko">내도감</span><span class="bwm-en">NAEDOGAM</span></span>
       </button>
-      <span class="mhver">v402β</span>
+      <span class="mhver">v403β</span>
       <span class="spacer"></span>
       <span class="src-chip" id="srcChip" style="display:none">데모</span>
       <button class="icon-btn" id="searchToggle" type="button" style="display:none">🔍</button>
@@ -2395,7 +2395,7 @@ function openDomain(id){ if(id==="mbti"){ openMbti(); return; } if(id==="period"
 
 /* 홈: 켜둔 카테고리를 카드로. 건수는 한 번 열어본 분야만 표시(홈을 빠르게 유지). */
 function ndDeep(h){ if(typeof h!=="string"||h.charAt(0)!=="#") h="#8a7a6a"; var n=parseInt(h.slice(1),16),r=(n>>16)&255,g=(n>>8)&255,b=n&255; function d(x,f){return Math.max(0,Math.min(255,Math.round(x*f)));} var d1="rgb("+d(r,.46)+","+d(g,.46)+","+d(b,.46)+")", d2="rgb("+d(r,.20)+","+d(g,.20)+","+d(b,.20)+")", gl="rgba("+r+","+g+","+b+",.16)"; return "radial-gradient(circle at 18% 14%,"+gl+",transparent 46%),linear-gradient(145deg,"+d1+","+d2+")"; }
-var ND_LOGO_HTML='<div class="ndh-brand"><svg width="47" height="35" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg><div class="ndh-wm"><b>내도감</b><small>NAEDOGAM</small></div><span class="mhver ndh-ver">v402β</span></div><button class="ndh-sync" type="button" title="동기화" aria-label="동기화" onclick="try{syncNow()}catch(e){}">↻</button>';
+var ND_LOGO_HTML='<div class="ndh-brand"><svg width="47" height="35" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg><div class="ndh-wm"><b>내도감</b><small>NAEDOGAM</small></div><span class="mhver ndh-ver">v403β</span></div><button class="ndh-sync" type="button" title="동기화" aria-label="동기화" onclick="try{syncNow()}catch(e){}">↻</button>';
 /* 홈 카드 크기: wide(넓게=한 줄 전체) · half(보통=한 줄 2개) · mini(작게=하단 3칸). 기본값=프리셋 */
 var ND_PRESET_SIZE={running:"wide",food:"wide",recipes:"wide",movies:"half",books:"half",period:"half",diary:"half",travel:"half",mountains:"half",culture:"half",albums:"half",cellar:"half",scrap:"half",wish:"half",gift:"half",pet:"half"};
 function getHomeSizes(){ try{ return JSON.parse(store.getItem("nd.homesize")||"{}")||{}; }catch(e){ return {}; } }
@@ -2451,7 +2451,7 @@ function ndCatPicker(mode){
   var active=getActive(); var sel={}; if(mode!=="onboard"){ active.forEach(function(id){ sel[id]=true; }); } else { ["movies","books","diary"].forEach(function(id){ if(MANIFESTS[id]&&MANIFESTS[id].title) sel[id]=true; }); }
   if(!document.getElementById("ndPickCss")){ var st=document.createElement("style"); st.id="ndPickCss"; st.textContent=".ndpick-cell{display:flex;align-items:center;gap:10px;padding:14px 14px;border-radius:16px;border:1.5px solid rgba(238,224,205,.14);background:rgba(255,255,255,.03);color:var(--ink,#f6eddf);font-size:14.5px;font-weight:600;cursor:pointer;text-align:left}.ndpick-cell .pc-ic{font-size:21px;line-height:1;flex:0 0 auto}.ndpick-cell .pc-t{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.ndpick-cell .pc-ck{margin-left:auto;opacity:0;color:var(--brand,#e0483f);font-weight:900}.ndpick-cell.on{border-color:var(--brand,#e0483f);background:rgba(224,72,63,.12)}.ndpick-cell.on .pc-ck{opacity:1}.ndpick-div{display:flex;align-items:center;gap:10px;margin:24px 2px 6px;color:var(--ink-soft,#c6b9a6);font-size:12.5px;font-weight:700}.ndpick-div span.ln{flex:1;height:1px;background:rgba(238,224,205,.14)}"; document.head.appendChild(st); }
   var mk=function(id){ var m=MANIFESTS[id]; var on=!!sel[id]; return '<button class="ndpick-cell'+(on?" on":"")+'" data-id="'+id+'" type="button"><span class="pc-ic">'+(m.icon||"🗂")+'</span><span class="pc-t">'+((m.title||id)+"").replace(/</g,"&lt;")+'</span><span class="pc-ck">✓</span></button>'; };
-  var gs="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px";
+  var gs="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:14px";   /* v403: 같은 찌그러짐 예방 */
   var title=(mode==="onboard")?"무엇을 수집해볼까요?":"도감 추가·정리";
   var sub=(mode==="onboard")?"마음에 드는 걸 여러 개 골라보세요.<br>나중에 언제든 더 추가할 수 있어요.":"켜고 끄면 홈에 나타나고 사라져요. 기록은 지워지지 않아요.";
   var body='<div style="'+gs+'">'+starters.map(mk).join("")+'</div>';
