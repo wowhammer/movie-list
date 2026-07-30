@@ -1301,7 +1301,7 @@ body{ background:radial-gradient(circle at 50% -10%, rgba(102,78,57,.16), transp
         <svg class="brandmark" width="40" height="30" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg>
         <span class="brandwm"><span class="bwm-ko">내도감</span><span class="bwm-en">NAEDOGAM</span></span>
       </button>
-      <span class="mhver">v408β</span>
+      <span class="mhver">v409β</span>
       <span class="spacer"></span>
       <span class="src-chip" id="srcChip" style="display:none">데모</span>
       <button class="icon-btn" id="searchToggle" type="button" style="display:none">🔍</button>
@@ -2395,7 +2395,7 @@ function openDomain(id){ if(id==="mbti"){ openMbti(); return; } if(id==="period"
 
 /* 홈: 켜둔 카테고리를 카드로. 건수는 한 번 열어본 분야만 표시(홈을 빠르게 유지). */
 function ndDeep(h){ if(typeof h!=="string"||h.charAt(0)!=="#") h="#8a7a6a"; var n=parseInt(h.slice(1),16),r=(n>>16)&255,g=(n>>8)&255,b=n&255; function d(x,f){return Math.max(0,Math.min(255,Math.round(x*f)));} var d1="rgb("+d(r,.46)+","+d(g,.46)+","+d(b,.46)+")", d2="rgb("+d(r,.20)+","+d(g,.20)+","+d(b,.20)+")", gl="rgba("+r+","+g+","+b+",.16)"; return "radial-gradient(circle at 18% 14%,"+gl+",transparent 46%),linear-gradient(145deg,"+d1+","+d2+")"; }
-var ND_LOGO_HTML='<div class="ndh-brand"><svg width="47" height="35" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg><div class="ndh-wm"><b>내도감</b><small>NAEDOGAM</small></div><span class="mhver ndh-ver">v408β</span></div><button class="ndh-sync" type="button" title="동기화" aria-label="동기화" onclick="try{syncNow()}catch(e){}">↻</button>';
+var ND_LOGO_HTML='<div class="ndh-brand"><svg width="47" height="35" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg><div class="ndh-wm"><b>내도감</b><small>NAEDOGAM</small></div><span class="mhver ndh-ver">v409β</span></div><button class="ndh-sync" type="button" title="동기화" aria-label="동기화" onclick="try{syncNow()}catch(e){}">↻</button>';
 /* 홈 카드 크기: wide(넓게=한 줄 전체) · half(보통=한 줄 2개) · mini(작게=하단 3칸). 기본값=프리셋 */
 var ND_PRESET_SIZE={running:"wide",food:"wide",recipes:"wide",movies:"half",books:"half",period:"half",diary:"half",travel:"half",mountains:"half",culture:"half",albums:"half",cellar:"half",scrap:"half",wish:"half",gift:"half",pet:"half"};
 function getHomeSizes(){ try{ return JSON.parse(store.getItem("nd.homesize")||"{}")||{}; }catch(e){ return {}; } }
@@ -6012,13 +6012,9 @@ function _ndInsightFacts(ids, data){
 }
 /* v407: 프록시 프롬프트를 고칠 수 없으므로, 보내는 재료 끝에 쓰기 규칙을 함께 싣는다(A/B로 효과 확인). */
 function _aiRules(){
-  return "\n\n[쓰기 규칙 — 반드시 지킬 것]\n"
-   +"1. 위 사실 중 최소 4개를 숫자·고유명사 그대로 지목해서 쓴다.\n"
-   +"2. 이 사람의 기록이 아니면 성립하지 않는 문장만 쓴다. 누구에게나 해당되는 말(삶을 사랑하는, 자신만의 속도로, 소중한 일상 등)은 한 문장도 쓰지 않는다.\n"
-   +"3. 적어두기만 한 것과 실제로 한 것의 간극, 몰려 있는 취향, 오래 비어 있는 칸 — 어긋남을 피하지 말고 정면으로 짚는다.\n"
-   +"4. 칭찬이나 위로로 끝내지 않는다. 관찰로 끝낸다. 훈계·조언 금지.\n"
-   +"5. 3문단, 각 문단 4~6문장. 수사보다 구체가 먼저다.\n"
-   +"6. 제목·머리말 없이 본문만 쓴다.";
+  /* ★v409: 규칙은 이제 Apps Script 프롬프트(버전 10)가 담당한다.
+     앱에서도 규칙을 보내면 지시가 겹쳐 AI가 번호 목록으로 답하는 문제가 생겼다(실측). 그래서 비운다. */
+  return "";
 }
 function _wAiSummary(ids, data){ try{ var arr=[]; (ids||[]).forEach(function(id){ var m=MANIFESTS[id]; var rows=(data&&data[id])||[]; if(m&&rows.length){ arr.push({t:(m.title||id), n:rows.length}); } }); arr.sort(function(a,b){ return b.n-a.n; }); var top=arr.slice(0,7).map(function(x){ return x.t+' '+x.n+'개'; }); if(!top.length) return ''; return '[중요 안내] 아래 숫자는 사용자가 앱 "내도감"에 담아둔(수집·기록한) 항목 수예요. 실제로 모두 경험/방문/완료했다는 뜻이 아닙니다. 그러니 "올랐다/다녀왔다/떠났다/봤다"처럼 실제 경험으로 단정하지 말고, "모았다/담았다/기록했다/골랐다"처럼 수집의 관점으로 표현해 주세요.\n\n도감에 담은 항목: '+top.join(', ')+'.'; }catch(e){ return ''; } }
 function ndAISetPersona(el){ try{ window.__wAiPersona=el.getAttribute('data-p'); try{ store.setItem('nd.aiPersona', window.__wAiPersona); }catch(_e){} var box=el.parentNode; box.querySelectorAll('.waiP').forEach(function(b){ b.classList.remove('on'); }); el.classList.add('on'); }catch(e){} }
