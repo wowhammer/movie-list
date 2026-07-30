@@ -1301,7 +1301,7 @@ body{ background:radial-gradient(circle at 50% -10%, rgba(102,78,57,.16), transp
         <svg class="brandmark" width="40" height="30" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg>
         <span class="brandwm"><span class="bwm-ko">내도감</span><span class="bwm-en">NAEDOGAM</span></span>
       </button>
-      <span class="mhver">v398β</span>
+      <span class="mhver">v399β</span>
       <span class="spacer"></span>
       <span class="src-chip" id="srcChip" style="display:none">데모</span>
       <button class="icon-btn" id="searchToggle" type="button" style="display:none">🔍</button>
@@ -2395,7 +2395,7 @@ function openDomain(id){ if(id==="mbti"){ openMbti(); return; } if(id==="period"
 
 /* 홈: 켜둔 카테고리를 카드로. 건수는 한 번 열어본 분야만 표시(홈을 빠르게 유지). */
 function ndDeep(h){ if(typeof h!=="string"||h.charAt(0)!=="#") h="#8a7a6a"; var n=parseInt(h.slice(1),16),r=(n>>16)&255,g=(n>>8)&255,b=n&255; function d(x,f){return Math.max(0,Math.min(255,Math.round(x*f)));} var d1="rgb("+d(r,.46)+","+d(g,.46)+","+d(b,.46)+")", d2="rgb("+d(r,.20)+","+d(g,.20)+","+d(b,.20)+")", gl="rgba("+r+","+g+","+b+",.16)"; return "radial-gradient(circle at 18% 14%,"+gl+",transparent 46%),linear-gradient(145deg,"+d1+","+d2+")"; }
-var ND_LOGO_HTML='<div class="ndh-brand"><svg width="47" height="35" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg><div class="ndh-wm"><b>내도감</b><small>NAEDOGAM</small></div><span class="mhver ndh-ver">v398β</span></div><button class="ndh-sync" type="button" title="동기화" aria-label="동기화" onclick="try{syncNow()}catch(e){}">↻</button>';
+var ND_LOGO_HTML='<div class="ndh-brand"><svg width="47" height="35" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg><div class="ndh-wm"><b>내도감</b><small>NAEDOGAM</small></div><span class="mhver ndh-ver">v399β</span></div><button class="ndh-sync" type="button" title="동기화" aria-label="동기화" onclick="try{syncNow()}catch(e){}">↻</button>';
 /* 홈 카드 크기: wide(넓게=한 줄 전체) · half(보통=한 줄 2개) · mini(작게=하단 3칸). 기본값=프리셋 */
 var ND_PRESET_SIZE={running:"wide",food:"wide",recipes:"wide",movies:"half",books:"half",period:"half",diary:"half",travel:"half",mountains:"half",culture:"half",albums:"half",cellar:"half",scrap:"half",wish:"half",gift:"half",pet:"half"};
 function getHomeSizes(){ try{ return JSON.parse(store.getItem("nd.homesize")||"{}")||{}; }catch(e){ return {}; } }
@@ -2671,7 +2671,7 @@ function renderHome(){
 
   const tabs = `<div class="ndh-tabs">`+active.map((m,i)=>`<button class="ndh-tab${i===0?" on":""}" data-id="${m.id}"${i===0?` style="background:${ND_COLORS[m.id]||"#48423a"};color:#fff6e8"`:""}>${iconOf(m)}<span>${m.title}</span></button>`).join("")+`</div>`;
   const _otd=_ndOnThisDay(); window._otdCache=_otd;
-  home.innerHTML=`<div class="ndhome"><div class="ndh-top">${ND_LOGO_HTML}</div>${tabs}<div class="ndh-dash">${_ndOtdNudgeHTML(_otd)}${heroCard}${_ndTodayCardHTML(_otd)}${(CONFIG.AI_PROXY_URL?'<button class="aistrip" onclick="openAIStory()"><span class="ms-ic">✨</span><span class="ms-b"><b>AI가 써주는 내 이야기</b> · 한 편의 글로</span><span class="ms-go">써보기 →</span></button>':'')}${out}<button class="card" id="ndAddCatCard" type="button" style="display:flex;align-items:center;justify-content:center;gap:8px;min-height:60px;border:1.5px dashed rgba(238,224,205,.3);background:transparent;color:var(--ink-soft,#c6b9a6);font-size:15px;font-weight:700;cursor:pointer;grid-column:1/-1;margin-top:2px">＋ 새 도감 추가</button></div></div>`;
+  home.innerHTML=`<div class="ndhome"><div class="ndh-top">${ND_LOGO_HTML}</div>${tabs}<div class="ndh-dash">${_ndOtdNudgeHTML(_otd)}${heroCard}${_ndTodayCardHTML(_otd)}${((MANIFESTS.diary && getActive().indexOf("diary")>=0)?'<button class="aistrip ndvoice" onclick="ndVoiceDiary()" style="background:linear-gradient(90deg,#6d28d9,#9333ea)"><span class="ms-ic">🎙</span><span class="ms-b"><b>말로 일기 쓰기</b> · 오늘 한마디</span><span class="ms-go">시작 →</span></button>':'')}${(CONFIG.AI_PROXY_URL?'<button class="aistrip" onclick="openAIStory()"><span class="ms-ic">✨</span><span class="ms-b"><b>AI가 써주는 내 이야기</b> · 한 편의 글로</span><span class="ms-go">써보기 →</span></button>':'')}${out}<button class="card" id="ndAddCatCard" type="button" style="display:flex;align-items:center;justify-content:center;gap:8px;min-height:60px;border:1.5px dashed rgba(238,224,205,.3);background:transparent;color:var(--ink-soft,#c6b9a6);font-size:15px;font-weight:700;cursor:pointer;grid-column:1/-1;margin-top:2px">＋ 새 도감 추가</button></div></div>`;
   home.querySelectorAll(".card[data-id],.ndh-tab[data-id]").forEach(b=>b.onclick=()=>openDomain(b.dataset.id));
   home.querySelectorAll(".otdTile[data-go]").forEach(function(b){ b.onclick=function(e){ if(e.target&&e.target.closest&&e.target.closest(".otdShare")) return; openDomain(b.getAttribute("data-go")); }; });
   home.querySelectorAll(".otdShare[data-share]").forEach(function(b){ b.onclick=function(e){ e.stopPropagation(); e.preventDefault(); var idx=+b.getAttribute("data-share"); _ndShareMemory((window._otdCache||[])[idx]); }; });
@@ -4245,7 +4245,8 @@ function _ndCalcPace(distStr,timeStr){
   return pm+"."+(ps<10?"0"+ps:String(ps));
 }
 function openRecordForm(m, existing, prefill){
-  const d=$("#add"); const isEdit=!!existing; const fields=(m.fields||[]).filter(f=>!f.hideForm);
+  const d=$("#add");
+  try{ _ndVoiceStop(); if(!d.__ndVoiceBound){ d.__ndVoiceBound=1; d.addEventListener("close", function(){ try{ _ndVoiceStop(); }catch(e){} }); } }catch(e){} const isEdit=!!existing; const fields=(m.fields||[]).filter(f=>!f.hideForm);
   const _cell=f=>{
     const val = existing ? existing[f.k] : (f.type==="bool"?false:"");
     if(f.type==="bool")
@@ -4395,6 +4396,9 @@ function openRecordForm(m, existing, prefill){
     const _df=d.querySelector('.rff .rf[data-k="date"]');
     if(_df) _df.addEventListener("change", ()=>fillDiaryLog(d, true));   // 날짜 바꾸면 그 날짜 활동 자동 채움
     fillDiaryLog(d, true);   // 폼 열 때 오늘 내도감 자동 채움(버튼 제거)
+    /* v399: 내용 칸에 마이크 — 홈에서 "말로 일기 쓰기"로 들어왔으면 자동으로 듣기 시작 */
+    try{ var _ta=d.querySelector('.rf[data-k="content"]'); var _auto=!!window.__ndVoiceAuto; window.__ndVoiceAuto=false;
+      if(_ta) _ndVoiceAttach(_ta, _auto); }catch(e){}
   }
   if(m.id==="cards"){
     const _cb=d.querySelector(".dbody.set");
@@ -7254,6 +7258,92 @@ function _ndIosLoginFallback(gb, gm){
       }catch(_){}
     }, 2500);
   }catch(_){}
+}
+/* ★v399: 음성일기 — 브라우저 내장 받아쓰기로 말한 것을 일기 '내용' 칸에 그대로 적는다.
+   별도 카테고리를 만들지 않는 이유: 기록이 두 곳으로 갈라지면 AI 이야기·회고·통계가 반쪽이 된다. */
+function _ndVoiceOK(){ try{ return !!(window.SpeechRecognition||window.webkitSpeechRecognition); }catch(e){ return false; } }
+function _ndVoiceStop(msg){
+  /* 여러 번 불려도 안전하게(멱등). 핸들러를 먼저 떼서 onend→stop 재귀를 끊는다. */
+  try{ var r=window.__ndRec; window.__ndRec=null;
+    if(r){ r.__want=false; try{ r.onend=null; r.onresult=null; r.onerror=null; }catch(e){} try{ r.stop(); }catch(e){} } }catch(e){}
+  try{ var b=document.getElementById("ndMicBtn"); if(b){ b.dataset.on="0"; b.textContent="🎙 말로 쓰기"; b.style.background="#7c3aed"; } }catch(e){}
+  try{ var h=document.getElementById("ndMicHint"); if(h) h.textContent=(msg||""); }catch(e){}
+}
+/* textarea 위에 마이크 버튼을 달아준다. autoStart=true면 열자마자 듣기 시작. */
+function _ndVoiceAttach(ta, autoStart){
+  try{
+    if(!ta || ta.dataset.ndmic==="1") return; ta.dataset.ndmic="1";
+    var wrap=document.createElement("div");
+    wrap.style.cssText="display:flex;align-items:center;gap:8px;margin:2px 0 6px;flex-wrap:wrap";
+    var btn=document.createElement("button"); btn.type="button"; btn.id="ndMicBtn"; btn.dataset.on="0";
+    btn.style.cssText="background:#7c3aed;color:#fff;border:none;border-radius:999px;padding:9px 16px;font-size:14px;font-weight:800;cursor:pointer;flex:0 0 auto";
+    btn.textContent="🎙 말로 쓰기";
+    var hint=document.createElement("span"); hint.id="ndMicHint";
+    hint.style.cssText="font-size:12.5px;color:var(--ink-soft,#8b8178);line-height:1.5;flex:1 1 140px;min-width:0";
+    wrap.appendChild(btn); wrap.appendChild(hint);
+    if(ta.parentNode) ta.parentNode.insertBefore(wrap, ta);
+
+    if(!_ndVoiceOK()){
+      btn.style.background="#9b9b9b";
+      btn.onclick=function(){ hint.textContent="이 브라우저는 받아쓰기를 지원하지 않아요. 키보드의 마이크(🎤) 버튼을 눌러 말해보세요."; };
+      hint.textContent="키보드 마이크(🎤)로도 말로 쓸 수 있어요";
+      return;
+    }
+    var SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+    var start=function(){
+      try{
+        var rec=new SR();
+        rec.lang="ko-KR"; rec.continuous=true; rec.interimResults=true; rec.__want=true; rec.__restarts=0;
+        rec.onresult=function(ev){
+          var fin="", itm="";
+          for(var i=ev.resultIndex;i<ev.results.length;i++){
+            var t=ev.results[i][0].transcript;
+            if(ev.results[i].isFinal) fin+=t; else itm+=t;
+          }
+          if(fin){
+            var cur=ta.value||"";
+            ta.value=(cur && !/\s$/.test(cur) ? cur+" " : cur)+fin.trim()+" ";
+            try{ ta.dispatchEvent(new Event("input",{bubbles:true})); }catch(e){}
+            ta.scrollTop=ta.scrollHeight;
+          }
+          hint.textContent=itm?("… "+itm):"듣는 중이에요 · 편하게 말해보세요";
+        };
+        rec.onerror=function(ev){
+          var c=(ev&&ev.error)||"";
+          if(c==="no-speech") return;                       /* 잠깐 조용한 건 오류 아님 */
+          if(c==="not-allowed"||c==="service-not-allowed"){ _ndVoiceStop("마이크 권한이 필요해요. 주소창 옆 자물쇠(또는 설정)에서 마이크를 허용해 주세요."); return; }
+          hint.textContent="받아쓰기 오류("+c+") · 다시 눌러보세요";
+        };
+        rec.onend=function(){
+          /* 크롬은 잠깐 조용하면 스스로 멈춘다 → 사용자가 멈추기 전엔 이어서 듣게 */
+          if(rec.__want && rec.__restarts<200){ rec.__restarts++; try{ rec.start(); return; }catch(e){} }
+          _ndVoiceStop();
+        };
+        window.__ndRec=rec; rec.start();
+        btn.dataset.on="1"; btn.textContent="⏹ 멈추기"; btn.style.background="#e0483f";
+        hint.textContent="듣는 중이에요 · 편하게 말해보세요";
+      }catch(e){ hint.textContent="받아쓰기를 시작하지 못했어요: "+((e&&e.message)||e); }
+    };
+    btn.onclick=function(){ if(btn.dataset.on==="1") _ndVoiceStop(); else start(); };
+    if(autoStart) setTimeout(start, 120);
+  }catch(e){}
+}
+/* 홈 "말로 일기 쓰기" → 일기 도감으로 이동 + 작성 폼 + 자동으로 듣기 시작 */
+function ndVoiceDiary(){
+  try{
+    var m=MANIFESTS.diary; if(!m) return;
+    var rows=(window.CACHE&&CACHE.diary)||loadPersist("diary")||[];
+    var _d=new Date(), today=_d.getFullYear()+"-"+String(_d.getMonth()+1).padStart(2,"0")+"-"+String(_d.getDate()).padStart(2,"0");
+    var ex=rows.filter(function(r){ return (typeof _isoOf==="function"?_isoOf(r.date):r.date)===today; })[0];
+    window.__ndVoiceAuto=true;
+    try{ openDomain("diary"); }catch(e){}
+    setTimeout(function(){
+      try{
+        if(ex && typeof _diaryAddChoice==="function") _diaryAddChoice(m, ex);
+        else openRecordForm(m, null);
+      }catch(e){}
+    }, 220);
+  }catch(e){}
 }
 function _gConsumeHash(){
   try{
