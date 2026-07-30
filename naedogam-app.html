@@ -1301,7 +1301,7 @@ body{ background:radial-gradient(circle at 50% -10%, rgba(102,78,57,.16), transp
         <svg class="brandmark" width="40" height="30" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg>
         <span class="brandwm"><span class="bwm-ko">내도감</span><span class="bwm-en">NAEDOGAM</span></span>
       </button>
-      <span class="mhver">v404β</span>
+      <span class="mhver">v405β</span>
       <span class="spacer"></span>
       <span class="src-chip" id="srcChip" style="display:none">데모</span>
       <button class="icon-btn" id="searchToggle" type="button" style="display:none">🔍</button>
@@ -2395,7 +2395,7 @@ function openDomain(id){ if(id==="mbti"){ openMbti(); return; } if(id==="period"
 
 /* 홈: 켜둔 카테고리를 카드로. 건수는 한 번 열어본 분야만 표시(홈을 빠르게 유지). */
 function ndDeep(h){ if(typeof h!=="string"||h.charAt(0)!=="#") h="#8a7a6a"; var n=parseInt(h.slice(1),16),r=(n>>16)&255,g=(n>>8)&255,b=n&255; function d(x,f){return Math.max(0,Math.min(255,Math.round(x*f)));} var d1="rgb("+d(r,.46)+","+d(g,.46)+","+d(b,.46)+")", d2="rgb("+d(r,.20)+","+d(g,.20)+","+d(b,.20)+")", gl="rgba("+r+","+g+","+b+",.16)"; return "radial-gradient(circle at 18% 14%,"+gl+",transparent 46%),linear-gradient(145deg,"+d1+","+d2+")"; }
-var ND_LOGO_HTML='<div class="ndh-brand"><svg width="47" height="35" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg><div class="ndh-wm"><b>내도감</b><small>NAEDOGAM</small></div><span class="mhver ndh-ver">v404β</span></div><button class="ndh-sync" type="button" title="동기화" aria-label="동기화" onclick="try{syncNow()}catch(e){}">↻</button>';
+var ND_LOGO_HTML='<div class="ndh-brand"><svg width="47" height="35" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg><div class="ndh-wm"><b>내도감</b><small>NAEDOGAM</small></div><span class="mhver ndh-ver">v405β</span></div><button class="ndh-sync" type="button" title="동기화" aria-label="동기화" onclick="try{syncNow()}catch(e){}">↻</button>';
 /* 홈 카드 크기: wide(넓게=한 줄 전체) · half(보통=한 줄 2개) · mini(작게=하단 3칸). 기본값=프리셋 */
 var ND_PRESET_SIZE={running:"wide",food:"wide",recipes:"wide",movies:"half",books:"half",period:"half",diary:"half",travel:"half",mountains:"half",culture:"half",albums:"half",cellar:"half",scrap:"half",wish:"half",gift:"half",pet:"half"};
 function getHomeSizes(){ try{ return JSON.parse(store.getItem("nd.homesize")||"{}")||{}; }catch(e){ return {}; } }
@@ -7278,10 +7278,33 @@ function _ndVoiceStop(msg){
     if(r){ r.__want=false; try{ r.onend=null; r.onresult=null; r.onerror=null; }catch(e){} try{ r.stop(); }catch(e){} } }catch(e){}
   try{ var a=window.__ndMic; window.__ndMic=null;
     if(a){ try{ if(a.idle) clearTimeout(a.idle); }catch(e){}
+      try{ if(a.fin) a.fin(); }catch(e){}   /* v405: 마지막 문장 부호 마무리 */
       if(a.btn){ a.btn.dataset.on="0"; a.btn.textContent=a.label; a.btn.style.background="#7c3aed"; }
       if(a.hint) a.hint.textContent=(msg||"");
       try{ if(a.el) a.el.dispatchEvent(new Event("change",{bubbles:true})); }catch(e){}   /* v402: 자동 저장 트리거 */
     } }catch(e){}
+}
+/* v405: 말로 문장부호 넣기 — "마침표/쉼표/물음표/느낌표/따옴표/줄바꿈" */
+function _ndVoiceCmds(t){
+  return String(t||"")
+    .replace(/\s*마침표\s*/g, ". ")
+    .replace(/\s*쉼표\s*/g, ", ")
+    .replace(/\s*물음표\s*/g, "? ")
+    .replace(/\s*느낌표\s*/g, "! ")
+    .replace(/\s*(큰따옴표|따옴표)\s*/g, '"')
+    .replace(/\s*(줄바꿈|엔터|다음\s*줄)\s*/g, "\n")
+    .replace(/\s+([.,!?])/g, "$1")
+    .replace(/[ \t]{2,}/g, " ");
+}
+/* v405: 끊긴 조각의 끝말이 종결어미일 때만 부호를 붙인다(쉬어간 자리는 그대로 둔다). */
+function _ndVoicePunct(t){
+  t=String(t||"").replace(/\s+$/,"");
+  if(!t) return t;
+  if(/[.!?…,"'\)\]\n]$/.test(t)) return t;                                  /* 이미 부호 있음 */
+  if(/(까|까요|나요|가요|는가|은가|을까|런가|답니까|습니까)$/.test(t)) return t+"?";   /* "니"는 그러니·하니 같은 연결어미와 겹쳐 제외 */
+  if(/(구나|군요|다니|라니)$/.test(t)) return t+"!";   /* 느낌표는 확실한 감탄형에만 */
+  if(/(다|요|죠|네|네요|군|니다|세요|이다|아니다|같아|이야|거야|어요|았어|었어|잖아|잖아요|더라|해|지)$/.test(t)) return t+".";
+  return t;                                                                  /* 종결어미 아님 → 그대로 */
 }
 /* 조각 합치기: 새 조각이 직전 조각을 '늘린 것'이면 덧붙이지 말고 교체한다.
    (안드로이드 크롬은 "오늘" → "오늘 하루는" → "오늘 하루는 괜찮은" 식으로 계속 보낸다) */
@@ -7320,8 +7343,12 @@ function _ndVoiceAttach(el, autoStart){
     }
     var SR=window.SpeechRecognition||window.webkitSpeechRecognition;
     var parts=[], committed=[], head="";
+    var _fin=false;   /* 멈춤 여부 — 마지막 조각 부호는 멈출 때만 */
     var render=function(){
-      var body=parts.join(" ").replace(/\s+/g," ").trim();
+      var body=parts.map(function(t,i){
+        return (i<parts.length-1 || _fin) ? _ndVoicePunct(t) : t;   /* v405: 끊긴 자리에만 부호 */
+      }).join(" ");
+      body=_ndVoiceCmds(body).replace(/[ \t]+/g," ").trim();
       var v=(head?(head.replace(/\s+$/,"")+(body?" ":"")):"")+body;
       el.value = single ? v.replace(/\n+/g," ") : v;
       try{ el.dispatchEvent(new Event("input",{bubbles:true})); }catch(e){}
@@ -7358,15 +7385,17 @@ function _ndVoiceAttach(el, autoStart){
           if(rec.__want && rec.__restarts<200){ rec.__restarts++; committed=parts.slice(); try{ rec.start(); return; }catch(e){} }
           _ndVoiceStop();
         };
-        window.__ndRec=rec; window.__ndMic={btn:btn,hint:hint,label:label,idle:null,el:el};
+        window.__ndRec=rec; window.__ndMic={btn:btn,hint:hint,label:label,idle:null,el:el,
+          fin:function(){ try{ _fin=true; render(); }catch(e){} }};
         rec.start();
         btn.dataset.on="1"; btn.textContent="⏹ 멈추기"; btn.style.background="#e0483f";
-        hint.textContent="듣는 중이에요 · 편하게 말해보세요";
+        hint.textContent="듣는 중이에요 · \"마침표\" \"물음표\" \"줄바꿈\"이라고 말해도 돼요";
       }catch(e){ hint.textContent="받아쓰기를 시작하지 못했어요: "+((e&&e.message)||e); }
     };
     btn.onclick=function(){
       if(btn.dataset.on==="1"){ _ndVoiceStop(); return; }
       head=String(el.value||"");    /* 이미 써둔 글은 앞에 그대로 둔다 */
+      _fin=false;
       parts=[]; committed=[];
       start();
     };
