@@ -1301,7 +1301,7 @@ body{ background:radial-gradient(circle at 50% -10%, rgba(102,78,57,.16), transp
         <svg class="brandmark" width="40" height="30" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg>
         <span class="brandwm"><span class="bwm-ko">내도감</span><span class="bwm-en">NAEDOGAM</span></span>
       </button>
-      <span class="mhver">v395β</span>
+      <span class="mhver">v396β</span>
       <span class="spacer"></span>
       <span class="src-chip" id="srcChip" style="display:none">데모</span>
       <button class="icon-btn" id="searchToggle" type="button" style="display:none">🔍</button>
@@ -2395,7 +2395,7 @@ function openDomain(id){ if(id==="mbti"){ openMbti(); return; } if(id==="period"
 
 /* 홈: 켜둔 카테고리를 카드로. 건수는 한 번 열어본 분야만 표시(홈을 빠르게 유지). */
 function ndDeep(h){ if(typeof h!=="string"||h.charAt(0)!=="#") h="#8a7a6a"; var n=parseInt(h.slice(1),16),r=(n>>16)&255,g=(n>>8)&255,b=n&255; function d(x,f){return Math.max(0,Math.min(255,Math.round(x*f)));} var d1="rgb("+d(r,.46)+","+d(g,.46)+","+d(b,.46)+")", d2="rgb("+d(r,.20)+","+d(g,.20)+","+d(b,.20)+")", gl="rgba("+r+","+g+","+b+",.16)"; return "radial-gradient(circle at 18% 14%,"+gl+",transparent 46%),linear-gradient(145deg,"+d1+","+d2+")"; }
-var ND_LOGO_HTML='<div class="ndh-brand"><svg width="47" height="35" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg><div class="ndh-wm"><b>내도감</b><small>NAEDOGAM</small></div><span class="mhver ndh-ver">v395β</span></div><button class="ndh-sync" type="button" title="동기화" aria-label="동기화" onclick="try{syncNow()}catch(e){}">↻</button>';
+var ND_LOGO_HTML='<div class="ndh-brand"><svg width="47" height="35" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg><div class="ndh-wm"><b>내도감</b><small>NAEDOGAM</small></div><span class="mhver ndh-ver">v396β</span></div><button class="ndh-sync" type="button" title="동기화" aria-label="동기화" onclick="try{syncNow()}catch(e){}">↻</button>';
 /* 홈 카드 크기: wide(넓게=한 줄 전체) · half(보통=한 줄 2개) · mini(작게=하단 3칸). 기본값=프리셋 */
 var ND_PRESET_SIZE={running:"wide",food:"wide",recipes:"wide",movies:"half",books:"half",period:"half",diary:"half",travel:"half",mountains:"half",culture:"half",albums:"half",cellar:"half",scrap:"half",wish:"half",gift:"half",pet:"half"};
 function getHomeSizes(){ try{ return JSON.parse(store.getItem("nd.homesize")||"{}")||{}; }catch(e){ return {}; } }
@@ -3997,7 +3997,7 @@ async function setMovieReviewDeploy(m,r,v){
 async function openMovieDetailDeploy(m, r){
   const d=$("#detail");
   const people=[personSpan(r.director,"director"), personSpan(r.actors,"actor")].filter(Boolean).join(' <span style="color:var(--line)">/</span> ');
-  const stream=(r.streaming||[]).map(t=>`<span class="tag">${t}</span>`).join("");
+  const stream=_ndArr(r.streaming).map(t=>`<span class="tag">${t}</span>`).join("");
   const metaBits=[r.year, r.country, (r.tmdbRating?("⭐"+r.tmdbRating):"")].filter(Boolean).join(" · ");
   d.innerHTML=`<div class="dhead"><h3>${r.title||"(제목 없음)"}</h3><div class="dh-actions"><button class="dh-btn" id="dEdit">수정</button><button class="dh-btn dh-del" id="dDel">삭제</button><button class="dclose-x" onclick="this.closest('dialog').close()" aria-label="닫기">✕</button></div></div>
     <div class="mvtop">
@@ -4043,8 +4043,8 @@ async function openMovieDetailDeploy(m, r){
 async function openMovieDetail(m, r){
   const d=$("#detail");
   const people=[personSpan(r.director,"director"), personSpan(r.actors,"actor")].filter(Boolean).join(' <span style="color:var(--line)">/</span> ');
-  const stream=(r.streaming||[]).map(t=>`<span class="tag">${t}</span>`).join("");
-  const rec=(r.recommendList||[]).map(t=>`<span class="tag rec">${t}</span>`).join("");
+  const stream=_ndArr(r.streaming).map(t=>`<span class="tag">${t}</span>`).join("");
+  const rec=_ndArr(r.recommendList).map(t=>`<span class="tag rec">${t}</span>`).join("");
   d.innerHTML=`<div class="dhead"><h3>${r.title}</h3><div class="dh-actions"><button class="dh-btn" id="dEdit">수정</button><button class="dh-btn dh-del" id="dDel">삭제</button><button class="dclose-x" onclick="this.closest('dialog').close()" aria-label="닫기">✕</button></div></div>
     <div class="mvtop">
       <div class="mvposter" id="mvPoster">🎬</div>
@@ -4776,6 +4776,13 @@ function openRecModal(key){
   if(!d.open) d.showModal();
 }
 
+/* v396: 시트 값이 배열일 수도, 한 개짜리 문자열일 수도 있다(coerce는 "|"가 있을 때만 배열로 만듦).
+   어느 쪽이 와도 배열로 돌려줘 카드 렌더가 터지지 않게 한다. */
+function _ndArr(v){
+  if(Array.isArray(v)) return v.map(function(x){ return String(x).trim(); }).filter(Boolean);
+  if(v==null || v==="") return [];
+  return String(v).split(/[|,\/]+/).map(function(x){ return x.trim(); }).filter(Boolean);
+}
 function movieCard(r, no){
   const wb = ((r.watched==="O"||r.watched===true)?`<span class="wb wb-W">시청</span>`:"")
     + ((r.rating!=null&&r.rating!=="")?`<span class="wb" style="background:#fef3c7;color:#b45309">★ ${r.rating}</span>`:"")
@@ -4786,8 +4793,8 @@ function movieCard(r, no){
   const actorFirst = (r.actors||"").split(/[,，]/)[0].trim();
   const act = actorFirst ? personSpan(actorFirst,"actor") : "";
   const sub = (dir||act) ? dir + (dir&&act?` <span style="color:#ddd">/</span> `:"") + act : "";
-  const stream=(r.streaming||[]).map(t=>{ const x=SC[t]||{bg:'#f0f0f0',c:'#666'}; return `<span class="sbadge" style="background:${x.bg};color:${x.c}">${t}</span>`; }).join("");
-  const _recArr=(r.recommendList&&r.recommendList.length)?r.recommendList:String(r.recommend||"").split(/[\/,]+/).map(x=>x.trim()).filter(Boolean);
+  const stream=_ndArr(r.streaming).map(t=>{ const x=SC[t]||{bg:'#f0f0f0',c:'#666'}; return `<span class="sbadge" style="background:${x.bg};color:${x.c}">${t}</span>`; }).join("");
+  const _recArr=_ndArr(r.recommendList).length?_ndArr(r.recommendList):_ndArr(r.recommend);
   const rec=_recArr.map(t=>{
     const key=Object.keys(REC_INFO).find(k=>t.includes(k));
     return key ? `<span class="rbadge clk" onclick="event.stopPropagation();openRecModal('${key}')">${t}</span>`
@@ -4808,8 +4815,8 @@ function movieCard(r, no){
 function movieSelectValues(rows, scope){
   const seen=new Set();
   rows.forEach(r=>{
-    let arr = scope==="stream" ? (r.streaming||[])
-      : scope==="rec" ? ((r.recommendList&&r.recommendList.length)?r.recommendList:String(r.recommend||"").split(/[\/,]+/).map(function(x){return x.trim();}).filter(Boolean))
+    let arr = scope==="stream" ? _ndArr(r.streaming)
+      : scope==="rec" ? (_ndArr(r.recommendList).length?_ndArr(r.recommendList):_ndArr(r.recommend))
       : String(r.director||"").split(/[,\/]+/);        // 감독
     arr.forEach(v=>{ const t=String(v).trim(); if(t) seen.add(t); });
   });
@@ -4817,8 +4824,8 @@ function movieSelectValues(rows, scope){
 }
 function movieSearch(rows, scope, q, sel){
   if(scope==="director") return sel ? rows.filter(r=>String(r.director||"").includes(sel)) : rows;
-  if(scope==="stream")   return sel ? rows.filter(r=>(r.streaming||[]).includes(sel)) : rows;
-  if(scope==="rec")      return sel ? rows.filter(function(r){ var a=(r.recommendList&&r.recommendList.length)?r.recommendList:String(r.recommend||"").split(/[\/,]+/).map(function(x){return x.trim();}).filter(Boolean); return a.indexOf(sel)>=0; }) : rows;
+  if(scope==="stream")   return sel ? rows.filter(r=>_ndArr(r.streaming).includes(sel)) : rows;
+  if(scope==="rec")      return sel ? rows.filter(function(r){ var a=_ndArr(r.recommendList).length?_ndArr(r.recommendList):_ndArr(r.recommend); return a.indexOf(sel)>=0; }) : rows;
   const nq=(q||"").toLowerCase().replace(/\s+/g,""); if(!nq) return rows;
   const norm=s=>String(s==null?"":s).toLowerCase().replace(/\s+/g,"");
   if(scope==="actor") return rows.filter(r=>norm(r.actors).includes(nq));
@@ -4868,7 +4875,11 @@ function paintMovies(m){
   const emptyM = (_q && (state.searchScope||"title")==="title")
     ? `<div class="noresult"><div class="nr-t">검색 결과 없음</div><div class="nr-s">"${_q}"는 목록에 없어요</div><button class="btn nr-add" id="nrAdd">+ "${_q}" 새로 추가</button></div>`
     : `<div class="count">결과가 없습니다.</div>`;
-  $("#list").innerHTML = (shown.map((r,i)=>movieCard(r,i+1)).join("")||emptyM)
+  /* ★v396: 항목 하나가 오류나도 나머지는 보이게(예전엔 한 줄 때문에 목록 전체가 백지). */
+  var _bad=0;
+  var _cards=shown.map(function(r,i){ try{ return movieCard(r,i+1); }catch(_e){ _bad++; return '<div class="card mvcard" data-id="'+(r&&r._id)+'"><div class="mvinfo"><div class="mv-titlerow"><span class="mv-title">'+String((r&&r.title)||"(제목 없음)")+'</span></div><div class="mv-sub" style="color:#e0483f">이 항목은 표시에 문제가 있어요 · 눌러서 수정</div></div></div>'; } }).join("");
+  if(_bad){ try{ _ndNetSet(_bad+"개 항목이 표시에 문제가 있어 간단히 보여드려요"); }catch(_e){} }
+  $("#list").innerHTML = (_cards||emptyM)
     + (shown.length<total?`<button class="btn ghost" id="moreBtn" style="width:100%;margin-top:10px">더 보기 (${total-shown.length}편)</button>`:"");
   $("#list").querySelectorAll(".card").forEach((b,i)=>{ const r=shown[i]; if(r){ b.onclick=()=>openDetail(m, r); } });
   { const na=$("#nrAdd"); if(na) na.onclick=()=>{ openAddMovie(); const mq=$("#mq"); if(mq){ mq.value=state.query; mq.dispatchEvent(new Event("input")); } }; }
