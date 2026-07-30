@@ -1301,7 +1301,7 @@ body{ background:radial-gradient(circle at 50% -10%, rgba(102,78,57,.16), transp
         <svg class="brandmark" width="40" height="30" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg>
         <span class="brandwm"><span class="bwm-ko">내도감</span><span class="bwm-en">NAEDOGAM</span></span>
       </button>
-      <span class="mhver">v400β</span>
+      <span class="mhver">v401β</span>
       <span class="spacer"></span>
       <span class="src-chip" id="srcChip" style="display:none">데모</span>
       <button class="icon-btn" id="searchToggle" type="button" style="display:none">🔍</button>
@@ -2395,7 +2395,7 @@ function openDomain(id){ if(id==="mbti"){ openMbti(); return; } if(id==="period"
 
 /* 홈: 켜둔 카테고리를 카드로. 건수는 한 번 열어본 분야만 표시(홈을 빠르게 유지). */
 function ndDeep(h){ if(typeof h!=="string"||h.charAt(0)!=="#") h="#8a7a6a"; var n=parseInt(h.slice(1),16),r=(n>>16)&255,g=(n>>8)&255,b=n&255; function d(x,f){return Math.max(0,Math.min(255,Math.round(x*f)));} var d1="rgb("+d(r,.46)+","+d(g,.46)+","+d(b,.46)+")", d2="rgb("+d(r,.20)+","+d(g,.20)+","+d(b,.20)+")", gl="rgba("+r+","+g+","+b+",.16)"; return "radial-gradient(circle at 18% 14%,"+gl+",transparent 46%),linear-gradient(145deg,"+d1+","+d2+")"; }
-var ND_LOGO_HTML='<div class="ndh-brand"><svg width="47" height="35" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg><div class="ndh-wm"><b>내도감</b><small>NAEDOGAM</small></div><span class="mhver ndh-ver">v400β</span></div><button class="ndh-sync" type="button" title="동기화" aria-label="동기화" onclick="try{syncNow()}catch(e){}">↻</button>';
+var ND_LOGO_HTML='<div class="ndh-brand"><svg width="47" height="35" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg><div class="ndh-wm"><b>내도감</b><small>NAEDOGAM</small></div><span class="mhver ndh-ver">v401β</span></div><button class="ndh-sync" type="button" title="동기화" aria-label="동기화" onclick="try{syncNow()}catch(e){}">↻</button>';
 /* 홈 카드 크기: wide(넓게=한 줄 전체) · half(보통=한 줄 2개) · mini(작게=하단 3칸). 기본값=프리셋 */
 var ND_PRESET_SIZE={running:"wide",food:"wide",recipes:"wide",movies:"half",books:"half",period:"half",diary:"half",travel:"half",mountains:"half",culture:"half",albums:"half",cellar:"half",scrap:"half",wish:"half",gift:"half",pet:"half"};
 function getHomeSizes(){ try{ return JSON.parse(store.getItem("nd.homesize")||"{}")||{}; }catch(e){ return {}; } }
@@ -4400,6 +4400,7 @@ function openRecordForm(m, existing, prefill){
     try{ var _ta=d.querySelector('.rf[data-k="content"]'); var _auto=!!window.__ndVoiceAuto; window.__ndVoiceAuto=false;
       if(_ta) _ndVoiceAttach(_ta, _auto); }catch(e){}
   }
+  try{ _ndVoiceAttachForm(d, m); }catch(e){}   /* v401: 전 카테고리 음성 입력 */
   if(m.id==="cards"){
     const _cb=d.querySelector(".dbody.set");
     if(_cb){ const _sb=document.createElement("button"); _sb.type="button"; _sb.className="btn ghost"; _sb.textContent="🔍 혜택 검색"; _sb.style.cssText="flex:1 1 100%;margin-bottom:8px"; _cb.insertBefore(_sb, _cb.firstChild);
@@ -7263,13 +7264,14 @@ function _ndIosLoginFallback(gb, gm){
    별도 카테고리를 만들지 않는 이유: 기록이 두 곳으로 갈라지면 AI 이야기·회고·통계가 반쪽이 된다. */
 function _ndVoiceOK(){ try{ return !!(window.SpeechRecognition||window.webkitSpeechRecognition); }catch(e){ return false; } }
 function _ndVoiceStop(msg){
-  /* 여러 번 불려도 안전하게(멱등). 핸들러를 먼저 떼서 onend→stop 재귀를 끊는다. */
+  /* 여러 번 불려도 안전(멱등). 핸들러를 먼저 떼어 onend→stop 재귀를 끊는다. */
   try{ var r=window.__ndRec; window.__ndRec=null;
     if(r){ r.__want=false; try{ r.onend=null; r.onresult=null; r.onerror=null; }catch(e){} try{ r.stop(); }catch(e){} } }catch(e){}
-  try{ var b=document.getElementById("ndMicBtn"); if(b){ b.dataset.on="0"; b.textContent="🎙 말로 쓰기"; b.style.background="#7c3aed"; } }catch(e){}
-  try{ var h=document.getElementById("ndMicHint"); if(h) h.textContent=(msg||""); }catch(e){}
+  try{ var a=window.__ndMic; window.__ndMic=null;
+    if(a){ try{ if(a.idle) clearTimeout(a.idle); }catch(e){}
+      if(a.btn){ a.btn.dataset.on="0"; a.btn.textContent=a.label; a.btn.style.background="#7c3aed"; }
+      if(a.hint) a.hint.textContent=(msg||""); } }catch(e){}
 }
-/* textarea 위에 마이크 버튼을 달아준다. autoStart=true면 열자마자 듣기 시작. */
 /* 조각 합치기: 새 조각이 직전 조각을 '늘린 것'이면 덧붙이지 말고 교체한다.
    (안드로이드 크롬은 "오늘" → "오늘 하루는" → "오늘 하루는 괜찮은" 식으로 계속 보낸다) */
 function _ndVoiceMerge(base, add){
@@ -7283,18 +7285,21 @@ function _ndVoiceMerge(base, add){
   }
   return out;
 }
-function _ndVoiceAttach(ta, autoStart){
+/* 어떤 칸에든 마이크를 달아준다. input(한 줄)이면 말이 끝나고 잠시 뒤 자동 정지. */
+function _ndVoiceAttach(el, autoStart){
   try{
-    if(!ta || ta.dataset.ndmic==="1") return; ta.dataset.ndmic="1";
-    var wrap=document.createElement("div");
-    wrap.style.cssText="display:flex;align-items:center;gap:8px;margin:2px 0 6px;flex-wrap:wrap";
-    var btn=document.createElement("button"); btn.type="button"; btn.id="ndMicBtn"; btn.dataset.on="0";
-    btn.style.cssText="background:#7c3aed;color:#fff;border:none;border-radius:999px;padding:9px 16px;font-size:14px;font-weight:800;cursor:pointer;flex:0 0 auto";
-    btn.textContent="🎙 말로 쓰기";
-    var hint=document.createElement("span"); hint.id="ndMicHint";
-    hint.style.cssText="font-size:12.5px;color:var(--ink-soft,#8b8178);line-height:1.5;flex:1 1 140px;min-width:0";
+    if(!el || el.dataset.ndmic==="1") return; el.dataset.ndmic="1";
+    var single=(String(el.tagName||"").toUpperCase()==="INPUT");
+    var label=single?"🎙 말로 입력":"🎙 말로 쓰기";
+    var wrap=document.createElement("div"); wrap.className="ndMicRow";
+    wrap.style.cssText="display:flex;align-items:center;gap:7px;margin:2px 0 6px;flex-wrap:wrap";
+    var btn=document.createElement("button"); btn.type="button"; btn.className="ndMicBtn"; btn.dataset.on="0";
+    btn.style.cssText="background:#7c3aed;color:#fff;border:none;border-radius:999px;padding:"+(single?"6px 13px":"9px 16px")+";font-size:"+(single?"12.5px":"14px")+";font-weight:800;cursor:pointer;flex:0 0 auto";
+    btn.textContent=label;
+    var hint=document.createElement("span"); hint.className="ndMicHint";
+    hint.style.cssText="font-size:12px;color:var(--ink-soft,#8b8178);line-height:1.5;flex:1 1 120px;min-width:0";
     wrap.appendChild(btn); wrap.appendChild(hint);
-    if(ta.parentNode) ta.parentNode.insertBefore(wrap, ta);
+    if(el.parentNode) el.parentNode.insertBefore(wrap, el);
 
     if(!_ndVoiceOK()){
       btn.style.background="#9b9b9b";
@@ -7303,17 +7308,17 @@ function _ndVoiceAttach(ta, autoStart){
       return;
     }
     var SR=window.SpeechRecognition||window.webkitSpeechRecognition;
-    var parts=[];        /* 지금까지 받아쓴 조각들(재시작해도 유지) */
-    var committed=[];    /* 이번 인식 세션이 시작될 때의 스냅샷 */
-    var head="";         /* 말하기 전에 손으로 써둔 글 */
+    var parts=[], committed=[], head="";
     var render=function(){
       var body=parts.join(" ").replace(/\s+/g," ").trim();
-      ta.value=(head?(head.replace(/\s+$/,"")+(body?" ":"")):"")+body;
-      try{ ta.dispatchEvent(new Event("input",{bubbles:true})); }catch(e){}
-      ta.scrollTop=ta.scrollHeight;
+      var v=(head?(head.replace(/\s+$/,"")+(body?" ":"")):"")+body;
+      el.value = single ? v.replace(/\n+/g," ") : v;
+      try{ el.dispatchEvent(new Event("input",{bubbles:true})); }catch(e){}
+      if(!single) el.scrollTop=el.scrollHeight;
     };
     var start=function(){
       try{
+        if(window.__ndRec) _ndVoiceStop();          /* 마이크는 한 번에 하나만 */
         var rec=new SR();
         rec.lang="ko-KR"; rec.continuous=true; rec.interimResults=true; rec.__want=true; rec.__restarts=0;
         committed=parts.slice();
@@ -7324,9 +7329,13 @@ function _ndVoiceAttach(ta, autoStart){
             if(ev.results[i].isFinal) sess=_ndVoiceMerge(sess,[t]);
             else itm+=t;
           }
-          parts=_ndVoiceMerge(committed, sess);   /* 항상 처음부터 다시 그린다 → 중복 누적 불가 */
+          parts=_ndVoiceMerge(committed, sess);     /* 항상 처음부터 다시 그린다 → 중복 누적 불가 */
           render();
           hint.textContent=itm?("… "+itm):"듣는 중이에요 · 편하게 말해보세요";
+          if(single && parts.length){                /* 한 줄 칸: 말 끝나면 스스로 멈춤 */
+            try{ var a=window.__ndMic; if(a){ if(a.idle) clearTimeout(a.idle);
+              a.idle=setTimeout(function(){ _ndVoiceStop("적었어요 · 고치거나 다시 눌러 말하세요"); }, 1800); } }catch(e){}
+          }
         };
         rec.onerror=function(ev){
           var c=(ev&&ev.error)||"";
@@ -7335,22 +7344,36 @@ function _ndVoiceAttach(ta, autoStart){
           hint.textContent="받아쓰기 오류("+c+") · 다시 눌러보세요";
         };
         rec.onend=function(){
-          /* 크롬은 잠깐 조용하면 스스로 멈춘다 → 사용자가 멈추기 전엔 이어서 듣게 */
           if(rec.__want && rec.__restarts<200){ rec.__restarts++; committed=parts.slice(); try{ rec.start(); return; }catch(e){} }
           _ndVoiceStop();
         };
-        window.__ndRec=rec; rec.start();
+        window.__ndRec=rec; window.__ndMic={btn:btn,hint:hint,label:label,idle:null};
+        rec.start();
         btn.dataset.on="1"; btn.textContent="⏹ 멈추기"; btn.style.background="#e0483f";
         hint.textContent="듣는 중이에요 · 편하게 말해보세요";
       }catch(e){ hint.textContent="받아쓰기를 시작하지 못했어요: "+((e&&e.message)||e); }
     };
     btn.onclick=function(){
       if(btn.dataset.on==="1"){ _ndVoiceStop(); return; }
-      head=String(ta.value||"");   /* 지금까지 손으로 쓴 글은 앞에 그대로 둔다 */
+      head=String(el.value||"");    /* 이미 써둔 글은 앞에 그대로 둔다 */
       parts=[]; committed=[];
       start();
     };
     if(autoStart) setTimeout(function(){ if(btn.dataset.on!=="1") btn.click(); }, 120);
+  }catch(e){}
+}
+/* 작성 폼 전체에 마이크 달기 — 긴 글 칸 전부 + 제목/이름 칸 */
+function _ndVoiceAttachForm(d, m){
+  try{
+    if(!d) return;
+    var tas=d.querySelectorAll("textarea.rf");
+    for(var i=0;i<tas.length;i++) _ndVoiceAttach(tas[i], false);
+    var keys=["title","name"];
+    (((m&&m.fields)||[])).forEach(function(f){
+      if(f.type!=="text" || keys.indexOf(f.k)<0) return;
+      var el=d.querySelector('.rf[data-k="'+f.k+'"]');
+      if(el && String(el.tagName||"").toUpperCase()==="INPUT") _ndVoiceAttach(el, false);
+    });
   }catch(e){}
 }
 /* 홈 "말로 일기 쓰기" → 일기 도감으로 이동 + 작성 폼 + 자동으로 듣기 시작 */
