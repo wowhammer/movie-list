@@ -1301,7 +1301,7 @@ body{ background:radial-gradient(circle at 50% -10%, rgba(102,78,57,.16), transp
         <svg class="brandmark" width="40" height="30" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg>
         <span class="brandwm"><span class="bwm-ko">내도감</span><span class="bwm-en">NAEDOGAM</span></span>
       </button>
-      <span class="mhver">v409β</span>
+      <span class="mhver">v410β</span>
       <span class="spacer"></span>
       <span class="src-chip" id="srcChip" style="display:none">데모</span>
       <button class="icon-btn" id="searchToggle" type="button" style="display:none">🔍</button>
@@ -2395,7 +2395,7 @@ function openDomain(id){ if(id==="mbti"){ openMbti(); return; } if(id==="period"
 
 /* 홈: 켜둔 카테고리를 카드로. 건수는 한 번 열어본 분야만 표시(홈을 빠르게 유지). */
 function ndDeep(h){ if(typeof h!=="string"||h.charAt(0)!=="#") h="#8a7a6a"; var n=parseInt(h.slice(1),16),r=(n>>16)&255,g=(n>>8)&255,b=n&255; function d(x,f){return Math.max(0,Math.min(255,Math.round(x*f)));} var d1="rgb("+d(r,.46)+","+d(g,.46)+","+d(b,.46)+")", d2="rgb("+d(r,.20)+","+d(g,.20)+","+d(b,.20)+")", gl="rgba("+r+","+g+","+b+",.16)"; return "radial-gradient(circle at 18% 14%,"+gl+",transparent 46%),linear-gradient(145deg,"+d1+","+d2+")"; }
-var ND_LOGO_HTML='<div class="ndh-brand"><svg width="47" height="35" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg><div class="ndh-wm"><b>내도감</b><small>NAEDOGAM</small></div><span class="mhver ndh-ver">v409β</span></div><button class="ndh-sync" type="button" title="동기화" aria-label="동기화" onclick="try{syncNow()}catch(e){}">↻</button>';
+var ND_LOGO_HTML='<div class="ndh-brand"><svg width="47" height="35" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg><div class="ndh-wm"><b>내도감</b><small>NAEDOGAM</small></div><span class="mhver ndh-ver">v410β</span></div><button class="ndh-sync" type="button" title="동기화" aria-label="동기화" onclick="try{syncNow()}catch(e){}">↻</button>';
 /* 홈 카드 크기: wide(넓게=한 줄 전체) · half(보통=한 줄 2개) · mini(작게=하단 3칸). 기본값=프리셋 */
 var ND_PRESET_SIZE={running:"wide",food:"wide",recipes:"wide",movies:"half",books:"half",period:"half",diary:"half",travel:"half",mountains:"half",culture:"half",albums:"half",cellar:"half",scrap:"half",wish:"half",gift:"half",pet:"half"};
 function getHomeSizes(){ try{ return JSON.parse(store.getItem("nd.homesize")||"{}")||{}; }catch(e){ return {}; } }
@@ -5843,7 +5843,10 @@ var AI_WITNESS_STEER='너는 이 사람 옆에서 오래 지켜본, 다정하지
 /* ① 재료 수집기 — 실제 산 나(한 것)에 무게. 담은 것 아님. (내도감_영혼_박제) */
 function _buildLifeContext(ids, data){
   try{
-    var L=[];
+    /* ★v410: 재료를 층으로 나눠 넘긴다. 층마다 '무엇을 말해도 되는지'가 다르다. */
+    var L=['[재료 읽는 법] A=실제로 한 일(행동). B=일기(자기 삶에 대해 직접 쓴 글). '
+          +'C=작품 감상평(삶이 아니라 작품에 대한 평). D=취향. E=적어두고 아직 안 한 것. F=패턴과 변화.'
+          +' ★감정은 B에서만 가져올 수 있다. C를 감정의 근거로 쓰지 마라.'];
     var has=function(id){ return (data&&data[id]&&data[id].length)?data[id]:null; };
     var norm=function(s){ return String(s==null?"":s).replace(/\s+/g,' ').trim(); };
     var cut=function(s,n){ s=norm(s); return s.length>n ? s.slice(0,n)+'…' : s; };
@@ -5870,7 +5873,7 @@ function _buildLifeContext(ids, data){
       for(var i=1;i<uniq.length;i++){ var gap=Math.round((new Date(uniq[i])-new Date(uniq[i-1]))/864e5); if(gap===1){ streak++; if(streak>best) best=streak; } else streak=1; }
       var wp=run.slice().sort(function(a,b){ return String(iso(b.date)).localeCompare(String(iso(a.date))); }).filter(function(r){ return norm(r.pace); });
       var pace=wp.length?norm(wp[0].pace):'';
-      L.push('[꾸준함·한 것] 러닝을 '+run.length+'번 실제로 뛰었고 누적 '+(Math.round(totalDist*10)/10)+'km. 최근 4주에 '+recent4+'번'+(best>1?(', 최장 '+best+'일 연속'):'')+'.'+(pace?(' 최근 페이스 '+pace):''));
+      L.push('[A·실제로 한 일] 러닝을 '+run.length+'번 실제로 뛰었고 누적 '+(Math.round(totalDist*10)/10)+'km. 최근 4주에 '+recent4+'번'+(best>1?(', 최장 '+best+'일 연속'):'')+'.'+(pace?(' 최근 페이스 '+pace):''));
     }
     var mtn=has('mountains');
     if(mtn){
@@ -5879,31 +5882,31 @@ function _buildLifeContext(ids, data){
         var regs={}; went.forEach(function(r){ var g=norm(r.region); if(g) regs[g]=(regs[g]||0)+1; });
         var regArr=Object.keys(regs).sort(function(a,b){ return regs[b]-regs[a]; }).slice(0,4);
         var names=went.map(function(r){ return norm(r.title); }).filter(Boolean).slice(0,6);
-        L.push('[다녀옴·한 것] 산을 '+went.length+'번 실제로 다녀왔다'+(names.length?(': '+names.join(', ')):'')+(regArr.length?(' (자주 간 곳: '+regArr.join(', ')+')'):''));
+        L.push('[A·실제로 한 일] 산을 '+went.length+'번 실제로 다녀왔다'+(names.length?(': '+names.join(', ')):'')+(regArr.length?(' (자주 간 곳: '+regArr.join(', ')+')'):''));
       }
     }
     var bkt=has('bucket');
     if(bkt){
       var done=bkt.filter(function(r){ return r.status==='달성'; }).map(function(r){ return norm(r.title); }).filter(Boolean);
       var doing=bkt.filter(function(r){ return r.status==='하는중'; }).map(function(r){ return norm(r.title); }).filter(Boolean);
-      if(done.length) L.push('[이룬 것·한 것] 버킷리스트에서 실제로 이룬 것: '+done.slice(0,8).join(', '));
-      if(doing.length) L.push('[하는 중] 지금 향해 가는 중: '+doing.slice(0,5).join(', '));
+      if(done.length) L.push('[A·실제로 한 일] 버킷리스트에서 실제로 이룬 것: '+done.slice(0,8).join(', '));
+      if(doing.length) L.push('[A·실제로 한 일] 지금 향해 가는 중: '+doing.slice(0,5).join(', '));
       var pend=bkt.filter(function(r){ return r.status!=='달성'&&r.status!=='하는중'; }).map(function(r){ return norm(r.title); }).filter(Boolean);
-      if(pend.length) L.push('[버킷리스트·꿈] 언젠가 이루려 적어둔 것: '+pend.slice(0,8).join(', '));
+      if(pend.length) L.push('[E·적어두고 아직 안 한 것] 언젠가 이루려 적어둔 것: '+pend.slice(0,8).join(', '));
     }
     var diaryOn=true; try{ diaryOn=(store.getItem('nd.aiDiaryOn')!=='0'); }catch(e){}
     var dia=has('diary');
     if(dia&&diaryOn){
       var ds=dia.slice().sort(function(a,b){ return String(iso(b.date)).localeCompare(String(iso(a.date))); });
       var picks=ds.slice(0,10).map(function(r){ var body=cut(r.content||r.nddaily||r.title, 90); var mood=norm(r.mood); return body?('· '+(iso(r.date)||'')+(mood?(' ['+mood+']'):'')+' '+body):''; }).filter(Boolean);
-      if(picks.length) L.push('[일기·내 마음] 최근 일기에서 사용자가 직접 쓴 문장들:\n'+picks.join('\n'));
+      if(picks.length) L.push('[B·일기 — 사용자가 자기 삶에 대해 직접 쓴 글. ★이 사람의 감정을 말할 수 있는 유일한 출처다]\n'+picks.join('\n'));
     }
     var mov=has('movies');
     if(mov){
       var mwatch=mov.filter(function(r){ return r.watched==="O"; });
       var mloved=mov.filter(function(r){ return r.rewatch||r.pick; }).map(function(r){ return norm(r.title); }).filter(Boolean);
       var mrec=mwatch.slice().sort(function(a,b){ return String(iso(b.watchDate)).localeCompare(String(iso(a.watchDate))); }).map(function(r){ return norm(r.title); }).filter(Boolean);
-      if(mwatch.length||mov.length) L.push('[본 것·영화] 영화를 '+(mwatch.length||mov.length)+'편 봤다'+(mloved.length?('. 다시 볼 만큼 아낀 작품: '+mloved.slice(0,8).join(', ')):(mrec.length?('. 최근 본: '+mrec.slice(0,6).join(', ')):'')));
+      if(mwatch.length||mov.length) L.push('[D·취향] 영화를 '+(mwatch.length||mov.length)+'편 봤다'+(mloved.length?('. 다시 볼 만큼 아낀 작품: '+mloved.slice(0,8).join(', ')):(mrec.length?('. 최근 본: '+mrec.slice(0,6).join(', ')):'')));
     }
     var bk=has('books');
     if(bk){
@@ -5911,23 +5914,23 @@ function _buildLifeContext(ids, data){
       var favb=bk.filter(function(r){ return r.pick||r.reread||(parseFloat(r.rating)>=4); }).map(function(r){ return norm(r.title)+(r.author?(' ('+norm(r.author)+')'):''); }).filter(Boolean);
       var gens={}; bk.forEach(function(r){ var gg=Array.isArray(r.genre)?r.genre:String(r.genre||'').split(','); gg.forEach(function(g){ g=norm(g); if(g) gens[g]=(gens[g]||0)+1; }); });
       var gArr=Object.keys(gens).sort(function(a,b){ return gens[b]-gens[a]; }).slice(0,4);
-      if(readb.length||bk.length) L.push('[읽은 것·책] 책을 '+(readb.length||bk.length)+'권 읽었다'+(favb.length?('. 마음에 남은 책: '+favb.slice(0,6).join(', ')):'')+(gArr.length?(' (주로 '+gArr.join(', ')+')'):''));
+      if(readb.length||bk.length) L.push('[D·취향] 책을 '+(readb.length||bk.length)+'권 읽었다'+(favb.length?('. 마음에 남은 책: '+favb.slice(0,6).join(', ')):'')+(gArr.length?(' (주로 '+gArr.join(', ')+')'):''));
     }
     var trv=has('travel');
     if(trv){
       var been=trv.filter(function(r){ return r.status==="다녀옴"; });
       var places=been.map(function(r){ return norm(r.place||r.title); }).filter(Boolean);
       var wish=trv.filter(function(r){ return r.status==="예정"||r.status==="찜"; }).map(function(r){ return norm(r.place||r.title); }).filter(Boolean);
-      if(places.length) L.push('[다녀온 곳·여행] '+been.length+'곳을 다녀왔다: '+places.slice(0,10).join(', ')+(wish.length?('. 가보고 싶어 적어둔 곳: '+wish.slice(0,5).join(', ')):''));
+      if(places.length) L.push('[A·실제로 한 일] 여행 '+been.length+'곳을 다녀왔다: '+places.slice(0,10).join(', ')+(wish.length?('. 가보고 싶어 적어둔 곳: '+wish.slice(0,5).join(', ')):''));
     }
     var fd=has('food');
     if(fd){
       var ftop=fd.filter(function(r){ return parseFloat(r.rating)>=4; }).sort(function(a,b){ return (parseFloat(b.rating)||0)-(parseFloat(a.rating)||0); }).map(function(r){ return norm(r.title)+(r.place?(' @'+norm(r.place)):'')+(r.rating?(' ★'+r.rating):''); }).filter(Boolean);
-      if(ftop.length) L.push('[아낀 맛집] 별점 높게 준 곳: '+ftop.slice(0,8).join(', '));
-      else if(fd.length) L.push('[맛집] 기록한 맛집 '+fd.length+'곳');
+      if(ftop.length) L.push('[D·취향] 별점 높게 준 맛집: '+ftop.slice(0,8).join(', '));
+      else if(fd.length) L.push('[D·취향] 기록한 맛집 '+fd.length+'곳');
     }
     var alb=has('albums');
-    if(alb){ var favA=alb.filter(function(r){ return parseFloat(r.rating)>=4; }).map(function(r){ return norm(r.title)+(r.artist?(' - '+norm(r.artist)):''); }).filter(Boolean); if(favA.length) L.push('[듣는 것·음반] 아끼는 음반: '+favA.slice(0,6).join(', ')); }
+    if(alb){ var favA=alb.filter(function(r){ return parseFloat(r.rating)>=4; }).map(function(r){ return norm(r.title)+(r.artist?(' - '+norm(r.artist)):''); }).filter(Boolean); if(favA.length) L.push('[D·취향] 아끼는 음반: '+favA.slice(0,6).join(', ')); }
     var cul=has('culture');
     if(cul){ var cbeen=cul.filter(function(r){ return r.status==="다녀옴"; }).map(function(r){ return norm(r.title); }).filter(Boolean); if(cbeen.length) L.push('[본 것·공연전시] 다녀온: '+cbeen.slice(0,6).join(', ')); }
     if(!L.length){ try{ return _wAiSummary(ids,data); }catch(_e){ return ''; } }
@@ -5996,18 +5999,25 @@ function _ndInsightFacts(ids, data){
     cold.sort(function(a,b){ return a.d-b.d; });
     if(cold.length) out.push("· 한창 쓰다가 멈춘 칸: "+cold.slice(0,2).map(function(x){ return x.t+" "+x.d+"일째"; }).join(", ")+" (켜두기만 하고 아직 안 쓰는 칸은 제외했다)");
 
-    /* (5) 내가 직접 쓴 문장(일기 외) — 감상평·메모에서 짧게 */
+    /* (5) ★v410: 작품 감상평은 '삶'이 아니라 '작품에 대한 평'이다. 별도 층(C)으로 분리해 넘긴다.
+       이전에는 패턴 블록 안에 섞여 들어가 AI가 영화 감상평을 사용자의 감정으로 읽는 사고가 났다. */
     var quotes=[];
     (ids||[]).forEach(function(id){
       if(id==="diary") return;
       rowsOf(id).forEach(function(r){
         var t=norm(r.review||r.memo||r.content); var nm=norm(r.title||r.name);
-        if(t && t.length>=12 && quotes.length<4) quotes.push("「"+(t.length>60?t.slice(0,60)+"…":t)+"」"+(nm?(" — "+nm):""));
+        var kind=(MANIFESTS[id]&&MANIFESTS[id].title)||id;
+        if(t && t.length>=12 && quotes.length<4)
+          quotes.push("· "+kind+" 「"+nm+"」에 대해 이렇게 적었다: \""+(t.length>60?t.slice(0,60)+"…":t)+"\"");
       });
     });
-    if(quotes.length) out.push("· 내가 남긴 한 줄: "+quotes.join(" "));
 
-    return out.length ? ("[어긋남·몰림·변화 — 여기서 이 사람이 보인다]\n"+out.join("\n")) : "";
+    var blocks=[];
+    if(out.length) blocks.push("[F·패턴과 변화 — 반복되는 것, 몰려 있는 것, 최근에 달라진 것]\n"+out.join("\n"));
+    if(quotes.length) blocks.push("[C·작품 감상평 — ★이 사람이 겪은 일이 아니다. 작품에 대한 평이다.\n"
+      +" 이 문장들로 말할 수 있는 것은 '무엇을 좋게 보는 사람인가' 뿐이다.\n"
+      +" 여기 적힌 감정을 이 사람의 감정으로 옮기지 말 것]\n"+quotes.join("\n"));
+    return blocks.length ? blocks.join("\n\n") : "";
   }catch(e){ return ""; }
 }
 /* v407: 프록시 프롬프트를 고칠 수 없으므로, 보내는 재료 끝에 쓰기 규칙을 함께 싣는다(A/B로 효과 확인). */
