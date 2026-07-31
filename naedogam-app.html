@@ -1313,7 +1313,7 @@ body{ background:radial-gradient(circle at 50% -10%, rgba(102,78,57,.16), transp
         <svg class="brandmark" width="40" height="30" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg>
         <span class="brandwm"><span class="bwm-ko">내도감</span><span class="bwm-en">NAEDOGAM</span></span>
       </button>
-      <span class="mhver">v412β</span>
+      <span class="mhver">v413β</span>
       <span class="spacer"></span>
       <span class="src-chip" id="srcChip" style="display:none">데모</span>
       <button class="icon-btn" id="searchToggle" type="button" style="display:none">🔍</button>
@@ -2407,7 +2407,7 @@ function openDomain(id){ if(id==="mbti"){ openMbti(); return; } if(id==="period"
 
 /* 홈: 켜둔 카테고리를 카드로. 건수는 한 번 열어본 분야만 표시(홈을 빠르게 유지). */
 function ndDeep(h){ if(typeof h!=="string"||h.charAt(0)!=="#") h="#8a7a6a"; var n=parseInt(h.slice(1),16),r=(n>>16)&255,g=(n>>8)&255,b=n&255; function d(x,f){return Math.max(0,Math.min(255,Math.round(x*f)));} var d1="rgb("+d(r,.46)+","+d(g,.46)+","+d(b,.46)+")", d2="rgb("+d(r,.20)+","+d(g,.20)+","+d(b,.20)+")", gl="rgba("+r+","+g+","+b+",.16)"; return "radial-gradient(circle at 18% 14%,"+gl+",transparent 46%),linear-gradient(145deg,"+d1+","+d2+")"; }
-var ND_LOGO_HTML='<div class="ndh-brand"><svg width="47" height="35" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg><div class="ndh-wm"><b>내도감</b><small>NAEDOGAM</small></div><span class="mhver ndh-ver">v412β</span></div><button class="ndh-sync" type="button" title="동기화" aria-label="동기화" onclick="try{syncNow()}catch(e){}">↻</button>';
+var ND_LOGO_HTML='<div class="ndh-brand"><svg width="47" height="35" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg><div class="ndh-wm"><b>내도감</b><small>NAEDOGAM</small></div><span class="mhver ndh-ver">v413β</span></div><button class="ndh-sync" type="button" title="동기화" aria-label="동기화" onclick="try{syncNow()}catch(e){}">↻</button>';
 /* 홈 카드 크기: wide(넓게=한 줄 전체) · half(보통=한 줄 2개) · mini(작게=하단 3칸). 기본값=프리셋 */
 var ND_PRESET_SIZE={running:"wide",food:"wide",recipes:"wide",movies:"half",books:"half",period:"half",diary:"half",travel:"half",mountains:"half",culture:"half",albums:"half",cellar:"half",scrap:"half",wish:"half",gift:"half",pet:"half"};
 function getHomeSizes(){ try{ return JSON.parse(store.getItem("nd.homesize")||"{}")||{}; }catch(e){ return {}; } }
@@ -5220,6 +5220,30 @@ async function _insData(){
   }));
   return {ids:ids,data:data};
 }
+/* ★v413: 기록이 적을 때 억지로 분석하지 않는다.
+   영석: "아예 분석할 게 없으면 데이터를 더 채우라고 말하던가."
+   억지 요약은 앱을 허술해 보이게 한다. 정직하게 막고, 얼마나 더 필요한지 알려준다. */
+var ND_INS_MIN = 15;
+function _ndRowsTotal(data){
+  try{ var n=0; Object.keys(data||{}).forEach(function(k){ n+=((data[k]||[]).length); }); return n; }catch(e){ return 0; }
+}
+function _ndNeedMoreHTML(have, need, what){
+  var left=Math.max(1, need-have);
+  return '<div class="wsec" style="text-align:center;padding:26px 18px">'
+    +'<div style="font-size:34px;margin-bottom:8px">🌱</div>'
+    +'<div class="wh2" style="justify-content:center">아직 보여드릴 만큼 쌓이지 않았어요</div>'
+    +'<div class="wcap" style="font-size:14.5px;line-height:1.75;margin-top:6px">'
+    +'지금 <b>'+have+'개</b> 기록했어요. <b>'+left+'개</b>만 더 모으면 '+(what||'이 화면')+'이 열려요.<br>'
+    +'적은 기록으로 억지로 분석하면 틀린 이야기가 나와요.</div>'
+    +'<button type="button" class="btn" id="ndNeedGo" style="margin-top:16px">기록하러 가기</button>'
+    +'</div>';
+}
+function _ndNeedMoreBind(){
+  try{ var b=document.getElementById("ndNeedGo"); if(!b) return;
+    b.onclick=function(){ try{ document.querySelectorAll("dialog").forEach(function(d){ try{ d.close(); }catch(e){} }); }catch(e){}
+      try{ goHome(); }catch(e){} };
+  }catch(e){}
+}
 function _insModal(id,title){
   var old=document.getElementById(id); if(old) old.remove();
   var dlg=document.createElement("dialog"); dlg.id=id; dlg.className="wrapDlg";
@@ -5235,7 +5259,8 @@ async function openMirror(){
   var d=await _insData(); var S=wrapStats(d.ids,d.data);
   var c=document.getElementById("mirrorDlgCard"); if(!c) return;
   var sec=['<div class="wsec whead"><div class="wlogo">내도감 · 취향 거울</div><div class="wtitle">취향 거울</div><div class="wdate">기록이 비추는 나의 취향</div></div>'];
-  if(!S.total){ c.innerHTML=sec.join("")+'<div class="wsec"><div class="wcap">아직 데이터가 적어요. 별점·상태를 남기면 취향이 또렷해집니다.</div></div>'; return; }
+  var _tot=_ndRowsTotal(d.data);
+  if(!S.total || _tot<ND_INS_MIN){ c.innerHTML=sec.join("")+_ndNeedMoreHTML(_tot, ND_INS_MIN, "취향 거울"); _ndNeedMoreBind(); return; }
   var _p=[]; if(S.movies&&S.movies.country&&S.movies.country.length)_p.push(_wEsc(S.movies.country[0][0])+' 영화'); if(S.books&&S.books.genres&&S.books.genres.length)_p.push(_wEsc(S.books.genres[0][0])+' 책'); var _prof=_p.length?('<b>'+_p.join('</b>과(와) <b>')+'</b>을(를) 좋아하는'):'폭넓게 수집하는'; sec.push('<div class="wsec"><div class="wh2">🔎 한 줄 프로필</div><div class="wcap" style="font-size:16px;line-height:1.6">'+_prof+' <b>'+(S.expPct<25?'막 시작한 탐험가':S.expPct<60?'꾸준한 기록가':'열정적 경험가')+'</b>.</div></div>');
   if(S.movies){ var M=S.movies; var lines=[];
     if(M.country&&M.country.length) lines.push('가장 많이 본 나라는 <b>'+_wEsc(M.country[0][0])+'</b>');
@@ -5254,6 +5279,8 @@ async function openDecide(){
   _insModal("decideDlg","🎯 오늘 뭐 볼까");
   var d=await _insData();
   var c=document.getElementById("decideDlgCard"); if(!c) return;
+  { var _tot=_ndRowsTotal(d.data);
+    if(_tot<ND_INS_MIN){ c.innerHTML='<div class="wsec whead"><div class="wlogo">내도감 · 오늘 뭐 볼까</div><div class="wtitle">오늘 뭐 볼까</div></div>'+_ndNeedMoreHTML(_tot, ND_INS_MIN, "오늘의 추천"); _ndNeedMoreBind(); return; } }
   var CATS=[["movies","🎬","오늘의 한 편"],["books","📖","오늘의 한 권"],["cellar","🍷","오늘의 한 잔"],["culture","🎭","가볼 공연·전시"],["travel","✈️","떠나볼 여행"],["food","🍽","가볼 맛집"],["albums","💿","들어볼 명반"]];
   var day=_dayNum(); var picks=[];
   var _tasteSet=function(rows,keys){ var set={}; rows.forEach(function(r){ var rt=(r.rating!=null&&r.rating!=="")?parseFloat(r.rating):null; if(rt!=null&&rt>=8){ keys.forEach(function(k){ String(r[k]||"").split(",").forEach(function(x){x=x.trim(); if(x)set[x]=(set[x]||0)+1;}); }); } }); return set; }; CATS.forEach(function(cc,ci){ var rows=d.data[cc[0]]||[]; var un=rows.filter(function(r){return !_wDone(cc[0],r);}); if(!un.length) return; var reason="", pool=un; if(cc[0]==="movies"){ var ts=_tasteSet(rows,["director","country"]); var mm=un.filter(function(r){ return ts[String(r.director||"").trim()]||ts[String(r.country||"").trim()]; }); if(mm.length){ pool=mm; reason="내 취향(감독·나라)"; } } else if(cc[0]==="books"){ var tg=_tasteSet(rows,["genre"]); var bb=un.filter(function(r){ return String(r.genre||"").split(",").some(function(g){return tg[g.trim()];}); }); if(bb.length){ pool=bb; reason="좋아한 장르"; } } var it=pool[(day+ci)%pool.length]; picks.push({cat:cc[0],icon:cc[1],label:cc[2],item:it,reason:reason}); });
@@ -5269,6 +5296,8 @@ async function openMemory(){
   _insModal("memDlg","🕰 회상");
   var d=await _insData();
   var c=document.getElementById("memDlgCard"); if(!c) return;
+  { var _tot=_ndRowsTotal(d.data);
+    if(_tot<ND_INS_MIN){ c.innerHTML='<div class="wsec whead"><div class="wlogo">내도감 · 회상</div><div class="wtitle">회상</div></div>'+_ndNeedMoreHTML(_tot, ND_INS_MIN, "회상"); _ndNeedMoreBind(); return; } }
   var DATEK={movies:"watchDate",books:"readDate",mountains:"climbDate",running:"date",travel:"date",culture:"date",food:"date",diary:"date"};
   var items=[];
   d.ids.forEach(function(id){ var dk=DATEK[id]; if(!dk) return; (d.data[id]||[]).forEach(function(r){ var v=r[dk]; if(!v) return; var iso=String(v).slice(0,10); var t=Date.parse(iso); if(isNaN(t)) return; items.push({id:id,title:r.title||r.name||"",date:iso,t:t,icon:(MANIFESTS[id].icon||"•")}); }); });
@@ -5868,8 +5897,9 @@ function _buildLifeContext(ids, data){
   try{
     /* ★v410: 재료를 층으로 나눠 넘긴다. 층마다 '무엇을 말해도 되는지'가 다르다. */
     var L=['[재료 읽는 법] A=실제로 한 일(행동). B=일기(자기 삶에 대해 직접 쓴 글). '
-          +'C=작품 감상평(삶이 아니라 작품에 대한 평). D=취향. E=적어두고 아직 안 한 것. F=패턴과 변화.'
-          +' ★감정은 B에서만 가져올 수 있다. C를 감정의 근거로 쓰지 마라.'];
+          +'D=취향(내가 좋게 본 것·최근 본 것). E=적어두고 아직 안 한 것. F=패턴과 변화.'
+          +' ★감정은 B에서만 가져올 수 있다. 그 밖의 층은 사실일 뿐 감정의 근거가 아니다.'
+          +' ★E는 아직 하지 않은 것이다. 한 것처럼 쓰지 마라.'];
     var has=function(id){ return (data&&data[id]&&data[id].length)?data[id]:null; };
     var norm=function(s){ return String(s==null?"":s).replace(/\s+/g,' ').trim(); };
     var cut=function(s,n){ s=norm(s); return s.length>n ? s.slice(0,n)+'…' : s; };
@@ -5924,20 +5954,31 @@ function _buildLifeContext(ids, data){
       var picks=ds.slice(0,10).map(function(r){ var body=cut(r.content||r.nddaily||r.title, 90); var mood=norm(r.mood); return body?('· '+(iso(r.date)||'')+(mood?(' ['+mood+']'):'')+' '+body):''; }).filter(Boolean);
       if(picks.length) L.push('[B·일기 — 사용자가 자기 삶에 대해 직접 쓴 글. ★이 사람의 감정을 말할 수 있는 유일한 출처다]\n'+picks.join('\n'));
     }
+    /* ★v413: '아낀 작품'은 본 것 중에서만. 찜(안 본 것)은 취향이 아니라 '아직 안 한 것'이다.
+       평점도 TMDB(남의 점수)가 아니라 시트의 '평점'(내가 매긴 것)만 본다. */
+    var myRate=function(r){ var v=r&&r["평점"]; if(v==null||v==="") return null; v=parseFloat(v); return isNaN(v)?null:v; };
     var mov=has('movies');
     if(mov){
       var mwatch=mov.filter(function(r){ return r.watched==="O"; });
-      var mloved=mov.filter(function(r){ return r.rewatch||r.pick; }).map(function(r){ return norm(r.title); }).filter(Boolean);
+      var mloved=mwatch.filter(function(r){ var v=myRate(r); return r.rewatch || (v!=null && v>=4); })
+                       .map(function(r){ var v=myRate(r); return norm(r.title)+(v!=null?(' ★'+v):''); }).filter(Boolean);
       var mrec=mwatch.slice().sort(function(a,b){ return String(iso(b.watchDate)).localeCompare(String(iso(a.watchDate))); }).map(function(r){ return norm(r.title); }).filter(Boolean);
-      if(mwatch.length||mov.length) L.push('[D·취향] 영화를 '+(mwatch.length||mov.length)+'편 봤다'+(mloved.length?('. 다시 볼 만큼 아낀 작품: '+mloved.slice(0,8).join(', ')):(mrec.length?('. 최근 본: '+mrec.slice(0,6).join(', ')):'')));
+      if(mwatch.length) L.push('[D·취향] 영화를 '+mwatch.length+'편 봤다'
+        +(mloved.length?('. 내가 좋게 본 작품: '+mloved.slice(0,6).join(', ')):'')
+        +(mrec.length?('. 최근 본: '+mrec.slice(0,4).join(', ')):''));
+      var mpick=mov.filter(function(r){ return r.pick && r.watched!=="O"; }).map(function(r){ return norm(r.title); }).filter(Boolean);
+      if(mpick.length) L.push('[E·적어두고 아직 안 한 것] 보려고 찜해둔 영화(아직 안 봤다): '+mpick.slice(0,6).join(', '));
     }
     var bk=has('books');
     if(bk){
       var readb=bk.filter(function(r){ return r.status==="읽음"; });
-      var favb=bk.filter(function(r){ return r.pick||r.reread||(parseFloat(r.rating)>=4); }).map(function(r){ return norm(r.title)+(r.author?(' ('+norm(r.author)+')'):''); }).filter(Boolean);
+      /* ★v413: 읽은 것 중에서만 '마음에 남은 책'으로 본다. 찜은 아래 E층으로. */
+      var favb=readb.filter(function(r){ return r.reread||(parseFloat(r.rating)>=4); }).map(function(r){ return norm(r.title)+(r.author?(' ('+norm(r.author)+')'):''); }).filter(Boolean);
       var gens={}; bk.forEach(function(r){ var gg=Array.isArray(r.genre)?r.genre:String(r.genre||'').split(','); gg.forEach(function(g){ g=norm(g); if(g) gens[g]=(gens[g]||0)+1; }); });
       var gArr=Object.keys(gens).sort(function(a,b){ return gens[b]-gens[a]; }).slice(0,4);
-      if(readb.length||bk.length) L.push('[D·취향] 책을 '+(readb.length||bk.length)+'권 읽었다'+(favb.length?('. 마음에 남은 책: '+favb.slice(0,6).join(', ')):'')+(gArr.length?(' (주로 '+gArr.join(', ')+')'):''));
+      if(readb.length) L.push('[D·취향] 책을 '+readb.length+'권 읽었다'+(favb.length?('. 마음에 남은 책: '+favb.slice(0,6).join(', ')):'')+(gArr.length?(' (주로 '+gArr.join(', ')+')'):''));
+      var bpick=bk.filter(function(r){ return r.status!=="읽음" && (r.pick||r.status==="읽고싶음"||r.status==="찜"); }).map(function(r){ return norm(r.title); }).filter(Boolean);
+      if(bpick.length) L.push('[E·적어두고 아직 안 한 것] 읽으려 적어둔 책(아직 안 읽었다): '+bpick.slice(0,6).join(', '));
     }
     var trv=has('travel');
     if(trv){
@@ -6024,23 +6065,10 @@ function _ndInsightFacts(ids, data){
 
     /* (5) ★v410: 작품 감상평은 '삶'이 아니라 '작품에 대한 평'이다. 별도 층(C)으로 분리해 넘긴다.
        이전에는 패턴 블록 안에 섞여 들어가 AI가 영화 감상평을 사용자의 감정으로 읽는 사고가 났다. */
-    var quotes=[];
-    (ids||[]).forEach(function(id){
-      if(id==="diary") return;
-      rowsOf(id).forEach(function(r){
-        var t=norm(r.review||r.memo||r.content); var nm=norm(r.title||r.name);
-        var kind=(MANIFESTS[id]&&MANIFESTS[id].title)||id;
-        if(t && t.length>=12 && quotes.length<4)
-          quotes.push("· "+kind+" 「"+nm+"」에 대해 이렇게 적었다: \""+(t.length>60?t.slice(0,60)+"…":t)+"\"");
-      });
-    });
-
-    var blocks=[];
-    if(out.length) blocks.push("[F·패턴과 변화 — 반복되는 것, 몰려 있는 것, 최근에 달라진 것]\n"+out.join("\n"));
-    if(quotes.length) blocks.push("[C·작품 감상평 — ★이 사람이 겪은 일이 아니다. 작품에 대한 평이다.\n"
-      +" 이 문장들로 말할 수 있는 것은 '무엇을 좋게 보는 사람인가' 뿐이다.\n"
-      +" 여기 적힌 감정을 이 사람의 감정으로 옮기지 말 것]\n"+quotes.join("\n"));
-    return blocks.length ? blocks.join("\n\n") : "";
+    /* ★v413: 작품 감상평 원문은 더 이상 넘기지 않는다.
+       영석: "감상평을 뭐라려고 또 적어. 난 내가 적은 걸 이미 알고 있다."
+       내가 쓴 문장을 그대로 돌려주는 건 정보 가치가 0이다. 취향은 D층(내 평점·최근 본 것)으로 충분하다. */
+    return out.length ? ("[F·패턴과 변화 — 반복되는 것, 몰려 있는 것, 최근에 달라진 것]\n"+out.join("\n")) : "";
   }catch(e){ return ""; }
 }
 /* v407: 프록시 프롬프트를 고칠 수 없으므로, 보내는 재료 끝에 쓰기 규칙을 함께 싣는다(A/B로 효과 확인). */
@@ -6305,7 +6333,7 @@ async function openWrapped(){
   var build=function(id,raw){ var m=MANIFESTS[id]; data[id]=applyComputed(m,(raw||[]).map(function(r){return Object.assign({_id:r._id||crypto.randomUUID()},r);})); };
   var had={};
   ids.forEach(function(id){ had[id]=!!CACHE[id]; var raw=CACHE[id]||loadPersist(id); if(raw&&!CACHE[id])CACHE[id]=raw; build(id,raw||[]); });
-  var draw=function(){ var S=wrapStats(ids,data); try{ window.__wSummary=_buildLifeContext(ids,data); }catch(e){} var card=document.getElementById("wrapCard"); if(card){ if(!S.total){ card.innerHTML='<div class="wloading">아직 담긴 기록이 없어요.<br>추천리스트에서 담거나 +로 추가해보세요.</div>'; } else { card.innerHTML=wrapCardHTML(S); } } };
+  var draw=function(){ var S=wrapStats(ids,data); try{ window.__wSummary=_buildLifeContext(ids,data); }catch(e){} var card=document.getElementById("wrapCard"); if(card){ var _tot=_ndRowsTotal(data); if(!S.total || _tot<ND_INS_MIN){ card.innerHTML='<div class="wsec whead"><div class="wlogo">내도감 · 결산</div><div class="wtitle">나의 결산</div></div>'+_ndNeedMoreHTML(_tot, ND_INS_MIN, "나의 결산"); _ndNeedMoreBind(); return; } if(false){ card.innerHTML='<div class="wloading">아직 담긴 기록이 없어요.<br>추천리스트에서 담거나 +로 추가해보세요.</div>'; } else { card.innerHTML=wrapCardHTML(S); } } };
   draw();
   var todo=ids.filter(function(id){return !had[id];});
   if(todo.length){ await Promise.all(todo.map(async function(id){ try{ var fresh=await sourceFor(MANIFESTS[id]).list(id); CACHE[id]=fresh; savePersist(id,fresh); build(id,fresh); }catch(e){} })); if(dlg.open) draw(); }
