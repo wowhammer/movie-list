@@ -1288,6 +1288,17 @@ body{ background:radial-gradient(circle at 50% -10%, rgba(102,78,57,.16), transp
 [data-theme="dark"] .insLight #insDecide{ border-left-color:#6aa6e0; }
 [data-theme="dark"] .insLight #insMemory{ border-left-color:#8bbf7a; }
 [data-theme="dark"] .insLight .wlogo{ color:#e0a86a; }
+.rf-quotes{ display:flex; flex-direction:column; gap:8px; }
+.q-row{ display:flex; gap:6px; align-items:flex-start; }
+.q-row .q-p{ flex:0 0 62px; border:1px solid var(--line); border-radius:8px; padding:8px 9px; font-size:14px; font-family:inherit; box-sizing:border-box; min-width:0; background:var(--card); color:var(--ink); }
+.q-row .q-t{ flex:1 1 auto; border:1px solid var(--line); border-radius:8px; padding:8px 9px; font-size:14px; font-family:inherit; line-height:1.6; box-sizing:border-box; min-width:0; background:var(--card); color:var(--ink); resize:vertical; }
+.q-row .q-del{ flex:0 0 26px; background:none; border:none; color:var(--sub); cursor:pointer; font-size:14px; padding:6px 0 0; }
+.q-add{ margin-top:8px; border:1px dashed var(--line); background:none; border-radius:9px; padding:9px; cursor:pointer; color:var(--ink-soft); font-size:13.5px; width:100%; }
+.qlist{ margin:0 18px 12px; display:flex; flex-direction:column; gap:9px; }
+.qitem{ border-left:3px solid var(--brand,#e0483f); padding:2px 0 2px 11px; }
+.qitem .qt{ font-size:14.5px; line-height:1.72; }
+.qitem .qm{ font-size:11.5px; color:var(--sub); margin-top:3px; }
+
 /* ★v412: 상세의 상태 버튼(봤음·다시볼것·찜 등)이 맨 아래라 모바일에서 누르기 힘들었다.
    템플릿을 카테고리마다 고치지 않고 order 하나로 전부 위로 올린다. */
 #detail[open]{ display:flex; flex-direction:column; overscroll-behavior:contain; }
@@ -1315,7 +1326,7 @@ body{ background:radial-gradient(circle at 50% -10%, rgba(102,78,57,.16), transp
         <svg class="brandmark" width="40" height="30" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg>
         <span class="brandwm"><span class="bwm-ko">내도감</span><span class="bwm-en">NAEDOGAM</span></span>
       </button>
-      <span class="mhver">v414β</span>
+      <span class="mhver">v415β</span>
       <span class="spacer"></span>
       <span class="src-chip" id="srcChip" style="display:none">데모</span>
       <button class="icon-btn" id="searchToggle" type="button" style="display:none">🔍</button>
@@ -1499,6 +1510,7 @@ const MANIFESTS = {
              {k:"status",sheet:"상태",label:"상태",type:"select",options:["","읽음","읽는중"]},
              {k:"rating",sheet:"평점",label:"내 평점(읽은 책만)",type:"rating"},
              {k:"review",sheet:"감상평",label:"서평/메모",type:"textarea"},
+             {k:"quotes",sheet:"문구",label:"밑줄 친 문장 (읽으면서 모으기)",type:"quotes",full:true},
              {k:"pick",sheet:"찜",label:"읽고싶다(찜)",type:"bool"},
              {k:"reread",sheet:"다시",label:"다시읽을것",type:"bool"},
              {k:"owned",sheet:"소장",label:"소장",type:"bool"},
@@ -1509,7 +1521,7 @@ const MANIFESTS = {
              {k:"cover",sheet:"표지",label:"표지 주소",type:"text",hideForm:true},
              {k:"readDate",sheet:"읽은날",label:"읽은날",type:"date"} ],
     shareFields:["title","author","publisher","recommend"],
-    search:["title","author"],
+    search:["title","author","quotes"],
     activity:{ df:"readDate", when:r=>r.status==="읽음", label:"읽음", name:r=>r.title },
     stats:[ {label:"전체",type:"count"},
             {label:"읽음",type:"countIf",field:"status",eq:"읽음",c:"#16a34a"},
@@ -2409,7 +2421,7 @@ function openDomain(id){ if(id==="mbti"){ openMbti(); return; } if(id==="period"
 
 /* 홈: 켜둔 카테고리를 카드로. 건수는 한 번 열어본 분야만 표시(홈을 빠르게 유지). */
 function ndDeep(h){ if(typeof h!=="string"||h.charAt(0)!=="#") h="#8a7a6a"; var n=parseInt(h.slice(1),16),r=(n>>16)&255,g=(n>>8)&255,b=n&255; function d(x,f){return Math.max(0,Math.min(255,Math.round(x*f)));} var d1="rgb("+d(r,.46)+","+d(g,.46)+","+d(b,.46)+")", d2="rgb("+d(r,.20)+","+d(g,.20)+","+d(b,.20)+")", gl="rgba("+r+","+g+","+b+",.16)"; return "radial-gradient(circle at 18% 14%,"+gl+",transparent 46%),linear-gradient(145deg,"+d1+","+d2+")"; }
-var ND_LOGO_HTML='<div class="ndh-brand"><svg width="47" height="35" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg><div class="ndh-wm"><b>내도감</b><small>NAEDOGAM</small></div><span class="mhver ndh-ver">v414β</span></div><button class="ndh-sync" type="button" title="동기화" aria-label="동기화" onclick="try{syncNow()}catch(e){}">↻</button>';
+var ND_LOGO_HTML='<div class="ndh-brand"><svg width="47" height="35" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg><div class="ndh-wm"><b>내도감</b><small>NAEDOGAM</small></div><span class="mhver ndh-ver">v415β</span></div><button class="ndh-sync" type="button" title="동기화" aria-label="동기화" onclick="try{syncNow()}catch(e){}">↻</button>';
 /* 홈 카드 크기: wide(넓게=한 줄 전체) · half(보통=한 줄 2개) · mini(작게=하단 3칸). 기본값=프리셋 */
 var ND_PRESET_SIZE={running:"wide",food:"wide",recipes:"wide",movies:"half",books:"half",period:"half",diary:"half",travel:"half",mountains:"half",culture:"half",albums:"half",cellar:"half",scrap:"half",wish:"half",gift:"half",pet:"half"};
 function getHomeSizes(){ try{ return JSON.parse(store.getItem("nd.homesize")||"{}")||{}; }catch(e){ return {}; } }
@@ -3542,6 +3554,53 @@ async function applyStatus(m, r, i, dlg){
   try{ await sheetSrc().update(m.id, r._id, r); }
   catch(e){ setLocal(prev); const b2=dlg.querySelector(".statusbtns"); if(b2){ b2.innerHTML=statusBtnsHTML(m,r); wireStatusBtns(m,r,dlg); } paintDomain(m); alert("저장 실패: "+e.message); }
 }
+/* ★v415: 읽는 중에 한 문장씩 담는다. 폼을 열지 않고 상세에서 바로. */
+function _ndQuotesArr(r){ try{ var a=JSON.parse(r.quotes||"[]"); return Array.isArray(a)?a:[]; }catch(e){ return []; } }
+function _ndQuotesHTML(r){
+  var a=_ndQuotesArr(r); var e=function(x){ return String(x==null?"":x).replace(/</g,"&lt;"); };
+  var body=a.length? a.map(function(t,i){
+      return '<div class="qitem" data-qi="'+i+'"><div class="qt">'+e(t.t)+'</div><div class="qm">'
+        +(t.p?('p.'+e(t.p)):'')+((t.p&&t.d)?' · ':'')+e(t.d)
+        +' <button type="button" class="qDel" data-qi="'+i+'" style="background:none;border:none;color:var(--sub);cursor:pointer;font-size:11.5px">삭제</button></div></div>';
+    }).join("")
+    : '<div class="hint" style="margin:0">아직 담은 문장이 없어요. 읽다가 마음에 남는 문장을 담아보세요.</div>';
+  return '<div style="margin:2px 18px 6px;display:flex;align-items:center;gap:8px">'
+    +'<b style="font-size:13.5px">✍️ 밑줄 친 문장</b>'
+    +'<span style="font-size:12px;color:var(--sub)">'+(a.length?(a.length+'개'):'')+'</span>'
+    +'<button type="button" class="btn ghost" id="qAddBtn" style="margin-left:auto;font-size:12.5px;padding:6px 12px">＋ 문장 담기</button></div>'
+    +'<div class="qlist" id="qList">'+body+'</div>';
+}
+async function _ndQuotesSave(m, r, arr){
+  var prev=r.quotes; r.quotes=JSON.stringify(arr);
+  var a=CACHE[m.id]; var it=a&&a.find(function(x){ return String(x._id)===String(r._id); }); if(it) it.quotes=r.quotes; if(a) savePersist(m.id,a);
+  try{ await sheetSrc().update(m.id, r._id, r); }
+  catch(e){ r.quotes=prev; if(it) it.quotes=prev; if(a) savePersist(m.id,a); try{ ndToast("저장 실패: "+((e&&e.message)||e)); }catch(_){} return false; }
+  return true;
+}
+function _ndQuotesWire(d, m, r){
+  var host=d.querySelector("#qList"); if(!host) return;
+  var redraw=function(){ var box=d.querySelector("#qWrap"); if(box){ box.innerHTML=_ndQuotesHTML(r); _ndQuotesWire(d,m,r); } };
+  d.querySelectorAll("#qList .qDel").forEach(function(b){
+    b.onclick=async function(){ var i=+b.dataset.qi; var arr=_ndQuotesArr(r); arr.splice(i,1); if(await _ndQuotesSave(m,r,arr)) redraw(); };
+  });
+  var add=d.querySelector("#qAddBtn"); if(!add) return;
+  add.onclick=function(){
+    if(d.querySelector("#qNewBox")) { var f=d.querySelector("#qNewT"); if(f) f.focus(); return; }
+    var box=document.createElement("div"); box.id="qNewBox"; box.style.cssText="margin:0 18px 12px";
+    box.innerHTML='<div class="q-row"><input class="q-p" id="qNewP" inputmode="numeric" placeholder="쪽"><textarea class="q-t" id="qNewT" rows="3" placeholder="마음에 남은 문장을 그대로 옮겨 적어보세요"></textarea></div>'
+      +'<div style="display:flex;gap:8px;margin-top:8px"><button type="button" class="btn" id="qNewSave" style="flex:1">담기</button><button type="button" class="btn ghost" id="qNewCancel">취소</button></div>';
+    host.parentNode.insertBefore(box, host);
+    var ta=box.querySelector("#qNewT"); try{ if(typeof _ndVoiceAttach==="function") _ndVoiceAttach(ta,false); }catch(e){}
+    ta.focus();
+    box.querySelector("#qNewCancel").onclick=function(){ box.remove(); };
+    box.querySelector("#qNewSave").onclick=async function(){
+      var t=(ta.value||"").trim(); if(!t){ ta.focus(); return; }
+      var arr=_ndQuotesArr(r);
+      arr.push({ p:(box.querySelector("#qNewP").value||"").trim(), t:t, d:(typeof todayStr==="function"?todayStr():"") });
+      if(await _ndQuotesSave(m,r,arr)){ box.remove(); var w=d.querySelector("#qWrap"); if(w){ w.innerHTML=_ndQuotesHTML(r); _ndQuotesWire(d,m,r); } try{ ndToast("문장을 담았어요"); }catch(e){} }
+    };
+  };
+}
 async function openBookDetail(m, r){
   const d=$("#detail");
   const gArr=Array.isArray(r.genre)?r.genre:(r.genre==null||r.genre===""?[]:[r.genre]);
@@ -3563,6 +3622,7 @@ async function openBookDetail(m, r){
           : `<div class="bkrate-hint">읽고 나서 아래 ‘읽음’으로 표시하면 내 평점을 매길 수 있어요</div>`}
       </div>
     </div>
+    <div id="qWrap">${_ndQuotesHTML(r)}</div>
     ${_inlineMemoHTML("review", r.review, "📝 서평·메모")}
     <div class="mvover" id="bkOver">책 소개 불러오는 중…</div>
     ${(rec||r.source)?`<div class="tags" style="margin:0 18px 8px">${rec}${r.source?`<span class="tag" style="opacity:.72">📍 ${String(r.source).replace(/</g,"&lt;")}</span>`:""}</div>`:""}
@@ -3578,6 +3638,7 @@ async function openBookDetail(m, r){
     </div>`;
   if(!d.open) d.showModal();
   wireStatusBtns(m, r, d);
+  try{ _ndQuotesWire(d, m, r); }catch(e){}
   _wireInlineMemo(d, m, r);
   { const _sb=$("#bkStars"); if(_sb && _sb.querySelector(".rf-stars-fg")) wireStarWidget(_sb, (r.rating||0), $("#bkStarsNum"), async v=>{
       const old=r.rating; r.rating=v;
@@ -3853,6 +3914,9 @@ function openDetail(m, r){ _navSet(m, r);
     if(FT[k]==="tiers"){ const arr=parseTiers({tiers:v}); if(!arr.length) return "";
       return arr.map(t=>{ const mn=String(t.min==null?"":t.min).trim(); const bl=String(t.benefits||"").split(/\n+/).map(x=>x.trim()).filter(Boolean);
         return `<div class="drow"><span class="k">${mn?mn+"만원↑":"기본"}</span><span>${bl.map(b=>String(b).replace(/</g,"&lt;")).join("<br>")||"—"}</span></div>`; }).join(""); }
+    if(FT[k]==="quotes"){ let arr=[]; try{ arr=JSON.parse(v||"[]"); }catch(e){} if(!Array.isArray(arr)||!arr.length) return "";
+      const _q=x=>String(x==null?"":x).replace(/</g,"&lt;");
+      return `<div class="drow"><span class="k">${LBL[k]||k}</span><span>`+arr.map(t=>`<span class="qitem" style="display:block;margin-bottom:7px"><span class="qt">${_q(t.t)}</span><span class="qm" style="display:block">${t.p?("p."+_q(t.p)):""}${(t.p&&t.d)?" · ":""}${_q(t.d)}</span></span>`).join("")+`</span></div>`; }
     if(FT[k]==="labrows"){ let arr=[]; try{ arr=JSON.parse(v||"[]"); }catch(e){} if(!Array.isArray(arr)||!arr.length) return "";
       const _e=x=>String(x==null?"":x).replace(/</g,"&lt;");
       return `<div class="drow drow-lab"><span class="k">${LBL[k]||k}</span><span class="lab-detail">`+arr.map(t=>`<span class="lab-drow"><b>${_e(t.item)}</b> <span class="lab-dv">${_e(t.value)}</span>${t.normal?` <span class="lab-dn">(정상 ${_e(t.normal)})</span>`:""}</span>`).join("")+`</span></div>`; }
@@ -4313,6 +4377,14 @@ function openRecordForm(m, existing, prefill){
       const rowH=t=>`<div class="tier-row"><div class="tier-min"><input type="number" inputmode="numeric" class="tier-min-in" value="${String(t.min==null?'':t.min).replace(/"/g,'&quot;')}" placeholder="30"><span class="tier-min-suf">만원↑</span></div><textarea class="tier-ben" rows="3" placeholder="혜택 (줄바꿈으로 여러 개)">${esc2(t.benefits)}</textarea><button type="button" class="tier-del" title="이 구간 삭제">✕</button></div>`;
       return `<label>${ndFL(f)}</label><div class="rf-tiers" data-k="${f.k}">${arr.map(rowH).join("")}</div><button type="button" class="tier-add" data-k="${f.k}">＋ 실적 구간 추가</button>`;
     }
+    if(f.type==="quotes"){
+      let arr=[]; try{ arr=JSON.parse(val||"[]"); if(!Array.isArray(arr)) arr=[]; }catch(e){ arr=[]; }
+      if(!arr.length) arr=[{p:"",t:"",d:""}];
+      const escQ=x=>String(x==null?"":x).replace(/&/g,'&amp;').replace(/</g,'&lt;');
+      const escA=x=>String(x==null?"":x).replace(/"/g,'&quot;');
+      const rowH=t=>`<div class="q-row" data-d="${escA(t.d)}"><input class="q-p" inputmode="numeric" placeholder="쪽" value="${escA(t.p)}"><textarea class="q-t" rows="2" placeholder="마음에 남은 문장">${escQ(t.t)}</textarea><button type="button" class="q-del" title="이 문장 삭제">✕</button></div>`;
+      return `<label>${ndFL(f)}</label><div class="hint" style="margin:-2px 0 6px">읽으면서 한 문장씩 모아두세요. 쪽수는 비워도 돼요.</div><div class="rf-quotes" data-k="${f.k}">${arr.map(rowH).join("")}</div><button type="button" class="q-add" data-k="${f.k}">＋ 문장 추가</button>`;
+    }
     if(f.type==="labrows"){
       let arr=[]; try{ arr=JSON.parse(val||"[]"); if(!Array.isArray(arr)) arr=[]; }catch(e){ arr=[]; }
       if(!arr.length && existing && (existing.item||existing.value||existing.range)) arr=[{item:existing.item||"",value:existing.value||"",normal:existing.range||""}];
@@ -4327,7 +4399,7 @@ function openRecordForm(m, existing, prefill){
     const v = (f.type==="tags" && Array.isArray(val)) ? val.join(", ") : (val==null?"":val);
     return `<label>${ndFL(f)}</label><input class="rf" data-k="${f.k}" data-type="${f.type}" value="${String(v).replace(/"/g,'&quot;')}" placeholder="${ndFP(f)}" autocomplete="off" />`;
   };
-  const _wcls=f=> f.third?"rff-third":f.full?"rff-full":(f.half?"rff-half":(f.type==="bool"?"rff-bool":((f.type==="textarea"||f.type==="image"||f.type==="rating"||f.type==="seg"||f.type==="labrows"||f.type==="tiers"||f.type==="checks")?"rff-full":"rff-half")));
+  const _wcls=f=> f.third?"rff-third":f.full?"rff-full":(f.half?"rff-half":(f.type==="bool"?"rff-bool":((f.type==="textarea"||f.type==="image"||f.type==="rating"||f.type==="seg"||f.type==="labrows"||f.type==="tiers"||f.type==="quotes"||f.type==="checks")?"rff-full":"rff-half")));
   const body=fields.map(f=>`<div class="rff ${_wcls(f)}">${_cell(f)}</div>`).join("");
   d.innerHTML=`<div class="dhead"><h3>${m.title} ${isEdit?'수정':'추가'}</h3><button class="dclose-x" onclick="this.closest('dialog').close()" aria-label="닫기">✕</button></div><div class="dbody set rfgrid">${body}
     <div class="rff-full" style="display:flex;gap:8px;margin-top:18px;flex:1 1 100%">
@@ -4344,6 +4416,13 @@ function openRecordForm(m, existing, prefill){
     const wireRow=rw=>{ const del=rw.querySelector(".tier-del"); if(del) del.onclick=()=>{ if(box.querySelectorAll(".tier-row").length>1) rw.remove(); else { rw.querySelector(".tier-min-in").value=""; rw.querySelector(".tier-ben").value=""; } }; };
     box.querySelectorAll(".tier-row").forEach(wireRow);
     if(addBtn) addBtn.onclick=()=>{ const tp=document.createElement("template"); tp.innerHTML=rowTpl; const nr=tp.content.firstChild; box.appendChild(nr); wireRow(nr); const mi=nr.querySelector(".tier-min-in"); if(mi) mi.focus(); };
+  });
+  d.querySelectorAll(".rf-quotes").forEach(box=>{
+    const addBtn = box.parentNode.querySelector(`.q-add[data-k="${box.dataset.k}"]`);
+    const rowTpl='<div class="q-row"><input class="q-p" inputmode="numeric" placeholder="쪽"><textarea class="q-t" rows="2" placeholder="마음에 남은 문장"></textarea><button type="button" class="q-del" title="이 문장 삭제">✕</button></div>';
+    const wireRow=rw=>{ const del=rw.querySelector(".q-del"); if(del) del.onclick=()=>{ if(box.querySelectorAll(".q-row").length>1) rw.remove(); else { rw.querySelector(".q-p").value=""; rw.querySelector(".q-t").value=""; } }; };
+    box.querySelectorAll(".q-row").forEach(wireRow);
+    if(addBtn) addBtn.onclick=()=>{ const tp=document.createElement("template"); tp.innerHTML=rowTpl; const nr=tp.content.firstChild; box.appendChild(nr); wireRow(nr); const ta=nr.querySelector(".q-t"); if(ta) ta.focus(); };
   });
   d.querySelectorAll(".rf-labrows").forEach(box=>{
     const addBtn = box.parentNode.querySelector(`.lab-add[data-k="${box.dataset.k}"]`);
@@ -4398,6 +4477,10 @@ function openRecordForm(m, existing, prefill){
     fields.forEach(f=>{
       if(f.type==="bool"){ row[f.k]=d.querySelector(`.rf-bool[data-k="${f.k}"]`).classList.contains("on"); return; }
       if(f.type==="seg"){ const sel=d.querySelector(`.rf-seg[data-k="${f.k}"] .rf-segbtn.on`); row[f.k]=sel?sel.dataset.v:""; return; }
+      if(f.type==="quotes"){ const box=d.querySelector(`.rf-quotes[data-k="${f.k}"]`);
+        const today=(typeof todayStr==="function")?todayStr():"";
+        const arr=box?[...box.querySelectorAll(".q-row")].map(rw=>({ p:(rw.querySelector(".q-p").value||"").trim(), t:(rw.querySelector(".q-t").value||"").trim(), d:(rw.dataset.d||today) })).filter(t=>t.t):[];
+        row[f.k]=JSON.stringify(arr); return; }
       if(f.type==="labrows"){ const box=d.querySelector(`.rf-labrows[data-k="${f.k}"]`);
         const arr=box?[...box.querySelectorAll(".lab-row")].map(rw=>({item:(rw.querySelector(".lab-item").value||"").trim(), value:(rw.querySelector(".lab-val").value||"").trim(), normal:(rw.querySelector(".lab-norm").value||"").trim()})).filter(t=>t.item||t.value||t.normal):[];
         row[f.k]=JSON.stringify(arr); return; }
@@ -5901,7 +5984,8 @@ function _buildLifeContext(ids, data){
     var L=['[재료 읽는 법] A=실제로 한 일(행동). B=일기(자기 삶에 대해 직접 쓴 글). '
           +'D=취향(내가 좋게 본 것·최근 본 것). E=적어두고 아직 안 한 것. F=패턴과 변화.'
           +' ★감정은 B에서만 가져올 수 있다. 그 밖의 층은 사실일 뿐 감정의 근거가 아니다.'
-          +' ★E는 아직 하지 않은 것이다. 한 것처럼 쓰지 마라.'];
+          +' ★E는 아직 하지 않은 것이다. 한 것처럼 쓰지 마라.'
+          +' G=책에서 밑줄 친 문장(저자의 말). 이 사람이 한 말이 아니다.'];
     var has=function(id){ return (data&&data[id]&&data[id].length)?data[id]:null; };
     var norm=function(s){ return String(s==null?"":s).replace(/\s+/g,' ').trim(); };
     var cut=function(s,n){ s=norm(s); return s.length>n ? s.slice(0,n)+'…' : s; };
@@ -5981,6 +6065,12 @@ function _buildLifeContext(ids, data){
       if(readb.length) L.push('[D·취향] 책을 '+readb.length+'권 읽었다'+(favb.length?('. 마음에 남은 책: '+favb.slice(0,6).join(', ')):'')+(gArr.length?(' (주로 '+gArr.join(', ')+')'):''));
       var bpick=bk.filter(function(r){ return r.status!=="읽음" && (r.pick||r.status==="읽고싶음"||r.status==="찜"); }).map(function(r){ return norm(r.title); }).filter(Boolean);
       if(bpick.length) L.push('[E·적어두고 아직 안 한 것] 읽으려 적어둔 책(아직 안 읽었다): '+bpick.slice(0,6).join(', '));
+      /* ★v415: 밑줄 친 문장은 '저자의 말'이지 이 사람의 말이 아니다. 별도 층(G)으로 분리해 넘긴다. */
+      var qs=[];
+      bk.forEach(function(r){ var a=[]; try{ a=JSON.parse(r.quotes||"[]"); }catch(e){}
+        if(Array.isArray(a)) a.forEach(function(t){ var tx=norm(t&&t.t); if(tx && qs.length<5) qs.push('· 「'+norm(r.title)+'」에서: "'+cut(tx,70)+'"'); }); });
+      if(qs.length) L.push('[G·밑줄 친 문장 — ★저자의 말이지 이 사람이 한 말이 아니다.\n'
+        +' 이 사람의 감정·경험으로 옮기지 마라. 무엇에 밑줄 긋는 사람인가의 근거로만 쓸 것]\n'+qs.join('\n'));
     }
     var trv=has('travel');
     if(trv){
