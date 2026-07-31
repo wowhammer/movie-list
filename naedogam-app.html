@@ -1344,7 +1344,7 @@ body{ background:radial-gradient(circle at 50% -10%, rgba(102,78,57,.16), transp
         <svg class="brandmark" width="40" height="30" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg>
         <span class="brandwm"><span class="bwm-ko">내도감</span><span class="bwm-en">NAEDOGAM</span></span>
       </button>
-      <span class="mhver">v418β</span>
+      <span class="mhver">v419β</span>
       <span class="spacer"></span>
       <span class="src-chip" id="srcChip" style="display:none">데모</span>
       <button class="icon-btn" id="searchToggle" type="button" style="display:none">🔍</button>
@@ -2439,7 +2439,7 @@ function openDomain(id){ if(id==="mbti"){ openMbti(); return; } if(id==="period"
 
 /* 홈: 켜둔 카테고리를 카드로. 건수는 한 번 열어본 분야만 표시(홈을 빠르게 유지). */
 function ndDeep(h){ if(typeof h!=="string"||h.charAt(0)!=="#") h="#8a7a6a"; var n=parseInt(h.slice(1),16),r=(n>>16)&255,g=(n>>8)&255,b=n&255; function d(x,f){return Math.max(0,Math.min(255,Math.round(x*f)));} var d1="rgb("+d(r,.46)+","+d(g,.46)+","+d(b,.46)+")", d2="rgb("+d(r,.20)+","+d(g,.20)+","+d(b,.20)+")", gl="rgba("+r+","+g+","+b+",.16)"; return "radial-gradient(circle at 18% 14%,"+gl+",transparent 46%),linear-gradient(145deg,"+d1+","+d2+")"; }
-var ND_LOGO_HTML='<div class="ndh-brand"><svg width="47" height="35" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg><div class="ndh-wm"><b>내도감</b><small>NAEDOGAM</small></div><span class="mhver ndh-ver">v418β</span></div><button class="ndh-sync" type="button" title="동기화" aria-label="동기화" onclick="try{syncNow()}catch(e){}">↻</button>';
+var ND_LOGO_HTML='<div class="ndh-brand"><svg width="47" height="35" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg><div class="ndh-wm"><b>내도감</b><small>NAEDOGAM</small></div><span class="mhver ndh-ver">v419β</span></div><button class="ndh-sync" type="button" title="동기화" aria-label="동기화" onclick="try{syncNow()}catch(e){}">↻</button>';
 /* 홈 카드 크기: wide(넓게=한 줄 전체) · half(보통=한 줄 2개) · mini(작게=하단 3칸). 기본값=프리셋 */
 var ND_PRESET_SIZE={running:"wide",food:"wide",recipes:"wide",movies:"half",books:"half",period:"half",diary:"half",travel:"half",mountains:"half",culture:"half",albums:"half",cellar:"half",scrap:"half",wish:"half",gift:"half",pet:"half"};
 function getHomeSizes(){ try{ return JSON.parse(store.getItem("nd.homesize")||"{}")||{}; }catch(e){ return {}; } }
@@ -3921,7 +3921,7 @@ function _optiSaveField(m, r, field, value){
 }
 function _inlineMemoHTML(field, value, label){
   var v=(value==null?"":String(value)).replace(/&/g,"&amp;").replace(/</g,"&lt;");
-  return '<div class="mvmemo"><div class="mvmemo-l">'+label+'</div><textarea class="mvmemo-ta" data-mk="'+field+'" rows="3" placeholder="여기에 바로 적어보세요 · 자동 저장">'+v+'</textarea></div>';
+  return '<div class="mvmemo"><div class="mvmemo-l">'+label+'</div><textarea class="mvmemo-ta" data-mk="'+field+'" rows="5" placeholder="여기에 바로 적어보세요 · 자동 저장">'+v+'</textarea></div>';
 }
 function _wireInlineMemo(d, m, r){
   if(!d) return;
@@ -5323,7 +5323,7 @@ var MBTI_INFO={
 function _mbtiSaved(){ try{ var raw=store.getItem("nd.mbti"); return raw?JSON.parse(raw):null; }catch(e){ return null; } }
 function _mbtiEsc(x){ return String(x==null?"":x).replace(/&/g,"&amp;").replace(/</g,"&lt;"); }
 function _mbtiDate(){ var d=new Date(); return d.getFullYear()+"."+String(d.getMonth()+1).padStart(2,"0")+"."+String(d.getDate()).padStart(2,"0"); }
-/* ── 인사이트 확장: 취향 거울 · 오늘 뭐 볼까 · 회상 ── */
+/* ── 인사이트 확장: 취향 거울 · 오늘의 추천 · 회상 ── */
 async function _insData(){
   var ids=getActive().filter(function(id){return MANIFESTS[id];});
   var data={};
@@ -5389,17 +5389,17 @@ async function openMirror(){
   c.innerHTML=sec.join("");
 }
 
-/* 오늘 뭐 볼까 (결정 엔진) */
+/* 오늘의 추천 (결정 엔진) */
 async function openDecide(){
-  _insModal("decideDlg","🎯 오늘 뭐 볼까");
+  _insModal("decideDlg","🎯 오늘의 추천");
   var d=await _insData();
   var c=document.getElementById("decideDlgCard"); if(!c) return;
   { var _tot=_ndRowsTotal(d.data);
-    if(_tot<ND_INS_MIN){ c.innerHTML='<div class="wsec whead"><div class="wlogo">내도감 · 오늘 뭐 볼까</div><div class="wtitle">오늘 뭐 볼까</div></div>'+_ndNeedMoreHTML(_tot, ND_INS_MIN, "오늘의 추천"); _ndNeedMoreBind(); return; } }
+    if(_tot<ND_INS_MIN){ c.innerHTML='<div class="wsec whead"><div class="wlogo">내도감 · 오늘의 추천</div><div class="wtitle">오늘의 추천</div></div>'+_ndNeedMoreHTML(_tot, ND_INS_MIN, "오늘의 추천"); _ndNeedMoreBind(); return; } }
   var CATS=[["movies","🎬","오늘의 한 편"],["books","📖","오늘의 한 권"],["cellar","🍷","오늘의 한 잔"],["culture","🎭","가볼 공연·전시"],["travel","✈️","떠나볼 여행"],["food","🍽","가볼 맛집"],["albums","💿","들어볼 명반"]];
   var day=_dayNum(); var picks=[];
   var _tasteSet=function(rows,keys){ var set={}; rows.forEach(function(r){ var rt=(r.rating!=null&&r.rating!=="")?parseFloat(r.rating):null; if(rt!=null&&rt>=8){ keys.forEach(function(k){ String(r[k]||"").split(",").forEach(function(x){x=x.trim(); if(x)set[x]=(set[x]||0)+1;}); }); } }); return set; }; CATS.forEach(function(cc,ci){ var rows=d.data[cc[0]]||[]; var un=rows.filter(function(r){return !_wDone(cc[0],r);}); if(!un.length) return; var reason="", pool=un; if(cc[0]==="movies"){ var ts=_tasteSet(rows,["director","country"]); var mm=un.filter(function(r){ return ts[String(r.director||"").trim()]||ts[String(r.country||"").trim()]; }); if(mm.length){ pool=mm; reason="내 취향(감독·나라)"; } } else if(cc[0]==="books"){ var tg=_tasteSet(rows,["genre"]); var bb=un.filter(function(r){ return String(r.genre||"").split(",").some(function(g){return tg[g.trim()];}); }); if(bb.length){ pool=bb; reason="좋아한 장르"; } } var it=pool[(day+ci)%pool.length]; picks.push({cat:cc[0],icon:cc[1],label:cc[2],item:it,reason:reason}); });
-  var sec=['<div class="wsec whead"><div class="wlogo">내도감 · 결정 엔진</div><div class="wtitle">오늘 뭐 볼까</div><div class="wdate">담아둔 것 중 오늘의 추천</div></div>'];
+  var sec=['<div class="wsec whead"><div class="wlogo">내도감 · 결정 엔진</div><div class="wtitle">오늘의 추천</div><div class="wdate">담아둔 것 중 오늘의 추천</div></div>'];
   if(!picks.length){ sec.push('<div class="wsec"><div class="wcap">추천할 후보가 없어요. 추천리스트에서 몇 개 담아보세요.</div></div>'); }
   else { picks.forEach(function(p){ var t=p.item.title||p.item.name||""; sec.push('<div class="wsec" style="border-bottom:1px solid rgba(255,255,255,.06)"><div class="wh2">'+p.icon+' '+p.label+'</div><button class="insCard" data-cat="'+p.cat+'" data-id="'+_wEsc(String(p.item._id))+'"><span class="insTx"><b>'+_wEsc(t)+'</b><i>'+(p.reason?_wEsc(p.reason)+' · ':'')+'탭하면 자세히</i></span><span class="insGo">→</span></button></div>'); }); }
   c.innerHTML=sec.join("");
@@ -5415,13 +5415,13 @@ async function openMemory(){
     if(_tot<ND_INS_MIN){ c.innerHTML='<div class="wsec whead"><div class="wlogo">내도감 · 회상</div><div class="wtitle">회상</div></div>'+_ndNeedMoreHTML(_tot, ND_INS_MIN, "회상"); _ndNeedMoreBind(); return; } }
   var DATEK={movies:"watchDate",books:"readDate",mountains:"climbDate",running:"date",travel:"date",culture:"date",food:"date",diary:"date"};
   var items=[];
-  d.ids.forEach(function(id){ var dk=DATEK[id]; if(!dk) return; (d.data[id]||[]).forEach(function(r){ var v=r[dk]; if(!v) return; var iso=String(v).slice(0,10); var t=Date.parse(iso); if(isNaN(t)) return; items.push({id:id,title:r.title||r.name||"",date:iso,t:t,icon:(MANIFESTS[id].icon||"•")}); }); });
+  d.ids.forEach(function(id){ var dk=DATEK[id]; if(!dk) return; (d.data[id]||[]).forEach(function(r){ var v=r[dk]; if(!v) return; var iso=String(v).slice(0,10); var t=Date.parse(iso); if(isNaN(t)) return; items.push({id:id,title:r.title||r.name||"",date:iso,t:t,icon:(MANIFESTS[id].icon||"•"),cat:(MANIFESTS[id].title||id)}); }); });
   items.sort(function(a,b){return b.t-a.t;});
   var now=Date.now();
   var _td=new Date(); var _mmdd=String(_td.getMonth()+1).padStart(2,"0")+"-"+String(_td.getDate()).padStart(2,"0"); var anniv=items.filter(function(x){ return x.date.slice(5)===_mmdd && parseInt(x.date.slice(0,4),10)<_td.getFullYear(); });
   var sec=['<div class="wsec whead"><div class="wlogo">내도감 · 회상</div><div class="wtitle">회상</div><div class="wdate">기록을 다시 꺼내봅니다</div></div>'];
   if(!items.length){ sec.push('<div class="wsec"><div class="wcap">날짜가 있는 기록이 아직 없어요. 경험한 날을 남기면 여기서 다시 만나요.</div></div>'); }
-  else { if(anniv.length){ sec.push('<div class="wsec"><div class="wh2">🎂 오늘의 회상</div>'+anniv.map(function(m){ var yrs=_td.getFullYear()-parseInt(m.date.slice(0,4),10); return '<div class="wrow"><span>'+m.icon+' '+_wEsc(m.title)+'</span><b style="color:#c62828">'+yrs+'년 전 오늘</b></div>'; }).join("")+'</div>'); } sec.push('<div class="wsec"><div class="wh2">🕰 지나온 기록</div>'+items.slice(0,20).map(function(m){ var days=Math.floor((now-m.t)/86400000); var ago=days<=0?"오늘":days<7?days+"일 전":days<30?Math.floor(days/7)+"주 전":days<365?Math.floor(days/30)+"개월 전":Math.floor(days/365)+"년 전"; return '<div class="wrow"><span>'+m.icon+' '+_wEsc(m.title)+'</span><b>'+ago+'</b></div>'; }).join("")+'</div>'); }
+  else { if(anniv.length){ sec.push('<div class="wsec"><div class="wh2">🎂 오늘의 회상</div>'+anniv.map(function(m){ var yrs=_td.getFullYear()-parseInt(m.date.slice(0,4),10); return '<div class="wrow"><span>'+m.icon+' <b style="opacity:.62;font-weight:700;font-size:12px">'+_wEsc(m.cat||"")+'</b> '+_wEsc(m.title)+'</span><b style="color:#c62828">'+yrs+'년 전 오늘</b></div>'; }).join("")+'</div>'); } sec.push('<div class="wsec"><div class="wh2">🕰 지나온 기록</div>'+items.slice(0,20).map(function(m){ var days=Math.floor((now-m.t)/86400000); var ago=days<=0?"오늘":days<7?days+"일 전":days<30?Math.floor(days/7)+"주 전":days<365?Math.floor(days/30)+"개월 전":Math.floor(days/365)+"년 전"; return '<div class="wrow"><span>'+m.icon+' <b style="opacity:.62;font-weight:700;font-size:12px">'+_wEsc(m.cat||"")+'</b> '+_wEsc(m.title)+'</span><b>'+ago+'</b></div>'; }).join("")+'</div>'); }
   c.innerHTML=sec.join("");
 }
 
@@ -5456,7 +5456,7 @@ function openInsight(){
     +'<div class="wsec" style="border-bottom:none">'
     +(CONFIG.AI_PROXY_URL?'<button class="insCard insAI" id="insAI"><span class="insEm">✨</span><span class="insTx"><b>AI가 써주는 내 이야기</b><i>내가 모은 기록으로 쓰는 한 편의 글</i></span><span class="insGo">→</span></button>':'')+'<button class="insCard" id="insWrap"><span class="insEm">🎊</span><span class="insTx"><b>나의 결산</b><i>수집·경험을 한 장으로 · 이미지 공유</i></span><span class="insGo">→</span></button>'
     +'<button class="insCard" id="insMirror"><span class="insEm">🪞</span><span class="insTx"><b>취향 거울</b><i>기록이 비추는 나의 취향</i></span><span class="insGo">→</span></button>'
-    +'<button class="insCard" id="insDecide"><span class="insEm">🎯</span><span class="insTx"><b>오늘 뭐 볼까</b><i>담아둔 것 중 오늘의 추천</i></span><span class="insGo">→</span></button>'
+    +'<button class="insCard" id="insDecide"><span class="insEm">🎯</span><span class="insTx"><b>오늘의 추천</b><i>담아둔 것 중 오늘의 추천</i></span><span class="insGo">→</span></button>'
     +'<button class="insCard" id="insMemory"><span class="insEm">🕰</span><span class="insTx"><b>회상</b><i>지난 기록을 다시 꺼내기</i></span><span class="insGo">→</span></button>'
     +'</div></div></div>';
   document.body.appendChild(dlg); dlg.showModal();
@@ -5486,9 +5486,8 @@ function _aiExport(){
   document.body.appendChild(card);
   _wLoadH2C(function(){
     html2canvas(card,{backgroundColor:"#0d0a1f",scale:2,useCORS:true,logging:false}).then(function(canvas){
-      try{ canvas.toBlob(function(blob){ var url=URL.createObjectURL(blob); var a=document.createElement("a"); a.href=url; a.download="내도감_AI이야기.png"; document.body.appendChild(a); a.click(); a.remove(); setTimeout(function(){URL.revokeObjectURL(url);},2000); },"image/png"); }
-      catch(e){ var a2=document.createElement("a"); a2.href=canvas.toDataURL("image/png"); a2.download="내도감_AI이야기.png"; a2.click(); }
-      card.remove(); _ndSavedToast(btn,t0);
+      card.remove();
+      _ndShareCanvas(canvas, "내도감_AI이야기.png", btn, t0, "AI가 써준 나의 이야기 · 내도감 app.naedogam.com");
     }).catch(function(e){ card.remove(); if(btn){btn.disabled=false;btn.textContent=t0;} try{ ndToast("이미지 저장 실패: "+((e&&e.message)||e)); }catch(_e){} });
   });
 }
@@ -5908,7 +5907,7 @@ function _wCardExport(cardId, filename, btn){
   var t0=btn?btn.textContent:""; if(btn){ btn.disabled=true; btn.textContent="만드는 중…"; }
   _wLoadH2C(function(){
     html2canvas(card,{backgroundColor:"#0d0a1f",scale:2,useCORS:true,logging:false}).then(function(canvas){
-      canvas.toBlob(function(blob){ var url=URL.createObjectURL(blob); var a=document.createElement("a"); a.href=url; a.download=filename; document.body.appendChild(a); a.click(); a.remove(); setTimeout(function(){URL.revokeObjectURL(url);},2000); _ndSavedToast(btn,t0); },"image/png");
+      _ndShareCanvas(canvas, filename, btn, t0, "내도감 · app.naedogam.com");
     }).catch(function(e){ try{ ndToast("이미지 저장 실패: "+((e&&e.message)||e)); }catch(_e){} if(btn){btn.disabled=false;btn.textContent=t0;} });
   });
 }
@@ -6446,7 +6445,7 @@ async function ndAIWrite(force){
 async function openWrapped(){
   var old=document.getElementById("wrapDlg"); if(old) old.remove();
   var dlg=document.createElement("dialog"); dlg.id="wrapDlg"; dlg.className="wrapDlg";
-  dlg.innerHTML='<div class="wtop"><button class="wclose" onclick="this.closest(\'dialog\').close(); openInsight();">← 인사이트</button><button class="wsave" id="wSave">📷 이미지 저장</button></div><div class="wscroll"><div class="wcard" id="wrapCard"><div class="wloading">내 결산을 만드는 중…</div></div></div>';
+  dlg.innerHTML='<div class="wtop"><button class="wclose" onclick="this.closest(\'dialog\').close(); openInsight();">← 인사이트</button><button class="wsave" id="wSave">📷 이미지 저장·공유</button></div><div class="wscroll"><div class="wcard" id="wrapCard"><div class="wloading">내 결산을 만드는 중…</div></div></div>';
   document.body.appendChild(dlg); dlg.showModal();
   dlg.addEventListener("click",function(e){ if(e.target===dlg) dlg.close(); });
   // 전체 카테고리 로딩(통계와 동일 패턴)
@@ -6463,14 +6462,63 @@ async function openWrapped(){
   var sv=document.getElementById("wSave");
   if(sv) sv.onclick=function(){ _wExport(sv); };
 }
+/* ★v419: 저장되는 모든 이미지 아래에 내도감 마크를 찍는다.
+   카드 HTML이 아니라 캔버스에 직접 그리므로 어떤 화면에서 저장해도 빠지지 않는다. */
+function _ndStamp(canvas){
+  try{
+    var w=canvas.width, s=w/1080;                 // 1080px 기준으로 비율 맞춤
+    var bar=Math.round(96*s);
+    var out=document.createElement("canvas"); out.width=w; out.height=canvas.height+bar;
+    var g=out.getContext("2d");
+    g.fillStyle="#0d0a1f"; g.fillRect(0,0,out.width,out.height);
+    g.drawImage(canvas,0,0);
+    var cy=canvas.height+bar/2;
+    /* 왼쪽 막대 3개 = 내도감 로고 */
+    var bx=Math.round(46*s), bw=Math.round(9*s), gap=Math.round(7*s), bh=Math.round(30*s);
+    var cols=["#c9bfae","#c9bfae","#e0483f"], hs=[0.62,0.82,1];
+    for(var i=0;i<3;i++){ g.fillStyle=cols[i]; var h=Math.round(bh*hs[i]);
+      g.fillRect(bx+i*(bw+gap), Math.round(cy+bh/2-h), bw, h); }
+    g.fillStyle="#f6eddf"; g.font="700 "+Math.round(30*s)+"px Pretendard, 'Noto Sans KR', sans-serif";
+    g.textBaseline="middle"; g.fillText("내도감", bx+3*(bw+gap)+Math.round(14*s), cy);
+    g.fillStyle="rgba(246,237,223,.55)"; g.font="500 "+Math.round(23*s)+"px Pretendard, 'Noto Sans KR', sans-serif";
+    g.textAlign="right"; g.fillText("app.naedogam.com", w-Math.round(46*s), cy);
+    return out;
+  }catch(e){ return canvas; }
+}
+/* ★v419: 저장 대신 '공유'까지. 폰이 지원하면 시스템 공유창(인스타·카톡…)이 뜬다. */
+function _ndShareCanvas(canvas, filename, btn, t0, shareText){
+  var stamped=_ndStamp(canvas);
+  var done=function(){ try{ _ndSavedToast(btn,t0); }catch(e){} };
+  var fallback=function(blob){
+    try{
+      var url=URL.createObjectURL(blob); var a=document.createElement("a"); a.href=url; a.download=filename;
+      document.body.appendChild(a); a.click(); a.remove(); setTimeout(function(){ URL.revokeObjectURL(url); },2000);
+    }catch(e){ var a2=document.createElement("a"); a2.href=stamped.toDataURL("image/png"); a2.download=filename; a2.click(); }
+    done();
+  };
+  try{
+    stamped.toBlob(function(blob){
+      if(!blob){ done(); return; }
+      try{
+        var file=new File([blob], filename, {type:"image/png"});
+        if(navigator.canShare && navigator.canShare({files:[file]})){
+          navigator.share({ files:[file], text:(shareText||"내도감 · app.naedogam.com") })
+            .then(function(){ try{ ndGA("card_share",{via:"native"}); }catch(e){} done(); })
+            .catch(function(err){ if(err && err.name==="AbortError"){ if(btn){ btn.disabled=false; btn.textContent=t0; } return; } fallback(blob); });
+          return;
+        }
+      }catch(e){}
+      fallback(blob);
+    },"image/png");
+  }catch(e){ fallback(null); }
+}
 function _wLoadH2C(cb){ if(window.html2canvas) return cb(); var s=document.createElement("script"); s.src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"; s.onload=function(){cb();}; s.onerror=function(){ alert("이미지 저장 모듈을 불러오지 못했어요. 잠시 후 다시 시도해주세요."); }; document.head.appendChild(s); }
 function _wExport(btn){
   var card=document.getElementById("wrapCard"); if(!card) return;
   var t0=btn?btn.textContent:""; if(btn){ btn.disabled=true; btn.textContent="만드는 중…"; }
   _wLoadH2C(function(){
     html2canvas(card,{backgroundColor:"#0d0a1f",scale:2,useCORS:true,logging:false}).then(function(canvas){
-      try{ canvas.toBlob(function(blob){ var url=URL.createObjectURL(blob); var a=document.createElement("a"); a.href=url; a.download="내도감_결산.png"; document.body.appendChild(a); a.click(); a.remove(); setTimeout(function(){URL.revokeObjectURL(url);},2000); _ndSavedToast(btn,t0); },"image/png"); }
-      catch(e){ var a2=document.createElement("a"); a2.href=canvas.toDataURL("image/png"); a2.download="내도감_결산.png"; a2.click(); _ndSavedToast(btn,t0); }
+      _ndShareCanvas(canvas, "내도감_결산.png", btn, t0, "내 기록으로 만든 결산 · 내도감 app.naedogam.com");
     }).catch(function(e){ try{ ndToast("이미지 저장 실패: "+((e&&e.message)||e)); }catch(_e){} if(btn){btn.disabled=false;btn.textContent=t0;} });
   });
 }
