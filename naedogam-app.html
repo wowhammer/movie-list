@@ -947,7 +947,7 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
 .memstrip .ms-b b{color:#7c3aed}
 .memstrip .ms-go{font-size:12px;color:var(--ink-soft);font-weight:700;white-space:nowrap}
 .memstrip:active{transform:translateY(1px)}
-.aistrip{display:flex;align-items:center;gap:10px;width:100%;text-align:left;background:linear-gradient(100deg,#7c5cff,#ff6fae);border:none;border-radius:14px;padding:13px 15px;margin:16px 0 4px;cursor:pointer;color:#fff;font:inherit;box-shadow:0 4px 14px rgba(124,92,255,.30)}
+.aistrip{display:flex;align-items:center;gap:10px;width:100%;text-align:left;background:linear-gradient(100deg,#7c5cff,#ff6fae);border:none;border-radius:14px;padding:13px 15px;margin:0;cursor:pointer;color:#fff;font:inherit;box-shadow:0 4px 14px rgba(124,92,255,.30)}
 .aistrip .ms-ic{font-size:18px;line-height:1}
 .aistrip .ms-b{flex:1;min-width:0;font-size:12.5px;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .aistrip .ms-b b{color:#fff}
@@ -1001,7 +1001,7 @@ body.home-dark .bnav-i.on .bnav-ic svg{ stroke:#f6eddf !important; }
 .ndh-wm b{ font-size:23px; font-weight:800; letter-spacing:-.05em; }
 .ndh-wm small{ font-size:9px; font-weight:800; letter-spacing:.28em; color:#c9bcac; margin-top:3px; }
 .ndh-prof{ width:41px; height:41px; border-radius:50%; border:1px solid rgba(255,255,255,.08); background:linear-gradient(145deg,#8a8177,#5f5952); cursor:pointer; flex:0 0 auto; }
-.ndh-tabs{ display:flex; gap:2px; overflow-x:auto; -webkit-overflow-scrolling:touch; touch-action:pan-x; padding:7px; margin-bottom:16px; border:1px solid rgba(238,224,205,.13); border-radius:22px; background:linear-gradient(180deg,rgba(255,255,255,.026),rgba(255,255,255,.008)),rgba(35,31,27,.92); box-shadow:0 12px 30px rgba(0,0,0,.13); scrollbar-width:none; }
+.ndh-tabs{ display:flex; gap:2px; overflow-x:auto; -webkit-overflow-scrolling:touch; touch-action:pan-x; padding:7px; margin-bottom:10px; border:1px solid rgba(238,224,205,.13); border-radius:22px; background:linear-gradient(180deg,rgba(255,255,255,.026),rgba(255,255,255,.008)),rgba(35,31,27,.92); box-shadow:0 12px 30px rgba(0,0,0,.13); scrollbar-width:none; }
 .ndh-tabs::-webkit-scrollbar{ display:none; }
 .ndh-tab{ flex:1 0 auto; display:flex; flex-direction:column; align-items:center; gap:5px; min-width:56px; padding:8px 8px 6px; border:0; border-radius:16px; background:transparent; color:#dfd5c7; cursor:pointer; }
 .ndh-tab.on{ color:#fff6e8; background:linear-gradient(145deg,rgba(255,255,255,.13),rgba(255,255,255,.055)),#48423a; box-shadow:inset 0 1px 0 rgba(255,255,255,.08); }
@@ -1288,6 +1288,14 @@ body{ background:radial-gradient(circle at 50% -10%, rgba(102,78,57,.16), transp
 [data-theme="dark"] .insLight #insDecide{ border-left-color:#6aa6e0; }
 [data-theme="dark"] .insLight #insMemory{ border-left-color:#8bbf7a; }
 [data-theme="dark"] .insLight .wlogo{ color:#e0a86a; }
+/* ★v412: 상세의 상태 버튼(봤음·다시볼것·찜 등)이 맨 아래라 모바일에서 누르기 힘들었다.
+   템플릿을 카테고리마다 고치지 않고 order 하나로 전부 위로 올린다. */
+#detail[open]{ display:flex; flex-direction:column; }
+#detail > *{ order:3; }
+#detail > .dhead{ order:0; }
+#detail > .dfoot{ order:1; padding:10px 18px 12px; margin-bottom:2px; border-bottom:1px solid var(--line-soft,rgba(0,0,0,.08)); }
+#detail > .dfoot .btn{ flex:1 1 0; min-width:0; }
+
 .hlpi summary::-webkit-details-marker{display:none}
 .hlpi[open] summary{border-bottom:1px solid var(--line,#e5e0d6)}
 .hlpi summary::after{content:'＋';float:right;opacity:.45;font-weight:700}
@@ -1305,7 +1313,7 @@ body{ background:radial-gradient(circle at 50% -10%, rgba(102,78,57,.16), transp
         <svg class="brandmark" width="40" height="30" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg>
         <span class="brandwm"><span class="bwm-ko">내도감</span><span class="bwm-en">NAEDOGAM</span></span>
       </button>
-      <span class="mhver">v411β</span>
+      <span class="mhver">v412β</span>
       <span class="spacer"></span>
       <span class="src-chip" id="srcChip" style="display:none">데모</span>
       <button class="icon-btn" id="searchToggle" type="button" style="display:none">🔍</button>
@@ -1568,7 +1576,7 @@ const MANIFESTS = {
     source:{ type:"sheet", tab:"일기" },
     fields:[ {k:"date",sheet:"날짜",label:"날짜",type:"date",today:true},
              {k:"title",sheet:"제목",label:"제목",type:"text",full:true},
-             {k:"content",sheet:"내용",label:"내용",type:"textarea"},
+             {k:"content",sheet:"내용",label:"내용",type:"textarea",full:true,rows:10},
              {k:"nddaily",sheet:"오늘내도감",label:"오늘 내도감 (자동)",type:"textarea",rows:3},
              {k:"mood",sheet:"기분",label:"기분",type:"select",options:["","😊 좋음","😐 보통","😔 힘듦","😡 화남","😢 슬픔","🥰 설렘"]},
              {k:"weather",sheet:"날씨",label:"날씨",type:"select",options:["","☀️ 맑음","⛅ 구름","🌧️ 비","❄️ 눈","🌫️ 흐림"]},
@@ -2399,7 +2407,7 @@ function openDomain(id){ if(id==="mbti"){ openMbti(); return; } if(id==="period"
 
 /* 홈: 켜둔 카테고리를 카드로. 건수는 한 번 열어본 분야만 표시(홈을 빠르게 유지). */
 function ndDeep(h){ if(typeof h!=="string"||h.charAt(0)!=="#") h="#8a7a6a"; var n=parseInt(h.slice(1),16),r=(n>>16)&255,g=(n>>8)&255,b=n&255; function d(x,f){return Math.max(0,Math.min(255,Math.round(x*f)));} var d1="rgb("+d(r,.46)+","+d(g,.46)+","+d(b,.46)+")", d2="rgb("+d(r,.20)+","+d(g,.20)+","+d(b,.20)+")", gl="rgba("+r+","+g+","+b+",.16)"; return "radial-gradient(circle at 18% 14%,"+gl+",transparent 46%),linear-gradient(145deg,"+d1+","+d2+")"; }
-var ND_LOGO_HTML='<div class="ndh-brand"><svg width="47" height="35" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg><div class="ndh-wm"><b>내도감</b><small>NAEDOGAM</small></div><span class="mhver ndh-ver">v411β</span></div><button class="ndh-sync" type="button" title="동기화" aria-label="동기화" onclick="try{syncNow()}catch(e){}">↻</button>';
+var ND_LOGO_HTML='<div class="ndh-brand"><svg width="47" height="35" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg><div class="ndh-wm"><b>내도감</b><small>NAEDOGAM</small></div><span class="mhver ndh-ver">v412β</span></div><button class="ndh-sync" type="button" title="동기화" aria-label="동기화" onclick="try{syncNow()}catch(e){}">↻</button>';
 /* 홈 카드 크기: wide(넓게=한 줄 전체) · half(보통=한 줄 2개) · mini(작게=하단 3칸). 기본값=프리셋 */
 var ND_PRESET_SIZE={running:"wide",food:"wide",recipes:"wide",movies:"half",books:"half",period:"half",diary:"half",travel:"half",mountains:"half",culture:"half",albums:"half",cellar:"half",scrap:"half",wish:"half",gift:"half",pet:"half"};
 function getHomeSizes(){ try{ return JSON.parse(store.getItem("nd.homesize")||"{}")||{}; }catch(e){ return {}; } }
@@ -2629,12 +2637,22 @@ function renderHome(){
   const bg=m=>`style="background:${ND_GRAD[m.id]||ndDeep(colOf(m))}"`;
   const zeroOf=m=>{ const a=rowsOf(m); return (a&&a.length===0)?" nc-zero":""; };
   const recentTitles=(m,k)=>{ const a=rowsOf(m); if(!a||!a.length) return ""; const out=[]; for(let i=a.length-1;i>=0&&out.length<k;i--){ const t=a[i]&&(a[i].title||a[i].name); if(t) out.push(String(t)); } return out.join(" · "); };
-  const _richRecent=(m)=>{ const a=rowsOf(m); if(!a||!a.length) return ""; const id=m.id;
+  const _richRecent=(m,n)=>{ n=n||2; const a=rowsOf(m); if(!a||!a.length) return ""; const id=m.id;
     const tail=(n,fn)=>{ const o=[]; for(let i=a.length-1;i>=0&&o.length<n;i--){ const v=fn(a[i]); if(v) o.push(String(v)); } return o.join(" · "); };
-    if(id==="mountains") return tail(2,r=>{ const t=r.title||r.name; if(!t) return ""; return t+(r.region?("("+r.region+")"):""); });
-    if(id==="travel") return tail(2,r=>{ const t=r.title||r.place||r.name; if(!t) return ""; const c=r.country; const cc=c?(c==="대한민국"?"국내":c):""; return t+(cc?("("+cc+")"):""); });
-    if(id==="albums") return tail(2,r=>{ const t=r.title||r.name; if(!t) return ""; return t+(r.artist?(" — "+r.artist):""); });
-    return recentTitles(m,2);
+    if(id==="mountains") return tail(n,r=>{ const t=r.title||r.name; if(!t) return ""; return t+(r.region?("("+r.region+")"):""); });
+    if(id==="travel") return tail(n,r=>{ const t=r.title||r.place||r.name; if(!t) return ""; const c=r.country; const cc=c?(c==="대한민국"?"국내":c):""; return t+(cc?("("+cc+")"):""); });
+    if(id==="albums") return tail(n,r=>{ const t=r.title||r.name; if(!t) return ""; return t+(r.artist?(" — "+r.artist):""); });
+    return recentTitles(m,n);
+  };
+  /* ★v412: 넓게보기는 보통보기보다 정보가 많아야 한다. 한 줄 더 — 이번 달 개수 · 최근 기록 날짜 */
+  const _dateOf=r=>String((r&&(r.date||r.watchDate||r.visitDate||r.readDate||r.climbDate||r.buyDate||r.playDate||r.day||r.start))||"");
+  const _wideMore=m=>{ const a=rowsOf(m); if(!a||!a.length) return "";
+    const now=new Date(); const ym=now.getFullYear()+"-"+String(now.getMonth()+1).padStart(2,"0");
+    let mon=0, last="";
+    a.forEach(r=>{ let iso=""; try{ iso=String((typeof _isoOf==="function"&&_isoOf(_dateOf(r)))||_dateOf(r)); }catch(e){ iso=_dateOf(r); }
+      if(!/^\d{4}-\d{2}/.test(iso)) return; if(iso.slice(0,7)===ym) mon++; if(iso>last) last=iso; });
+    const bits=[]; if(mon) bits.push("이번 달 "+mon+unitOf(m)); if(last) bits.push("최근 "+last.slice(5,10).replace("-","/"));
+    return bits.join(" · ");
   };
   const coverCells=(m,cls)=>{ const cs=coversOf(m); let h=""; for(let i=0;i<cs.length&&i<8;i++){ h+= `<span class="${cls}" style="background-image:url('${esc(cs[i])}')"></span>`; } return h; };
   const _decoGrad=function(c,i){ if(typeof c!=="string"||c.charAt(0)!=="#") c="#8a7a6a"; var n=parseInt(c.slice(1),16),r=(n>>16)&255,g=(n>>8)&255,b=n&255; var mix=function(x,t,p){return Math.round(x+(t-x)*p);}; var lp=[.40,.26,.52][i%3], dp=[.30,.22,.26][i%3]; var top="rgb("+mix(r,255,lp)+","+mix(g,255,lp)+","+mix(b,255,lp)+")"; var bot="rgb("+Math.round(r*dp)+","+Math.round(g*dp)+","+Math.round(b*dp)+")"; var ang=[152,168,140][i%3]; return "linear-gradient(180deg,rgba(255,255,255,.15),transparent 40%),linear-gradient("+ang+"deg,"+top+","+bot+")"; };
@@ -2647,12 +2665,12 @@ function renderHome(){
 
   const collHTML=m=>{ const rc=_richRecent(m); const vis=coversOf(m).length?`<div class="covers">${coverCells(m,"cover")}</div>`:((_posterCat(m)&&_hasRows(m))?`<div class="covers nd-pfill" data-cat="${m.id}"></div><span class="nc-glyph coll-glyph pf-glyph">${iconOf(m)}</span>`:_cardGlyph(m)); return `<button class="card collection-card${zeroOf(m)}" data-id="${m.id}" ${bg(m)}><div><h3>${m.title}</h3>${metric(m)}${rc?`<p class="helper">최근: ${rc.replace(/</g,"&lt;")}</p>`:""}</div>${vis}</button>`; };
   const runningHTML=m=>{ const _rows=rowsOf(m)||[]; const _now=new Date(); const _sun=new Date(_now.getFullYear(),_now.getMonth(),_now.getDate()-_now.getDay()); const _km=[0,0,0,0,0,0,0]; _rows.forEach(r=>{ const pd=parseDate(String((r&&r.date)||"")); if(!pd) return; const _di=Math.round((new Date(pd.getFullYear(),pd.getMonth(),pd.getDate())-_sun)/86400000); if(_di>=0&&_di<7){ _km[_di]+=parseFloat(r.dist)||0; } }); const _mx=Math.max.apply(null,_km.concat(0.001)); const _wtot=_km.reduce((a,b)=>a+b,0); const _wcount=_rows.filter(r=>{ const pd=parseDate(String((r&&r.date)||"")); if(!pd) return false; const _di=Math.round((new Date(pd.getFullYear(),pd.getMonth(),pd.getDate())-_sun)/86400000); return _di>=0&&_di<7; }).length; const _hasWk=_wcount>0; const bars=_km.map(v=>{ const h=v>0?Math.max(14,Math.round(v/_mx*100)):0; return `<span class="bar" style="height:${h}%${v<=0?";opacity:.22":""}"></span>`; }).join(""); const days=["일","월","화","수","목","금","토"].map((d,i)=>`<span${i===_now.getDay()?" class=\"rd-today\"":""}>${d}</span>`).join(""); const rc=recentTitles(m,1); return `<button class="card running${zeroOf(m)}" data-id="${m.id}" ${bg(m)}><div class="nc-main"><h3>${m.title}</h3>${metric(m)}${_hasWk?`<p class="helper">이번 주 ${_wcount}회</p>`:(rc?`<p class="helper">최근: ${rc.replace(/</g,"&lt;")}</p>`:"")}</div><div class="run-chart"><div class="bars">${bars}</div><div class="days">${days}</div></div></button>`; };
-  const foodHTML=m=>{ const rc=_richRecent(m); const vis=coversOf(m).length?`<div class="food-photos">${coverCells(m,"food-photo")}</div>`:((_posterCat(m)&&_hasRows(m))?`<div class="food-photos nd-pfill" data-cat="${m.id}"></div><span class="nc-glyph coll-glyph pf-glyph">${iconOf(m)}</span>`:_cardGlyph(m)); return `<button class="card food${zeroOf(m)}" data-id="${m.id}" ${bg(m)}><div class="nc-main"><h3>${m.title}</h3>${metric(m)}${rc?`<p class="helper">최근: ${rc.replace(/</g,"&lt;")}</p>`:""}</div>${vis}</button>`; };
+  const foodHTML=m=>{ const rc=_richRecent(m,3); const mo=_wideMore(m); const vis=coversOf(m).length?`<div class="food-photos">${coverCells(m,"food-photo")}</div>`:((_posterCat(m)&&_hasRows(m))?`<div class="food-photos nd-pfill" data-cat="${m.id}"></div><span class="nc-glyph coll-glyph pf-glyph">${iconOf(m)}</span>`:_cardGlyph(m)); return `<button class="card food${zeroOf(m)}" data-id="${m.id}" ${bg(m)}><div class="nc-main"><h3>${m.title}</h3>${metric(m)}${rc?`<p class="helper">최근: ${rc.replace(/</g,"&lt;")}</p>`:""}${mo?`<p class="helper" style="opacity:.72;margin-top:2px">${mo}</p>`:""}</div>${vis}</button>`; };
   const cycleHTML=m=>`<button class="card mini-card cycle${zeroOf(m)}" data-id="${m.id}" ${bg(m)}><div class="nc-main"><h3>${m.title}</h3><div class="metric"><b class="ndc" data-cnt="${m.id}">${pdHomeLabel()}</b></div></div><span class="moon"></span></button>`;
   const diaryHTML=m=>{ const rc=recentTitles(m,1); return `<button class="card mini-card diary${zeroOf(m)}" data-id="${m.id}" ${bg(m)}><div class="nc-main"><h3>${m.title}</h3>${metric(m)}${rc?`<p class="helper">${rc.slice(0,16).replace(/</g,"&lt;")}</p>`:""}</div><span class="pen"><svg viewBox="0 0 48 48"><path d="m15 34-2 9 9-3 17-24c1.8-2.5 1.2-6-1.3-7.8s-6-1.2-7.8 1.3z"/><path d="m27 14 9 6M16 34l6 5"/></svg></span></button>`; };
   const miniHTML=m=>`<button class="card small-card${zeroOf(m)}" data-id="${m.id}" ${bg(m)}><span class="mi">${coversOf(m).length?`<i class="mi-cov" style="background-image:url('${esc(coversOf(m)[0])}')"></i>`:iconOf(m)}</span><div><h3>${m.title}</h3><strong class="ndc" data-cnt="${m.id}">${cntNum(m)}</strong></div></button>`;
   // 크기별 렌더러: 카테고리 성격(nat)에 맞춰 넓게/보통 카드 생성
-  const wideStat=m=>{ const rc=_richRecent(m); return `<button class="card food${zeroOf(m)}" data-id="${m.id}" ${bg(m)}><div class="nc-main"><h3>${m.title}</h3>${metric(m)}${rc?`<p class="helper">최근: ${rc.replace(/</g,"&lt;")}</p>`:""}</div><span class="nc-glyph coll-glyph">${iconOf(m)}</span></button>`; };
+  const wideStat=m=>{ const rc=_richRecent(m,3); const mo=_wideMore(m); return `<button class="card food${zeroOf(m)}" data-id="${m.id}" ${bg(m)}><div class="nc-main"><h3>${m.title}</h3>${metric(m)}${rc?`<p class="helper">최근: ${rc.replace(/</g,"&lt;")}</p>`:""}${mo?`<p class="helper" style="opacity:.72;margin-top:2px">${mo}</p>`:""}</div><span class="nc-glyph coll-glyph">${iconOf(m)}</span></button>`; };
   const wideCard=m=>{ const nat=ndNat(m.id); if(nat==="run") return runningHTML(m); if(coversOf(m).length||_posterCat(m)) return foodHTML(m); return wideStat(m); };
   const halfCard=m=>{ const nat=ndNat(m.id); if(nat==="cycle") return cycleHTML(m); return collHTML(m); };
 
@@ -6710,7 +6728,7 @@ function _ndHelpBind(d){
 /* 홈 안내 칩 — 한 번 닫으면 다시 안 뜬다 */
 function _ndHelpChipHTML(){
   try{ if(store.getItem("nd.helpSeen")==="1") return ""; }catch(e){}
-  return '<div id="ndHelpChip" style="display:flex;align-items:center;gap:8px;margin:10px 4px 2px;padding:10px 12px;'
+  return '<div id="ndHelpChip" style="display:flex;align-items:center;gap:8px;margin:0 0 10px;padding:10px 12px;'
     +'background:rgba(255,255,255,.07);border:1px solid rgba(238,224,205,.16);border-radius:12px">'
     +'<span style="font-size:15px">💡</span>'
     +'<button type="button" id="ndHelpChipGo" style="flex:1;text-align:left;background:none;border:none;color:inherit;font-size:13.5px;font-weight:700;cursor:pointer;padding:0">'
