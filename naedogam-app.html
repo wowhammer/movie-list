@@ -1344,7 +1344,7 @@ body{ background:radial-gradient(circle at 50% -10%, rgba(102,78,57,.16), transp
         <svg class="brandmark" width="40" height="30" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg>
         <span class="brandwm"><span class="bwm-ko">내도감</span><span class="bwm-en">NAEDOGAM</span></span>
       </button>
-      <span class="mhver">v422β</span>
+      <span class="mhver">v423β</span>
       <span class="spacer"></span>
       <span class="src-chip" id="srcChip" style="display:none">데모</span>
       <button class="icon-btn" id="searchToggle" type="button" style="display:none">🔍</button>
@@ -2439,7 +2439,7 @@ function openDomain(id){ if(id==="mbti"){ openMbti(); return; } if(id==="period"
 
 /* 홈: 켜둔 카테고리를 카드로. 건수는 한 번 열어본 분야만 표시(홈을 빠르게 유지). */
 function ndDeep(h){ if(typeof h!=="string"||h.charAt(0)!=="#") h="#8a7a6a"; var n=parseInt(h.slice(1),16),r=(n>>16)&255,g=(n>>8)&255,b=n&255; function d(x,f){return Math.max(0,Math.min(255,Math.round(x*f)));} var d1="rgb("+d(r,.46)+","+d(g,.46)+","+d(b,.46)+")", d2="rgb("+d(r,.20)+","+d(g,.20)+","+d(b,.20)+")", gl="rgba("+r+","+g+","+b+",.16)"; return "radial-gradient(circle at 18% 14%,"+gl+",transparent 46%),linear-gradient(145deg,"+d1+","+d2+")"; }
-var ND_LOGO_HTML='<div class="ndh-brand"><svg width="47" height="35" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg><div class="ndh-wm"><b>내도감</b><small>NAEDOGAM</small></div><span class="mhver ndh-ver">v422β</span></div><button class="ndh-sync" type="button" title="동기화" aria-label="동기화" onclick="try{syncNow()}catch(e){}">↻</button>';
+var ND_LOGO_HTML='<div class="ndh-brand"><svg width="47" height="35" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg><div class="ndh-wm"><b>내도감</b><small>NAEDOGAM</small></div><span class="mhver ndh-ver">v423β</span></div><button class="ndh-sync" type="button" title="동기화" aria-label="동기화" onclick="try{syncNow()}catch(e){}">↻</button>';
 /* 홈 카드 크기: wide(넓게=한 줄 전체) · half(보통=한 줄 2개) · mini(작게=하단 3칸). 기본값=프리셋 */
 var ND_PRESET_SIZE={running:"wide",food:"wide",recipes:"wide",movies:"half",books:"half",period:"half",diary:"half",travel:"half",mountains:"half",culture:"half",albums:"half",cellar:"half",scrap:"half",wish:"half",gift:"half",pet:"half"};
 function getHomeSizes(){ try{ return JSON.parse(store.getItem("nd.homesize")||"{}")||{}; }catch(e){ return {}; } }
@@ -5407,12 +5407,15 @@ async function openDecide(){
   var CATS=[["movies","🎬","오늘의 한 편"],["books","📖","오늘의 한 권"],["cellar","🍷","오늘의 한 잔"],["culture","🎭","가볼 공연·전시"],["travel","✈️","떠나볼 여행"],["food","🍽","가볼 맛집"],["albums","💿","들어볼 명반"]];
   var picks=[];
   var _mr=function(id,r){ return (typeof _ndMyRate==="function")?_ndMyRate(id,r):null; };
+  var _day=_dayNum();
+  var _tag=function(r){ return String(r.recommend||r.source||"").split(/[,\/]+/)[0].trim(); };
   CATS.forEach(function(cc){
     var id=cc[0], rows=d.data[id]||[];
     var un=rows.filter(function(r){ return !_wDone(id,r); });
+    var done=rows.filter(function(r){ return _wDone(id,r); });
     if(!un.length) return;
 
-    /* 1순위 — 내가 높게 평가한 것과 같은 만든이(감독·저자) */
+    /* A — 내가 높게 평가한 것과 같은 만든이(감독·저자) */
     var loved=rows.filter(function(r){ var v=_mr(id,r); return v!=null && v>=ND_LOVE; });
     var makerKey = (id==="books") ? "author" : (id==="movies" ? "director" : "");
     if(makerKey && loved.length){
@@ -5422,19 +5425,39 @@ async function openDecide(){
         var k2=String(un[i2][makerKey]||"").trim();
         if(k2 && makers[k2]){
           var src=makers[k2];
-          picks.push({cat:id,icon:cc[1],label:cc[2],item:un[i2],
-            reason:'「'+(src.title||src.name||"")+'」에 ★'+_mr(id,src)+'를 준 '+(makerKey==="author"?"작가":"감독")+'의 다른 작품'});
+          picks.push({cat:id,icon:cc[1],label:cc[2],item:un[i2],pri:0,
+            reason:'「'+_wEsc(src.title||src.name||"")+'」에 ★'+_mr(id,src)+'를 준 '+(makerKey==="author"?"작가":"감독")+'의 다른 작품'});
           return;
         }
       }
     }
 
-    /* 2순위 — 가장 오래 기다린 것(먼저 담아둔 것) */
-    if(un.length>=5){
-      picks.push({cat:id,icon:cc[1],label:cc[2],item:un[0],
-        reason:'담아두고 가장 오래 기다린 것 · 대기 '+un.length+'개 중 맨 앞'});
+    /* B — 이미 여러 개를 완주한 '계열'에서 남은 것.
+       ★v423: 담은 날짜가 없으니 '오래 기다렸다'는 말은 하지 않는다(사실이 아니었다). */
+    var byTag={};
+    done.forEach(function(r){ var t=_tag(r); if(!t) return; (byTag[t]=byTag[t]||{done:[],left:[]}).done.push(r); });
+    un.forEach(function(r){ var t=_tag(r); if(!t||!byTag[t]) return; byTag[t].left.push(r); });
+    var tags=Object.keys(byTag).filter(function(t){ return byTag[t].done.length>=3 && byTag[t].left.length; })
+                  .sort(function(a,b){ return byTag[b].done.length-byTag[a].done.length; });
+    if(tags.length){
+      var t0=tags[_day%tags.length], g=byTag[t0];
+      var it=g.left[_day%g.left.length];
+      var rs=g.done.map(function(r){ return _mr(id,r); }).filter(function(v){ return v!=null; });
+      var why;
+      if(rs.length>=2){
+        var avg=Math.round(rs.reduce(function(a,b){return a+b;},0)/rs.length*10)/10;
+        why='「'+_wEsc(t0)+'」에서 '+g.done.length+'개를 이미 마쳤고 별점 평균이 <b>★'+avg+'</b>예요 · 남은 '+g.left.length+'개 중 하나';
+      } else {
+        why='「'+_wEsc(t0)+'」 '+g.done.length+'개를 이미 마쳤어요 · 남은 '+g.left.length+'개 중 하나';
+      }
+      picks.push({cat:id,icon:cc[1],label:cc[2],item:it,pri:1,reason:why});
     }
   });
+  /* ★v423: 하루에 최대 3개. 열 줄짜리 목록은 추천이 아니라 그냥 목록이다(영석 지적). */
+  picks.sort(function(a,b){ return (a.pri||0)-(b.pri||0); });
+  if(picks.length>3){ var _p0=picks.filter(function(p){return p.pri===0;}), _p1=picks.filter(function(p){return p.pri!==0;});
+    var _rot=[]; for(var _i=0;_i<_p1.length;_i++) _rot.push(_p1[(_day+_i)%_p1.length]);
+    picks=_p0.concat(_rot).slice(0,3); }
 
   var sec=['<div class="wsec whead"><div class="wlogo">내도감 · 오늘의 추천</div><div class="wtitle">오늘의 추천</div><div class="wdate">이유가 있는 것만 골랐어요</div></div>'];
   if(!picks.length){
@@ -5446,7 +5469,7 @@ async function openDecide(){
   }
   else { picks.forEach(function(p){ var t=p.item.title||p.item.name||"";
     sec.push('<div class="wsec" style="border-bottom:1px solid rgba(255,255,255,.06)"><div class="wh2">'+p.icon+' '+p.label+'</div>'
-      +'<button class="insCard" data-cat="'+p.cat+'" data-id="'+_wEsc(String(p.item._id))+'"><span class="insTx"><b>'+_wEsc(t)+'</b><i>'+_wEsc(p.reason)+'</i></span><span class="insGo">→</span></button></div>'); }); }
+      +'<button class="insCard" data-cat="'+p.cat+'" data-id="'+_wEsc(String(p.item._id))+'"><span class="insTx"><b>'+_wEsc(t)+'</b><i>'+p.reason+'</i></span><span class="insGo">→</span></button></div>'); }); }
   c.innerHTML=sec.join("");
   c.querySelectorAll("[data-cat]").forEach(function(b){ b.onclick=function(){ var rows=d.data[b.dataset.cat]||[]; var it=rows.find(function(x){return String(x._id)===b.dataset.id;}); if(it){ var dl=document.getElementById("decideDlg"); if(dl) dl.close(); _detailOf(b.dataset.cat,it); } }; });
 }
