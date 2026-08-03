@@ -1349,7 +1349,7 @@ body{ background:radial-gradient(circle at 50% -10%, rgba(102,78,57,.16), transp
         <svg class="brandmark" width="40" height="30" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg>
         <span class="brandwm"><span class="bwm-ko">내도감</span><span class="bwm-en">NAEDOGAM</span></span>
       </button>
-      <span class="mhver">v429β</span>
+      <span class="mhver">v430β</span>
       <span class="spacer"></span>
       <span class="src-chip" id="srcChip" style="display:none">데모</span>
       <button class="icon-btn" id="searchToggle" type="button" style="display:none">🔍</button>
@@ -2444,7 +2444,7 @@ function openDomain(id){ if(id==="mbti"){ openMbti(); return; } if(id==="period"
 
 /* 홈: 켜둔 카테고리를 카드로. 건수는 한 번 열어본 분야만 표시(홈을 빠르게 유지). */
 function ndDeep(h){ if(typeof h!=="string"||h.charAt(0)!=="#") h="#8a7a6a"; var n=parseInt(h.slice(1),16),r=(n>>16)&255,g=(n>>8)&255,b=n&255; function d(x,f){return Math.max(0,Math.min(255,Math.round(x*f)));} var d1="rgb("+d(r,.46)+","+d(g,.46)+","+d(b,.46)+")", d2="rgb("+d(r,.20)+","+d(g,.20)+","+d(b,.20)+")", gl="rgba("+r+","+g+","+b+",.16)"; return "radial-gradient(circle at 18% 14%,"+gl+",transparent 46%),linear-gradient(145deg,"+d1+","+d2+")"; }
-var ND_LOGO_HTML='<div class="ndh-brand"><svg width="47" height="35" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg><div class="ndh-wm"><b>내도감</b><small>NAEDOGAM</small></div><span class="mhver ndh-ver">v429β</span></div><button class="ndh-sync" type="button" title="동기화" aria-label="동기화" onclick="try{syncNow()}catch(e){}">↻</button>';
+var ND_LOGO_HTML='<div class="ndh-brand"><svg width="47" height="35" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg><div class="ndh-wm"><b>내도감</b><small>NAEDOGAM</small></div><span class="mhver ndh-ver">v430β</span></div><button class="ndh-sync" type="button" title="동기화" aria-label="동기화" onclick="try{syncNow()}catch(e){}">↻</button>';
 /* 홈 카드 크기: wide(넓게=한 줄 전체) · half(보통=한 줄 2개) · mini(작게=하단 3칸). 기본값=프리셋 */
 var ND_PRESET_SIZE={running:"wide",food:"wide",recipes:"wide",movies:"half",books:"half",period:"half",diary:"half",travel:"half",mountains:"half",culture:"half",albums:"half",cellar:"half",scrap:"half",wish:"half",gift:"half",pet:"half"};
 function getHomeSizes(){ try{ return JSON.parse(store.getItem("nd.homesize")||"{}")||{}; }catch(e){ return {}; } }
@@ -2468,6 +2468,9 @@ function _ndLoadSettingsSheet(){
   return new Promise(function(resolve){
     var S; try{ S=sheetSrc(); }catch(e){ return resolve(); }
     if(!S||!S.ssId||!S.token) return resolve();
+    /* ★v430: 앱을 연달아 다시 열면 이 읽기만으로도 분당 한도를 갉아먹는다. 3분 안엔 건너뛴다. */
+    try{ var _lr=parseInt(store.getItem("nd.setRead")||"0",10)||0; if(Date.now()-_lr < 180000) return resolve(); }catch(e){}
+    try{ store.setItem("nd.setRead", String(Date.now())); }catch(e){}
     var localTs=0, localActive=[];
     try{ localTs=parseInt(store.getItem("nd.setTs")||"0",10)||0; }catch(e){}
     try{ localActive=getActive(); }catch(e){}
@@ -2847,7 +2850,7 @@ class GSheetSource {
     if(_tid) clearTimeout(_tid);
     if(res.ok){ _ndNetSet(""); var _rb=document.getElementById("ndReconn"); if(_rb) _rb.remove(); }
     if(res.status===401 && !opt.__retried){ try{ await this._authSilent(); }catch(e){} if(this.token){ return this._api(url,{...opt,__retried:true}); } }
-    if(res.status===429 && (opt.__429||0)<3){ var _ra=parseInt(res.headers.get("Retry-After")||"0",10); var _w=Math.max(_ra*1000, 1500*Math.pow(3,(opt.__429||0)))+Math.floor(Math.random()*600); if(_w>16000)_w=16000;   /* ★v428: 읽기 한도는 분 단위 — 6초로는 안 풀렸다 */ _ndNetSet("구글이 잠시 요청을 제한했어요 · 다시 시도 "+((opt.__429||0)+1)+"/3"); await new Promise(function(r){ setTimeout(r,_w); }); return this._api(url,{...opt,__429:(opt.__429||0)+1}); }
+    if(res.status===429 && (opt.__429||0)<3){ var _ra=parseInt(res.headers.get("Retry-After")||"0",10); var _w=Math.max(_ra*1000, 1500*Math.pow(3,(opt.__429||0)))+Math.floor(Math.random()*600); if(_w>9000)_w=9000;   /* v428: 분 단위 한도 · ★v430: 16초는 멈춘 것처럼 보였다(영석 신고) */ var _n429=(opt.__429||0)+1, _left=Math.ceil(_w/1000); var _tick=function(){ try{ _ndNetSet("구글이 요청을 잠시 제한했어요 · "+_left+"초 뒤 다시 시도 ("+_n429+"/3)"); }catch(e){} }; _tick(); await new Promise(function(r){ var _iv=setInterval(function(){ _left--; if(_left<=0){ clearInterval(_iv); r(); return; } _tick(); }, 1000); setTimeout(function(){ try{clearInterval(_iv);}catch(e){} r(); }, _w+120); }); return this._api(url,{...opt,__429:(opt.__429||0)+1}); }
     if(res.status>=500 && res.status<=599 && (opt.__5xx||0)<3){ var _w5=Math.min(8000, 700*Math.pow(2,(opt.__5xx||0)))+Math.floor(Math.random()*400); _ndNetSet("구글 응답이 불안정해요 · 다시 시도 "+((opt.__5xx||0)+1)+"/3"); await new Promise(function(r){ setTimeout(r,_w5); }); return this._api(url,{...opt,__5xx:(opt.__5xx||0)+1}); }
     const t=await res.text(); let b; try{b=JSON.parse(t);}catch(e){b=t;}
     if(res.status===401){ this.token=null; try{ if(typeof ndReconnect==="function") ndReconnect(); }catch(_e){} try{ store.removeItem("nd.tok"); store.removeItem("nd.tokExp"); }catch(e){} }
@@ -2871,11 +2874,15 @@ class GSheetSource {
         this.ssId=_best; store.setItem("nd.ssId",this.ssId); this._titles=null; return; } }catch(e){}
     const d=await this._api("https://sheets.googleapis.com/v4/spreadsheets",{method:"POST", body:JSON.stringify({properties:{title:"내도감 Data"}})});
     this.ssId=d.spreadsheetId; store.setItem("nd.ssId",this.ssId); this._titles=null; }
+  /* ★v430: 탭 목록은 거의 안 변하는데 부팅마다 읽고 있었다. 2시간 캐시 → 부팅당 읽기 1회 절약. */
+  _titlesSave(){ try{ if(this.ssId && this._titles && this._titles.length) store.setItem("nd.tabs|"+this.ssId, JSON.stringify({t:Date.now(), a:this._titles})); }catch(e){} }
   async _tabTitles(force){ if(this._titles && !force) return this._titles;
+    if(!force){ try{ var _c=JSON.parse(store.getItem("nd.tabs|"+this.ssId)||"null");
+      if(_c && _c.a && _c.a.length && (Date.now()-(_c.t||0))<2*3600*1000){ this._titles=_c.a; return this._titles; } }catch(e){} }
     const d=await this._api("https://sheets.googleapis.com/v4/spreadsheets/"+this.ssId+"?fields=sheets.properties.title");
-    this._titles=(d.sheets||[]).map(s=>s.properties.title); return this._titles; }
+    this._titles=(d.sheets||[]).map(s=>s.properties.title); this._titlesSave(); return this._titles; }
   async _addSheet(tab){ return this._mut(async()=>{ const t=await this._tabTitles(true); if(t.includes(tab)) return;
-    await this._api("https://sheets.googleapis.com/v4/spreadsheets/"+this.ssId+":batchUpdate",{method:"POST", body:JSON.stringify({requests:[{addSheet:{properties:{title:tab}}}]})}); if(!this._titles.includes(tab)) this._titles.push(tab); }); }
+    await this._api("https://sheets.googleapis.com/v4/spreadsheets/"+this.ssId+":batchUpdate",{method:"POST", body:JSON.stringify({requests:[{addSheet:{properties:{title:tab}}}]})}); if(!this._titles.includes(tab)) this._titles.push(tab); this._titlesSave(); }); }
   async _sheetIdOf(tab){ /* v397: 탭ID는 안 변하므로 캐시 — 삭제·수정 때마다 조회하던 왕복 1회 제거 */
     if(!this._sidCache) this._sidCache={};
     if(this._sidCache[tab]!=null) return this._sidCache[tab];
@@ -5787,32 +5794,54 @@ function pdCycles(){ var o=_pdSaved(); var arr=(o.cycles||[]).map(function(c){ r
   arr.sort(function(a,b){ var da=pdParse(a.start), db=pdParse(b.start); return (da?da.getTime():0)-(db?db.getTime():0); }); return arr; }
 
 /* 통계 + 예측 */
+/* ★v430: 평균 대신 중앙값. 평균은 한 번의 이상치(짧은 간격·긴 공백)에 통째로 끌려간다. */
+function _pdMedian(a){ var b=a.slice().sort(function(x,y){return x-y;}), n=b.length;
+  if(!n) return null; return n%2 ? b[(n-1)/2] : Math.round((b[n/2-1]+b[n/2])/2); }
 function pdStats(){
   var cy=pdCycles(); var starts=cy.map(function(c){return pdParse(c.start);}).filter(Boolean);
-  var st={count:cy.length, cycles:cy, avgCycle:28, avgPeriod:5, lastStart:null, next:null, ovul:null, fertS:null, fertE:null, dday:null, phase:"", inPeriod:false, periodDay:0, minCycle:null, maxCycle:null};
+  var st={count:cy.length, cycles:cy, avgCycle:28, avgPeriod:5, lastStart:null, next:null, ovul:null,
+          fertS:null, fertE:null, dday:null, phase:"", inPeriod:false, periodDay:0,
+          minCycle:null, maxCycle:null,
+          /* ★v430 */ cycleKnown:false, periodKnown:false, gapsUsed:0, gapsDropped:[]};
   if(!starts.length) return st;
   st.lastStart=starts[starts.length-1];
-  /* 주기 = 연속 시작일 간격 평균 */
-  if(starts.length>=2){ var gaps=[]; for(var i=1;i<starts.length;i++){ var g=pdDiff(starts[i-1],starts[i]); if(g>=15&&g<=60) gaps.push(g); }
-    if(gaps.length){ var s=0; gaps.forEach(function(g){s+=g;}); st.avgCycle=Math.round(s/gaps.length); st.minCycle=Math.min.apply(null,gaps); st.maxCycle=Math.max.apply(null,gaps); } }
-  /* 기간 = 시작~종료 평균 */
-  var pl=[]; cy.forEach(function(c){ var a=pdParse(c.start), b=pdParse(c.end); if(a&&b){ var d=pdDiff(a,b)+1; if(d>=1&&d<=14) pl.push(d); } });
-  if(pl.length){ var ps=0; pl.forEach(function(d){ps+=d;}); st.avgPeriod=Math.round(ps/pl.length); }
-  st.next=pdAdd(st.lastStart, st.avgCycle);
+
+  /* 주기 = 연속 시작일 간격. 최근 6개의 중앙값만 쓴다. */
+  var all=[]; for(var i=1;i<starts.length;i++) all.push(pdDiff(starts[i-1],starts[i]));
+  var ok=[], bad=[];
+  all.forEach(function(g){ if(g>=15&&g<=60) ok.push(g); else if(g>0) bad.push(g); });
+  st.gapsDropped=bad;                       /* ★버린 것은 화면에서 말해준다(§0-D) */
+  ok=ok.slice(-6);
+  if(ok.length){ st.avgCycle=_pdMedian(ok); st.cycleKnown=true; st.gapsUsed=ok.length;
+    st.minCycle=Math.min.apply(null,ok); st.maxCycle=Math.max.apply(null,ok); }
+
+  /* 기간 = 시작~종료. 최근 6개 평균 */
+  var pl=[]; cy.forEach(function(c){ var a=pdParse(c.start), b=pdParse(c.end);
+    if(a&&b){ var d=pdDiff(a,b)+1; if(d>=1&&d<=14) pl.push(d); } });
+  pl=pl.slice(-6);
+  if(pl.length){ var ps=0; pl.forEach(function(d){ps+=d;}); st.avgPeriod=Math.round(ps/pl.length); st.periodKnown=true; }
+
   var today=pdToday();
-  /* 이미 지난 예정일이면 다음 주기로 밀기 */
-  var guard=0; while(pdDiff(today, st.next)< -1 && guard<12){ st.next=pdAdd(st.next, st.avgCycle); guard++; }
-  st.ovul=pdAdd(st.next, -14);
-  st.fertS=pdAdd(st.ovul, -5); st.fertE=pdAdd(st.ovul, 1);
-  st.dday=pdDiff(today, st.next);
-  /* 현재 생리중인지 (마지막 시작일 ~ +기간) */
-  var lastEnd=null; var lc=cy[cy.length-1]; if(lc){ var le=pdParse(lc.end); lastEnd=le?le:pdAdd(st.lastStart, st.avgPeriod-1); }
-  if(pdDiff(st.lastStart, today)>=0 && pdDiff(today, lastEnd)>=0){ st.inPeriod=true; st.periodDay=pdDiff(st.lastStart, today)+1; }
-  /* 국면 */
-  if(st.inPeriod) st.phase="생리 "+st.periodDay+"일차";
-  else if(today>=st.fertS && today<=st.fertE){ st.phase= pdSameDay(today,st.ovul)?"배란일":"가임기"; }
-  else if(today>st.ovul && today<st.next) st.phase="황체기";
-  else st.phase="여포기";
+  /* 생리중인지 — 실제 종료일이 있으면 그것으로, 없으면 평균 기간으로 본다 */
+  var lc=cy[cy.length-1], lastEnd=null;
+  if(lc){ var le=pdParse(lc.end); lastEnd = le ? le : pdAdd(st.lastStart, st.avgPeriod-1); }
+  if(lastEnd && pdDiff(st.lastStart,today)>=0 && pdDiff(today,lastEnd)>=0){
+    st.inPeriod=true; st.periodDay=pdDiff(st.lastStart,today)+1; }
+
+  /* ★★예측은 주기를 실제로 잰 뒤에만 한다.
+     기본값 28일로 예정일·배란일·가임기를 그리면 전부 지어낸 숫자가 된다(§0-D). */
+  if(st.cycleKnown){
+    st.next=pdAdd(st.lastStart, st.avgCycle);
+    var guard=0; while(pdDiff(today, st.next)< -1 && guard<24){ st.next=pdAdd(st.next, st.avgCycle); guard++; }
+    st.ovul=pdAdd(st.next,-14); st.fertS=pdAdd(st.ovul,-5); st.fertE=pdAdd(st.ovul,1);
+    st.dday=pdDiff(today, st.next);
+    if(st.inPeriod) st.phase="생리 "+st.periodDay+"일차";
+    else if(today>=st.fertS && today<=st.fertE) st.phase= pdSameDay(today,st.ovul)?"배란일":"가임기";
+    else if(today>st.ovul && today<st.next) st.phase="황체기";
+    else st.phase="여포기";
+  } else {
+    st.phase = st.inPeriod ? ("생리 "+st.periodDay+"일차") : "기록 모으는 중";
+  }
   return st;
 }
 
@@ -5830,7 +5859,10 @@ async function openPeriod(){
 }
 
 function pdClose(){ var d=document.getElementById("periodDlg"); if(!d) return; d.classList.remove("pdOpen"); setTimeout(function(){ try{ d.close(); d.remove(); }catch(e){} }, 200); }
-function pdHomeLabel(){ try{ var st=pdStats(); if(!st.count) return "기록하기"; if(st.inPeriod) return "생리 "+st.periodDay+"일차"; if(st.dday===0) return "오늘 예정"; if(st.dday>0) return "D-"+st.dday+" · "+st.phase; return "D+"+Math.abs(st.dday); }catch(e){ return ""; } }
+function pdHomeLabel(){ try{ var st=pdStats(); if(!st.count) return "기록하기";
+  if(st.inPeriod) return "생리 "+st.periodDay+"일차";
+  if(st.dday==null) return "기록 모으는 중";                 /* ★v430: 예측 전엔 D+0이 떴다 */
+  if(st.dday===0) return "오늘 예정"; if(st.dday>0) return "D-"+st.dday+" · "+st.phase; return "D+"+Math.abs(st.dday); }catch(e){ return ""; } }
 function pdPeriodDaySet(y,mo){ var out={}; try{ var st=pdStats(); (st.cycles||[]).forEach(function(c){ var a=pdParse(c.start); if(!a) return; var e=pdParse(c.end); if(!e) e=pdAdd(a,(st.avgPeriod||5)-1); var d=new Date(a.getFullYear(),a.getMonth(),a.getDate()), g=0; while(d<=e && g<40){ if(d.getFullYear()===y&&d.getMonth()===mo){ out[y+"-"+String(mo+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")]=true; } d=pdAdd(d,1); g++; } }); }catch(e){} return out; }
 function pdPhaseForDate(dstr){ try{ var d=pdParse(dstr); if(!d) return ""; var st=pdStats(); for(var i=0;i<(st.cycles||[]).length;i++){ var c=st.cycles[i]; var a=pdParse(c.start); if(!a) continue; var e=pdParse(c.end); if(!e) e=pdAdd(a,(st.avgPeriod||5)-1); if(pdDiff(a,d)>=0 && pdDiff(d,e)>=0) return "생리 "+(pdDiff(a,d)+1)+"일차"; } return ""; }catch(e){ return ""; } }
 function pdMoodInsight(){ try{ var diary=(typeof CACHE!=="undefined"&&CACHE["diary"])||(typeof loadPersist==="function"&&loadPersist("diary"))||[]; if(!diary.length) return null; var cy=pdCycles(); if(cy.length<2) return null; var starts=cy.map(function(c){return pdParse(c.start);}).filter(Boolean); var pms={total:0,moods:{}}; diary.forEach(function(e){ var d=pdParse(e.date); if(!d) return; var mood=String(e.mood||"").trim(); if(!mood) return; var inPms=false; starts.forEach(function(sx){ var df=pdDiff(d,sx); if(df>=1&&df<=5) inPms=true; }); if(inPms){ pms.total++; pms.moods[mood]=(pms.moods[mood]||0)+1; } }); if(pms.total<3) return null; var top=Object.keys(pms.moods).sort(function(a,b){return pms.moods[b]-pms.moods[a];})[0]; var pct=Math.round(pms.moods[top]/pms.total*100); if(pct<40) return null; return { topMood:top, pct:pct, n:pms.total }; }catch(e){ return null; } }
@@ -5842,22 +5874,33 @@ function pdRenderMain(){
   var hero;
   if(!st.count){
     hero='<div class="pdHero pdHeroEmpty"><div class="pdHeroEm">🌙</div><div class="pdHeroBig">첫 기록을 남겨보세요</div><div class="pdHeroSub">생리 시작일만 기록하면<br>다음 예정일·가임기를 예측해드려요.</div><button class="pdBig" id="pdStartBtn">＋ 생리 시작 기록</button></div>';
+  } else if(!st.cycleKnown){
+    /* ★v430: 주기를 아직 못 쟀다. 28일 기본값으로 예정일·배란일을 지어내지 않는다. */
+    var _drop = st.gapsDropped.length
+      ? '<div class="pdHeroRange">기록 간격이 '+st.gapsDropped.join("·")+'일이라 주기 계산에서 뺐어요</div>' : '';
+    hero='<div class="pdHero"><div class="pdHeroTag">기록 모으는 중</div>'
+      +'<div class="pdHeroBig">'+(st.inPeriod?("생리 "+st.periodDay+"일차"):(st.count+"회 기록"))+'</div>'
+      +'<div class="pdHeroSub">다음 생리 <b>시작일</b>을 한 번 더 기록하면<br>그때부터 예정일·가임기를 알려드려요.</div>'
+      +_drop+'</div>';
   } else {
     var ddayTxt = st.inPeriod ? ("생리 "+st.periodDay+"일차")
       : (st.dday===0 ? "오늘 시작 예정" : (st.dday>0 ? "D-"+st.dday : "D+"+Math.abs(st.dday)));
-    var _rng="";
-    if(st.minCycle&&st.maxCycle&&st.maxCycle>st.minCycle&&st.next){ var _lo=pdAdd(st.next,-(st.avgCycle-st.minCycle)), _hi=pdAdd(st.next,(st.maxCycle-st.avgCycle)); _rng='<div class="pdHeroRange">예상 범위 '+pdFmtMD(_lo)+' ~ '+pdFmtMD(_hi)+'</div>'; }
+    var _rng='<div class="pdHeroRange">최근 '+st.gapsUsed+'회 기준';
+    if(st.minCycle&&st.maxCycle&&st.maxCycle>st.minCycle&&st.next){ var _lo=pdAdd(st.next,-(st.avgCycle-st.minCycle)), _hi=pdAdd(st.next,(st.maxCycle-st.avgCycle)); _rng+=' · 예상 범위 '+pdFmtMD(_lo)+' ~ '+pdFmtMD(_hi); }
+    if(st.gapsDropped.length) _rng+=' · 간격 '+st.gapsDropped.join("·")+'일은 제외';
+    _rng+='</div>';
     hero='<div class="pdHero"><div class="pdHeroTag">'+_pdEsc(st.phase)+'</div>'
       +'<div class="pdHeroBig">'+ddayTxt+'</div>'
       +'<div class="pdHeroSub">다음 생리 예정 <b>'+pdFmt(st.next)+'</b></div>'+_rng
       +'<div class="pdHeroRow"><span class="pdHeroCell"><i class="pdDotFert"></i>가임기 '+pdFmtMD(st.fertS)+'~'+pdFmtMD(st.fertE)+'</span><span class="pdHeroCell"><i class="pdDotOvul"></i>배란 '+pdFmtMD(st.ovul)+'</span></div></div>';
   }
+  /* ★v430: 아직 안 잰 값은 숫자로 보여주지 않는다. 28일·5일은 기본값이지 측정값이 아니다. */
   var stats = st.count ? ('<div class="pdStats">'
-    +'<div class="pdStat"><b>'+st.avgCycle+'일</b><span>평균 주기</span></div>'
-    +'<div class="pdStat"><b>'+st.avgPeriod+'일</b><span>평균 기간</span></div>'
+    +'<div class="pdStat"><b>'+(st.cycleKnown?(st.avgCycle+'일'):'—')+'</b><span>'+(st.cycleKnown?'주기(중앙값)':'주기 · 2회부터')+'</span></div>'
+    +'<div class="pdStat"><b>'+(st.periodKnown?(st.avgPeriod+'일'):'—')+'</b><span>'+(st.periodKnown?'평균 기간':'기간 · 종료일 필요')+'</span></div>'
     +'<div class="pdStat"><b>'+st.count+'회</b><span>기록</span></div></div>') : '';
   var _insight=""; try{ var _mi=pdMoodInsight(); if(_mi){ _insight='<div class="pdInsight"><div class="pdInsightH">🧠 몸과 마음 · 일기 연동</div><div class="pdInsightB">생리 시작 <b>5일 전</b>, 일기 기분이 <b>'+_pdEsc(_mi.topMood)+'</b>인 날이 <b>'+_mi.pct+'%</b> <span>('+_mi.n+'일 기준)</span></div></div>'; } }catch(e){}
-  var remindBtn = st.count ? '<button id="pdCalRemind" style="display:block;width:100%;margin:10px 0 2px;background:#201c16;color:#f6eddf;border:1px solid rgba(238,224,205,.18);border-radius:14px;padding:12px;font-size:14px;font-weight:700;cursor:pointer">\ud83d\udd14 \ub2e4\uc74c \uc608\uc815 1\uc77c \uc804 \u00b7 \uce98\ub9b0\ub354 \uc54c\ub9bc \ucd94\uac00</button>' : '';
+  var remindBtn = (st.count && st.cycleKnown) ? '<button id="pdCalRemind" style="display:block;width:100%;margin:10px 0 2px;background:#201c16;color:#f6eddf;border:1px solid rgba(238,224,205,.18);border-radius:14px;padding:12px;font-size:14px;font-weight:700;cursor:pointer">\ud83d\udd14 \ub2e4\uc74c \uc608\uc815 1\uc77c \uc804 \u00b7 \uce98\ub9b0\ub354 \uc54c\ub9bc \ucd94\uac00</button>' : '';
   b.innerHTML=hero+remindBtn+stats+_insight+pdCalHTML(st)+pdRecordsHTML(st);
   var sb=document.getElementById("pdStartBtn"); if(sb) sb.onclick=function(){ pdLogForm(null); };
   var rb=document.getElementById("pdCalRemind"); if(rb) rb.onclick=function(){ try{ var u=pdCalReminderUrl(st); if(u) window.open(u,"_blank"); }catch(e){} };
@@ -6158,7 +6201,7 @@ function wrapCardHTML(S){
   // 페르소나
   sec.push('<div class="wsec"><div class="wpersona"><div class="wem">'+p.em+'</div><div class="wph">당신은<br>“'+p.t+'”</div><div class="wpp">'+p.p+'</div></div></div>');
   var _mb=_mbtiSaved(); if(_mb&&_mb.latest){ sec.push('<div class="wsec"><div class="wh2">🧠 나의 성향</div><div class="wmbti"><div class="wmbtiT">'+_mb.latest.type+'</div><div class="wmbtiN">'+_wEsc(_ndNick(_mb.latest.type,_mb.latest.nick))+'</div></div></div>'); }
-  try{ if(typeof pdStats==="function"){ var _pd=pdStats(); if(_pd&&_pd.count){ var _sc={}; (_pd.cycles||[]).forEach(function(c){ (c.symptoms||[]).forEach(function(x){ _sc[x]=(_sc[x]||0)+1; }); }); var _tp=Object.keys(_sc).sort(function(a,b){return _sc[b]-_sc[a];})[0]||""; var _rows='<div class="wrow"><span>평균 주기</span><b>'+_pd.avgCycle+'일</b></div><div class="wrow"><span>평균 기간</span><b>'+_pd.avgPeriod+'일</b></div><div class="wrow"><span>기록</span><b>'+_pd.count+'회</b></div>'+(_tp?'<div class="wrow"><span>가장 잦은 증상</span><b>'+_wEsc(_tp)+'</b></div>':''); var _mins=''; try{ var _mi2=pdMoodInsight(); if(_mi2) _mins='<div class="winsight" style="margin-top:12px">생리 시작 <b>5일 전</b>, 일기 기분이 <b>'+_wEsc(_mi2.topMood)+'</b> <b>'+_mi2.pct+'%</b> ('+_mi2.n+'일)</div>'; }catch(e){} sec.push('<div class="wsec"><div class="wh2">🌙 생리주기</div><div class="wbig2">'+_pd.avgCycle+'<small>일 평균 주기</small></div>'+_rows+_mins+'</div>'); } } }catch(e){}
+  try{ if(typeof pdStats==="function"){ var _pd=pdStats(); if(_pd&&_pd.count){ var _sc={}; (_pd.cycles||[]).forEach(function(c){ (c.symptoms||[]).forEach(function(x){ _sc[x]=(_sc[x]||0)+1; }); }); var _tp=Object.keys(_sc).sort(function(a,b){return _sc[b]-_sc[a];})[0]||""; var _rows=(_pd.cycleKnown?('<div class="wrow"><span>주기(중앙값)</span><b>'+_pd.avgCycle+'일</b></div>'):'')+'<div class="wrow"><span>평균 기간</span><b>'+_pd.avgPeriod+'일</b></div><div class="wrow"><span>기록</span><b>'+_pd.count+'회</b></div>'+(_tp?'<div class="wrow"><span>가장 잦은 증상</span><b>'+_wEsc(_tp)+'</b></div>':''); var _mins=''; try{ var _mi2=pdMoodInsight(); if(_mi2) _mins='<div class="winsight" style="margin-top:12px">생리 시작 <b>5일 전</b>, 일기 기분이 <b>'+_wEsc(_mi2.topMood)+'</b> <b>'+_mi2.pct+'%</b> ('+_mi2.n+'일)</div>'; }catch(e){} sec.push('<div class="wsec"><div class="wh2">🌙 생리주기</div>'+(_pd.cycleKnown?('<div class="wbig2">'+_pd.avgCycle+'<small>일 주기(중앙값)</small></div>'):'<div class="winsight">기록 2회부터 주기를 알려드려요</div>')+_rows+_mins+'</div>'); } } }catch(e){}
   // 총 수집 + 경험
   sec.push('<div class="wsec"><div class="wkick">TOTAL COLLECTED</div><div class="wbig">'+S.total+'<small>개 수집</small></div>'
     +'<div class="wgrid"><div class="wstat wacc"><div class="wn">'+S.experienced+'</div><div class="wl">실제로 경험함</div></div>'
@@ -8422,8 +8465,20 @@ try{ _ndDevBoot(); }catch(e){}
   function selOpen(){ return !!(document.getElementById('ndSelBar') || document.querySelector('#list.nd-selecting')); }
   function depth(){ if(anyDialog()||overlayOpen()) return 3; if(selOpen()) return 2; if(domainOpen()) return 1; return 0; }
   function pushGuard(){ try{ history.pushState({ndTrap:1}, ''); myPush++; }catch(e){} trap=true; }
+  /* ★v430: 홈에서 뒤로가기가 안내 없이 앱을 나가버리는 신고.
+     원인 후보가 여럿이라 타이밍을 추측하지 않고 **상태로** 보장한다 —
+     "홈이면 히스토리 맨 위는 항상 우리 것"이 참이 되게 계속 다시 심는다(§0-C-2). */
+  var _armT=0;
+  function armBase(){
+    try{ var stt=history.state;
+      if(stt && (stt.ndBase||stt.ndTrap)) return;
+      var now=Date.now(); if(now-_armT < 1000) return;   /* 안전장치: pushState 폭주 방지 */
+      _armT=now; pushBase();
+    }catch(e){}
+  }
   function sync(){
     if(busy) return;
+    if(depth()===0) armBase();
     var deep = depth()>0;
     if(deep && !trap){ pushGuard(); }
     else if(!deep && trap){
@@ -8438,7 +8493,7 @@ try{ _ndDevBoot(); }catch(e){}
     /* ★v425: 우리가 되감은 것은 사용자가 누른 게 아니다.
        이걸 구분하지 못해 홈 버튼·검색 닫기만 해도 '앱을 종료할까요?'가 떴다. */
     eatPush();
-    if(selfPop){ selfPop=false; return; }
+    if(selfPop){ selfPop=false; setTimeout(armBase,0); return; }   /* ★v430: 되감은 뒤에도 가드를 다시 심는다 */
     /* 종료 확인창이 떠 있으면 뒤로가기는 그 창만 닫는다 */
     var _ask=document.getElementById('ndExitAsk');
     if(_ask){ try{ _ask.remove(); }catch(e){} pushBase(); return; }
@@ -8541,6 +8596,9 @@ try{ _ndDevBoot(); }catch(e){}
   function baseGuard(){ try{ if(!window.__ndBaseGuard){ window.__ndBaseGuard=true; pushBase(); } }catch(e){} }
   baseGuard();
   setTimeout(baseGuard, 1500);
+  /* ★v430: 화면이 다시 보일 때(백그라운드 복귀·로그인 후 돌아옴) 가드가 남아 있는지 확인 */
+  document.addEventListener('visibilitychange', function(){ if(!document.hidden) setTimeout(armBase,0); });
+  window.addEventListener('pageshow', function(){ setTimeout(armBase,0); });
   var mo=new MutationObserver(function(){ sync(); });
   try{ mo.observe(document.documentElement,{subtree:true,attributes:true,childList:true,attributeFilter:['open','style','class']}); }catch(e){}
   setInterval(sync, 500);
