@@ -1349,7 +1349,7 @@ body{ background:radial-gradient(circle at 50% -10%, rgba(102,78,57,.16), transp
         <svg class="brandmark" width="40" height="30" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg>
         <span class="brandwm"><span class="bwm-ko">내도감</span><span class="bwm-en">NAEDOGAM</span></span>
       </button>
-      <span class="mhver">v431β</span>
+      <span class="mhver">v432β</span>
       <span class="spacer"></span>
       <span class="src-chip" id="srcChip" style="display:none">데모</span>
       <button class="icon-btn" id="searchToggle" type="button" style="display:none">🔍</button>
@@ -2446,7 +2446,7 @@ function openDomain(id){ if(id==="mbti"){ openMbti(); return; } if(id==="period"
 
 /* 홈: 켜둔 카테고리를 카드로. 건수는 한 번 열어본 분야만 표시(홈을 빠르게 유지). */
 function ndDeep(h){ if(typeof h!=="string"||h.charAt(0)!=="#") h="#8a7a6a"; var n=parseInt(h.slice(1),16),r=(n>>16)&255,g=(n>>8)&255,b=n&255; function d(x,f){return Math.max(0,Math.min(255,Math.round(x*f)));} var d1="rgb("+d(r,.46)+","+d(g,.46)+","+d(b,.46)+")", d2="rgb("+d(r,.20)+","+d(g,.20)+","+d(b,.20)+")", gl="rgba("+r+","+g+","+b+",.16)"; return "radial-gradient(circle at 18% 14%,"+gl+",transparent 46%),linear-gradient(145deg,"+d1+","+d2+")"; }
-var ND_LOGO_HTML='<div class="ndh-brand"><svg width="47" height="35" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg><div class="ndh-wm"><b>내도감</b><small>NAEDOGAM</small></div><span class="mhver ndh-ver">v431β</span></div><button class="ndh-sync" type="button" title="동기화" aria-label="동기화" onclick="try{syncNow()}catch(e){}">↻</button>';
+var ND_LOGO_HTML='<div class="ndh-brand"><svg width="47" height="35" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg><div class="ndh-wm"><b>내도감</b><small>NAEDOGAM</small></div><span class="mhver ndh-ver">v432β</span></div><button class="ndh-sync" type="button" title="동기화" aria-label="동기화" onclick="try{syncNow()}catch(e){}">↻</button>';
 /* 홈 카드 크기: wide(넓게=한 줄 전체) · half(보통=한 줄 2개) · mini(작게=하단 3칸). 기본값=프리셋 */
 var ND_PRESET_SIZE={running:"wide",food:"wide",recipes:"wide",movies:"half",books:"half",period:"half",diary:"half",travel:"half",mountains:"half",culture:"half",albums:"half",cellar:"half",scrap:"half",wish:"half",gift:"half",pet:"half"};
 function getHomeSizes(){ try{ return JSON.parse(store.getItem("nd.homesize")||"{}")||{}; }catch(e){ return {}; } }
@@ -5779,7 +5779,7 @@ var PD_TAB="생리주기", PD_HEAD=["_id","시작일","종료일","양","증상"
 var PD_SYMPTOMS=["복통","두통","요통","유방통","붓기","여드름","피로","식욕↑","불면","어지럼"];
 var PD_MOODS=["평온","예민","우울","불안","의욕↑","눈물"];
 var PD_FLOWS=["적음","보통","많음"];
-var pdCalY=null, pdCalM=null, pdEditId=null;
+var pdCalY=null, pdCalM=null, pdEditId=null, pdFormOpen=false;   /* ★v432 */
 
 function _pdEsc(x){ return String(x==null?"":x).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
 function _pdSaved(){ try{ var raw=store.getItem("nd.period"); var o=raw?JSON.parse(raw):null; if(!o||!o.cycles) return {cycles:[]}; return o; }catch(e){ return {cycles:[]}; } }
@@ -5856,7 +5856,7 @@ async function openPeriod(){
   _ndHideSelectUI();   /* ★v431 */
   $("#stats").style.display="none"; $("#stats").innerHTML=""; $("#count").innerHTML="";
   $("#list").innerHTML='<div class="pdInlineBar"><span class="pdTitle">🌙 생리주기</span><button class="pdBig pdBigSm" id="pdAddTop">＋ 기록</button></div><div class="pdBody pdInline" id="pdBody"></div>';
-  pdRenderMain();
+  pdRenderMain(true);
   document.getElementById("pdAddTop").onclick=function(){ pdLogForm(null); };
   /* 시트에서 로드(기기간 공유) */
   try{ var rows=await pdSheetLoad(); if(rows){ var o=_pdSaved(); o.cycles=rows; _pdWrite(o); if(document.getElementById("pdBody")) pdRenderMain(); } }catch(e){}
@@ -5871,7 +5871,11 @@ function pdPeriodDaySet(y,mo){ var out={}; try{ var st=pdStats(); (st.cycles||[]
 function pdPhaseForDate(dstr){ try{ var d=pdParse(dstr); if(!d) return ""; var st=pdStats(); for(var i=0;i<(st.cycles||[]).length;i++){ var c=st.cycles[i]; var a=pdParse(c.start); if(!a) continue; var e=pdParse(c.end); if(!e) e=pdAdd(a,(st.avgPeriod||5)-1); if(pdDiff(a,d)>=0 && pdDiff(d,e)>=0) return "생리 "+(pdDiff(a,d)+1)+"일차"; } return ""; }catch(e){ return ""; } }
 function pdMoodInsight(){ try{ var diary=(typeof CACHE!=="undefined"&&CACHE["diary"])||(typeof loadPersist==="function"&&loadPersist("diary"))||[]; if(!diary.length) return null; var cy=pdCycles(); if(cy.length<2) return null; var starts=cy.map(function(c){return pdParse(c.start);}).filter(Boolean); var pms={total:0,moods:{}}; diary.forEach(function(e){ var d=pdParse(e.date); if(!d) return; var mood=String(e.mood||"").trim(); if(!mood) return; var inPms=false; starts.forEach(function(sx){ var df=pdDiff(d,sx); if(df>=1&&df<=5) inPms=true; }); if(inPms){ pms.total++; pms.moods[mood]=(pms.moods[mood]||0)+1; } }); if(pms.total<3) return null; var top=Object.keys(pms.moods).sort(function(a,b){return pms.moods[b]-pms.moods[a];})[0]; var pct=Math.round(pms.moods[top]/pms.total*100); if(pct<40) return null; return { topMood:top, pct:pct, n:pms.total }; }catch(e){ return null; } }
 function pdCalReminderUrl(st){ if(!st||!st.next) return ""; var d=pdAdd(st.next,-1); var p=function(n){return String(n).padStart(2,"0");}; var ymd=d.getFullYear()+p(d.getMonth()+1)+p(d.getDate()); var cyc=st.avgCycle||28; var title=encodeURIComponent("\ud83c\udf19 \uc0dd\ub9ac \uc608\uc815 \ud558\ub8e8 \uc804 (\ub0b4\ub3c4\uac10)"); var det=encodeURIComponent("\ub0b4\ub3c4\uac10 \uc608\uce21 \uae30\uc900 \uc54c\ub9bc\uc774\uc5d0\uc694. \uc8fc\uae30\uac00 \ubc14\ub00c\uba74 \uc571\uc5d0\uc11c \ub2e4\uc2dc \ucd94\uac00\ud558\uba74 \ucd5c\uc2e0 \uc608\uce21\uc73c\ub85c \uac31\uc2e0\ub3fc\uc694."); return "https://calendar.google.com/calendar/render?action=TEMPLATE&text="+title+"&dates="+ymd+"T090000/"+ymd+"T091500&recur="+encodeURIComponent("RRULE:FREQ=DAILY;INTERVAL="+cyc)+"&details="+det; }
-function pdRenderMain(){
+function pdRenderMain(force){
+  /* ★v432: 기록 폼이 열려 있으면 절대 덮어쓰지 않는다.
+     시트 로드가 늦게 끝나면서 폼을 지워버리던 것이 "버튼이 안 눌린다"의 정체였다(영석 신고). */
+  if(pdFormOpen && !force) return;
+  pdFormOpen=false;
   var b=document.getElementById("pdBody"); if(!b) return;
   var st=pdStats();
   if(pdCalY==null){ var t=pdToday(); pdCalY=t.getFullYear(); pdCalM=t.getMonth(); }
@@ -5911,6 +5915,10 @@ function pdRenderMain(){
   var pv=document.getElementById("pdCalPrev"); if(pv) pv.onclick=function(){ pdCalM--; if(pdCalM<0){pdCalM=11;pdCalY--;} pdRenderMain(); };
   var nx=document.getElementById("pdCalNext"); if(nx) nx.onclick=function(){ pdCalM++; if(pdCalM>11){pdCalM=0;pdCalY++;} pdRenderMain(); };
   b.querySelectorAll(".pdRec").forEach(function(el){ el.onclick=function(){ pdLogForm(el.dataset.id); }; });
+  b.querySelectorAll(".pdRecDel").forEach(function(el){ el.onclick=function(e){
+    if(e&&e.stopPropagation) e.stopPropagation();
+    if(confirm("이 기록을 지울까요?")) pdDelete(el.dataset.id);
+  }; });
 }
 
 /* ★v431: 생리주기·나의 성향은 카드 목록이 아니라 전용 화면이다.
@@ -5962,8 +5970,12 @@ function pdRecordsHTML(st){
     var tags=[]; if(c.flow) tags.push(c.flow); if(c.mood) tags.push(c.mood);
     (c.symptoms||[]).slice(0,2).forEach(function(s){ tags.push(s); });
     var meta=[pdFmt(a)+(e?" ~ "+pdFmtMD(e):""), dur].filter(Boolean).join(" · ");
-    return '<button class="pdRec" data-id="'+_pdEsc(c._id)+'"><span class="pdRecD">'+meta+'</span>'
-      +(tags.length?'<span class="pdRecT">'+tags.map(function(t){return '<i>'+_pdEsc(t)+'</i>';}).join("")+'</span>':'')+'</button>';
+    /* ★v432: 목록에서 바로 지울 수 있게. 폼까지 안 들어가도 된다(영석: "삭제 안 보임"). */
+    return '<div class="pdRecRow" style="display:flex;align-items:center;gap:6px">'
+      +'<button class="pdRec" data-id="'+_pdEsc(c._id)+'" style="flex:1"><span class="pdRecD">'+meta+'</span>'
+      +(tags.length?'<span class="pdRecT">'+tags.map(function(t){return '<i>'+_pdEsc(t)+'</i>';}).join("")+'</span>':'')+'</button>'
+      +'<button class="pdRecDel" data-id="'+_pdEsc(c._id)+'" title="삭제" style="flex:0 0 auto;background:none;border:1px solid rgba(238,224,205,.22);color:#d98a8a;border-radius:10px;padding:9px 12px;font-size:14px;font-weight:800;cursor:pointer">✕</button>'
+      +'</div>';
   }).join("");
   return '<div class="pdSec"><div class="pdSecH">📋 기록 ('+st.count+')</div>'+rows+'</div>';
 }
@@ -5971,7 +5983,7 @@ function pdRecordsHTML(st){
 /* 기록 입력/수정 폼 */
 function pdLogForm(id){
   var b=document.getElementById("pdBody"); if(!b) return;
-  pdEditId=id||null;
+  pdEditId=id||null; pdFormOpen=true;   /* ★v432 */
   var cur=null; if(id){ var o=_pdSaved(); cur=(o.cycles||[]).filter(function(c){return c._id===id;})[0]||null; }
   var start = cur&&cur.start ? cur.start : pdFmt(pdToday());
   var end = cur&&cur.end ? cur.end : "";
@@ -5997,7 +6009,7 @@ function pdLogForm(id){
   b.querySelectorAll(".pdSeg").forEach(function(btn){ btn.onclick=function(){ selFlow=btn.dataset.flow; b.querySelectorAll(".pdSeg").forEach(function(x){x.classList.remove("on");}); btn.classList.add("on"); }; });
   b.querySelectorAll(".pdChip[data-sym]").forEach(function(btn){ btn.onclick=function(){ var s=btn.dataset.sym; var i=selSyms.indexOf(s); if(i>=0){selSyms.splice(i,1);btn.classList.remove("on");}else{selSyms.push(s);btn.classList.add("on");} }; });
   b.querySelectorAll(".pdChip[data-mood]").forEach(function(btn){ btn.onclick=function(){ var mo=btn.dataset.mood; if(selMood===mo){selMood="";btn.classList.remove("on");}else{selMood=mo; b.querySelectorAll(".pdChip[data-mood]").forEach(function(x){x.classList.remove("on");}); btn.classList.add("on");} }; });
-  document.getElementById("pdCancel").onclick=function(){ pdRenderMain(); };
+  document.getElementById("pdCancel").onclick=function(){ pdRenderMain(true); };
   var db=document.getElementById("pdDelBtn"); if(db) db.onclick=function(){ pdDelete(id); };
   document.getElementById("pdSaveBtn").onclick=function(){
     var sv=_pdI2D(document.getElementById("pdStart").value);
@@ -6015,14 +6027,14 @@ function pdSaveCycle(obj, isNew){
   var o=_pdSaved(); o.cycles=o.cycles||[];
   if(isNew){ o.cycles.push(obj); } else { for(var i=0;i<o.cycles.length;i++){ if(o.cycles[i]._id===obj._id){ o.cycles[i]=obj; break; } } }
   _pdWrite(o);
-  pdRenderMain();
+  pdRenderMain(true);
   try{ if(typeof ndToast==="function") ndToast(isNew?"✓ 기록했어요":"✓ 수정했어요"); }catch(e){}
   (isNew?pdSheetSave(obj):pdSheetUpdate(obj)).catch(function(){});
   try{ if(state&&state.view==="home") renderHome(); }catch(e){}
 }
 function pdDelete(id){
   var o=_pdSaved(); o.cycles=(o.cycles||[]).filter(function(c){return c._id!==id;}); _pdWrite(o);
-  pdRenderMain();
+  pdRenderMain(true);
   try{ if(typeof ndToast==="function") ndToast("삭제됨"); }catch(e){}
   pdSheetDelete(id).catch(function(){});
 }
@@ -8479,7 +8491,9 @@ try{ _ndDevBoot(); }catch(e){}
   function overlayOpen(){ return document.getElementById('ndWall'); }
   function domainOpen(){ var d=document.getElementById('domainView'); return !!(d && getComputedStyle(d).display!=='none'); }
   function selOpen(){ return !!(document.getElementById('ndSelBar') || document.querySelector('#list.nd-selecting')); }
-  function depth(){ if(anyDialog()||overlayOpen()) return 3; if(selOpen()) return 2; if(domainOpen()) return 1; return 0; }
+  /* ★v432: 생리주기 기록 폼은 dialog가 아니라 인라인이라 뒤로가기가 곧장 홈으로 갔다(영석 신고). */
+  function pdFormOpenNow(){ return !!document.querySelector('.pdForm'); }
+  function depth(){ if(anyDialog()||overlayOpen()) return 3; if(selOpen()||pdFormOpenNow()) return 2; if(domainOpen()) return 1; return 0; }
   function pushGuard(){ try{ history.pushState({ndTrap:1}, ''); myPush++; }catch(e){} trap=true; }
   /* ★v430: 홈에서 뒤로가기가 안내 없이 앱을 나가버리는 신고.
      원인 후보가 여럿이라 타이밍을 추측하지 않고 **상태로** 보장한다 —
@@ -8512,6 +8526,7 @@ try{ _ndDevBoot(); }catch(e){}
     /* ★v425: 우리가 되감은 것은 사용자가 누른 게 아니다.
        이걸 구분하지 못해 홈 버튼·검색 닫기만 해도 '앱을 종료할까요?'가 떴다. */
     eatPush();
+    try{ if(window.__ndReArm) window.__ndReArm(); }catch(e){}       /* ★v432: 다음 조작에 가드 재무장 */
     if(selfPop){ selfPop=false; setTimeout(armBase,0); return; }   /* ★v430: 되감은 뒤에도 가드를 다시 심는다 */
     /* 종료 확인창이 떠 있으면 뒤로가기는 그 창만 닫는다 */
     var _ask=document.getElementById('ndExitAsk');
@@ -8535,7 +8550,8 @@ try{ _ndDevBoot(); }catch(e){}
       }
       setTimeout(function(){ if(depth()>0){ pushGuard(); } busy=false; }, 0);
     } else if(d===2){
-      try{ if(typeof ndExitSelect==='function') ndExitSelect(); }catch(e){}
+      if(pdFormOpenNow()){ try{ if(typeof pdRenderMain==='function') pdRenderMain(true); }catch(e){} }
+      else { try{ if(typeof ndExitSelect==='function') ndExitSelect(); }catch(e){} }
       setTimeout(function(){ if(depth()>0){ pushGuard(); } busy=false; }, 0);
     } else if(d===1){
       try{ if(typeof goHome==='function') goHome(); }catch(e){}
@@ -8615,6 +8631,19 @@ try{ _ndDevBoot(); }catch(e){}
   function baseGuard(){ try{ if(!window.__ndBaseGuard){ window.__ndBaseGuard=true; pushBase(); } }catch(e){} }
   baseGuard();
   setTimeout(baseGuard, 1500);
+  /* ★v432: 크롬은 "사용자 조작 없이 스크립트가 만든 히스토리 항목"을 뒤로가기에서 건너뛴다.
+     부팅 때 심은 가드가 딱 그것이라 '앱 열자마자 뒤로가기'는 안내 없이 그냥 나갔다.
+     반면 메뉴를 한 번 만진 뒤에는 확인창이 떴다 — 영석이 본 두 경우가 정확히 이 차이다.
+     그래서 첫 조작이 들어온 순간, 그 조작에 얹어 가드를 한 번 더 심는다. */
+  var _gestArmed=false;
+  function armOnGesture(){
+    if(_gestArmed) return; _gestArmed=true;
+    try{ pushBase(); }catch(e){}
+  }
+  document.addEventListener('pointerdown', armOnGesture, {capture:true, passive:true});
+  document.addEventListener('touchstart', armOnGesture, {capture:true, passive:true});
+  document.addEventListener('keydown', armOnGesture, true);
+  window.__ndReArm=function(){ _gestArmed=false; };   /* 가드가 소모되면 다음 조작에 다시 심는다 */
   /* ★v430: 화면이 다시 보일 때(백그라운드 복귀·로그인 후 돌아옴) 가드가 남아 있는지 확인 */
   document.addEventListener('visibilitychange', function(){ if(!document.hidden) setTimeout(armBase,0); });
   window.addEventListener('pageshow', function(){ setTimeout(armBase,0); });
