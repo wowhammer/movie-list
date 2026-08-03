@@ -1349,7 +1349,7 @@ body{ background:radial-gradient(circle at 50% -10%, rgba(102,78,57,.16), transp
         <svg class="brandmark" width="40" height="30" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg>
         <span class="brandwm"><span class="bwm-ko">내도감</span><span class="bwm-en">NAEDOGAM</span></span>
       </button>
-      <span class="mhver">v434β</span>
+      <span class="mhver">v435β</span>
       <span class="spacer"></span>
       <span class="src-chip" id="srcChip" style="display:none">데모</span>
       <button class="icon-btn" id="searchToggle" type="button" style="display:none">🔍</button>
@@ -2446,7 +2446,7 @@ function openDomain(id){ if(id==="mbti"){ openMbti(); return; } if(id==="period"
 
 /* 홈: 켜둔 카테고리를 카드로. 건수는 한 번 열어본 분야만 표시(홈을 빠르게 유지). */
 function ndDeep(h){ if(typeof h!=="string"||h.charAt(0)!=="#") h="#8a7a6a"; var n=parseInt(h.slice(1),16),r=(n>>16)&255,g=(n>>8)&255,b=n&255; function d(x,f){return Math.max(0,Math.min(255,Math.round(x*f)));} var d1="rgb("+d(r,.46)+","+d(g,.46)+","+d(b,.46)+")", d2="rgb("+d(r,.20)+","+d(g,.20)+","+d(b,.20)+")", gl="rgba("+r+","+g+","+b+",.16)"; return "radial-gradient(circle at 18% 14%,"+gl+",transparent 46%),linear-gradient(145deg,"+d1+","+d2+")"; }
-var ND_LOGO_HTML='<div class="ndh-brand"><svg width="47" height="35" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg><div class="ndh-wm"><b>내도감</b><small>NAEDOGAM</small></div><span class="mhver ndh-ver">v434β</span></div><button class="ndh-sync" type="button" title="동기화" aria-label="동기화" onclick="try{syncNow()}catch(e){}">↻</button>';
+var ND_LOGO_HTML='<div class="ndh-brand"><svg width="47" height="35" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg><div class="ndh-wm"><b>내도감</b><small>NAEDOGAM</small></div><span class="mhver ndh-ver">v435β</span></div><button class="ndh-sync" type="button" title="동기화" aria-label="동기화" onclick="try{syncNow()}catch(e){}">↻</button>';
 /* 홈 카드 크기: wide(넓게=한 줄 전체) · half(보통=한 줄 2개) · mini(작게=하단 3칸). 기본값=프리셋 */
 var ND_PRESET_SIZE={running:"wide",food:"wide",recipes:"wide",movies:"half",books:"half",period:"half",diary:"half",travel:"half",mountains:"half",culture:"half",albums:"half",cellar:"half",scrap:"half",wish:"half",gift:"half",pet:"half"};
 function getHomeSizes(){ try{ return JSON.parse(store.getItem("nd.homesize")||"{}")||{}; }catch(e){ return {}; } }
@@ -5982,6 +5982,7 @@ function pdRecordsHTML(st){
 function pdLogForm(id){
   /* ★v433: 기록 폼은 body 위 오버레이. #list 재렌더(시트 로드 완료 등)에 지워지지 않는다.
      v432까지는 #pdBody 안에 있어서, 로드가 끝나는 순간 폼이 통째로 사라졌다(영석: "버튼이 안 눌려"). */
+  try{ if(window._ndBLog) _ndBLog("PD 폼열기 "+(id?"수정":"신규")); }catch(e){}
   pdCloseForm();
   var wrap=document.createElement("div"); wrap.id="pdFormWrap";
   wrap.style.cssText="position:fixed;inset:0;z-index:9100;background:rgba(20,17,13,.55);display:flex;align-items:flex-end;justify-content:center";
@@ -6020,8 +6021,9 @@ function pdLogForm(id){
   { var _x=b.querySelector("#pdSheetX"); if(_x) _x.onclick=function(){ pdCloseForm(); }; }
   var db=b.querySelector("#pdDelBtn"); if(db) db.onclick=function(){ pdCloseForm(); pdDelete(id); };
   b.querySelector("#pdSaveBtn").onclick=function(){
+    try{ if(window._ndBLog) _ndBLog("PD 저장클릭"); }catch(e){}
     var sv=_pdI2D(b.querySelector("#pdStart").value);
-    if(!sv){ alert("시작일을 선택해주세요."); return; }
+    if(!sv){ try{ if(window._ndBLog) _ndBLog("PD 저장중단: 시작일 비어있음"); }catch(e){} alert("시작일을 선택해주세요."); return; }
     var ev=_pdI2D(b.querySelector("#pdEnd").value);
     var obj={ _id: id||((window.crypto&&crypto.randomUUID)?crypto.randomUUID():String(Date.now())+Math.random().toString(16).slice(2)),
       start:sv, end:ev||"", flow:selFlow||"", symptoms:selSyms.slice(), mood:selMood||"", note:(b.querySelector("#pdNote").value||"").trim() };
@@ -6032,12 +6034,17 @@ function _pdD2I(v){ var d=pdParse(v); if(!d) return ""; return d.getFullYear()+"
 function _pdI2D(v){ if(!v) return ""; var p=v.split("-"); if(p.length<3) return ""; return p[0]+"."+p[1]+"."+p[2]; }
 
 function pdSaveCycle(obj, isNew){
+  try{ if(window._ndBLog) _ndBLog("PD 저장실행 "+(isNew?"신규":"수정")+" start="+(obj&&obj.start)); }catch(e){}
   var o=_pdSaved(); o.cycles=o.cycles||[];
   if(isNew){ o.cycles.push(obj); } else { for(var i=0;i<o.cycles.length;i++){ if(o.cycles[i]._id===obj._id){ o.cycles[i]=obj; break; } } }
   _pdWrite(o);
   pdRenderMain(true);
   try{ if(typeof ndToast==="function") ndToast(isNew?"✓ 기록했어요":"✓ 수정했어요"); }catch(e){}
-  (isNew?pdSheetSave(obj):pdSheetUpdate(obj)).catch(function(){});
+  try{ if(window._ndBLog) _ndBLog("PD 로컬저장 완료 총"+((_pdSaved().cycles||[]).length)+"건"); }catch(e){}
+  (isNew?pdSheetSave(obj):pdSheetUpdate(obj))
+    .then(function(ok){ try{ if(window._ndBLog) _ndBLog("PD 시트저장 "+(ok?"성공":"건너뜀")); }catch(e){} })
+    .catch(function(er){ try{ if(window._ndBLog) _ndBLog("PD 시트저장 실패: "+((er&&er.message)||er)); }catch(e){}
+      try{ if(typeof ndToast==="function") ndToast("기기에는 저장됐어요 · 구글시트 반영은 실패했어요"); }catch(e){} });
   try{ if(state&&state.view==="home") renderHome(); }catch(e){}
 }
 function pdDelete(id){
@@ -6945,6 +6952,15 @@ async function ndPhotoSpike(){
     if(btn){ btn.textContent=t0; btn.disabled=false; }
   }
 }
+/* ★v435: 조용히 죽는 스크립트 오류를 진단 로그에 남긴다. 개발자 모드 패널에서 바로 보인다. */
+try{
+  window.addEventListener("error", function(e){
+    try{ if(window._ndBLog) _ndBLog("!ERR "+((e&&e.message)||"?")+" @"+((e&&e.filename)?String(e.filename).slice(-14):"")+":"+((e&&e.lineno)||"")); }catch(_){}
+  }, true);
+  window.addEventListener("unhandledrejection", function(e){
+    try{ if(window._ndBLog) _ndBLog("!REJ "+(((e&&e.reason&&e.reason.message)||String((e&&e.reason)||"?")).slice(0,60))); }catch(_){}
+  });
+}catch(e){}
 function _ndDev(){ try{ return store.getItem("nd.dev")==="1"; }catch(e){ return false; } }
 function _ndDevApply(){ try{ document.body.classList.toggle("ndDevOn", _ndDev()); }catch(e){} }
 function _ndDevBoot(){ try{
@@ -8650,7 +8666,7 @@ try{ _ndDevBoot(); }catch(e){}
      ★v427: 1.5초 뒤에 심었더니 '열자마자 뒤로가기'는 붙잡을 게 없어 그냥 나가버렸다(영석 신고).
      즉시 심는다. 1.5초 뒤 한 번 더는 보험. */
   function baseGuard(){ try{ if(!window.__ndBaseGuard){ window.__ndBaseGuard=true; pushBase(); } }catch(e){} }
-  _ndBLog("=== LOAD len="+history.length+" st="+(history.state?"있음":"null")+" ver=v434 ===");
+  _ndBLog("=== LOAD len="+history.length+" st="+(history.state?"있음":"null")+" ver=v435 ===");
   baseGuard();
   setTimeout(baseGuard, 1500);
   /* 개발자 모드면 로그 패널을 띄운다 */
