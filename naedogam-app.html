@@ -1349,7 +1349,7 @@ body{ background:radial-gradient(circle at 50% -10%, rgba(102,78,57,.16), transp
         <svg class="brandmark" width="40" height="30" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg>
         <span class="brandwm"><span class="bwm-ko">내도감</span><span class="bwm-en">NAEDOGAM</span></span>
       </button>
-      <span class="mhver">v427β</span>
+      <span class="mhver">v428β</span>
       <span class="spacer"></span>
       <span class="src-chip" id="srcChip" style="display:none">데모</span>
       <button class="icon-btn" id="searchToggle" type="button" style="display:none">🔍</button>
@@ -2444,7 +2444,7 @@ function openDomain(id){ if(id==="mbti"){ openMbti(); return; } if(id==="period"
 
 /* 홈: 켜둔 카테고리를 카드로. 건수는 한 번 열어본 분야만 표시(홈을 빠르게 유지). */
 function ndDeep(h){ if(typeof h!=="string"||h.charAt(0)!=="#") h="#8a7a6a"; var n=parseInt(h.slice(1),16),r=(n>>16)&255,g=(n>>8)&255,b=n&255; function d(x,f){return Math.max(0,Math.min(255,Math.round(x*f)));} var d1="rgb("+d(r,.46)+","+d(g,.46)+","+d(b,.46)+")", d2="rgb("+d(r,.20)+","+d(g,.20)+","+d(b,.20)+")", gl="rgba("+r+","+g+","+b+",.16)"; return "radial-gradient(circle at 18% 14%,"+gl+",transparent 46%),linear-gradient(145deg,"+d1+","+d2+")"; }
-var ND_LOGO_HTML='<div class="ndh-brand"><svg width="47" height="35" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg><div class="ndh-wm"><b>내도감</b><small>NAEDOGAM</small></div><span class="mhver ndh-ver">v427β</span></div><button class="ndh-sync" type="button" title="동기화" aria-label="동기화" onclick="try{syncNow()}catch(e){}">↻</button>';
+var ND_LOGO_HTML='<div class="ndh-brand"><svg width="47" height="35" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg><div class="ndh-wm"><b>내도감</b><small>NAEDOGAM</small></div><span class="mhver ndh-ver">v428β</span></div><button class="ndh-sync" type="button" title="동기화" aria-label="동기화" onclick="try{syncNow()}catch(e){}">↻</button>';
 /* 홈 카드 크기: wide(넓게=한 줄 전체) · half(보통=한 줄 2개) · mini(작게=하단 3칸). 기본값=프리셋 */
 var ND_PRESET_SIZE={running:"wide",food:"wide",recipes:"wide",movies:"half",books:"half",period:"half",diary:"half",travel:"half",mountains:"half",culture:"half",albums:"half",cellar:"half",scrap:"half",wish:"half",gift:"half",pet:"half"};
 function getHomeSizes(){ try{ return JSON.parse(store.getItem("nd.homesize")||"{}")||{}; }catch(e){ return {}; } }
@@ -2847,7 +2847,7 @@ class GSheetSource {
     if(_tid) clearTimeout(_tid);
     if(res.ok){ _ndNetSet(""); var _rb=document.getElementById("ndReconn"); if(_rb) _rb.remove(); }
     if(res.status===401 && !opt.__retried){ try{ await this._authSilent(); }catch(e){} if(this.token){ return this._api(url,{...opt,__retried:true}); } }
-    if(res.status===429 && (opt.__429||0)<3){ var _ra=parseInt(res.headers.get("Retry-After")||"0",10); var _w=Math.max(_ra*1000, 1200*Math.pow(2,(opt.__429||0)))+Math.floor(Math.random()*600); if(_w>6000)_w=6000; _ndNetSet("구글이 잠시 요청을 제한했어요 · 다시 시도 "+((opt.__429||0)+1)+"/3"); await new Promise(function(r){ setTimeout(r,_w); }); return this._api(url,{...opt,__429:(opt.__429||0)+1}); }
+    if(res.status===429 && (opt.__429||0)<3){ var _ra=parseInt(res.headers.get("Retry-After")||"0",10); var _w=Math.max(_ra*1000, 1500*Math.pow(3,(opt.__429||0)))+Math.floor(Math.random()*600); if(_w>16000)_w=16000;   /* ★v428: 읽기 한도는 분 단위 — 6초로는 안 풀렸다 */ _ndNetSet("구글이 잠시 요청을 제한했어요 · 다시 시도 "+((opt.__429||0)+1)+"/3"); await new Promise(function(r){ setTimeout(r,_w); }); return this._api(url,{...opt,__429:(opt.__429||0)+1}); }
     if(res.status>=500 && res.status<=599 && (opt.__5xx||0)<3){ var _w5=Math.min(8000, 700*Math.pow(2,(opt.__5xx||0)))+Math.floor(Math.random()*400); _ndNetSet("구글 응답이 불안정해요 · 다시 시도 "+((opt.__5xx||0)+1)+"/3"); await new Promise(function(r){ setTimeout(r,_w5); }); return this._api(url,{...opt,__5xx:(opt.__5xx||0)+1}); }
     const t=await res.text(); let b; try{b=JSON.parse(t);}catch(e){b=t;}
     if(res.status===401){ this.token=null; try{ if(typeof ndReconnect==="function") ndReconnect(); }catch(_e){} try{ store.removeItem("nd.tok"); store.removeItem("nd.tokExp"); }catch(e){} }
@@ -2882,20 +2882,30 @@ class GSheetSource {
     const d=await this._api("https://sheets.googleapis.com/v4/spreadsheets/"+this.ssId+"?fields=sheets.properties");
     const s=(d.sheets||[]).find(x=>x.properties.title===tab); const _sid=s?s.properties.sheetId:null;
     if(_sid!=null) this._sidCache[tab]=_sid; return _sid; }
-  async _getValues(tab){ try{ const d=await this._api("https://sheets.googleapis.com/v4/spreadsheets/"+this.ssId+"/values/"+this._rng(tab,"A1:Z10000")); return d.values||[]; }
+  async _getValues(tab){ try{ const d=await this._api("https://sheets.googleapis.com/v4/spreadsheets/"+this.ssId+"/values/"+this._rng(tab,"A1:Z10000"));
+      const _v=d.values||[]; if(_v[0]&&_v[0].length) this._headSet(tab,_v[0]); return _v; }
     catch(e){ if(e.status===400) return null; throw e; } }
   async _setRow(tab,rowNum,row){ return this._mut(()=>this._api("https://sheets.googleapis.com/v4/spreadsheets/"+this.ssId+"/values/"+this._rng(tab,"A"+rowNum)+"?valueInputOption=RAW",{method:"PUT",body:JSON.stringify({values:[row]})})); }
   async _appendLine(tab,line){ return this._mut(()=>this._api("https://sheets.googleapis.com/v4/spreadsheets/"+this.ssId+"/values/"+this._rng(tab,"A1")+":append?valueInputOption=RAW&insertDataOption=INSERT_ROWS",{method:"POST",body:JSON.stringify({values:[line]})})); }
+  /* ★v428: 헤더 캐시. 저장 한 건마다 같은 시트를 통째로 두 번 읽던 것이 429(분당 읽기 한도)의 원인이었다.
+     120초만 들고 있는다 — 다른 기기가 헤더를 바꿔도 곧 다시 맞춰진다. */
+  _headGet(tab){ try{ const c=this._headCache&&this._headCache[tab]; if(c && c.h && c.h.length && (Date.now()-c.t)<120000) return c.h; }catch(e){} return null; }
+  _headSet(tab,h){ try{ if(!h||!h.length) return; if(!this._headCache) this._headCache={}; this._headCache[tab]={h:h.slice(), t:Date.now()}; }catch(e){} }
   async _ensureTab(tab,header){ const titles=await this._tabTitles(); if(!titles.includes(tab)) await this._addSheet(tab);
-    const vals=await this._getValues(tab); if((!vals||!vals.length) && header && header.length) await this._setRow(tab,1,header); }
+    let vals=await this._getValues(tab);
+    if((!vals||!vals.length) && header && header.length){ await this._setRow(tab,1,header); vals=[header.slice()]; }
+    if(vals && vals[0] && vals[0].length) this._headSet(tab, vals[0]);
+    return vals; }
   async _rowsOf(tab){ const vals=await this._getValues(tab); if(!vals||vals.length<2) return {head:(vals&&vals[0])||[],rows:[]};
     const head=vals[0], rows=[]; for(let i=1;i<vals.length;i++){ const o={}; for(let c=0;c<head.length;c++) o[head[c]]=(vals[i][c]==null?"":String(vals[i][c])); rows.push(o); } return {head,rows}; }
-  async _appendObj(tab,obj,header){ await this._ensureTab(tab, (header&&header.length)?header:Object.keys(obj));
-    const vals=await this._getValues(tab); const head=(vals&&vals[0]&&vals[0].length)?vals[0]:(header||Object.keys(obj));
+  async _appendObj(tab,obj,header){ const _hd=(header&&header.length)?header:Object.keys(obj);
+    let head=this._headGet(tab);                                   /* ★v428: 캐시가 있으면 읽기 0회 */
+    if(!head){ const vals=await this._ensureTab(tab,_hd); head=(vals&&vals[0]&&vals[0].length)?vals[0]:_hd; }
     const line=head.map(h=>{ const v=obj[h]; return v==null?"":String(v); }); return this._appendLine(tab,line); }
   async _appendObjs(tab,objs,header){ if(!objs||!objs.length) return {ok:true};
-    await this._ensureTab(tab, (header&&header.length)?header:Object.keys(objs[0]));
-    const vals=await this._getValues(tab); const head=(vals&&vals[0]&&vals[0].length)?vals[0]:(header||Object.keys(objs[0]));
+    const _hd=(header&&header.length)?header:Object.keys(objs[0]);
+    let head=this._headGet(tab);                                   /* ★v428 */
+    if(!head){ const vals=await this._ensureTab(tab,_hd); head=(vals&&vals[0]&&vals[0].length)?vals[0]:_hd; }
     const lines=objs.map(ob=>head.map(h=>{ const v=ob[h]; return v==null?"":String(v); }));
     return this._mut(()=>this._api("https://sheets.googleapis.com/v4/spreadsheets/"+this.ssId+"/values/"+this._rng(tab,"A1")+":append?valueInputOption=RAW&insertDataOption=INSERT_ROWS",{method:"POST",body:JSON.stringify({values:lines})})); }
   async upsertMany(id,rows){ const m=MANIFESTS[id]; return this._appendObjs(m.source.tab, rows.map(r=>this._flatten(m,r)), ndHeaders(m)); }
@@ -2916,7 +2926,7 @@ class GSheetSource {
        값이 있는 열만 헤더 끝에 덧붙인다. 기존 열·순서·데이터는 그대로 둔다. */
     try{
       const miss=Object.keys(obj).filter(k=>head.indexOf(k)===-1 && obj[k]!=null && String(obj[k])!=="" && String(obj[k])!=="[]");
-      if(miss.length){ head=head.concat(miss); await this._setRow(tab,1,head); vals[0]=head; }
+      if(miss.length){ head=head.concat(miss); await this._setRow(tab,1,head); vals[0]=head; this._headSet(tab,head); }
     }catch(e){}
     let ic=head.indexOf(idKey); if(ic===-1) ic=0;
     for(let i=1;i<vals.length;i++){ if(String(vals[i][ic])===String(id)){ const row=vals[i].slice(); while(row.length<head.length) row.push("");
@@ -7480,18 +7490,42 @@ async function addBook(b){
 }
 
 /* ── 영화 추가: TMDB에서 제목 검색 → 감독·배우·연도·포스터 자동 → 기존 addMovie 통로로 저장 ── */
-async function searchMovies(q){
-  if(!q || q.trim().length<2) return [];
-  const url=`${CONFIG.TMDB_BASE}/search/movie?api_key=${CONFIG.TMDB_KEY}&language=ko-KR&query=${encodeURIComponent(q.trim())}`;
+async function _tmdbSearchOnce(q){
+  const url=`${CONFIG.TMDB_BASE}/search/movie?api_key=${CONFIG.TMDB_KEY}&language=ko-KR&query=${encodeURIComponent(q)}`;
   let res=await _fetchT(url);
   if(res.status===429){ await new Promise(r=>setTimeout(r,1000)); res=await _fetchT(url); }
   if(res.status===429) throw new Error("검색이 잠깐 제한됐어요. 몇 초 뒤 다시 해보세요.");
   if(!res.ok) throw new Error("HTTP "+res.status);
   const d=await res.json();
-  return (d.results||[]).slice(0,6).map(m=>({
+  return (d.results||[]).map(m=>({
     id:m.id, orig:m.original_title||m.title||"", kor:m.title||m.original_title||"",
     year:(m.release_date||"").slice(0,4), rating:m.vote_average?Math.round(m.vote_average*10)/10:"",
     poster:m.poster_path?("https://image.tmdb.org/t/p/w185"+m.poster_path):"" }));
+}
+/* ★v428: TMDB는 붙여 쓴 한글을 못 찾는다(실측: "벤자민버튼" 0건 / "벤자민" 3건에 정답 포함).
+   0건이면 앞쪽만 남겨 다시 묻고, 띄어쓰기·문장부호를 뗀 제목이 가까운 순으로 올린다. */
+function _ndTitleNorm(t){ return String(t||"").replace(/[^0-9A-Za-z가-힣]/g,"").toLowerCase(); }
+async function searchMovies(q){
+  if(!q || q.trim().length<2) return [];
+  const raw=q.trim();
+  let out=await _tmdbSearchOnce(raw);
+  if(!out.length){
+    const flat=_ndTitleNorm(raw);
+    if(/[가-힣]/.test(flat) && flat.length>=4){
+      const tries=[flat.slice(0,3)]; if(flat.length>=6) tries.push(flat.slice(0,4));
+      let pool=[];
+      for(let i=0;i<tries.length;i++){ try{ pool=pool.concat(await _tmdbSearchOnce(tries[i])); }catch(e){} }
+      const seen={}; pool=pool.filter(m=>{ if(seen[m.id]) return false; seen[m.id]=1; return true; });
+      const sc=m=>{ const a=_ndTitleNorm(m.kor), b=_ndTitleNorm(m.orig);
+        if(a===flat||b===flat) return 3;
+        if((a&&a.indexOf(flat)>=0)||(b&&b.indexOf(flat)>=0)) return 2;
+        if(a&&a.length>=2&&flat.indexOf(a)>=0) return 1;
+        return 0; };
+      pool.sort((x,y)=>sc(y)-sc(x));
+      out=pool;
+    }
+  }
+  return out.slice(0,6);
 }
 async function fetchMovieExtra(id){   // 감독·배우·국적 (두 번째 호출)
   try{
@@ -8337,20 +8371,29 @@ function _ndStripDragBoot(){
       if(!moved && Math.abs(dx)>6){ moved=true; if(mouse) s.classList.add('ndDragging'); }
       if(moved && mouse){ s.scrollLeft = sl-dx; ev.preventDefault(); }
     };
-    var up=function(){
+    var up=function(ev){
       window.removeEventListener('pointermove',move,true);
       window.removeEventListener('pointerup',up,true);
       window.removeEventListener('pointercancel',up,true);
       s.classList.remove('ndDragging');
+      /* ★v428: 손가락으로 밀면 크롬이 스크롤을 넘겨받으면서 pointercancel을 던지고 pointermove가 끊긴다.
+         그래서 moved가 false로 남아 클릭이 그대로 새어 나갔다(영석 신고). 취소 = 스크롤 시작으로 본다. */
+      if(ev && ev.type==='pointercancel') moved=true;
+      if(!moved && Math.abs(s.scrollLeft-sl)>2) moved=true;
       if(moved) s.__ndDragT=Date.now();
     };
     window.addEventListener('pointermove',move,true);
     window.addEventListener('pointerup',up,true);
     window.addEventListener('pointercancel',up,true);
   }, true);
+  /* ★v428: 가장 확실한 신호는 '줄이 실제로 스크롤됐는가'다. scroll은 버블링을 안 하므로 캡처로 받는다. */
+  document.addEventListener('scroll', function(e){
+    var s=e.target; if(!s || !s.matches) return;
+    try{ if(s.matches(SEL)) s.__ndDragT=Date.now(); }catch(err){}
+  }, true);
   document.addEventListener('click', function(e){
     var s=pick(e.target); if(!s) return;
-    if(s.__ndDragT && (Date.now()-s.__ndDragT)<400){ e.stopPropagation(); e.preventDefault(); }
+    if(s.__ndDragT && (Date.now()-s.__ndDragT)<600){ e.stopPropagation(); e.preventDefault(); }
   }, true);
 }
 try{ _ndStripDragBoot(); }catch(e){}
