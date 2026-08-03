@@ -1349,7 +1349,7 @@ body{ background:radial-gradient(circle at 50% -10%, rgba(102,78,57,.16), transp
         <svg class="brandmark" width="40" height="30" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg>
         <span class="brandwm"><span class="bwm-ko">내도감</span><span class="bwm-en">NAEDOGAM</span></span>
       </button>
-      <span class="mhver">v433β</span>
+      <span class="mhver">v434β</span>
       <span class="spacer"></span>
       <span class="src-chip" id="srcChip" style="display:none">데모</span>
       <button class="icon-btn" id="searchToggle" type="button" style="display:none">🔍</button>
@@ -2446,7 +2446,7 @@ function openDomain(id){ if(id==="mbti"){ openMbti(); return; } if(id==="period"
 
 /* 홈: 켜둔 카테고리를 카드로. 건수는 한 번 열어본 분야만 표시(홈을 빠르게 유지). */
 function ndDeep(h){ if(typeof h!=="string"||h.charAt(0)!=="#") h="#8a7a6a"; var n=parseInt(h.slice(1),16),r=(n>>16)&255,g=(n>>8)&255,b=n&255; function d(x,f){return Math.max(0,Math.min(255,Math.round(x*f)));} var d1="rgb("+d(r,.46)+","+d(g,.46)+","+d(b,.46)+")", d2="rgb("+d(r,.20)+","+d(g,.20)+","+d(b,.20)+")", gl="rgba("+r+","+g+","+b+",.16)"; return "radial-gradient(circle at 18% 14%,"+gl+",transparent 46%),linear-gradient(145deg,"+d1+","+d2+")"; }
-var ND_LOGO_HTML='<div class="ndh-brand"><svg width="47" height="35" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg><div class="ndh-wm"><b>내도감</b><small>NAEDOGAM</small></div><span class="mhver ndh-ver">v433β</span></div><button class="ndh-sync" type="button" title="동기화" aria-label="동기화" onclick="try{syncNow()}catch(e){}">↻</button>';
+var ND_LOGO_HTML='<div class="ndh-brand"><svg width="47" height="35" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg><div class="ndh-wm"><b>내도감</b><small>NAEDOGAM</small></div><span class="mhver ndh-ver">v434β</span></div><button class="ndh-sync" type="button" title="동기화" aria-label="동기화" onclick="try{syncNow()}catch(e){}">↻</button>';
 /* 홈 카드 크기: wide(넓게=한 줄 전체) · half(보통=한 줄 2개) · mini(작게=하단 3칸). 기본값=프리셋 */
 var ND_PRESET_SIZE={running:"wide",food:"wide",recipes:"wide",movies:"half",books:"half",period:"half",diary:"half",travel:"half",mountains:"half",culture:"half",albums:"half",cellar:"half",scrap:"half",wish:"half",gift:"half",pet:"half"};
 function getHomeSizes(){ try{ return JSON.parse(store.getItem("nd.homesize")||"{}")||{}; }catch(e){ return {}; } }
@@ -5985,8 +5985,9 @@ function pdLogForm(id){
   pdCloseForm();
   var wrap=document.createElement("div"); wrap.id="pdFormWrap";
   wrap.style.cssText="position:fixed;inset:0;z-index:9100;background:rgba(20,17,13,.55);display:flex;align-items:flex-end;justify-content:center";
-  var b=document.createElement("div");
-  b.style.cssText="width:100%;max-width:520px;max-height:88vh;overflow-y:auto;-webkit-overflow-scrolling:touch;background:var(--paper,#fbf7f8);border-radius:18px 18px 0 0;padding:14px 14px calc(18px + env(safe-area-inset-bottom,0px));box-shadow:0 -12px 40px rgba(0,0,0,.35)";
+  /* ★v434: 기존 화면과 똑같이 보이도록 .pdBody 스타일을 그대로 쓴다(다크 테마 포함). */
+  var b=document.createElement("div"); b.className="pdBody";
+  b.style.cssText="width:100%;max-width:520px;max-height:88vh;border-radius:18px 18px 0 0;padding:14px 15px calc(24px + env(safe-area-inset-bottom,0px));box-shadow:0 -12px 40px rgba(0,0,0,.35)";
   wrap.appendChild(b); document.body.appendChild(wrap);
   wrap.addEventListener("click", function(e){ if(e.target===wrap) pdCloseForm(); });
   pdEditId=id||null; pdFormOpen=true;
@@ -6002,7 +6003,7 @@ function pdLogForm(id){
   var symBtns=PD_SYMPTOMS.map(function(s){ return '<button type="button" class="pdChip'+(syms.indexOf(s)>=0?' on':'')+'" data-sym="'+s+'">'+s+'</button>'; }).join("");
   var moodBtns=PD_MOODS.map(function(mo){ return '<button type="button" class="pdChip'+(mo===mood?' on':'')+'" data-mood="'+mo+'">'+mo+'</button>'; }).join("");
   b.innerHTML='<div class="pdForm">'
-    +'<div class="pdFH">'+(id?"기록 수정":"생리 기록")+'</div>'
+    +'<div class="pdFH" style="display:flex;align-items:center;justify-content:space-between"><span>'+(id?"기록 수정":"생리 기록")+'</span><button type="button" id="pdSheetX" aria-label="닫기" style="background:none;border:none;color:#b0a3a8;font-size:20px;font-weight:800;line-height:1;padding:2px 6px;cursor:pointer">✕</button></div>'
     +'<div class="pdFRow"><label>시작일</label>'+inpDate("pdStart",start)+'</div>'
     +'<div class="pdFRow"><label>종료일 <em>(선택)</em></label>'+inpDate("pdEnd",end)+'</div>'
     +'<div class="pdFRow"><label>양</label><div class="pdSegs">'+flowBtns+'</div></div>'
@@ -6016,6 +6017,7 @@ function pdLogForm(id){
   b.querySelectorAll(".pdChip[data-sym]").forEach(function(btn){ btn.onclick=function(){ var s=btn.dataset.sym; var i=selSyms.indexOf(s); if(i>=0){selSyms.splice(i,1);btn.classList.remove("on");}else{selSyms.push(s);btn.classList.add("on");} }; });
   b.querySelectorAll(".pdChip[data-mood]").forEach(function(btn){ btn.onclick=function(){ var mo=btn.dataset.mood; if(selMood===mo){selMood="";btn.classList.remove("on");}else{selMood=mo; b.querySelectorAll(".pdChip[data-mood]").forEach(function(x){x.classList.remove("on");}); btn.classList.add("on");} }; });
   b.querySelector("#pdCancel").onclick=function(){ pdCloseForm(); };
+  { var _x=b.querySelector("#pdSheetX"); if(_x) _x.onclick=function(){ pdCloseForm(); }; }
   var db=b.querySelector("#pdDelBtn"); if(db) db.onclick=function(){ pdCloseForm(); pdDelete(id); };
   b.querySelector("#pdSaveBtn").onclick=function(){
     var sv=_pdI2D(b.querySelector("#pdStart").value);
@@ -8497,7 +8499,8 @@ try{ _ndDevBoot(); }catch(e){}
   var busy=false, trap=false, selfPop=false;
   /* ★v427: 종료하려면 우리가 쌓아둔 상태를 전부 되감아야 한다. 몇 개인지 센다. */
   var myPush=0;
-  function pushBase(){ try{ history.pushState({ndBase:1}, ''); myPush++; _ndBLog("push base myPush="+myPush+" len="+history.length); }catch(e){} }
+  function _ndUA(){ try{ return (navigator.userActivation && navigator.userActivation.hasBeenActive)?1:0; }catch(e){ return "?"; } }
+  function pushBase(){ try{ history.pushState({ndBase:1}, ''); myPush++; _ndBLog("push base myPush="+myPush+" len="+history.length+" ua="+_ndUA()); }catch(e){} }
   function eatPush(){ myPush = Math.max(0, myPush-1); }
   function anyDialog(){ return document.querySelector('dialog[open]'); }
   /* ★v418: '내가 모아온 것들'은 dialog가 아니라 body에 붙는 div였다.
@@ -8645,7 +8648,7 @@ try{ _ndDevBoot(); }catch(e){}
      ★v427: 1.5초 뒤에 심었더니 '열자마자 뒤로가기'는 붙잡을 게 없어 그냥 나가버렸다(영석 신고).
      즉시 심는다. 1.5초 뒤 한 번 더는 보험. */
   function baseGuard(){ try{ if(!window.__ndBaseGuard){ window.__ndBaseGuard=true; pushBase(); } }catch(e){} }
-  _ndBLog("=== LOAD len="+history.length+" st="+(history.state?"있음":"null")+" ver=v433 ===");
+  _ndBLog("=== LOAD len="+history.length+" st="+(history.state?"있음":"null")+" ver=v434 ===");
   baseGuard();
   setTimeout(baseGuard, 1500);
   /* 개발자 모드면 로그 패널을 띄운다 */
@@ -8671,9 +8674,12 @@ try{ _ndDevBoot(); }catch(e){}
   function guardsOnGesture(){
     try{ var n=0; while(myPush<3 && n<3){ pushBase(); n++; } }catch(e){}
   }
-  document.addEventListener('pointerdown', guardsOnGesture, {capture:true, passive:true});
-  document.addEventListener('touchstart', guardsOnGesture, {capture:true, passive:true});
-  document.addEventListener('keydown', guardsOnGesture, true);
+  /* ★v434: 터치에서 '사용자 활성화'를 주는 것은 up 계열이다(touchend·pointerup·click).
+     down 계열(pointerdown·touchstart)에 걸면 활성화가 없어 항목이 그대로 건너뛰기 대상이 된다.
+     v432·v433이 실패한 이유가 정확히 이것 — 진단 로그에서 POP이 아예 안 찍혔다. */
+  ['pointerup','touchend','click','keydown'].forEach(function(t){
+    document.addEventListener(t, guardsOnGesture, {capture:true, passive:true});
+  });
   /* ★v430: 화면이 다시 보일 때(백그라운드 복귀·로그인 후 돌아옴) 가드가 남아 있는지 확인 */
   document.addEventListener('visibilitychange', function(){ if(!document.hidden) setTimeout(armBase,0); });
   window.addEventListener('pageshow', function(){ setTimeout(armBase,0); });
