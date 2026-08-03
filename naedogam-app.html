@@ -8497,10 +8497,11 @@ try{ _ndDevBoot(); }catch(e){}
   }
   window._ndBLog=_ndBLog;
   var busy=false, trap=false, selfPop=false;
+  var uaPush=0;   /* ★v434b: 활성화(사용자 조작)가 붙은 가드 수 — 이것만 뒤로가기에서 안 건너뛴다 */
   /* ★v427: 종료하려면 우리가 쌓아둔 상태를 전부 되감아야 한다. 몇 개인지 센다. */
   var myPush=0;
   function _ndUA(){ try{ return (navigator.userActivation && navigator.userActivation.hasBeenActive)?1:0; }catch(e){ return "?"; } }
-  function pushBase(){ try{ history.pushState({ndBase:1}, ''); myPush++; _ndBLog("push base myPush="+myPush+" len="+history.length+" ua="+_ndUA()); }catch(e){} }
+  function pushBase(){ try{ history.pushState({ndBase:1}, ''); myPush++; _ndBLog("push base myPush="+myPush+"/ua"+uaPush+" len="+history.length+" act="+_ndUA()); }catch(e){} }
   function eatPush(){ myPush = Math.max(0, myPush-1); }
   function anyDialog(){ return document.querySelector('dialog[open]'); }
   /* ★v418: '내가 모아온 것들'은 dialog가 아니라 body에 붙는 div였다.
@@ -8519,7 +8520,7 @@ try{ _ndDevBoot(); }catch(e){}
      뒤로가기가 곧장 문서 밖으로 나간다(영석: "안내 안 나오고 그냥 종료"). 2개를 깔아 한 번은 반드시 붙잡는다. */
   function armBase(){
     try{ var stt=history.state, ours=!!(stt&&(stt.ndBase||stt.ndTrap));
-      if(ours && myPush>=2) return;
+      if(ours && myPush>=1) return;                      /* ★v434b: 부팅 때는 1개만. 나머지는 조작에 얹어 심는다 */
       if(myPush>=4) return;                              /* 폭주 방지 상한 */
       var now=Date.now(); if(now-_armT < 400) return;
       _armT=now; pushBase();
@@ -8542,8 +8543,9 @@ try{ _ndDevBoot(); }catch(e){}
     /* ★v425: 우리가 되감은 것은 사용자가 누른 게 아니다.
        이걸 구분하지 못해 홈 버튼·검색 닫기만 해도 '앱을 종료할까요?'가 떴다. */
     eatPush();
+    uaPush=Math.max(0, uaPush-1);   /* ★v434b: 소모됐으니 다음 조작에 다시 심는다 */
     _ndBLog("POP st="+(history.state?(history.state.ndBase?"base":(history.state.ndTrap?"trap":"?")):"null")
-      +" len="+history.length+" d="+depth()+" myPush="+myPush+" self="+(selfPop?1:0));
+      +" len="+history.length+" d="+depth()+" myPush="+myPush+"/ua"+uaPush+" self="+(selfPop?1:0));
     if(selfPop){ selfPop=false; setTimeout(armBase,0); return; }   /* ★v430: 되감은 뒤에도 가드를 다시 심는다 */
     /* 종료 확인창이 떠 있으면 뒤로가기는 그 창만 닫는다 */
     var _ask=document.getElementById('ndExitAsk');
@@ -8672,7 +8674,10 @@ try{ _ndDevBoot(); }catch(e){}
   /* ★v433: 조작 없이 만든 히스토리 항목은 크롬이 건너뛴다.
      그래서 "조작이 있을 때마다" 가드를 3개까지 채운다. 연속 뒤로가기 2~3번을 버틴다. */
   function guardsOnGesture(){
-    try{ var n=0; while(myPush<3 && n<3){ pushBase(); n++; } }catch(e){}
+    try{
+      if(uaPush<2){ pushBase(); uaPush++; return; }
+      var n=0; while(myPush<3 && n<3){ pushBase(); n++; }
+    }catch(e){}
   }
   /* ★v434: 터치에서 '사용자 활성화'를 주는 것은 up 계열이다(touchend·pointerup·click).
      down 계열(pointerdown·touchstart)에 걸면 활성화가 없어 항목이 그대로 건너뛰기 대상이 된다.
