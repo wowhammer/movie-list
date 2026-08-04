@@ -1365,7 +1365,7 @@ body{ background:radial-gradient(circle at 50% -10%, rgba(102,78,57,.16), transp
         <svg class="brandmark" width="40" height="30" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg>
         <span class="brandwm"><span class="bwm-ko">내도감</span><span class="bwm-en">NAEDOGAM</span></span>
       </button>
-      <span class="mhver">v447β</span>
+      <span class="mhver">v448β</span>
       <span class="spacer"></span>
       <span class="src-chip" id="srcChip" style="display:none">데모</span>
       <button class="icon-btn" id="searchToggle" type="button" style="display:none">🔍</button>
@@ -1463,7 +1463,7 @@ const MANIFESTS = {
     search:["flow","mood","note"], dateSort:"start",
     stats:[ {label:"기록",type:"count",c:"#e03e63"} ] },
   assets:{ id:"assets", title:"자산", icon:"💰", vol:"", canAdd:true, source:{ type:"sheet", tab:"자산" }, fields:[ {k:"name",sheet:"자산명",label:"자산명",type:"text",full:true},{k:"kind",sheet:"종류",label:"종류",type:"select",options:["","부동산","예금·적금","주식·펀드","코인","현금","자동차","기타"]},{k:"value",sheet:"평가액",label:"평가액(원)",type:"number",money:true},{k:"buyDate",sheet:"취득일",label:"취득일",type:"date"},{k:"expiry",sheet:"만기일",label:"만기일",type:"date"},{k:"place",sheet:"보관처",label:"보관처·계좌",type:"text"},{k:"memo",sheet:"메모",label:"메모",type:"textarea"} ], search:["name","kind","place","memo"], dateSort:"buyDate", card:{ kind:"specimen", thumb:"💰", memo:"memo", title:function(r){ return r.name||"(무제)"; }, meta:function(r){ var v=(r.value!==""&&r.value!=null&&!isNaN(Number(r.value)))?Number(r.value).toLocaleString()+"원":""; return [r.kind,v].filter(Boolean).join(" · "); } }, stats:[ {label:"자산 수",type:"count",c:"#0891b2"}, {label:"총 평가액",type:"sum",field:"value",unit:"원",c:"#c2410c"} ] },
-  recipes:{ id:"recipes", title:"음식 레시피", icon:"🍳", vol:"", canAdd:true, source:{ type:"sheet", tab:"레시피" }, fields:[ {k:"title",sheet:"요리명",label:"요리명",type:"text",full:true},{k:"kind",sheet:"종류",label:"종류",type:"select",options:["","한식","중식","일식","양식","분식","베이킹","음료","기타"]},{k:"ingredients",sheet:"재료",label:"재료(쉼표로 여러 개)",type:"tags"},{k:"steps",sheet:"조리법",label:"조리법(순서대로)",type:"textarea",rows:4},{k:"time",sheet:"소요시간",label:"소요시간(분)",type:"number"},{k:"level",sheet:"난이도",label:"난이도",type:"select",options:["","쉬움","보통","어려움"]},{k:"rating",sheet:"별점",label:"별점",type:"rating"},{k:"status",sheet:"상태",label:"상태",type:"seg",options:["해봄","또할래","찜"],hideForm:true},{k:"memo",sheet:"메모",label:"메모·후기",type:"textarea"},{k:"cover",sheet:"사진",label:"사진",type:"image"} ], search:["title","kind","ingredients","memo"], filterBy:{ field:"kind", allLabel:"전체" }, card:{ kind:"specimen", thumb:"🍳", tags:"ingredients", memo:"memo", meta:function(r){ return [r.kind,(r.time?r.time+"분":""),r.level].filter(Boolean).join(" · "); }, flags:function(r){ return [ (r.rating!=null&&r.rating!=="")?{t:"★ "+r.rating}:null, stHas(r,"찜")?{t:"찜"}:null ]; } }, stats:[ {label:"레시피 수",type:"count",c:"#e8590c"}, {label:"찜",type:"countIf",field:"status",eq:"찜",c:"#e0a86a"} ] },
+  recipes:{ id:"recipes", title:"음식 레시피", icon:"🍳", vol:"", canAdd:true, source:{ type:"sheet", tab:"레시피" }, fields:[ {k:"title",sheet:"요리명",label:"요리명",type:"text",full:true},{k:"kind",sheet:"종류",label:"종류",type:"select",options:["","한식","중식","일식","양식","분식","베이킹","음료","기타"]},{k:"ingredients",sheet:"재료",label:"재료(쉼표로 여러 개)",type:"tags"},{k:"steps",sheet:"조리법",label:"조리법(순서대로)",type:"textarea",rows:4},{k:"time",sheet:"소요시간",label:"소요시간(분)",type:"number"},{k:"level",sheet:"난이도",label:"난이도",type:"select",options:["","쉬움","보통","어려움"]},{k:"rating",sheet:"별점",label:"별점",type:"rating"},{k:"status",sheet:"상태",label:"상태",type:"seg",options:["해봄","또할래","찜"]},{k:"memo",sheet:"메모",label:"메모·후기",type:"textarea"},{k:"cover",sheet:"사진",label:"사진",type:"image"} ], search:["title","kind","ingredients","memo"], filterBy:{ field:"kind", allLabel:"전체" }, card:{ kind:"specimen", thumb:"🍳", tags:"ingredients", memo:"memo", meta:function(r){ return [r.kind,(r.time?r.time+"분":""),r.level].filter(Boolean).join(" · "); }, flags:function(r){ return [ (r.rating!=null&&r.rating!=="")?{t:"★ "+r.rating}:null, stHas(r,"찜")?{t:"찜"}:null ]; } }, stats:[ {label:"레시피 수",type:"count",c:"#e8590c"}, {label:"찜",type:"countIf",field:"status",eq:"찜",c:"#e0a86a"} ] },
     /* 영화: 실제 구글시트(Apps Script)에서 라이브로 불러옴.
      source.map = 시트 한글 헤더 → 엔진 항목 이름.  source.derive = 특수 처리(코드·수식·숫자). */
   movies:{ id:"movies", title:"영화", icon:"🎬", vol:"卷1", canAdd:true, shareFields:["title","director","year","country"],
@@ -1761,7 +1761,7 @@ const MANIFESTS = {
              {k:"seat",sheet:"좌석",label:"좌석·티켓",type:"text"},
              {k:"cost",sheet:"비용",label:"비용(원)",type:"number",money:true},
              {k:"rating",sheet:"만족도",label:"만족도(별점)",type:"rating"},
-             {k:"status",sheet:"상태",label:"상태",type:"seg",options:["다녀옴","예정","찜"],hideForm:true},
+             {k:"status",sheet:"상태",label:"상태",type:"seg",options:["다녀옴","예정","찜"]},   /* ★v448: hideForm 제거 */
              {k:"artists",sheet:"출연",label:"출연·작가(쉼표로 여러 개)",type:"tags"},
              {k:"content",sheet:"관람평",label:"관람평",type:"textarea"},{k:"recommend",sheet:"추천",label:"추천",type:"text"},{k:"source",sheet:"출처",label:"출처",type:"text"},
              {k:"cover",sheet:"사진",label:"사진",type:"image"} ],
@@ -1792,7 +1792,7 @@ const MANIFESTS = {
              {k:"menu",sheet:"추천메뉴",label:"추천 메뉴",type:"text"},
              {k:"price",sheet:"가격대",label:"가격대(1인 원)",type:"number",money:true},
              {k:"rating",sheet:"만족도",label:"만족도(별점)",type:"rating"},
-             {k:"status",sheet:"상태",label:"상태",type:"seg",options:["다녀옴","가볼곳","찜"],hideForm:true},
+             {k:"status",sheet:"상태",label:"상태",type:"seg",options:["다녀옴","가볼곳","찜"]},   /* ★v448: hideForm 제거 — 빠른 담기 노출+저장 */
              {k:"content",sheet:"메모",label:"메모·후기",type:"textarea"},{k:"recommend",sheet:"추천",label:"추천",type:"text"},{k:"source",sheet:"출처",label:"출처",type:"text"},
              {k:"cover",sheet:"사진",label:"사진",type:"image"} ],
     shareFields:["title","kind","place"],
@@ -2462,7 +2462,7 @@ function openDomain(id){ if(id==="mbti"){ openMbti(); return; } if(id==="period"
 
 /* 홈: 켜둔 카테고리를 카드로. 건수는 한 번 열어본 분야만 표시(홈을 빠르게 유지). */
 function ndDeep(h){ if(typeof h!=="string"||h.charAt(0)!=="#") h="#8a7a6a"; var n=parseInt(h.slice(1),16),r=(n>>16)&255,g=(n>>8)&255,b=n&255; function d(x,f){return Math.max(0,Math.min(255,Math.round(x*f)));} var d1="rgb("+d(r,.46)+","+d(g,.46)+","+d(b,.46)+")", d2="rgb("+d(r,.20)+","+d(g,.20)+","+d(b,.20)+")", gl="rgba("+r+","+g+","+b+",.16)"; return "radial-gradient(circle at 18% 14%,"+gl+",transparent 46%),linear-gradient(145deg,"+d1+","+d2+")"; }
-var ND_LOGO_HTML='<div class="ndh-brand"><svg width="47" height="35" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg><div class="ndh-wm"><b>내도감</b><small>NAEDOGAM</small></div><span class="mhver ndh-ver">v447β</span></div><button class="ndh-sync" type="button" title="동기화" aria-label="동기화" onclick="try{syncNow()}catch(e){}">↻</button>';
+var ND_LOGO_HTML='<div class="ndh-brand"><svg width="47" height="35" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg><div class="ndh-wm"><b>내도감</b><small>NAEDOGAM</small></div><span class="mhver ndh-ver">v448β</span></div><button class="ndh-sync" type="button" title="동기화" aria-label="동기화" onclick="try{syncNow()}catch(e){}">↻</button>';
 /* 홈 카드 크기: wide(넓게=한 줄 전체) · half(보통=한 줄 2개) · mini(작게=하단 3칸). 기본값=프리셋 */
 var ND_PRESET_SIZE={running:"wide",food:"wide",recipes:"wide",movies:"half",books:"half",period:"half",diary:"half",travel:"half",mountains:"half",culture:"half",albums:"half",cellar:"half",scrap:"half",wish:"half",gift:"half",pet:"half"};
 function getHomeSizes(){ try{ return JSON.parse(store.getItem("nd.homesize")||"{}")||{}; }catch(e){ return {}; } }
@@ -4471,7 +4471,7 @@ function openRecordForm(m, existing, prefill){
   };
   const _wcls=f=> f.third?"rff-third":f.full?"rff-full":(f.half?"rff-half":(f.type==="bool"?"rff-bool":((f.type==="textarea"||f.type==="image"||f.type==="rating"||f.type==="seg"||f.type==="labrows"||f.type==="tiers"||f.type==="quotes"||f.type==="checks")?"rff-full":"rff-half")));
   /* ★v446: 빠른 담기 파일럿(여행) — 제목·상태·별점만 먼저 보이고 나머지는 '자세히'로 접는다. 수정(isEdit)일 땐 전체 표시(기존 동작 유지). */
-  const _quickKeys={ travel:["title","status","rating"] };
+  const _quickKeys={ travel:["title","status","rating"], food:["title","status","rating"], recipes:["title","status","rating"], culture:["title","status","rating"], mountains:["title","climbed"] };   /* ★v448: 빠른 담기 확대 */
   const _renderCell=f=>`<div class="rff ${_wcls(f)}">${_cell(f)}</div>`;
   const _qk=(!isEdit && _quickKeys[m.id]) ? _quickKeys[m.id].filter(k=>fields.some(f=>f.k===k)) : null;
   let body;
@@ -4481,7 +4481,7 @@ function openRecordForm(m, existing, prefill){
     const _d=fields.filter(f=>!_qset[f.k]);
     let _moreLbl="＋ 자세히 입력";   /* ★v447: 접힘 줄에 안에 든 항목 이름을 붙여 '비어 보임' 오해 방지 */
     if(_d.length){ const _names=_d.slice(0,5).map(f=>String(f.sheet||f.label||"").replace(/[(（].*$/,"").trim()).filter(Boolean); if(_names.length) _moreLbl="＋ 자세히 — "+_names.join("·")+"…"; }
-    body=_q.map(_renderCell).join("")
+    body=_q.map((f,_i)=>('<div class="rff '+(_i===0?'rff-full':_wcls(f))+'">'+_cell(f)+'</div>')).join("")   /* ★v448: 첫 핵심필드는 전체폭(등산 산이름 등) */
       + (_d.length ? ('<details class="rf-more" style="flex:1 1 100%;margin-top:2px"><summary style="cursor:pointer;font-weight:700;color:var(--sub,#8a7f70);padding:9px 2px">'+_moreLbl+'</summary><div class="rfgrid" style="display:flex;margin-top:6px">'+_d.map(_renderCell).join("")+'</div></details>') : "");
   } else {
     body=fields.map(_renderCell).join("");
