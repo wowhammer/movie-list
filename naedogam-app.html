@@ -1349,7 +1349,7 @@ body{ background:radial-gradient(circle at 50% -10%, rgba(102,78,57,.16), transp
         <svg class="brandmark" width="40" height="30" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg>
         <span class="brandwm"><span class="bwm-ko">내도감</span><span class="bwm-en">NAEDOGAM</span></span>
       </button>
-      <span class="mhver">v439β</span>
+      <span class="mhver">v440β</span>
       <span class="spacer"></span>
       <span class="src-chip" id="srcChip" style="display:none">데모</span>
       <button class="icon-btn" id="searchToggle" type="button" style="display:none">🔍</button>
@@ -2446,7 +2446,7 @@ function openDomain(id){ if(id==="mbti"){ openMbti(); return; } if(id==="period"
 
 /* 홈: 켜둔 카테고리를 카드로. 건수는 한 번 열어본 분야만 표시(홈을 빠르게 유지). */
 function ndDeep(h){ if(typeof h!=="string"||h.charAt(0)!=="#") h="#8a7a6a"; var n=parseInt(h.slice(1),16),r=(n>>16)&255,g=(n>>8)&255,b=n&255; function d(x,f){return Math.max(0,Math.min(255,Math.round(x*f)));} var d1="rgb("+d(r,.46)+","+d(g,.46)+","+d(b,.46)+")", d2="rgb("+d(r,.20)+","+d(g,.20)+","+d(b,.20)+")", gl="rgba("+r+","+g+","+b+",.16)"; return "radial-gradient(circle at 18% 14%,"+gl+",transparent 46%),linear-gradient(145deg,"+d1+","+d2+")"; }
-var ND_LOGO_HTML='<div class="ndh-brand"><svg width="47" height="35" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg><div class="ndh-wm"><b>내도감</b><small>NAEDOGAM</small></div><span class="mhver ndh-ver">v439β</span></div><button class="ndh-sync" type="button" title="동기화" aria-label="동기화" onclick="try{syncNow()}catch(e){}">↻</button>';
+var ND_LOGO_HTML='<div class="ndh-brand"><svg width="47" height="35" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg><div class="ndh-wm"><b>내도감</b><small>NAEDOGAM</small></div><span class="mhver ndh-ver">v440β</span></div><button class="ndh-sync" type="button" title="동기화" aria-label="동기화" onclick="try{syncNow()}catch(e){}">↻</button>';
 /* 홈 카드 크기: wide(넓게=한 줄 전체) · half(보통=한 줄 2개) · mini(작게=하단 3칸). 기본값=프리셋 */
 var ND_PRESET_SIZE={running:"wide",food:"wide",recipes:"wide",movies:"half",books:"half",period:"half",diary:"half",travel:"half",mountains:"half",culture:"half",albums:"half",cellar:"half",scrap:"half",wish:"half",gift:"half",pet:"half"};
 function getHomeSizes(){ try{ return JSON.parse(store.getItem("nd.homesize")||"{}")||{}; }catch(e){ return {}; } }
@@ -5812,7 +5812,7 @@ function pdStats(){
   /* 주기 = 연속 시작일 간격. 최근 6개의 중앙값만 쓴다. */
   var all=[]; for(var i=1;i<starts.length;i++) all.push(pdDiff(starts[i-1],starts[i]));
   var ok=[], bad=[];
-  all.forEach(function(g){ if(g>=15&&g<=60) ok.push(g); else if(g>0) bad.push(g); });
+  all.forEach(function(g){ if(g>=15&&g<=60) ok.push(g); else if(g>=0) bad.push(g); });   /* ★v440: 0일(같은 날)도 버린 것으로 센다 */
   st.gapsDropped=bad;                       /* ★버린 것은 화면에서 말해준다(§0-D) */
   ok=ok.slice(-6);
   if(ok.length){ st.avgCycle=_pdMedian(ok); st.cycleKnown=true; st.gapsUsed=ok.length;
@@ -5884,11 +5884,17 @@ function pdRenderMain(force){
     hero='<div class="pdHero pdHeroEmpty"><div class="pdHeroEm">🌙</div><div class="pdHeroBig">첫 기록을 남겨보세요</div><div class="pdHeroSub">생리 시작일만 기록하면<br>다음 예정일·가임기를 예측해드려요.</div><button class="pdBig" id="pdStartBtn">＋ 생리 시작 기록</button></div>';
   } else if(!st.cycleKnown){
     /* ★v430: 주기를 아직 못 쟀다. 28일 기본값으로 예정일·배란일을 지어내지 않는다. */
-    var _drop = st.gapsDropped.length
-      ? '<div class="pdHeroRange">기록 간격이 '+st.gapsDropped.join("·")+'일이라 주기 계산에서 뺐어요</div>' : '';
+    var _dr=st.gapsDropped, _drop='';
+    if(_dr.length){
+      var _z=_dr.filter(function(g){return g===0;}).length, _n=_dr.filter(function(g){return g>0;});
+      var _t=[]; if(_z) _t.push("같은 날 "+_z+"건"); if(_n.length) _t.push(_n.join("·")+"일 간격");
+      _drop='<div class="pdHeroRange">'+_t.join(" · ")+' — 주기 계산에서 뺐어요</div>';
+    }
     hero='<div class="pdHero"><div class="pdHeroTag">기록 모으는 중</div>'
       +'<div class="pdHeroBig">'+(st.inPeriod?("생리 "+st.periodDay+"일차"):(st.count+"회 기록"))+'</div>'
-      +'<div class="pdHeroSub">다음 생리 <b>시작일</b>을 한 번 더 기록하면<br>그때부터 예정일·가임기를 알려드려요.</div>'
+      +'<div class="pdHeroSub">'+(st.count>=2
+          ? '기록끼리 간격이 짧아 <b>아직 주기를 못 쟀어요</b>.<br>다음 달 생리 <b>시작일</b>을 기록하면 그때부터 예측해드려요.'
+          : '다음 생리 <b>시작일</b>을 한 번 더 기록하면<br>그때부터 예정일·가임기를 알려드려요.')+'</div>'
       +_drop+'</div>';
   } else {
     var ddayTxt = st.inPeriod ? ("생리 "+st.periodDay+"일차")
@@ -6028,6 +6034,12 @@ function _pdLogFormInner(id){
     var ev=_pdI2D(b.querySelector("#pdEnd").value);
     var obj={ _id: id||((window.crypto&&crypto.randomUUID)?crypto.randomUUID():String(Date.now())+Math.random().toString(16).slice(2)),
       start:sv, end:ev||"", flow:selFlow||"", symptoms:selSyms.slice(), mood:selMood||"", note:(b.querySelector("#pdNote").value||"").trim() };
+    /* ★v440: 같은 시작일이 이미 있으면 물어본다. 며칠 사이 중복 기록은 주기 계산을 전부 무의미하게 만든다. */
+    if(!id){ try{
+      var _dup=(_pdSaved().cycles||[]).filter(function(c){ return c && c.start===sv; });
+      if(_dup.length && !confirm(sv+" 기록이 이미 있어요.\n그래도 하나 더 추가할까요?")){
+        try{ if(window._ndBLog) _ndBLog("PD 중복취소 "+sv); }catch(e){} return; }
+    }catch(e){} }
     pdCloseForm(); pdSaveCycle(obj, !id);
   };
   { var _sb=b.querySelector("#pdSaveBtn"); if(_sb) _sb.addEventListener("click", _pdSave); }   /* 하나만 건다 — 둘 다 걸면 두 번 저장된다 */
@@ -8683,7 +8695,7 @@ try{ _ndDevBoot(); }catch(e){}
      ★v427: 1.5초 뒤에 심었더니 '열자마자 뒤로가기'는 붙잡을 게 없어 그냥 나가버렸다(영석 신고).
      즉시 심는다. 1.5초 뒤 한 번 더는 보험. */
   function baseGuard(){ try{ if(!window.__ndBaseGuard){ window.__ndBaseGuard=true; pushBase(); } }catch(e){} }
-  _ndBLog("=== LOAD len="+history.length+" st="+(history.state?"있음":"null")+" ver=v439 ===");
+  _ndBLog("=== LOAD len="+history.length+" st="+(history.state?"있음":"null")+" ver=v440 ===");
   /* 개발자 모드면 로그 패널을 띄운다 */
   function _ndBPanel(){
     try{
