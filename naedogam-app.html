@@ -1373,7 +1373,7 @@ body{ background:radial-gradient(circle at 50% -10%, rgba(102,78,57,.16), transp
         <svg class="brandmark" width="40" height="30" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg>
         <span class="brandwm"><span class="bwm-ko">내도감</span><span class="bwm-en">NAEDOGAM</span></span>
       </button>
-      <span class="mhver">v451β</span>
+      <span class="mhver">v452β</span>
       <span class="spacer"></span>
       <span class="src-chip" id="srcChip" style="display:none">데모</span>
       <button class="icon-btn" id="searchToggle" type="button" style="display:none">🔍</button>
@@ -2470,7 +2470,7 @@ function openDomain(id){ if(id==="mbti"){ openMbti(); return; } if(id==="period"
 
 /* 홈: 켜둔 카테고리를 카드로. 건수는 한 번 열어본 분야만 표시(홈을 빠르게 유지). */
 function ndDeep(h){ if(typeof h!=="string"||h.charAt(0)!=="#") h="#8a7a6a"; var n=parseInt(h.slice(1),16),r=(n>>16)&255,g=(n>>8)&255,b=n&255; function d(x,f){return Math.max(0,Math.min(255,Math.round(x*f)));} var d1="rgb("+d(r,.46)+","+d(g,.46)+","+d(b,.46)+")", d2="rgb("+d(r,.20)+","+d(g,.20)+","+d(b,.20)+")", gl="rgba("+r+","+g+","+b+",.16)"; return "radial-gradient(circle at 18% 14%,"+gl+",transparent 46%),linear-gradient(145deg,"+d1+","+d2+")"; }
-var ND_LOGO_HTML='<div class="ndh-brand"><svg width="47" height="35" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg><div class="ndh-wm"><b>내도감</b><small>NAEDOGAM</small></div><span class="mhver ndh-ver">v451β</span></div><button class="ndh-sync" type="button" title="동기화" aria-label="동기화" onclick="try{syncNow()}catch(e){}">↻</button>';
+var ND_LOGO_HTML='<div class="ndh-brand"><svg width="47" height="35" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg><div class="ndh-wm"><b>내도감</b><small>NAEDOGAM</small></div><span class="mhver ndh-ver">v452β</span></div><button class="ndh-sync" type="button" title="동기화" aria-label="동기화" onclick="try{syncNow()}catch(e){}">↻</button>';
 /* 홈 카드 크기: wide(넓게=한 줄 전체) · half(보통=한 줄 2개) · mini(작게=하단 3칸). 기본값=프리셋 */
 var ND_PRESET_SIZE={running:"wide",food:"wide",recipes:"wide",movies:"half",books:"half",period:"half",diary:"half",travel:"half",mountains:"half",culture:"half",albums:"half",cellar:"half",scrap:"half",wish:"half",gift:"half",pet:"half"};
 function getHomeSizes(){ try{ return JSON.parse(store.getItem("nd.homesize")||"{}")||{}; }catch(e){ return {}; } }
@@ -4426,7 +4426,7 @@ function openRecordForm(m, existing, prefill){
   const d=$("#add");
   try{ _ndVoiceStop(); if(!d.__ndVoiceBound){ d.__ndVoiceBound=1; d.addEventListener("close", function(){ try{ _ndVoiceStop(); }catch(e){} }); } }catch(e){} const isEdit=!!existing; const fields=(m.fields||[]).filter(f=>!f.hideForm);
   const _cell=f=>{
-    const val = existing ? existing[f.k] : (f.type==="bool"?false:"");
+    const val = existing ? existing[f.k] : ((prefill && prefill[f.k]!=null && prefill[f.k]!=="") ? prefill[f.k] : (f.type==="bool"?false:""));   /* ★v452: prefill을 모든 필드 타입에 적용(도서 검색→폼 프리필) */
     if(f.type==="bool")
       return `<button type="button" class="btn ghost rf-bool ${val?'on':''}" data-k="${f.k}" style="margin-top:6px;margin-right:6px">${f.sheet||f.label}</button>`;
     if(f.type==="select")
@@ -7647,16 +7647,13 @@ function openAddBook(){
   setTimeout(()=>bq.focus(),50);
 }
 async function addBook(b){
-  const row={ _id:crypto.randomUUID(), title:b.title, author:b.author, year:b.year,
-    cover:b.cover, genre:b.genre||[], rating:null,
+  /* ★v452: 영화(배포앱)처럼 — 책을 고르면 바로 저장하지 말고 폼을 띄워 평점·후기를 매기고 저장 */
+  const prefill={ _id:crypto.randomUUID(), title:b.title, author:b.author, year:b.year,
+    cover:b.cover, genre:b.genre||[],
     status: addStatus==="읽고싶다" ? "" : addStatus,
     pick: addStatus==="읽고싶다" };
   if(!(CACHE.books&&CACHE.books.length)){ try{ CACHE.books=await sheetSrc().list("books"); }catch(e){} }
-  if(!ndConfirmDup("books", row)) return;
-  $("#add").close();
-  sheetSrc().upsert("books", row)          // 시트 '도서' 탭에 실제 저장(영구)
-    .then(()=>refreshDomain())
-    .catch(e=>alert("시트 저장 실패: "+e.message));
+  openRecordForm(MANIFESTS.books, null, prefill);
 }
 
 /* ── 영화 추가: TMDB에서 제목 검색 → 감독·배우·연도·포스터 자동 → 기존 addMovie 통로로 저장 ── */
