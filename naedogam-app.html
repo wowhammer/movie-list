@@ -731,8 +731,26 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
   .lab-head .lab-h1{ flex:2; } .lab-head .lab-h2{ flex:1; } .lab-head .lab-h3{ flex:1; } .lab-head .lab-hx{ flex:0 0 26px; }
   .rf-labrows{ display:flex; flex-direction:column; gap:6px; }
   .lab-row{ display:flex; gap:6px; align-items:center; }
-  .lab-row input{ border:1px solid var(--line); border-radius:8px; padding:8px 9px; font-size:14px; font-family:inherit; box-sizing:border-box; min-width:0; background:var(--card); color:var(--ink); }
+  .lab-row input, .lab-row select{ border:1px solid var(--line); border-radius:8px; padding:8px 9px; font-size:14px; font-family:inherit; box-sizing:border-box; min-width:0; background:var(--card); color:var(--ink); }
+  .lab-row select.lab-norm{ appearance:none; -webkit-appearance:none; text-align:center; cursor:pointer; }
   .lab-row .lab-item{ flex:2; } .lab-row .lab-val{ flex:1; } .lab-row .lab-norm{ flex:1; }
+  /* v457β 건강검진 판정 색상 (라이트/다크 공통) */
+  .lab-st{ display:inline-block; padding:1px 8px; border-radius:999px; font-size:12px; font-weight:700; border:1px solid transparent; }
+  .lab-st-ok{ background:#e6f7ec; color:#127a3e; border-color:#a7ddba; }
+  .lab-st-warn{ background:#fff5db; color:#8a5a00; border-color:#eccd78; }
+  .lab-st-bad{ background:#fdeaea; color:#b5352f; border-color:#e7a8a3; }
+  [data-theme="dark"] .lab-st-ok{ background:rgba(34,160,90,.18); color:#7fe0a6; border-color:rgba(120,220,160,.35); }
+  [data-theme="dark"] .lab-st-warn{ background:rgba(210,150,20,.18); color:#f2ce7c; border-color:rgba(230,200,110,.35); }
+  [data-theme="dark"] .lab-st-bad{ background:rgba(200,60,55,.20); color:#f3a29c; border-color:rgba(230,150,145,.35); }
+  .ckcard-body{ display:flex; flex-direction:column; gap:5px; margin-top:7px; }
+  .ckcard-row{ display:flex; align-items:center; gap:7px; font-size:13.5px; line-height:1.4; }
+  .ckcard-row .ck-item{ flex:1; min-width:0; color:var(--ink); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .ckcard-row .ck-val{ color:var(--ink-soft); font-variant-numeric:tabular-nums; white-space:nowrap; }
+  .ckcard-more{ font-size:12px; color:var(--sub); margin-top:2px; }
+  .card.ckcard{ align-items:flex-start; }
+  .card.ckcard.ckacc-ok{ border-left:3px solid #34a06a; }
+  .card.ckcard.ckacc-warn{ border-left:3px solid #d9a412; }
+  .card.ckcard.ckacc-bad{ border-left:3px solid #d5453d; }
   .lab-row .lab-del{ flex:0 0 26px; background:none; border:none; color:var(--sub); cursor:pointer; font-size:14px; padding:0; }
   .lab-add{ margin-top:8px; border:1px dashed var(--line); background:none; border-radius:9px; padding:9px; cursor:pointer; color:var(--ink-soft); font-size:13.5px; width:100%; }
   .lab-detail{ display:flex; flex-direction:column; gap:4px; }
@@ -1380,7 +1398,7 @@ body{ background:radial-gradient(circle at 50% -10%, rgba(102,78,57,.16), transp
         <svg class="brandmark" width="40" height="30" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg>
         <span class="brandwm"><span class="bwm-ko">내도감</span><span class="bwm-en">NAEDOGAM</span></span>
       </button>
-      <span class="mhver">v456β</span>
+      <span class="mhver">v457β</span>
       <span class="spacer"></span>
       <span class="src-chip" id="srcChip" style="display:none">데모</span>
       <button class="icon-btn" id="searchToggle" type="button" style="display:none">🔍</button>
@@ -1626,7 +1644,7 @@ const MANIFESTS = {
              {k:"shoes",sheet:"신발",label:"신발",type:"text"},
              {k:"cumulative",sheet:"누적",label:"누적 거리(km)",type:"number",hideForm:true},
              {k:"place",sheet:"장소",label:"장소",type:"text"},
-             {k:"memo",sheet:"메모",label:"메모",type:"text"},
+             {k:"memo",sheet:"메모",label:"메모",type:"textarea",rows:3},
              {k:"cover",sheet:"커버",label:"사진",type:"image"} ],
     search:["memo","place","shoes"],
     scopeSort:[{k:"date",label:"최신",desc:true},{k:"dist",label:"거리",desc:true},{k:"time",label:"시간",desc:true},{k:"pace",label:"페이스",desc:false},{k:"hr",label:"심박",desc:true}],
@@ -2039,7 +2057,7 @@ const MANIFESTS = {
     fields:[ {k:"name",sheet:"검사명",label:"검사명",type:"text",full:true},
              {k:"date",sheet:"검사일",label:"검사일",type:"date"},
              {k:"hospital",sheet:"병원",label:"병원",type:"text"},
-             {k:"results",sheet:"결과항목",label:"결과 항목 (항목·수치·정상)",type:"labrows"},
+             {k:"results",sheet:"결과항목",label:"결과 항목 (항목·수치·판정)",type:"labrows"},
              {k:"cover",sheet:"사진",label:"결과지 사진",type:"image"},
              {k:"memo",sheet:"메모",label:"메모",type:"textarea"} ],
     search:["name","hospital","memo","results","item"],
@@ -2049,6 +2067,20 @@ const MANIFESTS = {
            title:function(r){ return r.name||r.item||"(검사)"; },
            meta:function(r){ var d=r.date?(_isoOf(r.date)||r.date):""; var n=0; try{ var a=JSON.parse(r.results||"[]"); if(Array.isArray(a)) n=a.filter(function(x){return x&&(x.item||x.value);}).length; }catch(e){} if(!n && r.item) n=1; return [d, r.hospital, (n?n+"개 항목":"")].filter(Boolean).join(" · "); } } }
 };
+
+/* v457β 건강검진 판정(정상/경계/…) 공용 헬퍼 */
+var ND_LAB_STATUS=["정상","경계","주의","재검","이상"];
+function ndLabStatusClass(s){ s=String(s==null?"":s).trim();
+  if(!s) return ""; if(s==="정상") return "lab-st-ok"; if(s==="경계") return "lab-st-warn";
+  if(s==="주의"||s==="재검"||s==="이상") return "lab-st-bad"; return ""; }
+function ndLabStatusRank(s){ s=String(s==null?"":s).trim();
+  return s==="이상"?4:(s==="재검"?3:(s==="주의"?3:(s==="경계"?2:(s==="정상"?1:0)))); }
+function ndLabSelectHTML(v){ v=String(v==null?"":v).trim();
+  var list=ND_LAB_STATUS.slice(); if(v && list.indexOf(v)<0) list.unshift(v);
+  var esc=function(x){ return String(x).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/"/g,"&quot;"); };
+  var ops='<option value=""'+(v?"":" selected")+'>판정</option>';
+  ops+=list.map(function(o){ return '<option'+(o===v?" selected":"")+'>'+esc(o)+'</option>'; }).join("");
+  return '<select class="lab-norm">'+ops+'</select>'; }
 
 /* ── 배포용: 영화·차계부를 표준 nd 카테고리로 재정의(신규 사용자용 깨끗한 버전). 개인앱은 영향 없음. ── */
 if(typeof CONFIG!=="undefined" && CONFIG.DEPLOY){
@@ -2477,7 +2509,7 @@ function openDomain(id){ if(id==="mbti"){ openMbti(); return; } if(id==="period"
 
 /* 홈: 켜둔 카테고리를 카드로. 건수는 한 번 열어본 분야만 표시(홈을 빠르게 유지). */
 function ndDeep(h){ if(typeof h!=="string"||h.charAt(0)!=="#") h="#8a7a6a"; var n=parseInt(h.slice(1),16),r=(n>>16)&255,g=(n>>8)&255,b=n&255; function d(x,f){return Math.max(0,Math.min(255,Math.round(x*f)));} var d1="rgb("+d(r,.46)+","+d(g,.46)+","+d(b,.46)+")", d2="rgb("+d(r,.20)+","+d(g,.20)+","+d(b,.20)+")", gl="rgba("+r+","+g+","+b+",.16)"; return "radial-gradient(circle at 18% 14%,"+gl+",transparent 46%),linear-gradient(145deg,"+d1+","+d2+")"; }
-var ND_LOGO_HTML='<div class="ndh-brand"><svg width="47" height="35" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg><div class="ndh-wm"><b>내도감</b><small>NAEDOGAM</small></div><span class="mhver ndh-ver">v456β</span></div><button class="ndh-sync" type="button" title="동기화" aria-label="동기화" onclick="try{syncNow()}catch(e){}">↻</button>';
+var ND_LOGO_HTML='<div class="ndh-brand"><svg width="47" height="35" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg><div class="ndh-wm"><b>내도감</b><small>NAEDOGAM</small></div><span class="mhver ndh-ver">v457β</span></div><button class="ndh-sync" type="button" title="동기화" aria-label="동기화" onclick="try{syncNow()}catch(e){}">↻</button>';
 /* 홈 카드 크기: wide(넓게=한 줄 전체) · half(보통=한 줄 2개) · mini(작게=하단 3칸). 기본값=프리셋 */
 var ND_PRESET_SIZE={running:"wide",food:"wide",recipes:"wide",movies:"half",books:"half",period:"half",diary:"half",travel:"half",mountains:"half",culture:"half",albums:"half",cellar:"half",scrap:"half",wish:"half",gift:"half",pet:"half"};
 function getHomeSizes(){ try{ return JSON.parse(store.getItem("nd.homesize")||"{}")||{}; }catch(e){ return {}; } }
@@ -3904,7 +3936,27 @@ function _ndPicScan(root){ try{ if(!root||root.nodeType!==1) return;
   }catch(e){} }
 function _ndPicBoot(){ try{ _ndPicScan(document.body); var mo=new MutationObserver(function(muts){ muts.forEach(function(mu){ if(mu.addedNodes) mu.addedNodes.forEach(function(n){ if(n.nodeType===1) _ndPicScan(n); }); }); }); mo.observe(document.body,{childList:true,subtree:true}); }catch(e){} }
 function ndAutoCover(){ try{ var cache=_ndAC(); var io=new IntersectionObserver(function(ents,obs){ ents.forEach(function(e){ if(!e.isIntersecting) return; var el=e.target; obs.unobserve(el); var t=el.getAttribute("data-ac"); if(!t) return; var key="r|"+t; if(cache[key]==="0") return; if(cache[key]){ _ndACset(el,cache[key]); return; } ndWikiImg(t).then(function(src){ cache[key]=src||"0"; _ndACsave(); if(src&&document.body.contains(el)) _ndACset(el,src); }); }); },{rootMargin:"400px"}); document.querySelectorAll(".rc-img[data-ac], .fl-img[data-ac], .thumb[data-ac]").forEach(function(el){ io.observe(el); }); }catch(e){} }
-function renderCard(m, r, no){ if(m.id==="recipes") return recipeCard(r); if(m.id==="food") return foodListCard(r); if(m.id==="baby") return babyCard(r); if(m.id==="books") return bookCard(r); if(m.id==="quote") return quoteCard(r); if(m.id==="travel") return travelCard(r); if(m.id==="albums") return albumCard(r); if(m.id==="scrap") return scrapCard(r); const c=m.card;
+function checkupCard(r){
+  var esc=function(x){ return String(x==null?"":x).replace(/&/g,"&amp;").replace(/</g,"&lt;"); };
+  var name=r.name||r.item||"(검사)";
+  var d=r.date?(_isoOf(r.date)||r.date):"";
+  var meta=[d,r.hospital].filter(Boolean).join(" · ");
+  var arr=[]; try{ arr=JSON.parse(r.results||"[]"); if(!Array.isArray(arr)) arr=[]; }catch(e){ arr=[]; }
+  arr=arr.filter(function(x){ return x&&(x.item||x.value||x.normal); });
+  var worst=0; arr.forEach(function(x){ var rk=ndLabStatusRank(x.normal); if(rk>worst) worst=rk; });
+  var show=arr.slice(0,4);
+  var rows=show.map(function(x){
+    var cls=ndLabStatusClass(x.normal);
+    var badge=x.normal?('<span class="lab-st '+(cls||"")+'">'+esc(x.normal)+'</span>'):"";
+    return '<div class="ckcard-row"><span class="ck-item">'+esc(x.item||"—")+'</span>'+(x.value?'<span class="ck-val">'+esc(x.value)+'</span>':"")+badge+'</div>';
+  }).join("");
+  var more=arr.length>show.length?('<div class="ckcard-more">＋'+(arr.length-show.length)+'개 항목 더</div>'):"";
+  var _cov=r.cover||r._cover;
+  var body=rows?('<div class="ckcard-body">'+rows+more+'</div>'):(r.memo?'<div class="cmemo">'+esc(r.memo)+'</div>':"");
+  var accent=worst>=3?"ckacc-bad":(worst===2?"ckacc-warn":(worst===1?"ckacc-ok":""));
+  return '<button class="card catcard ckcard '+accent+'" data-id="'+r._id+'"><span class="thumb">'+(_cov?'<img src="'+esc(_cov).replace(/&amp;/g,"&")+'" alt="">':"🩺")+'</span><span class="body"><h3>'+esc(name)+'</h3>'+(meta?'<div class="meta">'+esc(meta)+'</div>':"")+body+'</span></button>';
+}
+function renderCard(m, r, no){ if(m.id==="checkup") return checkupCard(r); if(m.id==="recipes") return recipeCard(r); if(m.id==="food") return foodListCard(r); if(m.id==="baby") return babyCard(r); if(m.id==="books") return bookCard(r); if(m.id==="quote") return quoteCard(r); if(m.id==="travel") return travelCard(r); if(m.id==="albums") return albumCard(r); if(m.id==="scrap") return scrapCard(r); const c=m.card;
   if(c.kind==="wallet") return walletCard(r);
   if(c.kind==="specimen"){ const meta=c.meta(r);
     const traw=r[c.tags]; const _tarr0=Array.isArray(traw)?traw:(traw==null||traw===""?[]:String(traw).split(",").map(x=>x.trim()).filter(Boolean));   // 쉼표 문자열도 개별 태그로
@@ -4484,8 +4536,8 @@ function openRecordForm(m, existing, prefill){
       if(!arr.length && existing && (existing.item||existing.value||existing.range)) arr=[{item:existing.item||"",value:existing.value||"",normal:existing.range||""}];
       if(!arr.length) arr=[{item:"",value:"",normal:""}];
       const esc3=x=>String(x==null?"":x).replace(/"/g,'&quot;');
-      const rowH=t=>`<div class="lab-row"><input class="lab-item" placeholder="항목 (예: 총콜레스테롤)" value="${esc3(t.item)}"><input class="lab-val" placeholder="수치" value="${esc3(t.value)}"><input class="lab-norm" placeholder="정상" value="${esc3(t.normal)}"><button type="button" class="lab-del" title="이 줄 삭제">✕</button></div>`;
-      return `<label>${ndFL(f)}</label><div class="lab-head"><span class="lab-h1">항목</span><span class="lab-h2">수치</span><span class="lab-h3">정상</span><span class="lab-hx"></span></div><div class="rf-labrows" data-k="${f.k}">${arr.map(rowH).join("")}</div><button type="button" class="lab-add" data-k="${f.k}">＋ 항목 추가</button>`;
+      const rowH=t=>`<div class="lab-row"><input class="lab-item" placeholder="항목 (예: 총콜레스테롤)" value="${esc3(t.item)}"><input class="lab-val" placeholder="수치" value="${esc3(t.value)}">${ndLabSelectHTML(t.normal)}<button type="button" class="lab-del" title="이 줄 삭제">✕</button></div>`;
+      return `<label>${ndFL(f)}</label><div class="lab-head"><span class="lab-h1">항목</span><span class="lab-h2">수치</span><span class="lab-h3">판정</span><span class="lab-hx"></span></div><div class="rf-labrows" data-k="${f.k}">${arr.map(rowH).join("")}</div><button type="button" class="lab-add" data-k="${f.k}">＋ 항목 추가</button>`;
     }
     if(f.money||f.comma){ const nz=(val==null||val===""||isNaN(Number(val)))?"":Number(val).toLocaleString(); return `<label>${ndFL(f)}</label><input class="rf" data-k="${f.k}" data-type="money" inputmode="numeric" value="${nz}" autocomplete="off" />`; }
     if(f.type==="checks"){ var _arr=Array.isArray(val)?val.map(String):(val?String(val).split(",").map(function(x){return x.trim();}).filter(Boolean):[]);
@@ -4535,8 +4587,8 @@ function openRecordForm(m, existing, prefill){
   });
   d.querySelectorAll(".rf-labrows").forEach(box=>{
     const addBtn = box.parentNode.querySelector(`.lab-add[data-k="${box.dataset.k}"]`);
-    const rowTpl='<div class="lab-row"><input class="lab-item" placeholder="항목 (예: 총콜레스테롤)"><input class="lab-val" placeholder="수치"><input class="lab-norm" placeholder="정상"><button type="button" class="lab-del" title="이 줄 삭제">✕</button></div>';
-    const wireRow=rw=>{ const del=rw.querySelector(".lab-del"); if(del) del.onclick=()=>{ if(box.querySelectorAll(".lab-row").length>1) rw.remove(); else { rw.querySelectorAll("input").forEach(i=>i.value=""); } }; };
+    const rowTpl='<div class="lab-row"><input class="lab-item" placeholder="항목 (예: 총콜레스테롤)"><input class="lab-val" placeholder="수치">'+ndLabSelectHTML("")+'<button type="button" class="lab-del" title="이 줄 삭제">✕</button></div>';
+    const wireRow=rw=>{ const del=rw.querySelector(".lab-del"); if(del) del.onclick=()=>{ if(box.querySelectorAll(".lab-row").length>1) rw.remove(); else { rw.querySelectorAll("input").forEach(i=>i.value=""); var _s=rw.querySelector("select.lab-norm"); if(_s) _s.value=""; } }; };
     box.querySelectorAll(".lab-row").forEach(wireRow);
     if(addBtn) addBtn.onclick=()=>{ const tp=document.createElement("template"); tp.innerHTML=rowTpl; const nr=tp.content.firstChild; box.appendChild(nr); wireRow(nr); const mi=nr.querySelector(".lab-item"); if(mi) mi.focus(); };
   });
@@ -5622,7 +5674,7 @@ function openInsight(){
   document.body.appendChild(dlg); dlg.showModal();
   dlg.addEventListener("click",function(e){ if(e.target===dlg) dlg.close(); });
   document.getElementById("insWrap").onclick=function(){ dlg.close(); openWrapped(); };
-  var _insAI=document.getElementById("insAI"); if(_insAI) _insAI.onclick=function(){ dlg.close(); openAIStory(); };
+  var _insAI=document.getElementById("insAI"); if(_insAI) _insAI.onclick=function(){ dlg.close(); openAIStory('insight'); };
   document.getElementById("insMirror").onclick=function(){ dlg.close(); openMirror(); };
   document.getElementById("insDecide").onclick=function(){ dlg.close(); openDecide(); };
   document.getElementById("insMemory").onclick=function(){ dlg.close(); openMemory(); };
@@ -5651,11 +5703,13 @@ function _aiExport(){
     }).catch(function(e){ card.remove(); if(btn){btn.disabled=false;btn.textContent=t0;} try{ ndToast("이미지 저장 실패: "+((e&&e.message)||e)); }catch(_e){} });
   });
 }
-async function openAIStory(){
+async function openAIStory(from){
   if(!CONFIG.AI_PROXY_URL){ return; }
+  window.__aiFrom=(from==='insight')?'insight':'home';
+  var _backLbl=(window.__aiFrom==='insight')?'← 인사이트':'← 홈';
   var old=document.getElementById("aiDlg"); if(old) old.remove();
   var dlg=document.createElement("dialog"); dlg.id="aiDlg"; dlg.className="wrapDlg insLight";
-  dlg.innerHTML='<div class="wtop"><button class="wclose" id="aiBack">← 인사이트</button><span class="mbTitle">✨ AI 이야기</span><span style="width:56px"></span></div>'
+  dlg.innerHTML='<div class="wtop"><button class="wclose" id="aiBack">'+_backLbl+'</button><span class="mbTitle">✨ AI 이야기</span><span style="width:56px"></span></div>'
     +'<div class="wscroll"><div class="wcard">'
     +'<div class="wsec whead"><div class="wlogo">내도감 · AI STORY</div><div class="wtitle">AI가 써주는 내 이야기</div><div class="wdate">내가 모은 기록으로 쓰는 한 편의 글</div></div>'
     +'<div class="wsec" style="border-bottom:none">'
@@ -5666,7 +5720,7 @@ async function openAIStory(){
     +'</div></div></div>';
   document.body.appendChild(dlg); dlg.showModal();
   dlg.addEventListener("click",function(e){ if(e.target===dlg) dlg.close(); });
-  var _bk=document.getElementById("aiBack"); if(_bk) _bk.onclick=function(){ dlg.close(); openInsight(); };
+  var _bk=document.getElementById("aiBack"); if(_bk) _bk.onclick=function(){ dlg.close(); if(window.__aiFrom==='insight'){ openInsight(); } };
   if(!window.__wAiPersona){ var _lp=""; try{ _lp=store.getItem("nd.aiPersona")||""; }catch(e){} window.__wAiPersona=_lp||"warm"; }
   try{ var _pb=document.querySelector('.waiPick .waiP[data-p="'+window.__wAiPersona+'"]');
     if(_pb){ document.querySelectorAll(".waiPick .waiP").forEach(function(b){ b.classList.remove("on"); }); _pb.classList.add("on"); } }catch(e){}
