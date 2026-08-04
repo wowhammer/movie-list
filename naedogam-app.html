@@ -1349,7 +1349,7 @@ body{ background:radial-gradient(circle at 50% -10%, rgba(102,78,57,.16), transp
         <svg class="brandmark" width="40" height="30" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg>
         <span class="brandwm"><span class="bwm-ko">내도감</span><span class="bwm-en">NAEDOGAM</span></span>
       </button>
-      <span class="mhver">v440β</span>
+      <span class="mhver">v432β</span>
       <span class="spacer"></span>
       <span class="src-chip" id="srcChip" style="display:none">데모</span>
       <button class="icon-btn" id="searchToggle" type="button" style="display:none">🔍</button>
@@ -2446,7 +2446,7 @@ function openDomain(id){ if(id==="mbti"){ openMbti(); return; } if(id==="period"
 
 /* 홈: 켜둔 카테고리를 카드로. 건수는 한 번 열어본 분야만 표시(홈을 빠르게 유지). */
 function ndDeep(h){ if(typeof h!=="string"||h.charAt(0)!=="#") h="#8a7a6a"; var n=parseInt(h.slice(1),16),r=(n>>16)&255,g=(n>>8)&255,b=n&255; function d(x,f){return Math.max(0,Math.min(255,Math.round(x*f)));} var d1="rgb("+d(r,.46)+","+d(g,.46)+","+d(b,.46)+")", d2="rgb("+d(r,.20)+","+d(g,.20)+","+d(b,.20)+")", gl="rgba("+r+","+g+","+b+",.16)"; return "radial-gradient(circle at 18% 14%,"+gl+",transparent 46%),linear-gradient(145deg,"+d1+","+d2+")"; }
-var ND_LOGO_HTML='<div class="ndh-brand"><svg width="47" height="35" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg><div class="ndh-wm"><b>내도감</b><small>NAEDOGAM</small></div><span class="mhver ndh-ver">v440β</span></div><button class="ndh-sync" type="button" title="동기화" aria-label="동기화" onclick="try{syncNow()}catch(e){}">↻</button>';
+var ND_LOGO_HTML='<div class="ndh-brand"><svg width="47" height="35" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg><div class="ndh-wm"><b>내도감</b><small>NAEDOGAM</small></div><span class="mhver ndh-ver">v432β</span></div><button class="ndh-sync" type="button" title="동기화" aria-label="동기화" onclick="try{syncNow()}catch(e){}">↻</button>';
 /* 홈 카드 크기: wide(넓게=한 줄 전체) · half(보통=한 줄 2개) · mini(작게=하단 3칸). 기본값=프리셋 */
 var ND_PRESET_SIZE={running:"wide",food:"wide",recipes:"wide",movies:"half",books:"half",period:"half",diary:"half",travel:"half",mountains:"half",culture:"half",albums:"half",cellar:"half",scrap:"half",wish:"half",gift:"half",pet:"half"};
 function getHomeSizes(){ try{ return JSON.parse(store.getItem("nd.homesize")||"{}")||{}; }catch(e){ return {}; } }
@@ -5812,7 +5812,7 @@ function pdStats(){
   /* 주기 = 연속 시작일 간격. 최근 6개의 중앙값만 쓴다. */
   var all=[]; for(var i=1;i<starts.length;i++) all.push(pdDiff(starts[i-1],starts[i]));
   var ok=[], bad=[];
-  all.forEach(function(g){ if(g>=15&&g<=60) ok.push(g); else if(g>=0) bad.push(g); });   /* ★v440: 0일(같은 날)도 버린 것으로 센다 */
+  all.forEach(function(g){ if(g>=15&&g<=60) ok.push(g); else if(g>0) bad.push(g); });
   st.gapsDropped=bad;                       /* ★버린 것은 화면에서 말해준다(§0-D) */
   ok=ok.slice(-6);
   if(ok.length){ st.avgCycle=_pdMedian(ok); st.cycleKnown=true; st.gapsUsed=ok.length;
@@ -5871,9 +5871,9 @@ function pdPeriodDaySet(y,mo){ var out={}; try{ var st=pdStats(); (st.cycles||[]
 function pdPhaseForDate(dstr){ try{ var d=pdParse(dstr); if(!d) return ""; var st=pdStats(); for(var i=0;i<(st.cycles||[]).length;i++){ var c=st.cycles[i]; var a=pdParse(c.start); if(!a) continue; var e=pdParse(c.end); if(!e) e=pdAdd(a,(st.avgPeriod||5)-1); if(pdDiff(a,d)>=0 && pdDiff(d,e)>=0) return "생리 "+(pdDiff(a,d)+1)+"일차"; } return ""; }catch(e){ return ""; } }
 function pdMoodInsight(){ try{ var diary=(typeof CACHE!=="undefined"&&CACHE["diary"])||(typeof loadPersist==="function"&&loadPersist("diary"))||[]; if(!diary.length) return null; var cy=pdCycles(); if(cy.length<2) return null; var starts=cy.map(function(c){return pdParse(c.start);}).filter(Boolean); var pms={total:0,moods:{}}; diary.forEach(function(e){ var d=pdParse(e.date); if(!d) return; var mood=String(e.mood||"").trim(); if(!mood) return; var inPms=false; starts.forEach(function(sx){ var df=pdDiff(d,sx); if(df>=1&&df<=5) inPms=true; }); if(inPms){ pms.total++; pms.moods[mood]=(pms.moods[mood]||0)+1; } }); if(pms.total<3) return null; var top=Object.keys(pms.moods).sort(function(a,b){return pms.moods[b]-pms.moods[a];})[0]; var pct=Math.round(pms.moods[top]/pms.total*100); if(pct<40) return null; return { topMood:top, pct:pct, n:pms.total }; }catch(e){ return null; } }
 function pdCalReminderUrl(st){ if(!st||!st.next) return ""; var d=pdAdd(st.next,-1); var p=function(n){return String(n).padStart(2,"0");}; var ymd=d.getFullYear()+p(d.getMonth()+1)+p(d.getDate()); var cyc=st.avgCycle||28; var title=encodeURIComponent("\ud83c\udf19 \uc0dd\ub9ac \uc608\uc815 \ud558\ub8e8 \uc804 (\ub0b4\ub3c4\uac10)"); var det=encodeURIComponent("\ub0b4\ub3c4\uac10 \uc608\uce21 \uae30\uc900 \uc54c\ub9bc\uc774\uc5d0\uc694. \uc8fc\uae30\uac00 \ubc14\ub00c\uba74 \uc571\uc5d0\uc11c \ub2e4\uc2dc \ucd94\uac00\ud558\uba74 \ucd5c\uc2e0 \uc608\uce21\uc73c\ub85c \uac31\uc2e0\ub3fc\uc694."); return "https://calendar.google.com/calendar/render?action=TEMPLATE&text="+title+"&dates="+ymd+"T090000/"+ymd+"T091500&recur="+encodeURIComponent("RRULE:FREQ=DAILY;INTERVAL="+cyc)+"&details="+det; }
-function pdCloseForm(){ pdFormOpen=false; try{ pdRenderMain(true); }catch(e){} }
 function pdRenderMain(force){
-  /* ★v439: 폼이 열려 있으면 어떤 재렌더도 덮어쓰지 않는다(닫는 경로만 force로 부른다). */
+  /* ★v432: 기록 폼이 열려 있으면 절대 덮어쓰지 않는다.
+     시트 로드가 늦게 끝나면서 폼을 지워버리던 것이 "버튼이 안 눌린다"의 정체였다(영석 신고). */
   if(pdFormOpen && !force) return;
   pdFormOpen=false;
   var b=document.getElementById("pdBody"); if(!b) return;
@@ -5884,17 +5884,11 @@ function pdRenderMain(force){
     hero='<div class="pdHero pdHeroEmpty"><div class="pdHeroEm">🌙</div><div class="pdHeroBig">첫 기록을 남겨보세요</div><div class="pdHeroSub">생리 시작일만 기록하면<br>다음 예정일·가임기를 예측해드려요.</div><button class="pdBig" id="pdStartBtn">＋ 생리 시작 기록</button></div>';
   } else if(!st.cycleKnown){
     /* ★v430: 주기를 아직 못 쟀다. 28일 기본값으로 예정일·배란일을 지어내지 않는다. */
-    var _dr=st.gapsDropped, _drop='';
-    if(_dr.length){
-      var _z=_dr.filter(function(g){return g===0;}).length, _n=_dr.filter(function(g){return g>0;});
-      var _t=[]; if(_z) _t.push("같은 날 "+_z+"건"); if(_n.length) _t.push(_n.join("·")+"일 간격");
-      _drop='<div class="pdHeroRange">'+_t.join(" · ")+' — 주기 계산에서 뺐어요</div>';
-    }
+    var _drop = st.gapsDropped.length
+      ? '<div class="pdHeroRange">기록 간격이 '+st.gapsDropped.join("·")+'일이라 주기 계산에서 뺐어요</div>' : '';
     hero='<div class="pdHero"><div class="pdHeroTag">기록 모으는 중</div>'
       +'<div class="pdHeroBig">'+(st.inPeriod?("생리 "+st.periodDay+"일차"):(st.count+"회 기록"))+'</div>'
-      +'<div class="pdHeroSub">'+(st.count>=2
-          ? '기록끼리 간격이 짧아 <b>아직 주기를 못 쟀어요</b>.<br>다음 달 생리 <b>시작일</b>을 기록하면 그때부터 예측해드려요.'
-          : '다음 생리 <b>시작일</b>을 한 번 더 기록하면<br>그때부터 예정일·가임기를 알려드려요.')+'</div>'
+      +'<div class="pdHeroSub">다음 생리 <b>시작일</b>을 한 번 더 기록하면<br>그때부터 예정일·가임기를 알려드려요.</div>'
       +_drop+'</div>';
   } else {
     var ddayTxt = st.inPeriod ? ("생리 "+st.periodDay+"일차")
@@ -5988,15 +5982,8 @@ function pdRecordsHTML(st){
 
 /* 기록 입력/수정 폼 */
 function pdLogForm(id){
-  try{ if(window._ndBLog) _ndBLog("PD 폼열기 "+(id?"수정":"신규")); }catch(e){}
-  try{ _pdLogFormInner(id); }
-  catch(err){ try{ if(window._ndBLog) _ndBLog("!PDERR "+((err&&err.message)||err)); }catch(e){}
-    try{ alert("기록 화면을 여는 중 문제가 생겼어요: "+((err&&err.message)||err)); }catch(e){} }
-}
-function _pdLogFormInner(id){
-  var b=document.getElementById("pdBody"); if(!b){ try{ if(window._ndBLog) _ndBLog("!PD pdBody 없음"); }catch(e){} return; }
-  try{ if(window._ndBLog) _ndBLog("PD ck1 컨테이너OK"); }catch(e){}
-  pdEditId=id||null; pdFormOpen=true;
+  var b=document.getElementById("pdBody"); if(!b) return;
+  pdEditId=id||null; pdFormOpen=true;   /* ★v432 */
   var cur=null; if(id){ var o=_pdSaved(); cur=(o.cycles||[]).filter(function(c){return c._id===id;})[0]||null; }
   var start = cur&&cur.start ? cur.start : pdFmt(pdToday());
   var end = cur&&cur.end ? cur.end : "";
@@ -6008,72 +5995,41 @@ function _pdLogFormInner(id){
   var flowBtns=PD_FLOWS.map(function(f){ return '<button type="button" class="pdSeg'+(f===flow?' on':'')+'" data-flow="'+f+'">'+f+'</button>'; }).join("");
   var symBtns=PD_SYMPTOMS.map(function(s){ return '<button type="button" class="pdChip'+(syms.indexOf(s)>=0?' on':'')+'" data-sym="'+s+'">'+s+'</button>'; }).join("");
   var moodBtns=PD_MOODS.map(function(mo){ return '<button type="button" class="pdChip'+(mo===mood?' on':'')+'" data-mood="'+mo+'">'+mo+'</button>'; }).join("");
-  try{ if(window._ndBLog) _ndBLog("PD ck2 버튼생성OK"); }catch(e){}
   b.innerHTML='<div class="pdForm">'
-    +'<div class="pdFH" style="display:flex;align-items:center;justify-content:space-between"><span>'+(id?"기록 수정":"생리 기록")+'</span><button type="button" id="pdSheetX" aria-label="닫기" style="background:none;border:none;color:#b0a3a8;font-size:20px;font-weight:800;line-height:1;padding:2px 6px;cursor:pointer">✕</button></div>'
+    +'<div class="pdFH">'+(id?"기록 수정":"생리 기록")+'</div>'
     +'<div class="pdFRow"><label>시작일</label>'+inpDate("pdStart",start)+'</div>'
     +'<div class="pdFRow"><label>종료일 <em>(선택)</em></label>'+inpDate("pdEnd",end)+'</div>'
     +'<div class="pdFRow"><label>양</label><div class="pdSegs">'+flowBtns+'</div></div>'
     +'<div class="pdFRow col"><label>증상 <em>(여러 개)</em></label><div class="pdChips">'+symBtns+'</div></div>'
     +'<div class="pdFRow col"><label>기분</label><div class="pdChips">'+moodBtns+'</div></div>'
     +'<div class="pdFRow col"><label>메모</label><textarea class="pdIn pdTa" id="pdNote" rows="2" placeholder="컨디션·특이사항">'+_pdEsc(note)+'</textarea></div>'
-    +'<div class="pdFBtns" style="position:sticky;bottom:0;background:inherit;padding:10px 0 2px;z-index:2">'+(id?'<button type="button" class="pdDel" id="pdDelBtn">삭제</button>':'')+'<button type="button" class="pdCancel" id="pdCancel">취소</button><button type="button" class="pdSaveB" id="pdSaveBtn">저장</button></div>'
+    +'<div class="pdFBtns">'+(id?'<button class="pdDel" id="pdDelBtn">삭제</button>':'')+'<button class="pdCancel" id="pdCancel">취소</button><button class="pdSaveB" id="pdSaveBtn">저장</button></div>'
     +'</div>';
-  try{ if(window._ndBLog) _ndBLog("PD ck3 HTML삽입OK"); }catch(e){}
   var selFlow=flow, selMood=mood, selSyms=syms;
   b.querySelectorAll(".pdSeg").forEach(function(btn){ btn.onclick=function(){ selFlow=btn.dataset.flow; b.querySelectorAll(".pdSeg").forEach(function(x){x.classList.remove("on");}); btn.classList.add("on"); }; });
   b.querySelectorAll(".pdChip[data-sym]").forEach(function(btn){ btn.onclick=function(){ var s=btn.dataset.sym; var i=selSyms.indexOf(s); if(i>=0){selSyms.splice(i,1);btn.classList.remove("on");}else{selSyms.push(s);btn.classList.add("on");} }; });
   b.querySelectorAll(".pdChip[data-mood]").forEach(function(btn){ btn.onclick=function(){ var mo=btn.dataset.mood; if(selMood===mo){selMood="";btn.classList.remove("on");}else{selMood=mo; b.querySelectorAll(".pdChip[data-mood]").forEach(function(x){x.classList.remove("on");}); btn.classList.add("on");} }; });
-  b.querySelector("#pdCancel").onclick=function(){ pdCloseForm(); };
-  { var _x=b.querySelector("#pdSheetX"); if(_x) _x.onclick=function(){ pdCloseForm(); }; }
-  var db=b.querySelector("#pdDelBtn"); if(db) db.onclick=function(){ pdCloseForm(); pdDelete(id); };
-  var _pdSave=function(){
-    try{ if(window._ndBLog) _ndBLog("PD 저장클릭"); }catch(e){}
-    var sv=_pdI2D(b.querySelector("#pdStart").value);
-    if(!sv){ try{ if(window._ndBLog) _ndBLog("PD 저장중단: 시작일 비어있음"); }catch(e){} alert("시작일을 선택해주세요."); return; }
-    var ev=_pdI2D(b.querySelector("#pdEnd").value);
+  document.getElementById("pdCancel").onclick=function(){ pdRenderMain(true); };
+  var db=document.getElementById("pdDelBtn"); if(db) db.onclick=function(){ pdDelete(id); };
+  document.getElementById("pdSaveBtn").onclick=function(){
+    var sv=_pdI2D(document.getElementById("pdStart").value);
+    if(!sv){ alert("시작일을 선택해주세요."); return; }
+    var ev=_pdI2D(document.getElementById("pdEnd").value);
     var obj={ _id: id||((window.crypto&&crypto.randomUUID)?crypto.randomUUID():String(Date.now())+Math.random().toString(16).slice(2)),
-      start:sv, end:ev||"", flow:selFlow||"", symptoms:selSyms.slice(), mood:selMood||"", note:(b.querySelector("#pdNote").value||"").trim() };
-    /* ★v440: 같은 시작일이 이미 있으면 물어본다. 며칠 사이 중복 기록은 주기 계산을 전부 무의미하게 만든다. */
-    if(!id){ try{
-      var _dup=(_pdSaved().cycles||[]).filter(function(c){ return c && c.start===sv; });
-      if(_dup.length && !confirm(sv+" 기록이 이미 있어요.\n그래도 하나 더 추가할까요?")){
-        try{ if(window._ndBLog) _ndBLog("PD 중복취소 "+sv); }catch(e){} return; }
-    }catch(e){} }
-    pdCloseForm(); pdSaveCycle(obj, !id);
+      start:sv, end:ev||"", flow:selFlow||"", symptoms:selSyms.slice(), mood:selMood||"", note:(document.getElementById("pdNote").value||"").trim() };
+    pdSaveCycle(obj, !id);
   };
-  { var _sb=b.querySelector("#pdSaveBtn"); if(_sb) _sb.addEventListener("click", _pdSave); }   /* 하나만 건다 — 둘 다 걸면 두 번 저장된다 */
-  /* ★v438: 폼이 열려 있는 동안 실제로 무엇이 눌리는지 기록한다.
-     "저장을 눌러도 PD 저장클릭이 안 찍힌다"는 신고를 끝내기 위한 것. */
-  try{
-    if(!window.__pdTapLog){
-      window.__pdTapLog=true;
-      document.addEventListener("click", function(ev){
-        try{
-          if(!document.querySelector(".pdForm")) return;
-          var t=ev.target, d=(t.tagName||"?")+(t.id?("#"+t.id):"")+((t.className&&t.className.split)?("."+String(t.className).split(" ")[0]):"");
-          if(window._ndBLog) _ndBLog("PD 탭: "+d);
-        }catch(e){}
-      }, true);
-    }
-  }catch(e){}
-  try{ if(window._ndBLog) _ndBLog("PD 폼준비완료"); }catch(e){}
 }
 function _pdD2I(v){ var d=pdParse(v); if(!d) return ""; return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0"); }
 function _pdI2D(v){ if(!v) return ""; var p=v.split("-"); if(p.length<3) return ""; return p[0]+"."+p[1]+"."+p[2]; }
 
 function pdSaveCycle(obj, isNew){
-  try{ if(window._ndBLog) _ndBLog("PD 저장실행 "+(isNew?"신규":"수정")+" start="+(obj&&obj.start)); }catch(e){}
   var o=_pdSaved(); o.cycles=o.cycles||[];
   if(isNew){ o.cycles.push(obj); } else { for(var i=0;i<o.cycles.length;i++){ if(o.cycles[i]._id===obj._id){ o.cycles[i]=obj; break; } } }
   _pdWrite(o);
   pdRenderMain(true);
   try{ if(typeof ndToast==="function") ndToast(isNew?"✓ 기록했어요":"✓ 수정했어요"); }catch(e){}
-  try{ if(window._ndBLog) _ndBLog("PD 로컬저장 완료 총"+((_pdSaved().cycles||[]).length)+"건"); }catch(e){}
-  (isNew?pdSheetSave(obj):pdSheetUpdate(obj))
-    .then(function(ok){ try{ if(window._ndBLog) _ndBLog("PD 시트저장 "+(ok?"성공":"건너뜀")); }catch(e){} })
-    .catch(function(er){ try{ if(window._ndBLog) _ndBLog("PD 시트저장 실패: "+((er&&er.message)||er)); }catch(e){}
-      try{ if(typeof ndToast==="function") ndToast("기기에는 저장됐어요 · 구글시트 반영은 실패했어요"); }catch(e){} });
+  (isNew?pdSheetSave(obj):pdSheetUpdate(obj)).catch(function(){});
   try{ if(state&&state.view==="home") renderHome(); }catch(e){}
 }
 function pdDelete(id){
@@ -6981,15 +6937,6 @@ async function ndPhotoSpike(){
     if(btn){ btn.textContent=t0; btn.disabled=false; }
   }
 }
-/* ★v435: 조용히 죽는 스크립트 오류를 진단 로그에 남긴다. 개발자 모드 패널에서 바로 보인다. */
-try{
-  window.addEventListener("error", function(e){
-    try{ if(window._ndBLog) _ndBLog("!ERR "+((e&&e.message)||"?")+" @"+((e&&e.filename)?String(e.filename).slice(-14):"")+":"+((e&&e.lineno)||"")); }catch(_){}
-  }, true);
-  window.addEventListener("unhandledrejection", function(e){
-    try{ if(window._ndBLog) _ndBLog("!REJ "+(((e&&e.reason&&e.reason.message)||String((e&&e.reason)||"?")).slice(0,60))); }catch(_){}
-  });
-}catch(e){}
 function _ndDev(){ try{ return store.getItem("nd.dev")==="1"; }catch(e){ return false; } }
 function _ndDevApply(){ try{ document.body.classList.toggle("ndDevOn", _ndDev()); }catch(e){} }
 function _ndDevBoot(){ try{
@@ -8533,20 +8480,10 @@ try{ _ndDevBoot(); }catch(e){}
 <script>
 (function(){
   if(window.__ndBackGuard) return; window.__ndBackGuard=true;
-  /* ★v433 진단: 뒤로가기 흐름을 기기에 남긴다(앱이 꺼져도 다음 실행에 보인다).
-     개발자 모드(로고 7번 탭)에서만 화면에 뜬다. */
-  function _ndBLog(m){
-    try{ var a=JSON.parse(localStorage.getItem("app:nd.blog")||"[]");
-      a.push(String(m).slice(0,90)); while(a.length>26) a.shift();
-      localStorage.setItem("app:nd.blog", JSON.stringify(a)); }catch(e){}
-  }
-  window._ndBLog=_ndBLog;
   var busy=false, trap=false, selfPop=false;
-  var uaPush=0;   /* ★v434b: 활성화(사용자 조작)가 붙은 가드 수 — 이것만 뒤로가기에서 안 건너뛴다 */
   /* ★v427: 종료하려면 우리가 쌓아둔 상태를 전부 되감아야 한다. 몇 개인지 센다. */
   var myPush=0;
-  function _ndUA(){ try{ return (navigator.userActivation && navigator.userActivation.hasBeenActive)?1:0; }catch(e){ return "?"; } }
-  function pushBase(){ try{ history.pushState({ndBase:1}, ''); myPush++; _ndBLog("push base myPush="+myPush+"/ua"+uaPush+" len="+history.length+" act="+_ndUA()); }catch(e){} }
+  function pushBase(){ try{ history.pushState({ndBase:1}, ''); myPush++; }catch(e){} }
   function eatPush(){ myPush = Math.max(0, myPush-1); }
   function anyDialog(){ return document.querySelector('dialog[open]'); }
   /* ★v418: '내가 모아온 것들'은 dialog가 아니라 body에 붙는 div였다.
@@ -8555,10 +8492,9 @@ try{ _ndDevBoot(); }catch(e){}
   function domainOpen(){ var d=document.getElementById('domainView'); return !!(d && getComputedStyle(d).display!=='none'); }
   function selOpen(){ return !!(document.getElementById('ndSelBar') || document.querySelector('#list.nd-selecting')); }
   /* ★v432: 생리주기 기록 폼은 dialog가 아니라 인라인이라 뒤로가기가 곧장 홈으로 갔다(영석 신고). */
-  /* ★v439: 생리주기 기록 폼은 인라인이라 dialog로 안 잡힌다. 깊이 2로 세어 뒤로가기가 메인으로 가게 한다. */
   function pdFormOpenNow(){ return !!document.querySelector('.pdForm'); }
   function depth(){ if(anyDialog()||overlayOpen()) return 3; if(selOpen()||pdFormOpenNow()) return 2; if(domainOpen()) return 1; return 0; }
-  function pushGuard(){ try{ history.pushState({ndTrap:1}, ''); myPush++; _ndBLog("push trap myPush="+myPush+" d="+depth()); }catch(e){} trap=true; }
+  function pushGuard(){ try{ history.pushState({ndTrap:1}, ''); myPush++; }catch(e){} trap=true; }
   /* ★v430: 홈에서 뒤로가기가 안내 없이 앱을 나가버리는 신고.
      원인 후보가 여럿이라 타이밍을 추측하지 않고 **상태로** 보장한다 —
      "홈이면 히스토리 맨 위는 항상 우리 것"이 참이 되게 계속 다시 심는다(§0-C-2). */
@@ -8567,7 +8503,7 @@ try{ _ndDevBoot(); }catch(e){}
      뒤로가기가 곧장 문서 밖으로 나간다(영석: "안내 안 나오고 그냥 종료"). 2개를 깔아 한 번은 반드시 붙잡는다. */
   function armBase(){
     try{ var stt=history.state, ours=!!(stt&&(stt.ndBase||stt.ndTrap));
-      if(ours && myPush>=1) return;                      /* ★v434b: 부팅 때는 1개만. 나머지는 조작에 얹어 심는다 */
+      if(ours && myPush>=2) return;
       if(myPush>=4) return;                              /* 폭주 방지 상한 */
       var now=Date.now(); if(now-_armT < 400) return;
       _armT=now; pushBase();
@@ -8575,6 +8511,7 @@ try{ _ndDevBoot(); }catch(e){}
   }
   function sync(){
     if(busy) return;
+    if(depth()===0) armBase();
     var deep = depth()>0;
     if(deep && !trap){ pushGuard(); }
     else if(!deep && trap){
@@ -8589,13 +8526,11 @@ try{ _ndDevBoot(); }catch(e){}
     /* ★v425: 우리가 되감은 것은 사용자가 누른 게 아니다.
        이걸 구분하지 못해 홈 버튼·검색 닫기만 해도 '앱을 종료할까요?'가 떴다. */
     eatPush();
-    uaPush=Math.max(0, uaPush-1);   /* ★v434b: 소모됐으니 다음 조작에 다시 심는다 */
-    _ndBLog("POP st="+(history.state?(history.state.ndBase?"base":(history.state.ndTrap?"trap":"?")):"null")
-      +" len="+history.length+" d="+depth()+" myPush="+myPush+"/ua"+uaPush+" self="+(selfPop?1:0));
-    if(selfPop){ selfPop=false; return; }
+    try{ if(window.__ndReArm) window.__ndReArm(); }catch(e){}       /* ★v432: 다음 조작에 가드 재무장 */
+    if(selfPop){ selfPop=false; setTimeout(armBase,0); return; }   /* ★v430: 되감은 뒤에도 가드를 다시 심는다 */
     /* 종료 확인창이 떠 있으면 뒤로가기는 그 창만 닫는다 */
     var _ask=document.getElementById('ndExitAsk');
-    if(_ask){ try{ _ask.remove(); }catch(e){} return; }
+    if(_ask){ try{ _ask.remove(); }catch(e){} pushBase(); return; }
     busy=true; trap=false;
     var d=depth();
     if(d===3){
@@ -8615,22 +8550,22 @@ try{ _ndDevBoot(); }catch(e){}
       }
       setTimeout(function(){ if(depth()>0){ pushGuard(); } busy=false; }, 0);
     } else if(d===2){
-      if(pdFormOpenNow()){ try{ if(typeof pdCloseForm==='function') pdCloseForm(); }catch(e){} }
+      if(pdFormOpenNow()){ try{ if(typeof pdRenderMain==='function') pdRenderMain(true); }catch(e){} }
       else { try{ if(typeof ndExitSelect==='function') ndExitSelect(); }catch(e){} }
       setTimeout(function(){ if(depth()>0){ pushGuard(); } busy=false; }, 0);
     } else if(d===1){
       try{ if(typeof goHome==='function') goHome(); }catch(e){}
       setTimeout(function(){ busy=false; }, 0);
     } else {
-      /* ★v436: 홈에서는 붙잡지 않는다(영석 결정). 브라우저 기본 동작 = 그냥 나감.
-         크롬은 사용자 조작 없이 만든 히스토리 항목을 뒤로가기에서 건너뛴다 —
-         v427~v435에서 여섯 번 시도했고 로그로 확인했다. 웹에서는 우회할 수 없다.
-         기록은 누를 때마다 즉시 저장되므로 잃을 것이 없다. */
-      if(true){
-        var _atHome=true; try{ if(typeof state!=='undefined' && state && state.view) _atHome=(state.view==='home'); }catch(e){}
-        if(!_atHome){ try{ if(typeof goHome==='function') goHome(); }catch(e){} }
-        busy=false; return;
-      }
+      /* ★v418: 홈에서 뒤로가기 = 곧바로 앱 종료였다. 한 번 물어본다. */
+      if(window.__ndAllowExit){ busy=false; return; }
+      /* ★v425: 홈이 아니면 종료를 묻지 않는다. 먼저 홈으로 나간다. */
+      /* ★v426: const 전역은 window에 안 붙는다. window.state로 보면 항상 undefined였다. */
+      var _atHome=true; try{ if(typeof state!=='undefined' && state && state.view) _atHome=(state.view==='home'); }catch(e){}
+      pushBase();
+      if(!_atHome){ try{ if(typeof goHome==='function') goHome(); }catch(e){} busy=false; return; }
+      _ndExitConfirm();
+      busy=false;
     }
   });
   /* ★v427: 안드로이드 크롬은 모달 dialog가 열려 있으면 뒤로가기를 우리에게 주지 않는다.
@@ -8654,7 +8589,6 @@ try{ _ndDevBoot(); }catch(e){}
   }, true);
   /* 종료 확인 — dialog가 아니라 div로 만든다(뒤로가기 깊이 계산에 끼어들지 않게) */
   function _ndExitConfirm(){
-    _ndBLog("EXIT-ASK 표시");
     if(document.getElementById('ndExitAsk')) return;
     var w=document.createElement('div'); w.id='ndExitAsk';
     w.style.cssText='position:fixed;inset:0;z-index:9000;background:rgba(20,17,13,.62);display:flex;align-items:center;justify-content:center;padding:24px';
@@ -8695,28 +8629,24 @@ try{ _ndDevBoot(); }catch(e){}
      ★v427: 1.5초 뒤에 심었더니 '열자마자 뒤로가기'는 붙잡을 게 없어 그냥 나가버렸다(영석 신고).
      즉시 심는다. 1.5초 뒤 한 번 더는 보험. */
   function baseGuard(){ try{ if(!window.__ndBaseGuard){ window.__ndBaseGuard=true; pushBase(); } }catch(e){} }
-  _ndBLog("=== LOAD len="+history.length+" st="+(history.state?"있음":"null")+" ver=v440 ===");
-  /* 개발자 모드면 로그 패널을 띄운다 */
-  function _ndBPanel(){
-    try{
-      if(localStorage.getItem("app:nd.dev")!=="1") return;
-      if(document.getElementById("ndBPanel")) return;
-      var a=[]; try{ a=JSON.parse(localStorage.getItem("app:nd.blog")||"[]"); }catch(e){}
-      var p=document.createElement("div"); p.id="ndBPanel";
-      p.style.cssText="position:fixed;left:6px;right:6px;top:6px;z-index:9600;background:rgba(12,10,8,.94);color:#d9f2b0;border:1px solid #4a6b2a;border-radius:10px;padding:8px 10px;font:11px/1.45 ui-monospace,monospace;max-height:44vh;overflow:auto;white-space:pre-wrap;word-break:break-all";
-      p.textContent="[뒤로가기 진단 · 최근 "+a.length+"건]\n"+a.join("\n")+"\n\n(여기를 탭하면 지우고 닫습니다)";
-      p.onclick=function(){ try{ localStorage.setItem("app:nd.blog","[]"); }catch(e){} p.remove(); };
-      document.body.appendChild(p);
-    }catch(e){}
-  }
-  setTimeout(_ndBPanel, 1200);
+  baseGuard();
+  setTimeout(baseGuard, 1500);
   /* ★v432: 크롬은 "사용자 조작 없이 스크립트가 만든 히스토리 항목"을 뒤로가기에서 건너뛴다.
      부팅 때 심은 가드가 딱 그것이라 '앱 열자마자 뒤로가기'는 안내 없이 그냥 나갔다.
      반면 메뉴를 한 번 만진 뒤에는 확인창이 떴다 — 영석이 본 두 경우가 정확히 이 차이다.
      그래서 첫 조작이 들어온 순간, 그 조작에 얹어 가드를 한 번 더 심는다. */
-  /* ★v433: 조작 없이 만든 히스토리 항목은 크롬이 건너뛴다.
-     그래서 "조작이 있을 때마다" 가드를 3개까지 채운다. 연속 뒤로가기 2~3번을 버틴다. */
-
+  var _gestArmed=false;
+  function armOnGesture(){
+    if(_gestArmed) return; _gestArmed=true;
+    try{ pushBase(); }catch(e){}
+  }
+  document.addEventListener('pointerdown', armOnGesture, {capture:true, passive:true});
+  document.addEventListener('touchstart', armOnGesture, {capture:true, passive:true});
+  document.addEventListener('keydown', armOnGesture, true);
+  window.__ndReArm=function(){ _gestArmed=false; };   /* 가드가 소모되면 다음 조작에 다시 심는다 */
+  /* ★v430: 화면이 다시 보일 때(백그라운드 복귀·로그인 후 돌아옴) 가드가 남아 있는지 확인 */
+  document.addEventListener('visibilitychange', function(){ if(!document.hidden) setTimeout(armBase,0); });
+  window.addEventListener('pageshow', function(){ setTimeout(armBase,0); });
   var mo=new MutationObserver(function(){ sync(); });
   try{ mo.observe(document.documentElement,{subtree:true,attributes:true,childList:true,attributeFilter:['open','style','class']}); }catch(e){}
   setInterval(sync, 500);
