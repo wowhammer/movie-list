@@ -783,6 +783,17 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
 .pdHeroEmpty{padding:26px 18px}
 .pdHeroEm{font-size:44px}
 .pdBig{display:block;width:100%;margin-top:16px;padding:14px;background:#ff5c7c;color:#fff;border:none;border-radius:12px;font-size:15px;font-weight:800;cursor:pointer}
+/* ★v443: 원탭 기록 */
+.pdQuick{display:block;width:100%;margin:12px 0 2px;padding:16px;border:none;border-radius:14px;font-size:16px;font-weight:800;cursor:pointer;box-shadow:0 6px 16px rgba(255,92,124,.22)}
+.pdQuick.start{background:#ff5c7c;color:#fff}
+.pdQuick.end{background:#fff;color:#e03e63;border:2px solid #ff8fa8;box-shadow:none}
+.pdQuickHint{text-align:center;font-size:11.5px;color:#a8969e;margin-top:6px}
+[data-theme="dark"] .pdQuick.end{background:var(--card);color:#ffb3c4;border-color:#ff8fa8}
+[data-theme="dark"] .pdQuickHint{color:var(--ink-soft)}
+/* ★v443: PMS 예상 구간 */
+.pdCell.pdPms{background:#fff3bf;color:#a1720a;font-weight:700}
+.pdLgM{background:#fff3bf;border:1px solid #ffe08a}
+[data-theme="dark"] .pdCell.pdPms{background:#4a3f14;color:#ffe08a}
 .pdStats{display:flex;gap:8px;margin-bottom:12px}
 .pdStat{flex:1;background:#fff;border:1px solid #f0dfe4;border-radius:12px;padding:11px 6px;text-align:center}
 .pdStat b{display:block;font-size:19px;font-weight:900;color:#e03e63}
@@ -1354,7 +1365,7 @@ body{ background:radial-gradient(circle at 50% -10%, rgba(102,78,57,.16), transp
         <svg class="brandmark" width="40" height="30" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg>
         <span class="brandwm"><span class="bwm-ko">내도감</span><span class="bwm-en">NAEDOGAM</span></span>
       </button>
-      <span class="mhver">v442β</span>
+      <span class="mhver">v443β</span>
       <span class="spacer"></span>
       <span class="src-chip" id="srcChip" style="display:none">데모</span>
       <button class="icon-btn" id="searchToggle" type="button" style="display:none">🔍</button>
@@ -2451,7 +2462,7 @@ function openDomain(id){ if(id==="mbti"){ openMbti(); return; } if(id==="period"
 
 /* 홈: 켜둔 카테고리를 카드로. 건수는 한 번 열어본 분야만 표시(홈을 빠르게 유지). */
 function ndDeep(h){ if(typeof h!=="string"||h.charAt(0)!=="#") h="#8a7a6a"; var n=parseInt(h.slice(1),16),r=(n>>16)&255,g=(n>>8)&255,b=n&255; function d(x,f){return Math.max(0,Math.min(255,Math.round(x*f)));} var d1="rgb("+d(r,.46)+","+d(g,.46)+","+d(b,.46)+")", d2="rgb("+d(r,.20)+","+d(g,.20)+","+d(b,.20)+")", gl="rgba("+r+","+g+","+b+",.16)"; return "radial-gradient(circle at 18% 14%,"+gl+",transparent 46%),linear-gradient(145deg,"+d1+","+d2+")"; }
-var ND_LOGO_HTML='<div class="ndh-brand"><svg width="47" height="35" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg><div class="ndh-wm"><b>내도감</b><small>NAEDOGAM</small></div><span class="mhver ndh-ver">v442β</span></div><button class="ndh-sync" type="button" title="동기화" aria-label="동기화" onclick="try{syncNow()}catch(e){}">↻</button>';
+var ND_LOGO_HTML='<div class="ndh-brand"><svg width="47" height="35" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg><div class="ndh-wm"><b>내도감</b><small>NAEDOGAM</small></div><span class="mhver ndh-ver">v443β</span></div><button class="ndh-sync" type="button" title="동기화" aria-label="동기화" onclick="try{syncNow()}catch(e){}">↻</button>';
 /* 홈 카드 크기: wide(넓게=한 줄 전체) · half(보통=한 줄 2개) · mini(작게=하단 3칸). 기본값=프리셋 */
 var ND_PRESET_SIZE={running:"wide",food:"wide",recipes:"wide",movies:"half",books:"half",period:"half",diary:"half",travel:"half",mountains:"half",culture:"half",albums:"half",cellar:"half",scrap:"half",wish:"half",gift:"half",pet:"half"};
 function getHomeSizes(){ try{ return JSON.parse(store.getItem("nd.homesize")||"{}")||{}; }catch(e){ return {}; } }
@@ -5845,6 +5856,7 @@ function pdStats(){
     st.dday=pdDiff(today, st.next);
     if(st.inPeriod) st.phase="생리 "+st.periodDay+"일차";
     else if(today>=st.fertS && today<=st.fertE) st.phase= pdSameDay(today,st.ovul)?"배란일":"가임기";
+    else if(pdDiff(pdAdd(st.next,-5),today)>=0 && pdDiff(today,pdAdd(st.next,-1))>=0) st.phase="PMS 예상";   /* ★v443 */
     else if(today>st.ovul && today<st.next) st.phase="황체기";
     else st.phase="여포기";
   } else {
@@ -5917,11 +5929,26 @@ function pdRenderMain(force){
   var stats = st.count ? ('<div class="pdStats">'
     +'<div class="pdStat"><b>'+(st.cycleKnown?(st.avgCycle+'일'):'—')+'</b><span>'+(st.cycleKnown?'주기(중앙값)':'주기 · 2회부터')+'</span></div>'
     +'<div class="pdStat"><b>'+(st.periodKnown?(st.avgPeriod+'일'):'—')+'</b><span>'+(st.periodKnown?'평균 기간':'기간 · 종료일 필요')+'</span></div>'
-    +'<div class="pdStat"><b>'+st.count+'회</b><span>기록</span></div></div>') : '';
+    +'<div class="pdStat"><b>'+st.count+'회</b><span>기록</span></div></div>'
+    + (function(){    /* ★v443: 주기가 규칙적인지 한 줄로 */
+        try{ if(!st.cycleKnown || st.minCycle==null) return '';
+          var _w=st.maxCycle-st.minCycle;
+          var _t=(_w<=3)?"규칙적인 편이에요":((_w<=7)?"조금씩 달라져요":"변동이 큰 편이에요");
+          return '<div class="pdHeroRange" style="text-align:center;margin:-4px 0 10px">최근 '+st.gapsUsed+'회 '+st.minCycle+'~'+st.maxCycle+'일 · '+_t+'</div>';
+        }catch(e){ return ''; } })()) : '';
   var _insight=""; try{ var _mi=pdMoodInsight(); if(_mi){ _insight='<div class="pdInsight"><div class="pdInsightH">🧠 몸과 마음 · 일기 연동</div><div class="pdInsightB">생리 시작 <b>5일 전</b>, 일기 기분이 <b>'+_pdEsc(_mi.topMood)+'</b>인 날이 <b>'+_mi.pct+'%</b> <span>('+_mi.n+'일 기준)</span></div></div>'; } }catch(e){}
+  /* ★v443: 원탭 기록. 생리 중이면 '오늘 끝', 아니면 '오늘 시작'. */
+  var quickBtn='';
+  if(st.count){
+    quickBtn = st.inPeriod
+      ? '<button type="button" class="pdQuick end" id="pdQuickEnd">오늘 생리 끝</button><div class="pdQuickHint">'+st.periodDay+'일차 · 누르면 오늘로 마무리돼요</div>'
+      : '<button type="button" class="pdQuick start" id="pdQuickStart">🩸 오늘 생리 시작</button><div class="pdQuickHint">한 번만 누르면 기록돼요 · 증상은 나중에 채워도 돼요</div>';
+  }
   var remindBtn = (st.count && st.cycleKnown) ? '<button id="pdCalRemind" style="display:block;width:100%;margin:10px 0 2px;background:#201c16;color:#f6eddf;border:1px solid rgba(238,224,205,.18);border-radius:14px;padding:12px;font-size:14px;font-weight:700;cursor:pointer">\ud83d\udd14 \ub2e4\uc74c \uc608\uc815 1\uc77c \uc804 \u00b7 \uce98\ub9b0\ub354 \uc54c\ub9bc \ucd94\uac00</button>' : '';
-  b.innerHTML=hero+remindBtn+stats+_insight+pdCalHTML(st)+pdRecordsHTML(st);
+  b.innerHTML=hero+quickBtn+remindBtn+stats+_insight+pdCalHTML(st)+pdRecordsHTML(st);
   var sb=document.getElementById("pdStartBtn"); if(sb) sb.onclick=function(){ pdLogForm(null); };
+  { var _qs=document.getElementById("pdQuickStart"); if(_qs) _qs.onclick=pdQuickStart;
+    var _qe=document.getElementById("pdQuickEnd");   if(_qe) _qe.onclick=pdQuickEnd; }
   var rb=document.getElementById("pdCalRemind"); if(rb) rb.onclick=function(){ try{ var u=pdCalReminderUrl(st); if(u) window.open(u,"_blank"); }catch(e){} };
   var pv=document.getElementById("pdCalPrev"); if(pv) pv.onclick=function(){ pdCalM--; if(pdCalM<0){pdCalM=11;pdCalY--;} pdRenderMain(); };
   var nx=document.getElementById("pdCalNext"); if(nx) nx.onclick=function(){ pdCalM++; if(pdCalM>11){pdCalM=0;pdCalY++;} pdRenderMain(); };
@@ -5950,10 +5977,13 @@ function pdCalHTML(st){
   var first=new Date(y,m,1); var startDow=first.getDay(); var dim=new Date(y,m+1,0).getDate();
   var today=pdToday();
   function inRecordedPeriod(d){ for(var i=0;i<st.cycles.length;i++){ var c=st.cycles[i]; var a=pdParse(c.start); if(!a) continue; var e=pdParse(c.end); if(!e) e=pdAdd(a, st.avgPeriod-1); if(pdDiff(a,d)>=0 && pdDiff(d,e)>=0) return true; } return false; }
-  var _preds=[]; if(st.next){ for(var _k=0;_k<14;_k++){ var _ps=pdAdd(st.next, st.avgCycle*_k); var _ov=pdAdd(_ps,-14); _preds.push({s:_ps, e:pdAdd(_ps, st.avgPeriod-1), ov:_ov, fs:pdAdd(_ov,-5), fe:pdAdd(_ov,1)}); } }
+  var _preds=[]; if(st.next){ for(var _k=0;_k<14;_k++){ var _ps=pdAdd(st.next, st.avgCycle*_k); var _ov=pdAdd(_ps,-14);
+    /* ★v443: PMS = 예정일 5일 전 ~ 1일 전 */
+    _preds.push({s:_ps, e:pdAdd(_ps, st.avgPeriod-1), ov:_ov, fs:pdAdd(_ov,-5), fe:pdAdd(_ov,1), ms:pdAdd(_ps,-5), me:pdAdd(_ps,-1)}); } }
   function inPredicted(d){ for(var j=0;j<_preds.length;j++){ if(pdDiff(_preds[j].s,d)>=0 && pdDiff(d,_preds[j].e)>=0) return true; } return false; }
   function isPredOvul(d){ for(var j=0;j<_preds.length;j++){ if(pdSameDay(d,_preds[j].ov)) return true; } return false; }
   function inFertile(d){ for(var j=0;j<_preds.length;j++){ if(pdDiff(_preds[j].fs,d)>=0 && pdDiff(d,_preds[j].fe)>=0) return true; } return false; }
+  function inPms(d){ for(var j=0;j<_preds.length;j++){ if(pdDiff(_preds[j].ms,d)>=0 && pdDiff(d,_preds[j].me)>=0) return true; } return false; }
   var cells="";
   for(var i=0;i<startDow;i++) cells+='<div class="pdCell pdEmpty"></div>';
   for(var day=1;day<=dim;day++){
@@ -5962,13 +5992,14 @@ function pdCalHTML(st){
     else if(inPredicted(d)) cls+=" pdPred";
     else if(isPredOvul(d)) cls+=" pdOvul";
     else if(inFertile(d)) cls+=" pdFert";
+    else if(inPms(d)) cls+=" pdPms";
     if(pdSameDay(d,today)) cls+=" pdToday";
     cells+='<div class="'+cls+'"><span>'+day+'</span>'+mark+'</div>';
   }
   var dows=["일","월","화","수","목","금","토"].map(function(w){return '<div class="pdDow">'+w+'</div>';}).join("");
   return '<div class="pdCalWrap"><div class="pdCalHead"><button class="pdNav" id="pdCalPrev">‹</button><span class="pdCalTit">'+y+'년 '+(m+1)+'월</span><button class="pdNav" id="pdCalNext">›</button></div>'
     +'<div class="pdGrid">'+dows+cells+'</div>'
-    +'<div class="pdLegend"><span><i class="pdLgP"></i>생리</span><span><i class="pdLgPr"></i>예상</span><span><i class="pdLgF"></i>가임기</span><span><i class="pdLgO"></i>배란</span></div></div>';
+    +'<div class="pdLegend"><span><i class="pdLgP"></i>생리</span><span><i class="pdLgPr"></i>예상</span><span><i class="pdLgF"></i>가임기</span><span><i class="pdLgO"></i>배란</span><span><i class="pdLgM"></i>PMS 예상</span></div></div>';
 }
 
 /* 기록 리스트 */
@@ -6041,6 +6072,28 @@ function pdLogForm(id){
 function _pdD2I(v){ var d=pdParse(v); if(!d) return ""; return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0"); }
 function _pdI2D(v){ if(!v) return ""; var p=v.split("-"); if(p.length<3) return ""; return p[0]+"."+p[1]+"."+p[2]; }
 
+/* ★v443: 오늘 날짜로 바로 기록. 양은 '보통' 기본값, 나머지는 나중에 채우면 된다. */
+function pdQuickStart(){
+  try{
+    var today=pdFmt(pdToday());
+    var cy=(_pdSaved().cycles||[]);
+    if(cy.some(function(c){ return c && c.start===today; })){
+      try{ if(typeof ndToast==="function") ndToast("오늘 기록이 이미 있어요"); }catch(e){} return; }
+    var obj={ _id:((window.crypto&&crypto.randomUUID)?crypto.randomUUID():String(Date.now())+Math.random().toString(16).slice(2)),
+      start:today, end:"", flow:"보통", symptoms:[], mood:"", note:"" };
+    pdSaveCycle(obj, true);
+  }catch(e){ try{ alert("기록 중 문제가 생겼어요: "+((e&&e.message)||e)); }catch(_e){} }
+}
+/* 생리 중일 때 오늘로 마무리 */
+function pdQuickEnd(){
+  try{
+    var cy=pdCycles(); var last=cy[cy.length-1]; if(!last) return;
+    var o=_pdSaved(); var t=(o.cycles||[]).filter(function(c){ return c && c._id===last._id; })[0];
+    if(!t) return;
+    t.end=pdFmt(pdToday());
+    pdSaveCycle(t, false);
+  }catch(e){ try{ alert("기록 중 문제가 생겼어요: "+((e&&e.message)||e)); }catch(_e){} }
+}
 function pdSaveCycle(obj, isNew){
   try{ window.__pdWroteAt=Date.now(); }catch(e){}   /* ★v441 */
   var o=_pdSaved(); o.cycles=o.cycles||[];
