@@ -1365,7 +1365,7 @@ body{ background:radial-gradient(circle at 50% -10%, rgba(102,78,57,.16), transp
         <svg class="brandmark" width="40" height="30" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg>
         <span class="brandwm"><span class="bwm-ko">내도감</span><span class="bwm-en">NAEDOGAM</span></span>
       </button>
-      <span class="mhver">v445β</span>
+      <span class="mhver">v446β</span>
       <span class="spacer"></span>
       <span class="src-chip" id="srcChip" style="display:none">데모</span>
       <button class="icon-btn" id="searchToggle" type="button" style="display:none">🔍</button>
@@ -1704,7 +1704,7 @@ const MANIFESTS = {
              {k:"stay",sheet:"숙소",label:"숙소",type:"text"},
              {k:"cost",sheet:"비용",label:"비용(원)",type:"number",money:true},
              {k:"rating",sheet:"만족도",label:"만족도(별점)",type:"rating"},
-             {k:"status",sheet:"상태",label:"상태",type:"seg",options:["다녀옴","예정","찜"],hideForm:true},
+             {k:"status",sheet:"상태",label:"상태",type:"seg",options:["다녀옴","예정","찜"]},   /* ★v446: hideForm 제거 — 빠른 담기에서 '다녀옴' 바로 찍기(저장 루프가 hideForm 건너뜀) */
              {k:"spots",sheet:"명소",label:"가본 곳·명소(쉼표로 여러 개)",type:"tags"},
              {k:"recommend",sheet:"추천",label:"추천",type:"text"},{k:"source",sheet:"출처",label:"출처",type:"text"},
              {k:"content",sheet:"내용",label:"내용",type:"textarea"},
@@ -2462,7 +2462,7 @@ function openDomain(id){ if(id==="mbti"){ openMbti(); return; } if(id==="period"
 
 /* 홈: 켜둔 카테고리를 카드로. 건수는 한 번 열어본 분야만 표시(홈을 빠르게 유지). */
 function ndDeep(h){ if(typeof h!=="string"||h.charAt(0)!=="#") h="#8a7a6a"; var n=parseInt(h.slice(1),16),r=(n>>16)&255,g=(n>>8)&255,b=n&255; function d(x,f){return Math.max(0,Math.min(255,Math.round(x*f)));} var d1="rgb("+d(r,.46)+","+d(g,.46)+","+d(b,.46)+")", d2="rgb("+d(r,.20)+","+d(g,.20)+","+d(b,.20)+")", gl="rgba("+r+","+g+","+b+",.16)"; return "radial-gradient(circle at 18% 14%,"+gl+",transparent 46%),linear-gradient(145deg,"+d1+","+d2+")"; }
-var ND_LOGO_HTML='<div class="ndh-brand"><svg width="47" height="35" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg><div class="ndh-wm"><b>내도감</b><small>NAEDOGAM</small></div><span class="mhver ndh-ver">v445β</span></div><button class="ndh-sync" type="button" title="동기화" aria-label="동기화" onclick="try{syncNow()}catch(e){}">↻</button>';
+var ND_LOGO_HTML='<div class="ndh-brand"><svg width="47" height="35" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg><div class="ndh-wm"><b>내도감</b><small>NAEDOGAM</small></div><span class="mhver ndh-ver">v446β</span></div><button class="ndh-sync" type="button" title="동기화" aria-label="동기화" onclick="try{syncNow()}catch(e){}">↻</button>';
 /* 홈 카드 크기: wide(넓게=한 줄 전체) · half(보통=한 줄 2개) · mini(작게=하단 3칸). 기본값=프리셋 */
 var ND_PRESET_SIZE={running:"wide",food:"wide",recipes:"wide",movies:"half",books:"half",period:"half",diary:"half",travel:"half",mountains:"half",culture:"half",albums:"half",cellar:"half",scrap:"half",wish:"half",gift:"half",pet:"half"};
 function getHomeSizes(){ try{ return JSON.parse(store.getItem("nd.homesize")||"{}")||{}; }catch(e){ return {}; } }
@@ -4470,7 +4470,20 @@ function openRecordForm(m, existing, prefill){
     return `<label>${ndFL(f)}</label><input class="rf" data-k="${f.k}" data-type="${f.type}" value="${String(v).replace(/"/g,'&quot;')}" placeholder="${ndFP(f)}" autocomplete="off" />`;
   };
   const _wcls=f=> f.third?"rff-third":f.full?"rff-full":(f.half?"rff-half":(f.type==="bool"?"rff-bool":((f.type==="textarea"||f.type==="image"||f.type==="rating"||f.type==="seg"||f.type==="labrows"||f.type==="tiers"||f.type==="quotes"||f.type==="checks")?"rff-full":"rff-half")));
-  const body=fields.map(f=>`<div class="rff ${_wcls(f)}">${_cell(f)}</div>`).join("");
+  /* ★v446: 빠른 담기 파일럿(여행) — 제목·상태·별점만 먼저 보이고 나머지는 '자세히'로 접는다. 수정(isEdit)일 땐 전체 표시(기존 동작 유지). */
+  const _quickKeys={ travel:["title","status","rating"] };
+  const _renderCell=f=>`<div class="rff ${_wcls(f)}">${_cell(f)}</div>`;
+  const _qk=(!isEdit && _quickKeys[m.id]) ? _quickKeys[m.id].filter(k=>fields.some(f=>f.k===k)) : null;
+  let body;
+  if(_qk && _qk.length){
+    const _qset={}; _qk.forEach(k=>{ _qset[k]=1; });
+    const _q=_qk.map(k=>fields.find(f=>f.k===k));
+    const _d=fields.filter(f=>!_qset[f.k]);
+    body=_q.map(_renderCell).join("")
+      + (_d.length ? ('<details class="rf-more" style="flex:1 1 100%;margin-top:2px"><summary style="cursor:pointer;font-weight:700;color:var(--sub,#8a7f70);padding:9px 2px">＋ 자세히 입력</summary><div class="rfgrid" style="display:flex;margin-top:6px">'+_d.map(_renderCell).join("")+'</div></details>') : "");
+  } else {
+    body=fields.map(_renderCell).join("");
+  }
   d.innerHTML=`<div class="dhead"><h3>${m.title} ${isEdit?'수정':'추가'}</h3><button class="dclose-x" onclick="this.closest('dialog').close()" aria-label="닫기">✕</button></div><div class="dbody set rfgrid">${body}
     <div class="rff-full" style="display:flex;gap:8px;margin-top:18px;flex:1 1 100%">
       <button class="btn" id="rfSave" style="flex:1">저장</button>
