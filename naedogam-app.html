@@ -1426,7 +1426,7 @@ body{ background:radial-gradient(circle at 50% -10%, rgba(102,78,57,.16), transp
         <svg class="brandmark" width="40" height="30" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg>
         <span class="brandwm"><span class="bwm-ko">내도감</span><span class="bwm-en">NAEDOGAM</span></span>
       </button>
-      <span class="mhver">v471β</span>
+      <span class="mhver">v472β</span>
       <span class="spacer"></span>
       <span class="src-chip" id="srcChip" style="display:none">데모</span>
       <button class="icon-btn" id="searchToggle" type="button" style="display:none">🔍</button>
@@ -2562,7 +2562,7 @@ function openDomain(id){ if(id==="mbti"){ openMbti(); return; } if(id==="period"
 
 /* 홈: 켜둔 카테고리를 카드로. 건수는 한 번 열어본 분야만 표시(홈을 빠르게 유지). */
 function ndDeep(h){ if(typeof h!=="string"||h.charAt(0)!=="#") h="#8a7a6a"; var n=parseInt(h.slice(1),16),r=(n>>16)&255,g=(n>>8)&255,b=n&255; function d(x,f){return Math.max(0,Math.min(255,Math.round(x*f)));} var d1="rgb("+d(r,.46)+","+d(g,.46)+","+d(b,.46)+")", d2="rgb("+d(r,.20)+","+d(g,.20)+","+d(b,.20)+")", gl="rgba("+r+","+g+","+b+",.16)"; return "radial-gradient(circle at 18% 14%,"+gl+",transparent 46%),linear-gradient(145deg,"+d1+","+d2+")"; }
-var ND_LOGO_HTML='<div class="ndh-brand"><svg width="47" height="35" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg><div class="ndh-wm"><b>내도감</b><small>NAEDOGAM</small></div><span class="mhver ndh-ver">v471β</span></div><button class="ndh-sync" type="button" title="동기화" aria-label="동기화" onclick="try{syncNow()}catch(e){}">↻</button>';
+var ND_LOGO_HTML='<div class="ndh-brand"><svg width="47" height="35" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg><div class="ndh-wm"><b>내도감</b><small>NAEDOGAM</small></div><span class="mhver ndh-ver">v472β</span></div><button class="ndh-sync" type="button" title="동기화" aria-label="동기화" onclick="try{syncNow()}catch(e){}">↻</button>';
 /* 홈 카드 크기: wide(넓게=한 줄 전체) · half(보통=한 줄 2개) · mini(작게=하단 3칸). 기본값=프리셋 */
 var ND_PRESET_SIZE={running:"wide",food:"wide",recipes:"wide",movies:"half",books:"half",period:"half",diary:"half",travel:"half",mountains:"half",culture:"half",albums:"half",cellar:"half",scrap:"half",wish:"half",gift:"half",pet:"half"};
 function getHomeSizes(){ try{ return JSON.parse(store.getItem("nd.homesize")||"{}")||{}; }catch(e){ return {}; } }
@@ -7792,13 +7792,17 @@ function openAddBook(){
     const _my=++seq;
     bres.innerHTML=`<div class="count">검색 중…</div>`;
     try{ const _r=await searchBooks(bq.value); if(_my!==seq) return; results=_r;
-      bres.innerHTML = results.length ? results.map((b,i)=>
-        `<button class="card" data-i="${i}" style="grid-template-columns:auto 1fr">
+      bres.innerHTML = results.length ? results.map((b,i)=>{ var _dup=null; try{ _dup=ndFindDup("books",{title:b.title,author:b.author}); }catch(e){} var _hb=_dup?'<span class="tmdb-have">✓ 이미 있음</span>':''; return `<button class="card${_dup?' tmdb-dupcard':''}" data-i="${i}" style="grid-template-columns:auto 1fr">
           <span class="thumb">${b.cover?`<img src="${b.cover}" alt="">`:"📖"}</span>
-          <span class="body"><h3 style="font-size:15px">${b.title}</h3>
-          <div class="meta">${[b.year,b.author].filter(Boolean).join(" · ")}</div></span></button>`).join("")
+          <span class="body"><h3 style="font-size:15px">${b.title}${_hb}</h3>
+          <div class="meta">${[b.year,b.author].filter(Boolean).join(" · ")}</div></span></button>`; }).join("")
         : `<div class="count">검색 결과가 없습니다.</div>`;
-      bres.querySelectorAll(".card").forEach(btn=>btn.onclick=()=>addBook(results[+btn.dataset.i]));
+      bres.querySelectorAll(".card").forEach(btn=>btn.onclick=()=>{ var b=results[+btn.dataset.i]; var dup=null; try{ dup=ndFindDup("books",{title:b.title,author:b.author}); }catch(e){}
+        if(dup){ bres.innerHTML='<div class="tmdb-dupbox">이미 <b>'+String(dup.title||b.title).replace(/</g,"&lt;")+'</b> 담아두셨어요. 감상평을 이어 쓰려면 기존 기록을 여세요.<div class="tmdb-dupbtns"><button type="button" class="btn" id="bkOpenEx">📄 기존 기록 열기</button><button type="button" class="btn ghost" id="bkAddNew">그래도 새로 추가</button></div></div>';
+          var _oe=bres.querySelector("#bkOpenEx"); if(_oe) _oe.onclick=function(){ try{ state.domain="books"; }catch(e){} try{ openRecordForm(MANIFESTS.books, dup); }catch(e){} };
+          var _an=bres.querySelector("#bkAddNew"); if(_an) _an.onclick=function(){ addBook(b); };
+          return; }
+        addBook(b); });
     }catch(e){ bres.innerHTML=`<div class="banner warn">검색 실패: ${e.message}</div>`; }
   },600); });
   setTimeout(()=>bq.focus(),50);
