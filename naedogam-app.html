@@ -1426,7 +1426,7 @@ body{ background:radial-gradient(circle at 50% -10%, rgba(102,78,57,.16), transp
         <svg class="brandmark" width="40" height="30" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg>
         <span class="brandwm"><span class="bwm-ko">내도감</span><span class="bwm-en">NAEDOGAM</span></span>
       </button>
-      <span class="mhver">v472β</span>
+      <span class="mhver">v473β</span>
       <span class="spacer"></span>
       <span class="src-chip" id="srcChip" style="display:none">데모</span>
       <button class="icon-btn" id="searchToggle" type="button" style="display:none">🔍</button>
@@ -2561,8 +2561,8 @@ function _ndAttachSectionNav(dlg, current){
 function openDomain(id){ if(id==="mbti"){ openMbti(); return; } if(id==="period"){ openPeriod(); return; } state.domain=id; state.query=""; state.pick=""; state.recPick=""; state.statFilter=null; state.selMode=false; try{NDSEL.clear();}catch(_e){} state.sort="default"; state.sortAsc=false; state.searchScope="title"; state.selectQ=""; state.searchOpen=false; state.page=0; carWorkFilter=""; carSort="date"; carSortAsc=false; bookGenreFilter=""; mtnRegion=""; diaryTag=""; diaryView="list"; diaryYM=null; diaryMood=""; $("#search").value=""; $("#search").style.display="none"; $("#mvselect").style.display="none"; $("#scope").style.display="none"; if(MANIFESTS[id]&&MANIFESTS[id].scopeSort){ state.sort=MANIFESTS[id].scopeSort[0].k; state.sortAsc=false; } showView("domain"); loadAndRender(); }
 
 /* 홈: 켜둔 카테고리를 카드로. 건수는 한 번 열어본 분야만 표시(홈을 빠르게 유지). */
-function ndDeep(h){ if(typeof h!=="string"||h.charAt(0)!=="#") h="#8a7a6a"; var n=parseInt(h.slice(1),16),r=(n>>16)&255,g=(n>>8)&255,b=n&255; function d(x,f){return Math.max(0,Math.min(255,Math.round(x*f)));} var d1="rgb("+d(r,.46)+","+d(g,.46)+","+d(b,.46)+")", d2="rgb("+d(r,.20)+","+d(g,.20)+","+d(b,.20)+")", gl="rgba("+r+","+g+","+b+",.16)"; return "radial-gradient(circle at 18% 14%,"+gl+",transparent 46%),linear-gradient(145deg,"+d1+","+d2+")"; }
-var ND_LOGO_HTML='<div class="ndh-brand"><svg width="47" height="35" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg><div class="ndh-wm"><b>내도감</b><small>NAEDOGAM</small></div><span class="mhver ndh-ver">v472β</span></div><button class="ndh-sync" type="button" title="동기화" aria-label="동기화" onclick="try{syncNow()}catch(e){}">↻</button>';
+function ndDeep(h){ if(typeof h!=="string"||h.charAt(0)!=="#") h="#8a7a6a"; var n=parseInt(h.slice(1),16),r=(n>>16)&255,g=(n>>8)&255,b=n&255; function d(x,f){return Math.max(0,Math.min(255,Math.round(x*f)));} var d1="rgb("+d(r,.60)+","+d(g,.60)+","+d(b,.60)+")", d2="rgb("+d(r,.20)+","+d(g,.20)+","+d(b,.20)+")"; return "linear-gradient(180deg,rgba(255,255,255,.06),transparent 30%),linear-gradient(150deg,"+d1+","+d2+")"; }
+var ND_LOGO_HTML='<div class="ndh-brand"><svg width="47" height="35" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg><div class="ndh-wm"><b>내도감</b><small>NAEDOGAM</small></div><span class="mhver ndh-ver">v473β</span></div><button class="ndh-sync" type="button" title="동기화" aria-label="동기화" onclick="try{syncNow()}catch(e){}">↻</button>';
 /* 홈 카드 크기: wide(넓게=한 줄 전체) · half(보통=한 줄 2개) · mini(작게=하단 3칸). 기본값=프리셋 */
 var ND_PRESET_SIZE={running:"wide",food:"wide",recipes:"wide",movies:"half",books:"half",period:"half",diary:"half",travel:"half",mountains:"half",culture:"half",albums:"half",cellar:"half",scrap:"half",wish:"half",gift:"half",pet:"half"};
 function getHomeSizes(){ try{ return JSON.parse(store.getItem("nd.homesize")||"{}")||{}; }catch(e){ return {}; } }
@@ -3267,21 +3267,21 @@ const ND_ICONS={
   subs:'M20 11a8 8 0 0 0 -14 -5l-2 2 M4 13a8 8 0 0 0 14 5l2 -2 M4 4v4h4 M20 20v-4h-4',
   travel:'M22 2L11 13 M22 2l-7 20l-4 -9l-9 -4z'
 };
-const ND_COLORS={ mbti:'#7c3aed', movies:'#e8590c', books:'#2f9e44', mountains:'#2b8a3e', running:'#1c7ed6', carlog:'#e67700', diary:'#7048e8', subs:'#0ca678', travel:'#f08c00', cards:'#4263eb', culture:'#c2255c', food:'#d9480f', albums:'#9c36b5', wish:'#e64980', bucket:'#f59f00', quote:'#5c7cfa', pet:'#12b886', gift:'#f06595', insurance:'#3b5bdb', scrap:'#f76707', cellar:'#a61e4d', period:'#e03e63' };
+const ND_COLORS={ mbti:'#7c3aed', movies:'#e8590c', books:'#0d9488', mountains:'#2563eb', running:'#0891b2', carlog:'#e67700', diary:'#7048e8', subs:'#0ca678', travel:'#f08c00', cards:'#4263eb', culture:'#c2255c', food:'#d9480f', albums:'#9c36b5', wish:'#e64980', bucket:'#f59f00', quote:'#5c7cfa', pet:'#12b886', gift:'#f06595', insurance:'#3b5bdb', scrap:'#f76707', cellar:'#a61e4d', period:'#e03e63' };
 var ND_GRAD={
- movies:"radial-gradient(circle at 20% 18%,rgba(217,91,38,.16),transparent 45%),linear-gradient(145deg,#82330f,#321a12)",
- books:"radial-gradient(circle at 15% 14%,rgba(92,150,82,.17),transparent 45%),linear-gradient(145deg,#214a2b,#13281b)",
- mountains:"radial-gradient(circle at 82% 14%,rgba(92,150,82,.15),transparent 46%),linear-gradient(145deg,#28512d,#172d1c)",
- running:"radial-gradient(circle at 88% 12%,rgba(26,133,160,.17),transparent 48%),linear-gradient(135deg,#0e4657,#102831)",
- carlog:"radial-gradient(circle at 16% 12%,rgba(233,150,52,.15),transparent 46%),linear-gradient(145deg,#78400e,#402610)",
- diary:"radial-gradient(circle at 18% 8%,rgba(127,79,139,.16),transparent 42%),linear-gradient(145deg,#3a2a48,#211927)",
- subs:"radial-gradient(circle at 16% 12%,rgba(20,170,150,.15),transparent 46%),linear-gradient(145deg,#0d6059,#173530)",
- travel:"radial-gradient(circle at 16% 12%,rgba(233,150,52,.15),transparent 46%),linear-gradient(145deg,#754308,#42270c)",
- culture:"radial-gradient(circle at 16% 12%,rgba(225,85,90,.15),transparent 44%),linear-gradient(145deg,#6b242e,#37191f)",
- food:"radial-gradient(circle at 12% 10%,rgba(233,150,52,.18),transparent 45%),linear-gradient(135deg,#703b0c,#3d240f)",
- albums:"radial-gradient(circle at 16% 12%,rgba(150,90,180,.16),transparent 44%),linear-gradient(145deg,#4b315b,#281d30)",
- period:"radial-gradient(circle at 16% 10%,rgba(225,85,87,.15),transparent 43%),linear-gradient(145deg,#68201f,#351718)",
- cellar:"radial-gradient(circle at 16% 12%,rgba(200,70,110,.15),transparent 44%),linear-gradient(145deg,#5e1c38,#2c1420)"
+ movies:"linear-gradient(180deg,rgba(255,255,255,.06),transparent 30%),linear-gradient(150deg,#9a3324,#2a1310)",
+ books:"linear-gradient(180deg,rgba(255,255,255,.06),transparent 30%),linear-gradient(150deg,#12604e,#0b2622)",
+ mountains:"linear-gradient(180deg,rgba(255,255,255,.06),transparent 30%),linear-gradient(150deg,#245a78,#101f2b)",
+ running:"linear-gradient(180deg,rgba(255,255,255,.06),transparent 30%),linear-gradient(150deg,#0f5f74,#0b2029)",
+ carlog:"linear-gradient(180deg,rgba(255,255,255,.06),transparent 30%),linear-gradient(150deg,#8a5a16,#2d1e0c)",
+ diary:"linear-gradient(180deg,rgba(255,255,255,.06),transparent 30%),linear-gradient(150deg,#3f2b5e,#1a1228)",
+ subs:"linear-gradient(180deg,rgba(255,255,255,.06),transparent 30%),linear-gradient(150deg,#0c675c,#0b2723)",
+ travel:"linear-gradient(180deg,rgba(255,255,255,.06),transparent 30%),linear-gradient(150deg,#9c6318,#2e1f0c)",
+ culture:"linear-gradient(180deg,rgba(255,255,255,.06),transparent 30%),linear-gradient(150deg,#7d2743,#2b141d)",
+ food:"linear-gradient(180deg,rgba(255,255,255,.06),transparent 30%),linear-gradient(150deg,#93430f,#2e1a0b)",
+ albums:"linear-gradient(180deg,rgba(255,255,255,.06),transparent 30%),linear-gradient(150deg,#562f6e,#221830)",
+ period:"linear-gradient(180deg,rgba(255,255,255,.06),transparent 30%),linear-gradient(150deg,#7e2438,#2c1418)",
+ cellar:"linear-gradient(180deg,rgba(255,255,255,.06),transparent 30%),linear-gradient(150deg,#6b2140,#251320)"
 };
 const HOME_SOON=[
   {t:"운동/건강", d:'M2 12h4l2 5l4 -12l2 7h6'}
