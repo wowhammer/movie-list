@@ -734,7 +734,7 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
   .lab-row input, .lab-row select{ border:1px solid var(--line); border-radius:8px; padding:8px 9px; font-size:14px; font-family:inherit; box-sizing:border-box; min-width:0; background:var(--card); color:var(--ink); }
   .lab-row select.lab-norm{ appearance:none; -webkit-appearance:none; text-align:center; cursor:pointer; }
   .lab-row .lab-item{ flex:2; } .lab-row .lab-val{ flex:1; } .lab-row .lab-norm{ flex:1; }
-  /* v467β 건강검진 판정 색상 (라이트/다크 공통) */
+  /* v468β 건강검진 판정 색상 (라이트/다크 공통) */
   .lab-st{ display:inline-block; padding:1px 8px; border-radius:999px; font-size:12px; font-weight:700; border:1px solid transparent; }
   .lab-st-ok{ background:#e6f7ec; color:#127a3e; border-color:#a7ddba; }
   .lab-st-warn{ background:#fff5db; color:#8a5a00; border-color:#eccd78; }
@@ -959,9 +959,13 @@ dialog.nd-hasnav .dbody, dialog.nd-hasnav .wscroll, dialog.nd-hasnav .nsRes{ pad
 /* v464 #2: 섹션(통계·설정·인사이트)도 검색처럼 전체화면 = 떠 있는 '새창'이 아니라 메인 프레임 페이지처럼 */
 dialog.nd-hasnav{ width:100vw !important; max-width:100vw !important; height:100vh !important; height:100dvh !important; max-height:100dvh !important; margin:0 !important; border-radius:0 !important; }
 dialog.nd-hasnav .wscroll{ max-height:none !important; }
-/* v467 섹션 상단 = 홈 프레임 그대로(왼쪽 큰 내도감) */
-.nd-sectop{ padding:calc(11px + env(safe-area-inset-top)) 16px 4px !important; }
-dialog.nd-hasnav .dhead, dialog.nd-hasnav .wtop, dialog.nd-hasnav .nsHead{ padding-top:8px !important; }
+/* v468 섹션 상단 = 홈 프레임과 픽셀 동일(가운데 정렬·좌우 12px, 로고 왼쪽 14px) */
+.nd-sectop{ width:min(100%,520px); margin:0 auto; padding:calc(14px + env(safe-area-inset-top)) 12px 0 !important; }
+.nd-sectop .ndh-top{ padding:2px 2px 10px; }
+/* v468 섹션 공통 헤더 — 제목 위치·폰트·닫기 통일 */
+.nd-sechd{ display:flex; align-items:center; justify-content:space-between; gap:10px; width:min(100%,520px); margin:0 auto; padding:2px 12px 12px; }
+.nd-sechd h3{ margin:0; font-size:21px; font-weight:800; letter-spacing:-.02em; color:var(--ink,#f6eddf); }
+.nd-sechd-x{ width:37px; height:37px; flex:0 0 auto; border-radius:50%; border:1px solid var(--line,rgba(238,224,205,.18)); background:none; color:var(--ink-soft,#c6b9a6); font-size:15px; cursor:pointer; display:flex; align-items:center; justify-content:center; -webkit-tap-highlight-color:transparent; }
 .nd-exp{ display:block; font-size:11.5px; font-weight:700; color:rgba(255,255,255,.82); margin-top:3px; line-height:1.2; letter-spacing:-.01em; }
 .small-card .nd-exp{ font-size:10px; margin-top:1px; }
 /* v465 검색 결과 '이미 있음' 표시 */
@@ -1417,7 +1421,7 @@ body{ background:radial-gradient(circle at 50% -10%, rgba(102,78,57,.16), transp
         <svg class="brandmark" width="40" height="30" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg>
         <span class="brandwm"><span class="bwm-ko">내도감</span><span class="bwm-en">NAEDOGAM</span></span>
       </button>
-      <span class="mhver">v467β</span>
+      <span class="mhver">v468β</span>
       <span class="spacer"></span>
       <span class="src-chip" id="srcChip" style="display:none">데모</span>
       <button class="icon-btn" id="searchToggle" type="button" style="display:none">🔍</button>
@@ -2087,7 +2091,7 @@ const MANIFESTS = {
            meta:function(r){ var d=r.date?(_isoOf(r.date)||r.date):""; var n=0; try{ var a=JSON.parse(r.results||"[]"); if(Array.isArray(a)) n=a.filter(function(x){return x&&(x.item||x.value);}).length; }catch(e){} if(!n && r.item) n=1; return [d, r.hospital, (n?n+"개 항목":"")].filter(Boolean).join(" · "); } } }
 };
 
-/* v467β 건강검진 판정 공용 헬퍼 — 실제 데이터(국가건강검진 판정용어)에 맞춤 */
+/* v468β 건강검진 판정 공용 헬퍼 — 실제 데이터(국가건강검진 판정용어)에 맞춤 */
 var ND_LAB_STATUS=["정상","정상A","정상B","경계","주의","질환의심","유질환자"];
 function ndLabStatusClass(s){ s=String(s==null?"":s).trim();
   if(!s) return "";
@@ -2539,7 +2543,7 @@ function _ndCloseSections(exceptId){ _ndSectionIds().forEach(function(id){ if(id
 function _ndAttachSectionNav(dlg, current){
   try{
     if(!dlg) return;
-    if(!dlg.querySelector(".nd-sectop")){ dlg.insertAdjacentHTML("afterbegin", '<div class="ndh-top nd-sectop">'+ND_LOGO_HTML+'</div>'); }
+    if(!dlg.querySelector(".nd-sectop")){ dlg.insertAdjacentHTML("afterbegin", '<div class="nd-sectop"><div class="ndh-top">'+ND_LOGO_HTML+'</div></div>'); }
     var src=document.getElementById("bnav"); if(!src) return;
     var old=dlg.querySelector(".bnav-sec"); if(old) old.remove();
     var nav=src.cloneNode(true); nav.removeAttribute("id"); nav.classList.add("bnav-sec");
@@ -2552,7 +2556,7 @@ function openDomain(id){ if(id==="mbti"){ openMbti(); return; } if(id==="period"
 
 /* 홈: 켜둔 카테고리를 카드로. 건수는 한 번 열어본 분야만 표시(홈을 빠르게 유지). */
 function ndDeep(h){ if(typeof h!=="string"||h.charAt(0)!=="#") h="#8a7a6a"; var n=parseInt(h.slice(1),16),r=(n>>16)&255,g=(n>>8)&255,b=n&255; function d(x,f){return Math.max(0,Math.min(255,Math.round(x*f)));} var d1="rgb("+d(r,.46)+","+d(g,.46)+","+d(b,.46)+")", d2="rgb("+d(r,.20)+","+d(g,.20)+","+d(b,.20)+")", gl="rgba("+r+","+g+","+b+",.16)"; return "radial-gradient(circle at 18% 14%,"+gl+",transparent 46%),linear-gradient(145deg,"+d1+","+d2+")"; }
-var ND_LOGO_HTML='<div class="ndh-brand"><svg width="47" height="35" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg><div class="ndh-wm"><b>내도감</b><small>NAEDOGAM</small></div><span class="mhver ndh-ver">v467β</span></div><button class="ndh-sync" type="button" title="동기화" aria-label="동기화" onclick="try{syncNow()}catch(e){}">↻</button>';
+var ND_LOGO_HTML='<div class="ndh-brand"><svg width="47" height="35" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg><div class="ndh-wm"><b>내도감</b><small>NAEDOGAM</small></div><span class="mhver ndh-ver">v468β</span></div><button class="ndh-sync" type="button" title="동기화" aria-label="동기화" onclick="try{syncNow()}catch(e){}">↻</button>';
 /* 홈 카드 크기: wide(넓게=한 줄 전체) · half(보통=한 줄 2개) · mini(작게=하단 3칸). 기본값=프리셋 */
 var ND_PRESET_SIZE={running:"wide",food:"wide",recipes:"wide",movies:"half",books:"half",period:"half",diary:"half",travel:"half",mountains:"half",culture:"half",albums:"half",cellar:"half",scrap:"half",wish:"half",gift:"half",pet:"half"};
 function getHomeSizes(){ try{ return JSON.parse(store.getItem("nd.homesize")||"{}")||{}; }catch(e){ return {}; } }
@@ -2885,13 +2889,13 @@ function openSearch(){
   var d=document.getElementById("ndSearchDlg");
   if(!d){ d=document.createElement("dialog"); d.id="ndSearchDlg"; document.body.appendChild(d);
     d.addEventListener("close",function(){ try{ document.querySelectorAll(".bnav-i").forEach(function(x){x.classList.remove("on");}); var h=document.querySelector('.bnav-i[data-nav="home"]'); if(h) h.classList.add("on"); }catch(e){} }); }
-  d.innerHTML='<div class="nsHead"><input id="homeSearch" class="home-search" type="search" placeholder="🔍 전체 검색 — 제목·이름" autocomplete="off"><button class="nsClose" type="button">닫기</button></div><div id="homeSearchRes" class="nsRes"></div>';
+  d.innerHTML='<div class="nd-sechd"><h3>🔍 검색</h3><button class="nd-sechd-x" onclick="this.closest(\'dialog\').close()" aria-label="닫기">✕</button></div><div class="nsHead"><input id="homeSearch" class="home-search" type="search" placeholder="제목·이름으로 검색" autocomplete="off"></div><div id="homeSearchRes" class="nsRes"></div>';
   try{ _ndCloseSections("ndSearchDlg"); }catch(e){}
   d.showModal();
   try{ _ndAttachSectionNav(d,"search"); }catch(e){}
   var inp=d.querySelector("#homeSearch"), t=null;
   inp.addEventListener("input",function(){ clearTimeout(t); t=setTimeout(function(){ runHomeSearch(inp.value); },200); });
-  d.querySelector(".nsClose").onclick=function(){ d.close(); };
+  var _nsc=d.querySelector(".nsClose"); if(_nsc) _nsc.onclick=function(){ d.close(); };
   d.querySelector("#homeSearchRes").addEventListener("click",function(e){ if(e.target.closest&&e.target.closest(".hs-item")) setTimeout(function(){ d.close(); },0); });
   _ndSearchHome();
   setTimeout(function(){ try{ inp.focus(); }catch(e){} },80);
@@ -5722,7 +5726,7 @@ async function _insHomeMemory(){
 function openInsight(){
   var old=document.getElementById("insDlg"); if(old) old.remove();
   var dlg=document.createElement("dialog"); dlg.id="insDlg"; dlg.className="wrapDlg insLight";
-  dlg.innerHTML='<div class="wtop"><button class="wclose" onclick="this.closest(\'dialog\').close()">✕ 닫기</button><span class="mbTitle">✨ 인사이트</span><span style="width:56px"></span></div>'
+  dlg.innerHTML='<div class="nd-sechd"><h3>✨ 인사이트</h3><button class="nd-sechd-x" onclick="this.closest(\'dialog\').close()" aria-label="닫기">✕</button></div>'
     +'<div class="wscroll"><div class="wcard">'
     +'<div class="wsec" style="border-bottom:none;padding-top:6px">'
     +(CONFIG.AI_PROXY_URL?'<button class="insCard insAI" id="insAI"><span class="insEm">✨</span><span class="insTx"><b>AI가 써주는 내 이야기</b><i>내가 모은 기록으로 쓰는 한 편의 글</i></span><span class="insGo">→</span></button>':'')+'<button class="insCard" id="insWrap"><span class="insEm">🎊</span><span class="insTx"><b>나의 결산</b><i>수집·경험을 한 장으로 · 이미지 공유</i></span><span class="insGo">→</span></button>'
@@ -7028,7 +7032,7 @@ function _wExport(btn){
 
 async function openDashboard(){
   const d=$("#dash");
-  d.innerHTML=`<div class="dhead" style="display:flex;align-items:center;gap:10px"><h3 style="margin:0">📊 통계</h3><button class="pclose" onclick="this.closest('dialog').close()">✕</button></div><div class="dbody" id="dashBody"><div class="count">불러오는 중…</div></div>`;
+  d.innerHTML=`<div class="nd-sechd"><h3>📊 통계</h3><button class="nd-sechd-x" onclick="this.closest('dialog').close()" aria-label="닫기">✕</button></div><div class="dbody" id="dashBody"><div class="count">불러오는 중…</div></div>`;
   try{ _ndCloseSections("dash"); }catch(e){}
   if(!d.open) d.showModal();
   try{ _ndAttachSectionNav(d,"stats"); }catch(e){}
@@ -7454,7 +7458,7 @@ function renderSettingsBody(d){
   const _cc=m=>m.custom?`<button class="cat-edit" data-id="${m.id}" title="수정" type="button" style="background:none;border:none;cursor:pointer;font-size:13px;opacity:.6;padding:2px 5px">✏</button><button class="cat-del" data-id="${m.id}" title="삭제" type="button" style="background:none;border:none;cursor:pointer;font-size:13px;opacity:.6;padding:2px 5px">🗑</button>`:"";
   const arow=id=>{ const m=MANIFESTS[id]; const _sz=(typeof ndEffSize==="function"?ndEffSize(id):"mini"); const _sb=(v,l)=>`<button type="button" class="szb${v===_sz?" on":""}" data-id="${id}" data-sz="${v}">${l}</button>`; return `<div class="cat-mrow ord-row" data-id="${id}"><span class="ord-handle" aria-label="끌어서 순서 이동">≡</span><span class="mi">${m.icon}</span><span class="mn">${m.title} <span class="mv">${m.vol}</span></span><span class="sz-seg" role="group" aria-label="홈 카드 크기">${_sb("wide","넓")}${_sb("half","보")}${_sb("mini","작")}</span>${_cc(m)}<button class="sw on" data-id="${id}" role="switch" aria-checked="true" type="button"></button></div>`; };
   const irow=id=>{ const m=MANIFESTS[id]; return `<div class="cat-mrow" data-id="${id}"><span class="ord-handle ord-ph">≡</span><span class="mi">${m.icon}</span><span class="mn">${m.title} <span class="mv">${m.vol}</span></span>${_cc(m)}<button class="sw" data-id="${id}" role="switch" aria-checked="false" type="button"></button></div>`; };
-  d.innerHTML=`<div class="dhead"><h3>설정</h3><button class="dclose-x" onclick="this.closest('dialog').close()" aria-label="닫기">✕</button></div><div class="dbody set">
+  d.innerHTML=`<div class="nd-sechd"><h3>⚙️ 설정</h3><button class="nd-sechd-x" onclick="this.closest('dialog').close()" aria-label="닫기">✕</button></div><div class="dbody set">
     <div class="set-tabs">
       <button type="button" class="set-tab on" data-sec="cat">카테고리</button>
       <button type="button" class="set-tab" data-sec="help">사용법</button>
