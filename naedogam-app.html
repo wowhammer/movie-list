@@ -1349,7 +1349,7 @@ body{ background:radial-gradient(circle at 50% -10%, rgba(102,78,57,.16), transp
         <svg class="brandmark" width="40" height="30" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg>
         <span class="brandwm"><span class="bwm-ko">내도감</span><span class="bwm-en">NAEDOGAM</span></span>
       </button>
-      <span class="mhver">v432β</span>
+      <span class="mhver">v441β</span>
       <span class="spacer"></span>
       <span class="src-chip" id="srcChip" style="display:none">데모</span>
       <button class="icon-btn" id="searchToggle" type="button" style="display:none">🔍</button>
@@ -2446,7 +2446,7 @@ function openDomain(id){ if(id==="mbti"){ openMbti(); return; } if(id==="period"
 
 /* 홈: 켜둔 카테고리를 카드로. 건수는 한 번 열어본 분야만 표시(홈을 빠르게 유지). */
 function ndDeep(h){ if(typeof h!=="string"||h.charAt(0)!=="#") h="#8a7a6a"; var n=parseInt(h.slice(1),16),r=(n>>16)&255,g=(n>>8)&255,b=n&255; function d(x,f){return Math.max(0,Math.min(255,Math.round(x*f)));} var d1="rgb("+d(r,.46)+","+d(g,.46)+","+d(b,.46)+")", d2="rgb("+d(r,.20)+","+d(g,.20)+","+d(b,.20)+")", gl="rgba("+r+","+g+","+b+",.16)"; return "radial-gradient(circle at 18% 14%,"+gl+",transparent 46%),linear-gradient(145deg,"+d1+","+d2+")"; }
-var ND_LOGO_HTML='<div class="ndh-brand"><svg width="47" height="35" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg><div class="ndh-wm"><b>내도감</b><small>NAEDOGAM</small></div><span class="mhver ndh-ver">v432β</span></div><button class="ndh-sync" type="button" title="동기화" aria-label="동기화" onclick="try{syncNow()}catch(e){}">↻</button>';
+var ND_LOGO_HTML='<div class="ndh-brand"><svg width="47" height="35" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg><div class="ndh-wm"><b>내도감</b><small>NAEDOGAM</small></div><span class="mhver ndh-ver">v441β</span></div><button class="ndh-sync" type="button" title="동기화" aria-label="동기화" onclick="try{syncNow()}catch(e){}">↻</button>';
 /* 홈 카드 크기: wide(넓게=한 줄 전체) · half(보통=한 줄 2개) · mini(작게=하단 3칸). 기본값=프리셋 */
 var ND_PRESET_SIZE={running:"wide",food:"wide",recipes:"wide",movies:"half",books:"half",period:"half",diary:"half",travel:"half",mountains:"half",culture:"half",albums:"half",cellar:"half",scrap:"half",wish:"half",gift:"half",pet:"half"};
 function getHomeSizes(){ try{ return JSON.parse(store.getItem("nd.homesize")||"{}")||{}; }catch(e){ return {}; } }
@@ -5859,7 +5859,13 @@ async function openPeriod(){
   pdRenderMain(true);
   document.getElementById("pdAddTop").onclick=function(){ pdLogForm(null); };
   /* 시트에서 로드(기기간 공유) */
-  try{ var rows=await pdSheetLoad(); if(rows){ var o=_pdSaved(); o.cycles=rows; _pdWrite(o); if(document.getElementById("pdBody")) pdRenderMain(); } }catch(e){}
+  /* ★v441: 시트가 0건이라고 기기 기록을 지우면 안 된다.
+     방금 저장한 것이 아직 시트에 안 올라갔을 수 있고(저장은 백그라운드),
+     읽기 실패·429로도 0건이 내려온다. 빈 배열([])도 truthy라 예전엔 그대로 덮어썼다. */
+  try{ var rows=await pdSheetLoad();
+    if(rows && rows.length){ var o=_pdSaved(); o.cycles=rows; _pdWrite(o); if(document.getElementById("pdBody")) pdRenderMain(); }
+    else { var _lo=_pdSaved(); if(!(_lo.cycles||[]).length && document.getElementById("pdBody")) pdRenderMain(); }
+  }catch(e){}
 }
 
 function pdClose(){ var d=document.getElementById("periodDlg"); if(!d) return; d.classList.remove("pdOpen"); setTimeout(function(){ try{ d.close(); d.remove(); }catch(e){} }, 200); }
@@ -6024,6 +6030,7 @@ function _pdD2I(v){ var d=pdParse(v); if(!d) return ""; return d.getFullYear()+"
 function _pdI2D(v){ if(!v) return ""; var p=v.split("-"); if(p.length<3) return ""; return p[0]+"."+p[1]+"."+p[2]; }
 
 function pdSaveCycle(obj, isNew){
+  try{ window.__pdWroteAt=Date.now(); }catch(e){}   /* ★v441 */
   var o=_pdSaved(); o.cycles=o.cycles||[];
   if(isNew){ o.cycles.push(obj); } else { for(var i=0;i<o.cycles.length;i++){ if(o.cycles[i]._id===obj._id){ o.cycles[i]=obj; break; } } }
   _pdWrite(o);
@@ -6033,6 +6040,7 @@ function pdSaveCycle(obj, isNew){
   try{ if(state&&state.view==="home") renderHome(); }catch(e){}
 }
 function pdDelete(id){
+  try{ window.__pdWroteAt=Date.now(); }catch(e){}   /* ★v441 */
   var o=_pdSaved(); o.cycles=(o.cycles||[]).filter(function(c){return c._id!==id;}); _pdWrite(o);
   pdRenderMain(true);
   try{ if(typeof ndToast==="function") ndToast("삭제됨"); }catch(e){}
@@ -6059,6 +6067,8 @@ async function pdSheetDelete(id){
   }catch(e){ return false; }
 }
 async function pdSheetLoad(){
+  /* ★v441: 방금 쓴 직후(15초)는 시트를 믿지 않는다. 쓰기가 아직 반영 안 됐을 수 있다. */
+  try{ if(window.__pdWroteAt && (Date.now()-window.__pdWroteAt)<15000) return null; }catch(e){}
   try{ var src=sheetSrc(); if(!src||typeof src._rowsOf!=="function") return null;
     var r=await src._rowsOf(PD_TAB); var rows=(r&&r.rows)||[];
     var out=rows.map(function(o){ return { _id:o["_id"]||"", start:o["시작일"]||"", end:o["종료일"]||"", flow:o["양"]||"", symptoms:(o["증상"]?String(o["증상"]).split(/\s*·\s*|,\s*/).filter(Boolean):[]), mood:o["기분"]||"", note:o["메모"]||"" }; })
