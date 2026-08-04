@@ -734,7 +734,7 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
   .lab-row input, .lab-row select{ border:1px solid var(--line); border-radius:8px; padding:8px 9px; font-size:14px; font-family:inherit; box-sizing:border-box; min-width:0; background:var(--card); color:var(--ink); }
   .lab-row select.lab-norm{ appearance:none; -webkit-appearance:none; text-align:center; cursor:pointer; }
   .lab-row .lab-item{ flex:2; } .lab-row .lab-val{ flex:1; } .lab-row .lab-norm{ flex:1; }
-  /* v464β 건강검진 판정 색상 (라이트/다크 공통) */
+  /* v465β 건강검진 판정 색상 (라이트/다크 공통) */
   .lab-st{ display:inline-block; padding:1px 8px; border-radius:999px; font-size:12px; font-weight:700; border:1px solid transparent; }
   .lab-st-ok{ background:#e6f7ec; color:#127a3e; border-color:#a7ddba; }
   .lab-st-warn{ background:#fff5db; color:#8a5a00; border-color:#eccd78; }
@@ -961,6 +961,12 @@ dialog.nd-hasnav{ width:100vw !important; max-width:100vw !important; height:100
 dialog.nd-hasnav .wscroll{ max-height:none !important; }
 .nd-exp{ display:block; font-size:11.5px; font-weight:700; color:rgba(255,255,255,.82); margin-top:3px; line-height:1.2; letter-spacing:-.01em; }
 .small-card .nd-exp{ font-size:10px; margin-top:1px; }
+/* v465 검색 결과 '이미 있음' 표시 */
+.tmdb-have{ display:inline-block; margin-left:7px; font-size:11px; font-weight:800; color:#22c55e; background:rgba(34,197,94,.14); border:1px solid rgba(34,197,94,.4); border-radius:999px; padding:1px 7px; vertical-align:middle; white-space:nowrap; }
+.tmdb-dupcard{ position:relative; }
+.tmdb-dupbox{ padding:14px 12px; font-size:14px; line-height:1.65; color:var(--ink,#f6eddf); }
+.tmdb-dupbtns{ display:flex; flex-direction:column; gap:8px; margin-top:12px; }
+.tmdb-dupbtns .btn{ width:100%; }
 .bnav-ic{line-height:0;display:block}
 .bnav-ic svg{width:23px;height:23px;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round;display:block}
 .insCard{display:flex;align-items:center;gap:14px;width:100%;text-align:left;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:18px;padding:18px 16px;margin-bottom:12px;cursor:pointer;color:#f4f1ff}
@@ -1408,7 +1414,7 @@ body{ background:radial-gradient(circle at 50% -10%, rgba(102,78,57,.16), transp
         <svg class="brandmark" width="40" height="30" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg>
         <span class="brandwm"><span class="bwm-ko">내도감</span><span class="bwm-en">NAEDOGAM</span></span>
       </button>
-      <span class="mhver">v464β</span>
+      <span class="mhver">v465β</span>
       <span class="spacer"></span>
       <span class="src-chip" id="srcChip" style="display:none">데모</span>
       <button class="icon-btn" id="searchToggle" type="button" style="display:none">🔍</button>
@@ -2078,7 +2084,7 @@ const MANIFESTS = {
            meta:function(r){ var d=r.date?(_isoOf(r.date)||r.date):""; var n=0; try{ var a=JSON.parse(r.results||"[]"); if(Array.isArray(a)) n=a.filter(function(x){return x&&(x.item||x.value);}).length; }catch(e){} if(!n && r.item) n=1; return [d, r.hospital, (n?n+"개 항목":"")].filter(Boolean).join(" · "); } } }
 };
 
-/* v464β 건강검진 판정 공용 헬퍼 — 실제 데이터(국가건강검진 판정용어)에 맞춤 */
+/* v465β 건강검진 판정 공용 헬퍼 — 실제 데이터(국가건강검진 판정용어)에 맞춤 */
 var ND_LAB_STATUS=["정상","정상A","정상B","경계","주의","질환의심","유질환자"];
 function ndLabStatusClass(s){ s=String(s==null?"":s).trim();
   if(!s) return "";
@@ -2541,7 +2547,7 @@ function openDomain(id){ if(id==="mbti"){ openMbti(); return; } if(id==="period"
 
 /* 홈: 켜둔 카테고리를 카드로. 건수는 한 번 열어본 분야만 표시(홈을 빠르게 유지). */
 function ndDeep(h){ if(typeof h!=="string"||h.charAt(0)!=="#") h="#8a7a6a"; var n=parseInt(h.slice(1),16),r=(n>>16)&255,g=(n>>8)&255,b=n&255; function d(x,f){return Math.max(0,Math.min(255,Math.round(x*f)));} var d1="rgb("+d(r,.46)+","+d(g,.46)+","+d(b,.46)+")", d2="rgb("+d(r,.20)+","+d(g,.20)+","+d(b,.20)+")", gl="rgba("+r+","+g+","+b+",.16)"; return "radial-gradient(circle at 18% 14%,"+gl+",transparent 46%),linear-gradient(145deg,"+d1+","+d2+")"; }
-var ND_LOGO_HTML='<div class="ndh-brand"><svg width="47" height="35" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg><div class="ndh-wm"><b>내도감</b><small>NAEDOGAM</small></div><span class="mhver ndh-ver">v464β</span></div><button class="ndh-sync" type="button" title="동기화" aria-label="동기화" onclick="try{syncNow()}catch(e){}">↻</button>';
+var ND_LOGO_HTML='<div class="ndh-brand"><svg width="47" height="35" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg><div class="ndh-wm"><b>내도감</b><small>NAEDOGAM</small></div><span class="mhver ndh-ver">v465β</span></div><button class="ndh-sync" type="button" title="동기화" aria-label="동기화" onclick="try{syncNow()}catch(e){}">↻</button>';
 /* 홈 카드 크기: wide(넓게=한 줄 전체) · half(보통=한 줄 2개) · mini(작게=하단 3칸). 기본값=프리셋 */
 var ND_PRESET_SIZE={running:"wide",food:"wide",recipes:"wide",movies:"half",books:"half",period:"half",diary:"half",travel:"half",mountains:"half",culture:"half",albums:"half",cellar:"half",scrap:"half",wish:"half",gift:"half",pet:"half"};
 function getHomeSizes(){ try{ return JSON.parse(store.getItem("nd.homesize")||"{}")||{}; }catch(e){ return {}; } }
@@ -7853,8 +7859,13 @@ function tmdbAttachDeploy(d){
     const _my=++seq;
     res.innerHTML=`<div class="count">검색 중…</div>`;
     try{ const _r=await searchMovies(q.value); if(_my!==seq) return; results=_r;
-      res.innerHTML = results.length ? results.map((mm,i)=>`<button type="button" class="card" data-i="${i}" style="grid-template-columns:auto 1fr;text-align:left"><span class="thumb">${mm.poster?`<img src="${mm.poster}" alt="">`:"🎞"}</span><span class="body"><h3 style="font-size:14px">${mm.kor}</h3><div class="meta">${[mm.year,mm.orig].filter(Boolean).join(" · ")}</div></span></button>`).join("") : `<div class="count">검색 결과가 없습니다.</div>`;
-      res.querySelectorAll(".card").forEach(b=>b.onclick=()=>fillFromTmdb(d, results[+b.dataset.i], res));
+      res.innerHTML = results.length ? results.map((mm,i)=>{ var _dup=null; try{ _dup=ndFindDup("movies",{title:mm.kor,orig:mm.orig}); }catch(e){} var _hb=_dup?'<span class="tmdb-have">✓ 이미 있음</span>':''; return `<button type="button" class="card${_dup?' tmdb-dupcard':''}" data-i="${i}" style="grid-template-columns:auto 1fr;text-align:left"><span class="thumb">${mm.poster?`<img src="${mm.poster}" alt="">`:"🎞"}</span><span class="body"><h3 style="font-size:14px">${mm.kor}${_hb}</h3><div class="meta">${[mm.year,mm.orig].filter(Boolean).join(" · ")}</div></span></button>`; }).join("") : `<div class="count">검색 결과가 없습니다.</div>`;
+      res.querySelectorAll(".card").forEach(b=>b.onclick=()=>{ var mm=results[+b.dataset.i]; var dup=null; try{ dup=ndFindDup("movies",{title:mm.kor,orig:mm.orig}); }catch(e){}
+        if(dup){ res.innerHTML='<div class="tmdb-dupbox">이미 <b>'+String(dup.title||mm.kor).replace(/</g,"&lt;")+'</b> 담아두셨어요. 감상평을 이어 쓰려면 기존 기록을 여세요.<div class="tmdb-dupbtns"><button type="button" class="btn" id="tmdbOpenEx">📄 기존 기록 열기</button><button type="button" class="btn ghost" id="tmdbAddNew">그래도 새로 추가</button></div></div>';
+          var _oe=res.querySelector("#tmdbOpenEx"); if(_oe) _oe.onclick=function(){ try{ state.domain="movies"; }catch(e){} try{ openRecordForm(MANIFESTS.movies, dup); }catch(e){} };
+          var _an=res.querySelector("#tmdbAddNew"); if(_an) _an.onclick=function(){ fillFromTmdb(d, mm, res); };
+          return; }
+        fillFromTmdb(d, mm, res); });
     }catch(e){ res.innerHTML=`<div class="count">검색 실패: ${e.message}</div>`; }
   },500); });
   setTimeout(()=>q.focus(),50);
