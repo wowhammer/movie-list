@@ -734,7 +734,7 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
   .lab-row input, .lab-row select{ border:1px solid var(--line); border-radius:8px; padding:8px 9px; font-size:14px; font-family:inherit; box-sizing:border-box; min-width:0; background:var(--card); color:var(--ink); }
   .lab-row select.lab-norm{ appearance:none; -webkit-appearance:none; text-align:center; cursor:pointer; }
   .lab-row .lab-item{ flex:2; } .lab-row .lab-val{ flex:1; } .lab-row .lab-norm{ flex:1; }
-  /* v461β 건강검진 판정 색상 (라이트/다크 공통) */
+  /* v462β 건강검진 판정 색상 (라이트/다크 공통) */
   .lab-st{ display:inline-block; padding:1px 8px; border-radius:999px; font-size:12px; font-weight:700; border:1px solid transparent; }
   .lab-st-ok{ background:#e6f7ec; color:#127a3e; border-color:#a7ddba; }
   .lab-st-warn{ background:#fff5db; color:#8a5a00; border-color:#eccd78; }
@@ -951,6 +951,7 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
 .bnav-i{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;background:none;border:none;color:var(--ink-soft,#9a9a9a);font-size:10.5px;font-weight:600;padding:4px 0;cursor:pointer;-webkit-tap-highlight-color:transparent}
 .bnav-i *{pointer-events:none}
 .bnav-i.on{color:#E0483F}
+dialog.nd-hasnav .dbody, dialog.nd-hasnav .wscroll, dialog.nd-hasnav .nsRes{ padding-bottom:calc(74px + env(safe-area-inset-bottom)) !important; }
 .bnav-ic{line-height:0;display:block}
 .bnav-ic svg{width:23px;height:23px;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round;display:block}
 .insCard{display:flex;align-items:center;gap:14px;width:100%;text-align:left;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:18px;padding:18px 16px;margin-bottom:12px;cursor:pointer;color:#f4f1ff}
@@ -1398,7 +1399,7 @@ body{ background:radial-gradient(circle at 50% -10%, rgba(102,78,57,.16), transp
         <svg class="brandmark" width="40" height="30" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg>
         <span class="brandwm"><span class="bwm-ko">내도감</span><span class="bwm-en">NAEDOGAM</span></span>
       </button>
-      <span class="mhver">v461β</span>
+      <span class="mhver">v462β</span>
       <span class="spacer"></span>
       <span class="src-chip" id="srcChip" style="display:none">데모</span>
       <button class="icon-btn" id="searchToggle" type="button" style="display:none">🔍</button>
@@ -2068,7 +2069,7 @@ const MANIFESTS = {
            meta:function(r){ var d=r.date?(_isoOf(r.date)||r.date):""; var n=0; try{ var a=JSON.parse(r.results||"[]"); if(Array.isArray(a)) n=a.filter(function(x){return x&&(x.item||x.value);}).length; }catch(e){} if(!n && r.item) n=1; return [d, r.hospital, (n?n+"개 항목":"")].filter(Boolean).join(" · "); } } }
 };
 
-/* v461β 건강검진 판정 공용 헬퍼 — 실제 데이터(국가건강검진 판정용어)에 맞춤 */
+/* v462β 건강검진 판정 공용 헬퍼 — 실제 데이터(국가건강검진 판정용어)에 맞춤 */
 var ND_LAB_STATUS=["정상","정상A","정상B","경계","주의","질환의심","유질환자"];
 function ndLabStatusClass(s){ s=String(s==null?"":s).trim();
   if(!s) return "";
@@ -2511,12 +2512,27 @@ function showView(v){ state.view=v; document.body.classList.toggle("home-dark", 
        if(v!=="domain" || (_dd!=="period" && _dd!=="mbti")) _ndShowSelectUI(); }catch(e){}   /* ★v431 */
   $("#domainView").style.display = v==="domain"?"block":"none"; if(v!=="domain"){ state.selMode=false; try{NDSEL.clear();}catch(_e){} var _sbx=document.getElementById("ndSelBar"); if(_sbx)_sbx.remove(); }
   if(v==="home") $("#searchToggle").style.display="none"; try{ window.scrollTo(0,0); if(document.scrollingElement) document.scrollingElement.scrollTop=0; }catch(e){} }
-function goHome(){ state.domain=null; state.query=""; state.pick=""; setMhSub(""); showView("home"); renderHome(); }
+function goHome(){ try{ _ndCloseSections(null); }catch(e){} state.domain=null; state.query=""; state.pick=""; setMhSub(""); showView("home"); renderHome(); }
+/* ★v462: 하단 네비를 섹션(검색·통계·인사이트·설정)에도 유지 — showModal 다이얼로그가 top layer라 고정 네비를 덮던 문제(#1 '새창처럼 보임') 해결.
+   네비 라우팅은 문서 전역 위임 리스너(.bnav-i)라 다이얼로그 안 클론도 그대로 동작. 섹션끼리 이동 시 겹치지 않게 형제 섹션은 닫는다. */
+function _ndSectionIds(){ return ["ndSearchDlg","insDlg","dash","settings"]; }
+function _ndCloseSections(exceptId){ _ndSectionIds().forEach(function(id){ if(id===exceptId) return; var d=document.getElementById(id); if(d && d.open){ try{ d.close(); }catch(e){} } }); }
+function _ndAttachSectionNav(dlg, current){
+  try{
+    if(!dlg) return;
+    var src=document.getElementById("bnav"); if(!src) return;
+    var old=dlg.querySelector(".bnav-sec"); if(old) old.remove();
+    var nav=src.cloneNode(true); nav.removeAttribute("id"); nav.classList.add("bnav-sec");
+    nav.querySelectorAll(".bnav-i").forEach(function(b){ b.classList.toggle("on", b.dataset.nav===current); });
+    dlg.classList.add("nd-hasnav");
+    dlg.appendChild(nav);
+  }catch(e){}
+}
 function openDomain(id){ if(id==="mbti"){ openMbti(); return; } if(id==="period"){ openPeriod(); return; } state.domain=id; state.query=""; state.pick=""; state.recPick=""; state.statFilter=null; state.selMode=false; try{NDSEL.clear();}catch(_e){} state.sort="default"; state.sortAsc=false; state.searchScope="title"; state.selectQ=""; state.searchOpen=false; state.page=0; carWorkFilter=""; carSort="date"; carSortAsc=false; bookGenreFilter=""; mtnRegion=""; diaryTag=""; diaryView="list"; diaryYM=null; diaryMood=""; $("#search").value=""; $("#search").style.display="none"; $("#mvselect").style.display="none"; $("#scope").style.display="none"; if(MANIFESTS[id]&&MANIFESTS[id].scopeSort){ state.sort=MANIFESTS[id].scopeSort[0].k; state.sortAsc=false; } showView("domain"); loadAndRender(); }
 
 /* 홈: 켜둔 카테고리를 카드로. 건수는 한 번 열어본 분야만 표시(홈을 빠르게 유지). */
 function ndDeep(h){ if(typeof h!=="string"||h.charAt(0)!=="#") h="#8a7a6a"; var n=parseInt(h.slice(1),16),r=(n>>16)&255,g=(n>>8)&255,b=n&255; function d(x,f){return Math.max(0,Math.min(255,Math.round(x*f)));} var d1="rgb("+d(r,.46)+","+d(g,.46)+","+d(b,.46)+")", d2="rgb("+d(r,.20)+","+d(g,.20)+","+d(b,.20)+")", gl="rgba("+r+","+g+","+b+",.16)"; return "radial-gradient(circle at 18% 14%,"+gl+",transparent 46%),linear-gradient(145deg,"+d1+","+d2+")"; }
-var ND_LOGO_HTML='<div class="ndh-brand"><svg width="47" height="35" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg><div class="ndh-wm"><b>내도감</b><small>NAEDOGAM</small></div><span class="mhver ndh-ver">v461β</span></div><button class="ndh-sync" type="button" title="동기화" aria-label="동기화" onclick="try{syncNow()}catch(e){}">↻</button>';
+var ND_LOGO_HTML='<div class="ndh-brand"><svg width="47" height="35" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg><div class="ndh-wm"><b>내도감</b><small>NAEDOGAM</small></div><span class="mhver ndh-ver">v462β</span></div><button class="ndh-sync" type="button" title="동기화" aria-label="동기화" onclick="try{syncNow()}catch(e){}">↻</button>';
 /* 홈 카드 크기: wide(넓게=한 줄 전체) · half(보통=한 줄 2개) · mini(작게=하단 3칸). 기본값=프리셋 */
 var ND_PRESET_SIZE={running:"wide",food:"wide",recipes:"wide",movies:"half",books:"half",period:"half",diary:"half",travel:"half",mountains:"half",culture:"half",albums:"half",cellar:"half",scrap:"half",wish:"half",gift:"half",pet:"half"};
 function getHomeSizes(){ try{ return JSON.parse(store.getItem("nd.homesize")||"{}")||{}; }catch(e){ return {}; } }
@@ -2836,7 +2852,9 @@ function openSearch(){
   if(!d){ d=document.createElement("dialog"); d.id="ndSearchDlg"; document.body.appendChild(d);
     d.addEventListener("close",function(){ try{ document.querySelectorAll(".bnav-i").forEach(function(x){x.classList.remove("on");}); var h=document.querySelector('.bnav-i[data-nav="home"]'); if(h) h.classList.add("on"); }catch(e){} }); }
   d.innerHTML='<div class="nsHead"><input id="homeSearch" class="home-search" type="search" placeholder="🔍 전체 검색 — 제목·이름" autocomplete="off"><button class="nsClose" type="button">닫기</button></div><div id="homeSearchRes" class="nsRes"></div>';
+  try{ _ndCloseSections("ndSearchDlg"); }catch(e){}
   d.showModal();
+  try{ _ndAttachSectionNav(d,"search"); }catch(e){}
   var inp=d.querySelector("#homeSearch"), t=null;
   inp.addEventListener("input",function(){ clearTimeout(t); t=setTimeout(function(){ runHomeSearch(inp.value); },200); });
   d.querySelector(".nsClose").onclick=function(){ d.close(); };
@@ -5681,6 +5699,7 @@ function openInsight(){
     +'</div></div></div>';
   document.body.appendChild(dlg); dlg.showModal();
   dlg.addEventListener("click",function(e){ if(e.target===dlg) dlg.close(); });
+  try{ _ndCloseSections("insDlg"); _ndAttachSectionNav(dlg,"insight"); }catch(e){}
   document.getElementById("insWrap").onclick=function(){ dlg.close(); openWrapped(); };
   var _insAI=document.getElementById("insAI"); if(_insAI) _insAI.onclick=function(){ dlg.close(); openAIStory('insight'); };
   document.getElementById("insMirror").onclick=function(){ dlg.close(); openMirror(); };
@@ -6977,7 +6996,9 @@ function _wExport(btn){
 async function openDashboard(){
   const d=$("#dash");
   d.innerHTML=`<div class="dhead" style="display:flex;align-items:center;gap:10px"><h3 style="margin:0">📊 통계</h3><button class="pclose" onclick="this.closest('dialog').close()">✕</button></div><div class="dbody" id="dashBody"><div class="count">불러오는 중…</div></div>`;
+  try{ _ndCloseSections("dash"); }catch(e){}
   if(!d.open) d.showModal();
+  try{ _ndAttachSectionNav(d,"stats"); }catch(e){}
   const ids=getActive().filter(id=>MANIFESTS[id]);
   const data={};
   const build=(id,raw)=>{ const m=MANIFESTS[id]; data[id]=applyComputed(m,(raw||[]).map(r=>({_id:r._id||crypto.randomUUID(),...r}))); };
@@ -7290,7 +7311,7 @@ async function doImport(catId, rows){
   _prog(null);
   alert(ok+"건 등록 완료." + (ok<rows.length?(" ("+(rows.length-ok)+"건 실패)"):""));
 }
-function openSettings(){ const d=$("#settings"); renderSettingsBody(d); d.showModal(); }
+function openSettings(){ const d=$("#settings"); renderSettingsBody(d); try{ _ndCloseSections("settings"); }catch(e){} d.showModal(); try{ _ndAttachSectionNav(d,"settings"); }catch(e){} }
 /* ★v411: 사용법 — 설명만 두지 않고 "바로 해보기"로 그 자리까지 데려간다. */
 function _ndHelpItem(key, no, title, lead, steps, goLabel){
   var li = (steps||[]).map(function(t){ return "<li>"+t+"</li>"; }).join("");
