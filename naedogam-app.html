@@ -1032,6 +1032,10 @@ body.home-dark .bnav-i.on .bnav-ic svg{ stroke:#f6eddf !important; }
 .ndh-dash{ display:grid; gap:10px; }
 .ndh-dash .split{ display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px; }
 .ndh-dash .bottom-grid{ display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:9px; }
+.ndh-more>summary{ list-style:none; cursor:pointer; text-align:center; font-size:13px; font-weight:700; color:var(--ink-soft); padding:11px; border:1.5px dashed rgba(238,224,205,.28); border-radius:12px; -webkit-tap-highlight-color:transparent; }
+.ndh-more>summary::-webkit-details-marker{ display:none; }
+.ndh-more[open]>summary{ margin-bottom:10px; }
+.ndh-more-body{ display:grid; gap:10px; }
 .ndhome .card{ position:relative; overflow:hidden; border:1px solid rgba(255,242,224,.12); border-radius:25px; box-shadow:0 15px 35px rgba(0,0,0,.24); color:#f6eddf; text-align:left; cursor:pointer; isolation:isolate; }
 .ndhome .card::after{ content:""; position:absolute; inset:0; z-index:-1; border-radius:inherit; background:linear-gradient(145deg,rgba(255,255,255,.05),transparent 45%); pointer-events:none; }
 .ndhome .card h3,.ndhome .eyebrow{ margin:0; font-size:17px; font-weight:760; letter-spacing:-.055em; line-height:1.25; }
@@ -1376,7 +1380,7 @@ body{ background:radial-gradient(circle at 50% -10%, rgba(102,78,57,.16), transp
         <svg class="brandmark" width="40" height="30" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg>
         <span class="brandwm"><span class="bwm-ko">내도감</span><span class="bwm-en">NAEDOGAM</span></span>
       </button>
-      <span class="mhver">v454β</span>
+      <span class="mhver">v455β</span>
       <span class="spacer"></span>
       <span class="src-chip" id="srcChip" style="display:none">데모</span>
       <button class="icon-btn" id="searchToggle" type="button" style="display:none">🔍</button>
@@ -2473,7 +2477,7 @@ function openDomain(id){ if(id==="mbti"){ openMbti(); return; } if(id==="period"
 
 /* 홈: 켜둔 카테고리를 카드로. 건수는 한 번 열어본 분야만 표시(홈을 빠르게 유지). */
 function ndDeep(h){ if(typeof h!=="string"||h.charAt(0)!=="#") h="#8a7a6a"; var n=parseInt(h.slice(1),16),r=(n>>16)&255,g=(n>>8)&255,b=n&255; function d(x,f){return Math.max(0,Math.min(255,Math.round(x*f)));} var d1="rgb("+d(r,.46)+","+d(g,.46)+","+d(b,.46)+")", d2="rgb("+d(r,.20)+","+d(g,.20)+","+d(b,.20)+")", gl="rgba("+r+","+g+","+b+",.16)"; return "radial-gradient(circle at 18% 14%,"+gl+",transparent 46%),linear-gradient(145deg,"+d1+","+d2+")"; }
-var ND_LOGO_HTML='<div class="ndh-brand"><svg width="47" height="35" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg><div class="ndh-wm"><b>내도감</b><small>NAEDOGAM</small></div><span class="mhver ndh-ver">v454β</span></div><button class="ndh-sync" type="button" title="동기화" aria-label="동기화" onclick="try{syncNow()}catch(e){}">↻</button>';
+var ND_LOGO_HTML='<div class="ndh-brand"><svg width="47" height="35" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg><div class="ndh-wm"><b>내도감</b><small>NAEDOGAM</small></div><span class="mhver ndh-ver">v455β</span></div><button class="ndh-sync" type="button" title="동기화" aria-label="동기화" onclick="try{syncNow()}catch(e){}">↻</button>';
 /* 홈 카드 크기: wide(넓게=한 줄 전체) · half(보통=한 줄 2개) · mini(작게=하단 3칸). 기본값=프리셋 */
 var ND_PRESET_SIZE={running:"wide",food:"wide",recipes:"wide",movies:"half",books:"half",period:"half",diary:"half",travel:"half",mountains:"half",culture:"half",albums:"half",cellar:"half",scrap:"half",wish:"half",gift:"half",pet:"half"};
 function getHomeSizes(){ try{ return JSON.parse(store.getItem("nd.homesize")||"{}")||{}; }catch(e){ return {}; } }
@@ -2751,15 +2755,23 @@ function renderHome(){
 
   // 표시 순서 = 설정에서 정한 순서(getActive) 그대로. 크기(넓게/보통/작게)가 폭을 결정.
   // 넓게=한 줄 전체 / 보통=한 줄 2개 / 작게=한 줄 3개. 크기가 바뀌는 지점에서 줄을 끊음.
-  let out=""; let buf=[]; let bufSz="";
-  const flush=()=>{ if(!buf.length) return; out+=`<div class="${bufSz==="mini"?"bottom-grid":"split"}">${buf.join("")}</div>`; buf=[]; bufSz=""; };
-  active.forEach(m=>{ const sz=ndEffSize(m.id);
-    if(sz==="wide"){ flush(); out+=wideCard(m); return; }
-    if(bufSz && bufSz!==sz) flush();
-    bufSz=sz; buf.push(sz==="mini"?miniHTML(m):halfCard(m));
-    if(buf.length===(sz==="mini"?3:2)) flush();
-  });
-  flush();
+  // ★v455: 기록 적은 수집형 카테고리는 홈 하단 '더보기'로 접는다(§0-D 강한 카드 먼저). 특수/활동형은 유지.
+  const _ndAlways=["diary","running","mbti","period"];
+  const _ndFold=m=>{ if(_ndAlways.indexOf(m.id)>=0) return false; var a=rowsOf(m); return !(a&&a.length>=3); };
+  const _renderCats=(cats)=>{ let o=""; let b=[]; let bs="";
+    const fl=()=>{ if(!b.length) return; o+=`<div class="${bs==="mini"?"bottom-grid":"split"}">${b.join("")}</div>`; b=[]; bs=""; };
+    cats.forEach(m=>{ const sz=ndEffSize(m.id);
+      if(sz==="wide"){ fl(); o+=wideCard(m); return; }
+      if(bs && bs!==sz) fl();
+      bs=sz; b.push(sz==="mini"?miniHTML(m):halfCard(m));
+      if(b.length===(sz==="mini"?3:2)) fl();
+    });
+    fl(); return o;
+  };
+  const _mainCats=active.filter(m=>!_ndFold(m));
+  const _foldCats=active.filter(_ndFold);
+  let out=_renderCats(_mainCats);
+  if(_foldCats.length){ out+=`<details class="ndh-more"><summary>＋ 기록 적은 도감 더보기 (${_foldCats.length})</summary><div class="ndh-more-body">${_renderCats(_foldCats)}</div></details>`; }
 
   const tabs = `<div class="ndh-tabs">`+active.map((m,i)=>`<button class="ndh-tab${i===0?" on":""}" data-id="${m.id}"${i===0?` style="background:${ND_COLORS[m.id]||"#48423a"};color:#fff6e8"`:""}>${iconOf(m)}<span>${m.title}</span></button>`).join("")+`</div>`;
   const _otd=_ndOnThisDay(); window._otdCache=_otd;
