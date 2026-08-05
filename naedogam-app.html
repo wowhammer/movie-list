@@ -1438,7 +1438,7 @@ body{ background:radial-gradient(circle at 50% -10%, rgba(102,78,57,.16), transp
         <svg class="brandmark" width="40" height="30" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg>
         <span class="brandwm"><span class="bwm-ko">내도감</span><span class="bwm-en">NAEDOGAM</span></span>
       </button>
-      <span class="mhver">v482β</span>
+      <span class="mhver">v483β</span>
       <span class="spacer"></span>
       <span class="src-chip" id="srcChip" style="display:none">데모</span>
       <button class="icon-btn" id="searchToggle" type="button" style="display:none">🔍</button>
@@ -2574,7 +2574,7 @@ function openDomain(id){ if(id==="mbti"){ openMbti(); return; } if(id==="period"
 
 /* 홈: 켜둔 카테고리를 카드로. 건수는 한 번 열어본 분야만 표시(홈을 빠르게 유지). */
 function ndDeep(h){ if(typeof h!=="string"||h.charAt(0)!=="#") h="#8a7a6a"; var n=parseInt(h.slice(1),16),r=(n>>16)&255,g=(n>>8)&255,b=n&255; function d(x,f){return Math.max(0,Math.min(255,Math.round(x*f)));} var d1="rgb("+d(r,.60)+","+d(g,.60)+","+d(b,.60)+")", d2="rgb("+d(r,.20)+","+d(g,.20)+","+d(b,.20)+")"; return "linear-gradient(180deg,rgba(255,255,255,.06),transparent 30%),linear-gradient(150deg,"+d1+","+d2+")"; }
-var ND_LOGO_HTML='<div class="ndh-brand"><svg width="47" height="35" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg><div class="ndh-wm"><b>내도감</b><small>NAEDOGAM</small></div><span class="mhver ndh-ver">v482β</span></div><button class="ndh-sync" type="button" title="동기화" aria-label="동기화" onclick="try{syncNow()}catch(e){}">↻</button>';
+var ND_LOGO_HTML='<div class="ndh-brand"><svg width="47" height="35" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg><div class="ndh-wm"><b>내도감</b><small>NAEDOGAM</small></div><span class="mhver ndh-ver">v483β</span></div><button class="ndh-sync" type="button" title="동기화" aria-label="동기화" onclick="try{syncNow()}catch(e){}">↻</button>';
 /* 홈 카드 크기: wide(넓게=한 줄 전체) · half(보통=한 줄 2개) · mini(작게=하단 3칸). 기본값=프리셋 */
 var ND_PRESET_SIZE={running:"wide",food:"wide",recipes:"wide",movies:"half",books:"half",period:"half",diary:"half",travel:"half",mountains:"half",culture:"half",albums:"half",cellar:"half",scrap:"half",wish:"half",gift:"half",pet:"half"};
 function getHomeSizes(){ try{ return JSON.parse(store.getItem("nd.homesize")||"{}")||{}; }catch(e){ return {}; } }
@@ -2812,10 +2812,12 @@ function renderHome(){
   }
   setTimeout(function(){ try{ _ndHelpChipBind(); }catch(e){} }, 0);
   const rowsOf=m=> CACHE[m.id]||loadPersist(m.id)||null;
+  /* ★v483: 생리주기는 소프트삭제 껍데기(start 없음/메모=[삭제됨])를 세지 않는다 */
+  const _liveLen=m=>{ let a=rowsOf(m); if(!a) return null; if(m.id==="period") a=a.filter(r=>r&&r.start&&r.note!=="[삭제됨]"); return a.length; };
   const coversOf=m=>{ const a=rowsOf(m); const out=[]; if(a){ for(let i=a.length-1;i>=0&&out.length<5;i--){ const c=a[i]&&(a[i].cover||a[i]._cover); if(c) out.push(c);} } return out; };
   const UNIT={movies:"편",books:"권",mountains:"봉",running:"회",diary:"편",travel:"곳",food:"곳",recipes:"개",culture:"편",albums:"장",subs:"개",cards:"개",carlog:"건",wish:"개",bucket:"개",quote:"개",gift:"개",insurance:"개",scrap:"개",cellar:"병",meds:"개",checkup:"건",assets:"개",pet:""};
   const unitOf=m=> UNIT[m.id]!=null?UNIT[m.id]:"개";
-  const cntNum=m=>{ const a=rowsOf(m); return a?`${fmt(a.length)}`:""; };
+  const cntNum=m=>{ const n=_liveLen(m); return n==null?"":`${fmt(n)}`; };
   const colOf=m=> ND_COLORS[m.id]||"#8a7a6a";
   const esc=u=>String(u).replace(/'/g,"%27").replace(/"/g,"&quot;");
   const bg=m=>`style="background:${ND_GRAD[m.id]||ndDeep(colOf(m))}"`;
@@ -2862,7 +2864,7 @@ function renderHome(){
   const halfCard=m=>{ if(m.id==="diary") return diaryWideHTML(m); const nat=ndNat(m.id); if(nat==="cycle") return cycleHTML(m); return collHTML(m); };
 
   // 히어로
-  const totalItems = active.reduce((s,m)=>{const a=rowsOf(m);return s+(a?a.length:0);},0);
+  const totalItems = active.reduce((s,m)=>{const n=_liveLen(m);return s+(n||0);},0);
   let _hMb=""; try{ const _s=(typeof _mbtiSaved==="function")&&_mbtiSaved(); const _ty=_s&&_s.latest&&_s.latest.type; if(_ty){ const _nk=(typeof _ndNick==="function")?_ndNick(_ty,(_s.latest.nick||"")):""; _hMb=String(_ty)+(_nk?(" "+_nk):""); } }catch(e){}
   let _hMonth=0; { const _n=new Date(); const _ym=_n.getFullYear()+"-"+String(_n.getMonth()+1).padStart(2,"0"); active.forEach(m=>{ const a=rowsOf(m); if(!a) return; a.forEach(r=>{ let iso=""; try{ iso=String((typeof _isoOf==="function"&&_isoOf(_dateOf(r)))||_dateOf(r)); }catch(e){ iso=_dateOf(r); } if(/^\d{4}-\d{2}/.test(iso)&&iso.slice(0,7)===_ym) _hMonth++; }); }); }
   const _hInfo=[`🗂 ${active.length}개 카테고리`, (_hMb?`🧭 나의 성향 ${_hMb}`:""), (_hMonth>0?`📅 이번 달 +${fmt(_hMonth)}`:"")].filter(Boolean).map(c=>`<span>${String(c).replace(/</g,"&lt;")}</span>`).join("");
@@ -2900,7 +2902,7 @@ function renderHome(){
   { var _hc=home.querySelector("#ndHeroCard"); if(_hc) _hc.onclick=function(){ ndCollectionWall(); }; }
 
   { const _need=active.filter(m=>{ const _st=(Date.now()-(Number(store.getItem(persistKey(m.id)+"|t")||0)))>NDCACHE_TTL; return !((CACHE[m.id]||loadPersist(m.id)) && !_st); }).map(m=>m.id);
-    const _hero=()=>{ const el=home.querySelector("#ndHeroTotal"); if(el){ let t=0; active.forEach(m=>{ const a=CACHE[m.id]||loadPersist(m.id); if(a) t+=a.length; }); el.textContent=fmt(t); } };
+    const _hero=()=>{ const el=home.querySelector("#ndHeroTotal"); if(el){ let t=0; active.forEach(m=>{ let a=CACHE[m.id]||loadPersist(m.id); if(a){ if(m.id==="period") a=a.filter(r=>r&&r.start&&r.note!=="[삭제됨]"); t+=a.length; } }); el.textContent=fmt(t); } };
     const _apply=(id,rows)=>{ CACHE[id]=rows; savePersist(id,rows); if(id!=="period"){ const el=home.querySelector(`.ndc[data-cnt="${id}"]`); if(el) el.textContent=`${fmt(rows.length)}`; const ee=home.querySelector(`.nd-exp[data-exp="${id}"]`); if(ee){ const _ei=_ndExpCount(id,rows); ee.textContent=_ei?`${_ei.label} ${fmt(_ei.n)}`:""; } } _hero(); };
     const _one=id=>{ const m=MANIFESTS[id]; try{ sourceFor(m).list(id).then(r=>_apply(id,r)).catch(()=>{}); }catch(e){} };
     if(_need.length){ let _src; try{ _src=sheetSrc(); }catch(e){ _src=null; }
