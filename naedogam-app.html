@@ -1441,7 +1441,7 @@ body{ background:radial-gradient(circle at 50% -10%, rgba(102,78,57,.16), transp
         <svg class="brandmark" width="40" height="30" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg>
         <span class="brandwm"><span class="bwm-ko">내도감</span><span class="bwm-en">NAEDOGAM</span></span>
       </button>
-      <span class="mhver">v485</span>
+      <span class="mhver">v486</span>
       <span class="spacer"></span>
       <span class="src-chip" id="srcChip" style="display:none">데모</span>
       <button class="icon-btn" id="searchToggle" type="button" style="display:none">🔍</button>
@@ -2577,7 +2577,7 @@ function openDomain(id){ if(id==="mbti"){ openMbti(); return; } if(id==="period"
 
 /* 홈: 켜둔 카테고리를 카드로. 건수는 한 번 열어본 분야만 표시(홈을 빠르게 유지). */
 function ndDeep(h){ if(typeof h!=="string"||h.charAt(0)!=="#") h="#8a7a6a"; var n=parseInt(h.slice(1),16),r=(n>>16)&255,g=(n>>8)&255,b=n&255; function d(x,f){return Math.max(0,Math.min(255,Math.round(x*f)));} var d1="rgb("+d(r,.60)+","+d(g,.60)+","+d(b,.60)+")", d2="rgb("+d(r,.20)+","+d(g,.20)+","+d(b,.20)+")"; return "linear-gradient(180deg,rgba(255,255,255,.06),transparent 30%),linear-gradient(150deg,"+d1+","+d2+")"; }
-var ND_LOGO_HTML='<div class="ndh-brand"><svg width="47" height="35" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg><div class="ndh-wm"><b>내도감</b><small>NAEDOGAM</small></div><span class="mhver ndh-ver">v485</span></div><button class="ndh-sync" type="button" title="동기화" aria-label="동기화" onclick="try{syncNow()}catch(e){}">↻</button>';
+var ND_LOGO_HTML='<div class="ndh-brand"><svg width="47" height="35" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg><div class="ndh-wm"><b>내도감</b><small>NAEDOGAM</small></div><span class="mhver ndh-ver">v486</span></div><button class="ndh-sync" type="button" title="동기화" aria-label="동기화" onclick="try{syncNow()}catch(e){}">↻</button>';
 /* 홈 카드 크기: wide(넓게=한 줄 전체) · half(보통=한 줄 2개) · mini(작게=하단 3칸). 기본값=프리셋 */
 var ND_PRESET_SIZE={running:"wide",food:"wide",recipes:"wide",movies:"half",books:"half",period:"half",diary:"half",travel:"half",mountains:"half",culture:"half",albums:"half",cellar:"half",scrap:"half",wish:"half",gift:"half",pet:"half"};
 function getHomeSizes(){ try{ return JSON.parse(store.getItem("nd.homesize")||"{}")||{}; }catch(e){ return {}; } }
@@ -6713,9 +6713,31 @@ function _ndInsightFacts(ids, data){
 }
 /* v407: 프록시 프롬프트를 고칠 수 없으므로, 보내는 재료 끝에 쓰기 규칙을 함께 싣는다(A/B로 효과 확인). */
 function _aiRules(){
-  /* ★v409: 규칙은 이제 Apps Script 프롬프트(버전 10)가 담당한다.
-     앱에서도 규칙을 보내면 지시가 겹쳐 AI가 번호 목록으로 답하는 문제가 생겼다(실측). 그래서 비운다. */
-  return "";
+   /* v486: v409에서 비웠던 자리에 A~G 교정 지침 재투입. A/B 4판 검증(baseline/v3/+F/+G),
+      끝문장 미화·문단 칭호엔딩 개선. 과거 '번호목록' 회귀는 규칙 '중복'이 원인이었고,
+      이 블록은 예시형 교정이라 산문 유지 실측 확인. 되돌리려면 return ""; 로. */
+   return `
+
+[교정 지침] 아래는 재료가 아니라 글쓰기 교정 지침이다. 절대 재료로 인용하거나 글에 옮기지 마라. 앞의 모든 원칙에 더해 아래를 반드시 지켜라. 각 항목은 나쁜 예에서 좋은 예로 고치는 형식이다.
+
+A. 빈도 부사를 지어내지 마라. 매일, 날마다, 나날이, 늘, 항상, 언제나 는 재료에 그 빈도가 분명히 적혀 있을 때만 쓴다. 특히 글의 마지막 규정 문장에서 습관적으로 튀어나오니 끝까지 감시하라.
+   나쁜 예: "매일같이 달리며", "날마다의 실천을 밑거름 삼아 매일 조금씩"
+   좋은 예: "여러 번 산을 오르고 이어서 달리며", "쌓아 온 실천을 밑거름 삼아"
+
+B. 땀과 노력을 감동의 소재로 쓰지 마라. 땀, 흘린 땀, 스스로 만든 땀, 노력의 결실, 정직한 노력 같은 표현을 전면 금지한다. 그가 무엇을 했는지 동작으로만 규정하라.
+   나쁜 예: "스스로 노력해 흘린 땀이 주는 풍족함", "정직한 노력으로 삶을 일군"
+   좋은 예: "직접 몸을 움직여 결과를 쌓아 온", "요행을 믿지 않고 발로 뛰어 만든"
+   기질 형용사(부지런한, 집요한, 무던한)는 마음껏 써도 된다.
+
+C. 사용자가 담담하게 쓴 말을 거창한 문어체로 부풀리지 마라. 규정 문장의 온도를 인용의 온도에 맞춘다.
+
+D. 재료에 없는 소망이나 아쉬움을 지어내지 마라. 두 사실을 역접으로 잇는 순간 없던 아쉬움이 생긴다. 한 사실은 그대로 쓴다.
+
+E. 같은 형용사나 규정어를 한 편에서 두 번 이상 반복하지 마라. 반복되면 매번 다른 말로 바꾼다.
+
+F. 마지막 규정 문장이 가장 자주 실패한다. 여기에 정직한, 참된, 참으로, 미식가 같은, 삶의 주인 같은 미화를 붙이지 마라. 그 사람이 실제로 한 동작이나 취향으로 담담하게 끝맺어라.
+
+G. 문단 끝을 당신은 어떠한 무엇입니다 처럼 사람에게 별명을 붙여 맺지 마라. 나쁜 예: 당신은 삶의 풍요를 증명해 내는 빛나는 행동가입니다. 좋은 예: 그래서 당신은 트레드밀이든 야외든 가리지 않고 신발을 신고 나선다. 문단은 그 사람이 실제로 한 동작이나 고른 것으로 담담하게 끝맺어라.`;
 }
 function _wAiSummary(ids, data){ try{ var arr=[]; (ids||[]).forEach(function(id){ var m=MANIFESTS[id]; var rows=(data&&data[id])||[]; if(m&&rows.length){ arr.push({t:(m.title||id), n:rows.length}); } }); arr.sort(function(a,b){ return b.n-a.n; }); var top=arr.slice(0,7).map(function(x){ return x.t+' '+x.n+'개'; }); if(!top.length) return ''; return '[중요 안내] 아래 숫자는 사용자가 앱 "내도감"에 담아둔(수집·기록한) 항목 수예요. 실제로 모두 경험/방문/완료했다는 뜻이 아닙니다. 그러니 "올랐다/다녀왔다/떠났다/봤다"처럼 실제 경험으로 단정하지 말고, "모았다/담았다/기록했다/골랐다"처럼 수집의 관점으로 표현해 주세요.\n\n도감에 담은 항목: '+top.join(', ')+'.'; }catch(e){ return ''; } }
 function ndAISetPersona(el){ try{ window.__wAiPersona=el.getAttribute('data-p'); try{ store.setItem('nd.aiPersona', window.__wAiPersona); }catch(_e){} var box=el.parentNode; box.querySelectorAll('.waiP').forEach(function(b){ b.classList.remove('on'); }); el.classList.add('on'); }catch(e){} }
