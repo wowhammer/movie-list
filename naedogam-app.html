@@ -1443,7 +1443,7 @@ body{ background:radial-gradient(circle at 50% -10%, rgba(102,78,57,.16), transp
         <svg class="brandmark" width="40" height="30" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg>
         <span class="brandwm"><span class="bwm-ko">내도감</span><span class="bwm-en">NAEDOGAM</span></span>
       </button>
-      <span class="mhver">v494</span>
+      <span class="mhver">v495</span>
       <span class="spacer"></span>
       <span class="src-chip" id="srcChip" style="display:none">데모</span>
       <button class="icon-btn" id="searchToggle" type="button" style="display:none">🔍</button>
@@ -2579,7 +2579,7 @@ function openDomain(id){ if(id==="mbti"){ openMbti(); return; } if(id==="period"
 
 /* 홈: 켜둔 카테고리를 카드로. 건수는 한 번 열어본 분야만 표시(홈을 빠르게 유지). */
 function ndDeep(h){ if(typeof h!=="string"||h.charAt(0)!=="#") h="#8a7a6a"; var n=parseInt(h.slice(1),16),r=(n>>16)&255,g=(n>>8)&255,b=n&255; function d(x,f){return Math.max(0,Math.min(255,Math.round(x*f)));} var d1="rgb("+d(r,.60)+","+d(g,.60)+","+d(b,.60)+")", d2="rgb("+d(r,.20)+","+d(g,.20)+","+d(b,.20)+")"; return "linear-gradient(180deg,rgba(255,255,255,.06),transparent 30%),linear-gradient(150deg,"+d1+","+d2+")"; }
-var ND_LOGO_HTML='<div class="ndh-brand"><svg width="47" height="35" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg><div class="ndh-wm"><b>내도감</b><small>NAEDOGAM</small></div><span class="mhver ndh-ver">v494</span></div><button class="ndh-sync" type="button" title="동기화" aria-label="동기화" onclick="try{syncNow()}catch(e){}">↻</button>';
+var ND_LOGO_HTML='<div class="ndh-brand"><svg width="47" height="35" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg><div class="ndh-wm"><b>내도감</b><small>NAEDOGAM</small></div><span class="mhver ndh-ver">v495</span></div><button class="ndh-sync" type="button" title="동기화" aria-label="동기화" onclick="try{syncNow()}catch(e){}">↻</button>';
 /* 홈 카드 크기: wide(넓게=한 줄 전체) · half(보통=한 줄 2개) · mini(작게=하단 3칸). 기본값=프리셋 */
 var ND_PRESET_SIZE={running:"wide",food:"wide",recipes:"wide",movies:"half",books:"half",period:"half",diary:"half",travel:"half",mountains:"half",culture:"half",albums:"half",cellar:"half",scrap:"half",wish:"half",gift:"half",pet:"half"};
 function getHomeSizes(){ try{ return JSON.parse(store.getItem("nd.homesize")||"{}")||{}; }catch(e){ return {}; } }
@@ -6752,18 +6752,16 @@ function ndAISetPersona(el){ try{ window.__wAiPersona=el.getAttribute('data-p');
 function _companionRules(){ return `
 
 [이 지시는 앞의 모든 지시와 형식보다 우선한다]
-너는 그의 일기를 읽었다. 일기를 그대로 다시 읽어주지 마라. 그가 남긴 감정 하나에 조용히 응답하라. 정보가 아니라 정서를 나눠라.
-[해라]
-- 그가 쓴 감정 한 대목만 든다. 그 감정이 어떤 것인지 함께 느끼며 낮게 응답한다. 그 경험을 알아보는 목소리로.
-- 한 번 또렷하게 알아봤으면 거기서 멈춰라. 같은 말을 다른 표현으로 반복하지 마라(이름 붙일 수 없는, 명명되지 않은, 색깔 없는 식으로 빙빙 돌지 마라). 한 감정을 여러 번 고쳐 말하지 마라.
-- 아주 짧아도 된다. 서너 문장이면 충분하다. 그 마음 곁에 잠시 머물고 담백하게 끝낸다.
-[하지 마라]
-- 추상으로 흐르지 마라. 관념어(적막, 침묵, 깊이, 색깔 같은 말) 남발 금지. 그 밤의 구체적인 결로 말하라. 잠은 오는데 생각이 안 꺼지는, 뒤척이는 그런 결.
-- 그 사람 전체를 안다고 하지 마라(나는 너를 안다, 지켜봤다). 그가 쓴 그 마음에만 응답한다.
-- 판정하지 마라(충분하다, 잘하고 있다, 대단하다). 응원, 조언, 미래, 다짐 없음.
-- 당신은 어떠한 사람입니다 라는 규정으로 닫지 마라.
-- 정확한 우리말만 써라. 뭉개지거나 어색한 조어 금지.
-목표: 다 읽고 났을 때 내 마음을 누가 알아봐 줬다는 느낌. 담백하게.`; }
+너는 그의 일기 여러 편을 읽었다. 그의 삶을 요약하거나 묘사하지 마라. 대신 마음이 담긴 대목 서너 개에 하나씩 응답하는 짧은 편지를 써라.
+[구조]
+- 결이 다른 일기 대목 서너 개를 고른다(무거운 밤, 힘든 하루, 작은 기쁨처럼).
+- 대목마다: 그 순간을 한 줄로 떠올리고, 그 마음이 어떤 것인지 알아보는 응답을 한두 문장 건넨 뒤 다음 대목으로 넘어간다.
+- 그렇게 짧은 응답 서너 개가 이어진다. 길이는 거기서 자연히 나온다. 요약 문단을 따로 만들지 마라.
+[금지]
+- 삶을 묘사·요약하는 문장(어떠한 풍경이 떠오릅니다, 자리하고 있습니다, 보여줍니다, 자취는 어떠합니다) 전부 금지. 사실 나열 금지.
+- 아는 척(나는 안다, 지켜봤다), 판정(충분하다, 성숙한, 대단한), 규정(당신은 어떠한 사람입니다), 응원·조언·미래.
+- 클리셰(땀, 정직한 노력, 미려한, 따뜻하고 어떠한 미화), 감동 노리기.
+목표: 흩어진 내 마음들을 누군가 하나하나 알아봐 준 느낌.`; }
 function _aiLivedCount(){
   try{
     var g=function(id){ try{ return (window.CACHE&&CACHE[id])||loadPersist(id)||[]; }catch(e){ return []; } };
