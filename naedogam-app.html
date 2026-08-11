@@ -1451,7 +1451,7 @@ body{ background:radial-gradient(circle at 50% -10%, rgba(102,78,57,.16), transp
         <svg class="brandmark" width="40" height="30" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg>
         <span class="brandwm"><span class="bwm-ko">내도감</span><span class="bwm-en">NAEDOGAM</span></span>
       </button>
-      <span class="mhver">v507</span>
+      <span class="mhver">v508</span>
       <span class="spacer"></span>
       <span class="src-chip" id="srcChip" style="display:none">데모</span>
       <button class="icon-btn" id="searchToggle" type="button" style="display:none">🔍</button>
@@ -2149,13 +2149,13 @@ var ND_LAB_REF=[
  {item:"이완기혈압", aliases:["이완기","최저혈압","DBP","이완기혈압(DBP)"], j:function(v){ if(v<80)return"정상"; if(v<90)return"경계"; return"질환의심"; }},
  {item:"공복혈당", aliases:["혈당","공복 혈당","FBS","glucose","글루코스"], j:function(v){ if(v<100)return"정상"; if(v<126)return"경계"; return"질환의심"; }},
  {item:"총콜레스테롤", aliases:["TC","총콜레스테롤","total","콜레스테롤(총)","총 콜레스테롤"], j:function(v){ if(v<200)return"정상"; if(v<240)return"경계"; return"질환의심"; }},
- {item:"HDL콜레스테롤", aliases:["HDL","HDL-C","HDL콜레스테롤"]},
+ {item:"HDL콜레스테롤", aliases:["HDL","HDL-C","HDL콜레스테롤"], j:function(v){ if(v<40)return"경계"; return"정상"; }},
  {item:"LDL콜레스테롤", aliases:["LDL","LDL-C","LDL콜레스테롤"], j:function(v){ if(v<130)return"정상"; if(v<160)return"경계"; return"질환의심"; }},
  {item:"중성지방", aliases:["TG","트리글리세라이드","트리글리세리드","중성지방(TG)"], j:function(v){ if(v<150)return"정상"; if(v<200)return"경계"; return"질환의심"; }},
  {item:"AST", aliases:["SGOT","AST(SGOT)","AST/SGOT","ASTSGOT"], j:function(v){ if(v<=40)return"정상"; if(v<=60)return"경계"; return"질환의심"; }},
  {item:"ALT", aliases:["SGPT","ALT(SGPT)","ALT/SGPT","ALTSGPT"], j:function(v){ if(v<=40)return"정상"; if(v<=60)return"경계"; return"질환의심"; }},
- {item:"감마지티피", aliases:["GGT","γ-GTP","γGTP","감마GTP","rGTP","gGTP"]},
- {item:"혈색소", aliases:["헤모글로빈","Hb","혈색소량","hemoglobin"]},
+ {item:"감마지티피", aliases:["GGT","γ-GTP","γGTP","감마GTP","rGTP","gGTP"], j:function(v){ if(v<=63)return"정상"; if(v<=100)return"경계"; return"질환의심"; }},
+ {item:"혈색소", aliases:["헤모글로빈","Hb","혈색소량","hemoglobin"], j:function(v){ if(v<10)return"질환의심"; if(v<12)return"경계"; if(v>18)return"경계"; return"정상"; }},
  {item:"혈청크레아티닌", aliases:["크레아티닌","Cr","혈청 크레아티닌","creatinine"], j:function(v){ if(v<=1.5)return"정상"; if(v<=2.0)return"경계"; return"질환의심"; }},
  {item:"eGFR", aliases:["신사구체여과율","사구체여과율","GFR","eGFR","추정사구체여과율"], j:function(v){ if(v>=60)return"정상"; if(v>=45)return"경계"; return"질환의심"; }}
 ];
@@ -2614,7 +2614,7 @@ function openDomain(id){ if(id==="mbti"){ openMbti(); return; } if(id==="period"
 
 /* 홈: 켜둔 카테고리를 카드로. 건수는 한 번 열어본 분야만 표시(홈을 빠르게 유지). */
 function ndDeep(h){ if(typeof h!=="string"||h.charAt(0)!=="#") h="#8a7a6a"; var n=parseInt(h.slice(1),16),r=(n>>16)&255,g=(n>>8)&255,b=n&255; function d(x,f){return Math.max(0,Math.min(255,Math.round(x*f)));} var d1="rgb("+d(r,.60)+","+d(g,.60)+","+d(b,.60)+")", d2="rgb("+d(r,.20)+","+d(g,.20)+","+d(b,.20)+")"; return "linear-gradient(180deg,rgba(255,255,255,.06),transparent 30%),linear-gradient(150deg,"+d1+","+d2+")"; }
-var ND_LOGO_HTML='<div class="ndh-brand"><svg width="47" height="35" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg><div class="ndh-wm"><b>내도감</b><small>NAEDOGAM</small></div><span class="mhver ndh-ver">v507</span></div><button class="ndh-sync" type="button" title="동기화" aria-label="동기화" onclick="try{syncNow()}catch(e){}">↻</button>';
+var ND_LOGO_HTML='<div class="ndh-brand"><svg width="47" height="35" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg><div class="ndh-wm"><b>내도감</b><small>NAEDOGAM</small></div><span class="mhver ndh-ver">v508</span></div><button class="ndh-sync" type="button" title="동기화" aria-label="동기화" onclick="try{syncNow()}catch(e){}">↻</button>';
 /* 홈 카드 크기: wide(넓게=한 줄 전체) · half(보통=한 줄 2개) · mini(작게=하단 3칸). 기본값=프리셋 */
 var ND_PRESET_SIZE={running:"wide",food:"wide",recipes:"wide",movies:"half",books:"half",period:"half",diary:"half",travel:"half",mountains:"half",culture:"half",albums:"half",cellar:"half",scrap:"half",wish:"half",gift:"half",pet:"half"};
 function getHomeSizes(){ try{ return JSON.parse(store.getItem("nd.homesize")||"{}")||{}; }catch(e){ return {}; } }
@@ -3365,6 +3365,17 @@ function renderStats(m, rows){
   if(m.statStyle==="mood"){ $("#stats").style.display="none"; $("#stats").innerHTML=""; return; }
   $("#stats").style.display="";
   $("#stats").className="stats";
+  if(m.id==="checkup"){
+    var _cr=(rows||[]).filter(function(r){return r;});
+    var _latest=null,_lt=-1;
+    _cr.forEach(function(r){ var t=_ndWallTs(r.date||r["검사일"]||"")||0; if(t>=_lt){ _lt=t; _latest=r; } });
+    var _bad=0,_warn=0;
+    if(_latest){ var _a=[]; try{ _a=JSON.parse(_latest.results||_latest["결과항목"]||"[]"); }catch(e){} if(!Array.isArray(_a)) _a=[];
+      _a.forEach(function(x){ if(!x) return; var nm=(x.normal!=null?x.normal:(x.range!=null?x.range:x["정상범위"])); var rk=(typeof ndLabStatusRank==="function")?ndLabStatusRank(nm):0; if(rk>=3) _bad++; else if(rk===2) _warn++; }); }
+    var _c=function(n,l,col){ return '<div class="stat"><div class="n"'+(col?' style="color:'+col+'"':'')+'>'+n+'</div><div class="l">'+l+'</div></div>'; };
+    $("#stats").innerHTML=_c(_cr.length,"전체","")+_c(_bad,"질환의심",(_bad?"#e5675f":""))+_c(_warn,"경계",(_warn?"#d9a441":""));
+    return;
+  }
   $("#stats").innerHTML=m.stats.map((s,idx)=>{ let n=calcStat(s,rows);
     if(s.type==="sum"||s.type==="avgComputed"||s.type==="max") n=(s.unit==="원")?(_ndWonShort(n)+"원"):(fmt(n)+(s.unit?` ${s.unit}`:""));
     const clickable = (s.type==="count"||s.type==="countIf");
@@ -4671,7 +4682,7 @@ function openRecordForm(m, existing, prefill){
       if(!arr.length) arr=[{item:"",value:"",normal:""}];
       const esc3=x=>String(x==null?"":x).replace(/"/g,'&quot;');
       const rowH=t=>`<div class="lab-row"><input class="lab-item" placeholder="항목 (예: 총콜레스테롤)" value="${esc3(t.item)}"><input class="lab-val" placeholder="수치" value="${esc3(t.value)}">${ndLabSelectHTML(t.normal)}<button type="button" class="lab-del" title="이 줄 삭제">✕</button></div>`;
-      return `<label>${ndFL(f)}</label>${m.id==="checkup"?'<div class="hint" style="margin:-2px 0 7px;line-height:1.55">수치를 넣으면 표준범위로 <b>정상·경계·질환의심</b>이 자동 표시돼요. ※의학적 진단이 아니며 실제 판정은 <b>검진 결과지가 우선</b>이에요 — 이미 적힌 판정은 그대로 둡니다.</div>':""}<div class="lab-head"><span class="lab-h1">항목</span><span class="lab-h2">수치</span><span class="lab-h3">판정</span><span class="lab-hx"></span></div><div class="rf-labrows" data-k="${f.k}">${arr.map(rowH).join("")}</div>${m.id==="checkup"?`<button type="button" class="lab-add lab-preset" data-k="${f.k}" style="border-style:solid;border-color:var(--brand,#e0483f);color:var(--brand,#e0483f);margin-top:8px">🩺 국가검진 표준항목 불러오기</button>`:""}<button type="button" class="lab-add" data-k="${f.k}">＋ 항목 추가</button>`;
+      return `<label>${ndFL(f)}</label>${m.id==="checkup"?'<div class="hint" style="margin:-2px 0 7px;line-height:1.55">수치를 넣으면 표준범위로 <b>정상·경계·질환의심</b>이 자동 표시돼요. ※의학적 진단이 아니며 실제 판정은 <b>검진 결과지가 우선</b>이에요 — 성별·검사기관에 따라 다를 수 있고, 이미 적힌 판정은 그대로 둡니다.</div>':""}<div class="lab-head"><span class="lab-h1">항목</span><span class="lab-h2">수치</span><span class="lab-h3">판정</span><span class="lab-hx"></span></div><div class="rf-labrows" data-k="${f.k}">${arr.map(rowH).join("")}</div>${m.id==="checkup"?`<button type="button" class="lab-add lab-preset" data-k="${f.k}" style="border-style:solid;border-color:var(--brand,#e0483f);color:var(--brand,#e0483f);margin-top:8px">🩺 국가검진 표준항목 불러오기</button>`:""}<button type="button" class="lab-add" data-k="${f.k}">＋ 항목 추가</button>`;
     }
     if(f.money||f.comma){ const nz=(val==null||val===""||isNaN(Number(val)))?"":Number(val).toLocaleString(); return `<label>${ndFL(f)}</label><input class="rf" data-k="${f.k}" data-type="money" inputmode="numeric" value="${nz}" autocomplete="off" />`; }
     if(f.type==="checks"){ var _arr=Array.isArray(val)?val.map(String):(val?String(val).split(",").map(function(x){return x.trim();}).filter(Boolean):[]);
