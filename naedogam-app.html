@@ -1451,7 +1451,7 @@ body{ background:radial-gradient(circle at 50% -10%, rgba(102,78,57,.16), transp
         <svg class="brandmark" width="40" height="30" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg>
         <span class="brandwm"><span class="bwm-ko">내도감</span><span class="bwm-en">NAEDOGAM</span></span>
       </button>
-      <span class="mhver">v505</span>
+      <span class="mhver">v506</span>
       <span class="spacer"></span>
       <span class="src-chip" id="srcChip" style="display:none">데모</span>
       <button class="icon-btn" id="searchToggle" type="button" style="display:none">🔍</button>
@@ -2587,7 +2587,7 @@ function openDomain(id){ if(id==="mbti"){ openMbti(); return; } if(id==="period"
 
 /* 홈: 켜둔 카테고리를 카드로. 건수는 한 번 열어본 분야만 표시(홈을 빠르게 유지). */
 function ndDeep(h){ if(typeof h!=="string"||h.charAt(0)!=="#") h="#8a7a6a"; var n=parseInt(h.slice(1),16),r=(n>>16)&255,g=(n>>8)&255,b=n&255; function d(x,f){return Math.max(0,Math.min(255,Math.round(x*f)));} var d1="rgb("+d(r,.60)+","+d(g,.60)+","+d(b,.60)+")", d2="rgb("+d(r,.20)+","+d(g,.20)+","+d(b,.20)+")"; return "linear-gradient(180deg,rgba(255,255,255,.06),transparent 30%),linear-gradient(150deg,"+d1+","+d2+")"; }
-var ND_LOGO_HTML='<div class="ndh-brand"><svg width="47" height="35" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg><div class="ndh-wm"><b>내도감</b><small>NAEDOGAM</small></div><span class="mhver ndh-ver">v505</span></div><button class="ndh-sync" type="button" title="동기화" aria-label="동기화" onclick="try{syncNow()}catch(e){}">↻</button>';
+var ND_LOGO_HTML='<div class="ndh-brand"><svg width="47" height="35" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg><div class="ndh-wm"><b>내도감</b><small>NAEDOGAM</small></div><span class="mhver ndh-ver">v506</span></div><button class="ndh-sync" type="button" title="동기화" aria-label="동기화" onclick="try{syncNow()}catch(e){}">↻</button>';
 /* 홈 카드 크기: wide(넓게=한 줄 전체) · half(보통=한 줄 2개) · mini(작게=하단 3칸). 기본값=프리셋 */
 var ND_PRESET_SIZE={running:"wide",food:"wide",recipes:"wide",movies:"half",books:"half",period:"half",diary:"half",travel:"half",mountains:"half",culture:"half",albums:"half",cellar:"half",scrap:"half",wish:"half",gift:"half",pet:"half"};
 function getHomeSizes(){ try{ return JSON.parse(store.getItem("nd.homesize")||"{}")||{}; }catch(e){ return {}; } }
@@ -2637,12 +2637,18 @@ function _ndLoadSettingsSheet(){
 }
 function ndEffSize(id){ var o; try{o=getHomeSizes();}catch(e){o={};} return o[id]||ND_PRESET_SIZE[id]||"mini"; }
 function ndNat(id){ if(id==="running")return "run"; if(id==="food"||id==="recipes")return "food"; if(id==="period")return "cycle"; if(id==="diary")return "diary"; return "coll"; }
-var ND_STARTERS=["movies","books","mountains","running","diary","bucket","food","travel","albums","quote","wish","mbti"];
+var ND_STARTERS=["movies","books","mountains","running","diary","bucket","food","travel","quote","wish","mbti"];
+/* ★기본 숨김 카테고리 — 홈/추천/피커에서 숨기고 설정에서만 켠다. nd.active·데이터·AI재료는 그대로 보존(가역). */
+var ND_HIDDEN_CATS=["albums"];
+function _ndCatHidden(id){ return ND_HIDDEN_CATS.indexOf(id)>=0; }
+function _ndCatShown(id){ if(!_ndCatHidden(id)) return true; try{ return store.getItem("nd.show."+id)==="1"; }catch(e){ return false; } }
+function _ndSetCatShown(id,on){ try{ store.setItem("nd.show."+id, on?"1":"0"); }catch(e){} }
+function _ndHomeCats(){ var raw=getActive()||[]; var out=[]; raw.forEach(function(id){ if(!_ndCatHidden(id)||_ndCatShown(id)) out.push(id); }); ND_HIDDEN_CATS.forEach(function(id){ if(_ndCatShown(id)&&MANIFESTS[id]&&out.indexOf(id)<0) out.push(id); }); return out; }
 function ndCatPicker(mode){
   mode=mode||"onboard";
   var old=document.getElementById("ndPick"); if(old) old.remove();
-  var starters=ND_STARTERS.filter(function(id){return MANIFESTS[id]&&MANIFESTS[id].title;});
-  var rest=Object.keys(MANIFESTS).filter(function(id){ return MANIFESTS[id]&&MANIFESTS[id].title && starters.indexOf(id)<0; });
+  var starters=ND_STARTERS.filter(function(id){return MANIFESTS[id]&&MANIFESTS[id].title && _ndCatShown(id);});
+  var rest=Object.keys(MANIFESTS).filter(function(id){ return MANIFESTS[id]&&MANIFESTS[id].title && starters.indexOf(id)<0 && _ndCatShown(id); });
   var active=getActive(); var sel={}; if(mode!=="onboard"){ active.forEach(function(id){ sel[id]=true; }); } else { ["movies","books","diary"].forEach(function(id){ if(MANIFESTS[id]&&MANIFESTS[id].title) sel[id]=true; }); }
   if(!document.getElementById("ndPickCss")){ var st=document.createElement("style"); st.id="ndPickCss"; st.textContent=".ndpick-cell{display:flex;align-items:center;gap:10px;padding:14px 14px;border-radius:16px;border:1.5px solid rgba(238,224,205,.14);background:rgba(255,255,255,.03);color:var(--ink,#f6eddf);font-size:14.5px;font-weight:600;cursor:pointer;text-align:left}.ndpick-cell .pc-ic{font-size:21px;line-height:1;flex:0 0 auto}.ndpick-cell .pc-t{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.ndpick-cell .pc-ck{margin-left:auto;opacity:0;color:var(--brand,#e0483f);font-weight:900}.ndpick-cell.on{border-color:var(--brand,#e0483f);background:rgba(224,72,63,.12)}.ndpick-cell.on .pc-ck{opacity:1}.ndpick-div{display:flex;align-items:center;gap:10px;margin:24px 2px 6px;color:var(--ink-soft,#c6b9a6);font-size:12.5px;font-weight:700}.ndpick-div span.ln{flex:1;height:1px;background:rgba(238,224,205,.14)}"; document.head.appendChild(st); }
   var mk=function(id){ var m=MANIFESTS[id]; var on=!!sel[id]; return '<button class="ndpick-cell'+(on?" on":"")+'" data-id="'+id+'" type="button"><span class="pc-ic">'+(m.icon||"🗂")+'</span><span class="pc-t">'+((m.title||id)+"").replace(/</g,"&lt;")+'</span><span class="pc-ck">✓</span></button>'; };
@@ -2669,7 +2675,7 @@ function ndCatPicker(mode){
       var ordered=starters.filter(function(id){return sel[id];}); rest.forEach(function(id){ if(sel[id]) ordered.push(id); });
       setActive(ordered); try{ store.setItem("nd.onboarded","1"); }catch(e){}
     } else {
-      var cur=getActive(); var next=cur.filter(function(id){return sel[id];}); picked.forEach(function(id){ if(next.indexOf(id)<0) next.push(id); }); setActive(next);
+      var cur=getActive(); var next=cur.filter(function(id){return sel[id]||_ndCatHidden(id);}); picked.forEach(function(id){ if(next.indexOf(id)<0) next.push(id); }); setActive(next);
     }
     wrap.remove();
     try{ if(state.view==="home") renderHome(); else { renderTabs(); } }catch(e){}
@@ -2814,7 +2820,7 @@ var _ND_EXP={
 function _ndExpCount(id, rows){ var d=_ND_EXP[id]; if(!d||!rows) return null; var n=0; for(var i=0;i<rows.length;i++){ if(rows[i]&&d.done(rows[i])) n++; } return {n:n,label:d.label}; }
 function _ndExpHTML(id, rows){ if(!_ND_EXP[id]) return ""; var t=""; if(rows){ var e=_ndExpCount(id,rows); if(e) t=e.label+" "+fmt(e.n); } return '<span class="nd-exp" data-exp="'+id+'">'+t+'</span>'; }
 function renderHome(){
-  const active = getActive().map(id=>MANIFESTS[id]).filter(Boolean);
+  const active = _ndHomeCats().map(id=>MANIFESTS[id]).filter(Boolean);
   const home=$("#home");
   document.body.classList.add("home-dark");
   const _ics=d=>`<svg class="ci-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="${d}"/></svg>`;
@@ -5651,7 +5657,7 @@ async function openDecide(){
     if(_tot<ND_INS_MIN){ c.innerHTML='<div class="wsec whead"><div class="wlogo">내도감 · 오늘의 추천</div><div class="wtitle">오늘의 추천</div></div>'+_ndNeedMoreHTML(_tot, ND_INS_MIN, "오늘의 추천"); _ndNeedMoreBind(); return; } }
   /* ★v421: 예전엔 담아둔 것을 랜덤으로 뿌렸다. 사용자가 이미 아는 정보라 의미가 없었다(영석 지적).
      이제 **왜 지금 이것인지 말할 수 있는 것만** 추천한다. 이유가 없으면 추천하지 않는다. */
-  var CATS=[["movies","🎬","오늘의 한 편"],["books","📖","오늘의 한 권"],["cellar","🍷","오늘의 한 잔"],["culture","🎭","가볼 공연·전시"],["travel","✈️","떠나볼 여행"],["food","🍽","가볼 맛집"],["albums","💿","들어볼 명반"]];
+  var CATS=[["movies","🎬","오늘의 한 편"],["books","📖","오늘의 한 권"],["cellar","🍷","오늘의 한 잔"],["culture","🎭","가볼 공연·전시"],["travel","✈️","떠나볼 여행"],["food","🍽","가볼 맛집"],["albums","💿","들어볼 명반"]].filter(function(cc){ return _ndCatShown(cc[0]); });
   var picks=[];
   var _mr=function(id,r){ return (typeof _ndMyRate==="function")?_ndMyRate(id,r):null; };
   var _day=_dayNum();
@@ -7624,8 +7630,9 @@ function _ndHelpChipBind(){
   }catch(e){}
 }
 function renderSettingsBody(d){
-  const act=getActive(); const actSet=new Set(act);
-  const inact=Object.values(MANIFESTS).map(m=>m.id).filter(id=>!actSet.has(id));
+  const actSet=new Set(getActive());
+  const act=getActive().filter(id=>!_ndCatHidden(id));
+  const inact=Object.values(MANIFESTS).map(m=>m.id).filter(id=>!actSet.has(id) && !_ndCatHidden(id));
   const _cc=m=>m.custom?`<button class="cat-edit" data-id="${m.id}" title="수정" type="button" style="background:none;border:none;cursor:pointer;font-size:13px;opacity:.6;padding:2px 5px">✏</button><button class="cat-del" data-id="${m.id}" title="삭제" type="button" style="background:none;border:none;cursor:pointer;font-size:13px;opacity:.6;padding:2px 5px">🗑</button>`:"";
   const arow=id=>{ const m=MANIFESTS[id]; const _sz=(typeof ndEffSize==="function"?ndEffSize(id):"mini"); const _sb=(v,l)=>`<button type="button" class="szb${v===_sz?" on":""}" data-id="${id}" data-sz="${v}">${l}</button>`; return `<div class="cat-mrow ord-row" data-id="${id}"><span class="ord-handle" aria-label="끌어서 순서 이동">≡</span><span class="mi">${m.icon}</span><span class="mn">${m.title} <span class="mv">${m.vol}</span></span><span class="sz-seg" role="group" aria-label="홈 카드 크기">${_sb("wide","넓")}${_sb("half","보")}${_sb("mini","작")}</span>${_cc(m)}<button class="sw on" data-id="${id}" role="switch" aria-checked="true" type="button"></button></div>`; };
   const irow=id=>{ const m=MANIFESTS[id]; return `<div class="cat-mrow" data-id="${id}"><span class="ord-handle ord-ph">≡</span><span class="mi">${m.icon}</span><span class="mn">${m.title} <span class="mv">${m.vol}</span></span>${_cc(m)}<button class="sw" data-id="${id}" role="switch" aria-checked="false" type="button"></button></div>`; };
@@ -7641,6 +7648,7 @@ function renderSettingsBody(d){
     <div class="cat-hd"><span>≡ 끌어서 순서</span><span>크기(넓게·보통·작게) · 표시 →</span></div>
     <div class="ord-list" id="catList">${act.map(arow).join("")}</div>
     ${inact.length?`<div class="hint" style="margin-top:12px;color:var(--sub)">꺼진 카테고리 · 켜면 홈에 추가</div>${inact.map(irow).join("")}`:""}
+    ${ND_HIDDEN_CATS.filter(id=>MANIFESTS[id]).length?`<div class="hint" style="margin-top:18px;color:var(--sub)">숨긴 도감 · 켜면 홈·추천에 다시 나타나요 (기록은 늘 보존)</div>${ND_HIDDEN_CATS.filter(id=>MANIFESTS[id]).map(id=>{ const m=MANIFESTS[id]; const on=_ndCatShown(id); return `<div class="cat-mrow" data-id="${id}"><span class="ord-handle ord-ph">≡</span><span class="mi">${m.icon}</span><span class="mn">${m.title} <span class="mv">${m.vol}</span></span><button class="sw nd-hidsw${on?" on":""}" data-id="${id}" role="switch" aria-checked="${on?"true":"false"}" type="button"></button></div>`; }).join("")}`:""}
     <button class="btn ghost" id="catNew" type="button" style="margin-top:14px">＋ 내 카테고리 만들기</button>
 
     </div>
@@ -7693,7 +7701,13 @@ function renderSettingsBody(d){
   d.querySelectorAll(".set-tab").forEach(t=>t.onclick=()=>{ const sec=t.dataset.sec;
     d.querySelectorAll(".set-tab").forEach(x=>x.classList.toggle("on",x===t));
     d.querySelectorAll(".set-sec").forEach(z=>z.style.display=(z.dataset.sec===sec)?"":"none"); });
-  d.querySelectorAll(".sw").forEach(sw=>sw.onclick=()=>{
+  d.querySelectorAll(".nd-hidsw").forEach(sw=>sw.onclick=()=>{
+    const id=sw.dataset.id, on=!sw.classList.contains("on");
+    _ndSetCatShown(id,on); if(on) ensureCategoryTab(id);
+    if(state.view==="home") renderHome(); else if(state.view==="domain") renderTabs();
+    renderSettingsBody(d);
+  });
+  d.querySelectorAll(".sw:not(.nd-hidsw)").forEach(sw=>sw.onclick=()=>{
     const id=sw.dataset.id, on=!sw.classList.contains("on");
     toggleActive(id,on);
     if(on) ensureCategoryTab(id);
@@ -7703,7 +7717,7 @@ function renderSettingsBody(d){
   d.querySelectorAll(".szb").forEach(b=>{ b.onpointerdown=e=>e.stopPropagation(); b.onclick=e=>{ e.stopPropagation(); setHomeSize(b.dataset.id, b.dataset.sz); const seg=b.parentNode; if(seg) seg.querySelectorAll(".szb").forEach(x=>x.classList.toggle("on",x===b)); if(state.view==="home") renderHome(); }; });
   d.querySelectorAll(".cat-edit").forEach(b=>b.onclick=e=>{ e.stopPropagation(); openCatEdit(b.dataset.id); });
   d.querySelectorAll(".cat-del").forEach(b=>b.onclick=e=>{ e.stopPropagation(); deleteCustomCategory(b.dataset.id); });
-  const cl=$("#catList"); if(cl) wireReorder(cl, order=>{ setActive(order); if(state.view==="home") renderHome(); else if(state.view==="domain") renderTabs(); });
+  const cl=$("#catList"); if(cl) wireReorder(cl, order=>{ var _keep=(getActive()||[]).filter(function(id){return order.indexOf(id)<0;}); setActive(order.concat(_keep)); if(state.view==="home") renderHome(); else if(state.view==="domain") renderTabs(); });
   { const _sel=$("#ioCat"), _fi=$("#ioFile"), _xp=$("#ioExport"), _im=$("#ioImport");
     if(_xp) _xp.onclick=()=>exportCSV(_sel.value);
     var _bkx=$("#ndBkExport"); if(_bkx) _bkx.onclick=()=>ndFullBackup();
