@@ -488,12 +488,14 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
   .kv{ display:flex; gap:7px 20px; flex-wrap:wrap; font-family:var(--sans); font-size:12.5px; margin-top:9px; }
   .kv span b{ color:var(--ink); font-weight:500; }
   .kv b{ color:var(--accent); font-weight:500; }
-  /* v503: 러닝 카드 압축(사진 66px + 정보 3열 2줄) — 러닝 리스트에만 적용 */
-  #root[data-domain="running"] #list .catcard .thumb{ width:66px; height:66px; border-radius:8px; }
-  #root[data-domain="running"] #list .catcard .body{ display:flex; flex-direction:column; justify-content:center; }
-  #root[data-domain="running"] #list .catcard .kv{ display:grid; grid-template-columns:repeat(3,1fr); gap:4px 12px; margin-top:6px; }
-  #root[data-domain="running"] #list .catcard .kv span{ white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-  #root[data-domain="running"] #list .catcard .meta{ white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  /* v505: 러닝 카드 진짜 압축 — 후반 catcard 확대블록(9101~, !important)까지 이김. 러닝 리스트에만 적용 */
+  #root[data-domain="running"] #list .catcard{ padding:11px 12px!important; gap:11px!important; grid-template-columns:64px 1fr!important; align-items:center!important; }
+  #root[data-domain="running"] #list .catcard .thumb{ width:64px!important; min-width:64px!important; max-width:64px!important; height:64px!important; border-radius:8px; }
+  #root[data-domain="running"] #list .catcard .body{ min-height:0!important; display:flex; flex-direction:column; justify-content:center; }
+  #root[data-domain="running"] #list .catcard .body h3{ font-size:14.5px!important; margin:0 0 3px!important; }
+  #root[data-domain="running"] #list .catcard .kv{ display:grid!important; grid-template-columns:repeat(3,1fr); gap:4px 8px!important; margin-top:5px!important; }
+  #root[data-domain="running"] #list .catcard .kv span{ margin:0!important; padding:3px 7px!important; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  #root[data-domain="running"] #list .catcard .meta{ white-space:nowrap; overflow:hidden; text-overflow:ellipsis; margin-top:5px!important; }
 
   /* 다이얼로그 */
   /* 영화 카드 — 기존 앱 색·폰트 그대로 */
@@ -1449,7 +1451,7 @@ body{ background:radial-gradient(circle at 50% -10%, rgba(102,78,57,.16), transp
         <svg class="brandmark" width="40" height="30" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg>
         <span class="brandwm"><span class="bwm-ko">내도감</span><span class="bwm-en">NAEDOGAM</span></span>
       </button>
-      <span class="mhver">v504</span>
+      <span class="mhver">v505</span>
       <span class="spacer"></span>
       <span class="src-chip" id="srcChip" style="display:none">데모</span>
       <button class="icon-btn" id="searchToggle" type="button" style="display:none">🔍</button>
@@ -2585,7 +2587,7 @@ function openDomain(id){ if(id==="mbti"){ openMbti(); return; } if(id==="period"
 
 /* 홈: 켜둔 카테고리를 카드로. 건수는 한 번 열어본 분야만 표시(홈을 빠르게 유지). */
 function ndDeep(h){ if(typeof h!=="string"||h.charAt(0)!=="#") h="#8a7a6a"; var n=parseInt(h.slice(1),16),r=(n>>16)&255,g=(n>>8)&255,b=n&255; function d(x,f){return Math.max(0,Math.min(255,Math.round(x*f)));} var d1="rgb("+d(r,.60)+","+d(g,.60)+","+d(b,.60)+")", d2="rgb("+d(r,.20)+","+d(g,.20)+","+d(b,.20)+")"; return "linear-gradient(180deg,rgba(255,255,255,.06),transparent 30%),linear-gradient(150deg,"+d1+","+d2+")"; }
-var ND_LOGO_HTML='<div class="ndh-brand"><svg width="47" height="35" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg><div class="ndh-wm"><b>내도감</b><small>NAEDOGAM</small></div><span class="mhver ndh-ver">v504</span></div><button class="ndh-sync" type="button" title="동기화" aria-label="동기화" onclick="try{syncNow()}catch(e){}">↻</button>';
+var ND_LOGO_HTML='<div class="ndh-brand"><svg width="47" height="35" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg><div class="ndh-wm"><b>내도감</b><small>NAEDOGAM</small></div><span class="mhver ndh-ver">v505</span></div><button class="ndh-sync" type="button" title="동기화" aria-label="동기화" onclick="try{syncNow()}catch(e){}">↻</button>';
 /* 홈 카드 크기: wide(넓게=한 줄 전체) · half(보통=한 줄 2개) · mini(작게=하단 3칸). 기본값=프리셋 */
 var ND_PRESET_SIZE={running:"wide",food:"wide",recipes:"wide",movies:"half",books:"half",period:"half",diary:"half",travel:"half",mountains:"half",culture:"half",albums:"half",cellar:"half",scrap:"half",wish:"half",gift:"half",pet:"half"};
 function getHomeSizes(){ try{ return JSON.parse(store.getItem("nd.homesize")||"{}")||{}; }catch(e){ return {}; } }
