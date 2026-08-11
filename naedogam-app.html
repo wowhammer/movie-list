@@ -1459,7 +1459,7 @@ body{ background:radial-gradient(circle at 50% -10%, rgba(102,78,57,.16), transp
         <svg class="brandmark" width="40" height="30" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg>
         <span class="brandwm"><span class="bwm-ko">내도감</span><span class="bwm-en">NAEDOGAM</span></span>
       </button>
-      <span class="mhver">v513</span>
+      <span class="mhver">v514</span>
       <span class="spacer"></span>
       <span class="src-chip" id="srcChip" style="display:none">데모</span>
       <button class="icon-btn" id="searchToggle" type="button" style="display:none">🔍</button>
@@ -2636,7 +2636,7 @@ function openDomain(id){ if(id==="mbti"){ openMbti(); return; } if(id==="period"
 
 /* 홈: 켜둔 카테고리를 카드로. 건수는 한 번 열어본 분야만 표시(홈을 빠르게 유지). */
 function ndDeep(h){ if(typeof h!=="string"||h.charAt(0)!=="#") h="#8a7a6a"; var n=parseInt(h.slice(1),16),r=(n>>16)&255,g=(n>>8)&255,b=n&255; function d(x,f){return Math.max(0,Math.min(255,Math.round(x*f)));} var d1="rgb("+d(r,.60)+","+d(g,.60)+","+d(b,.60)+")", d2="rgb("+d(r,.20)+","+d(g,.20)+","+d(b,.20)+")"; return "linear-gradient(180deg,rgba(255,255,255,.06),transparent 30%),linear-gradient(150deg,"+d1+","+d2+")"; }
-var ND_LOGO_HTML='<div class="ndh-brand"><svg width="47" height="35" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg><div class="ndh-wm"><b>내도감</b><small>NAEDOGAM</small></div><span class="mhver ndh-ver">v513</span></div><button class="ndh-sync" type="button" title="동기화" aria-label="동기화" onclick="try{syncNow()}catch(e){}">↻</button>';
+var ND_LOGO_HTML='<div class="ndh-brand"><svg width="47" height="35" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg><div class="ndh-wm"><b>내도감</b><small>NAEDOGAM</small></div><span class="mhver ndh-ver">v514</span></div><button class="ndh-sync" type="button" title="동기화" aria-label="동기화" onclick="try{syncNow()}catch(e){}">↻</button>';
 /* 홈 카드 크기: wide(넓게=한 줄 전체) · half(보통=한 줄 2개) · mini(작게=하단 3칸). 기본값=프리셋 */
 var ND_PRESET_SIZE={running:"wide",food:"wide",recipes:"wide",movies:"half",books:"half",period:"half",diary:"half",travel:"half",mountains:"half",culture:"half",albums:"half",cellar:"half",scrap:"half",wish:"half",gift:"half",pet:"half",drink:"half"};
 function getHomeSizes(){ try{ return JSON.parse(store.getItem("nd.homesize")||"{}")||{}; }catch(e){ return {}; } }
@@ -5178,7 +5178,7 @@ async function _insUndiscovered(m){
     listEl.querySelectorAll(".undisc[data-ui]").forEach(function(b){ b.onclick=async function(){ var o=undis[+b.dataset.ui]; if(!o) return; b.classList.add("catching"); try{ await recoAddOne(m,o.it); try{ ndToast("✨ 발견! ‘"+o.v.title+"’ 도감에 담았어요"); }catch(e){} state.rows=applyComputed(m,(CACHE[m.id]||[]).map(function(r){return Object.assign({_id:r._id||crypto.randomUUID()},r);})); paintDomain(m); }catch(e){ b.classList.remove("catching"); try{ ndToast(e.message||"담기 실패"); }catch(_){} } }; });
   }catch(e){}
 }
-function _ndDrinkCss(){ if(document.getElementById("ndDrinkCss")) return; var st=document.createElement("style"); st.id="ndDrinkCss"; st.textContent=".dk-add-hd{font-size:12.5px;font-weight:800;color:var(--brand,#e0483f);margin:2px 2px 8px}.dk-list-hd{font-size:12px;color:var(--ink-soft);margin:18px 2px 8px}.dk-row{display:flex;align-items:center;gap:7px;padding:7px 0;border-bottom:1px solid var(--line-soft,rgba(160,140,120,.14))}.dk-row.dk-new{border:1px solid var(--line);border-radius:12px;padding:9px 10px;background:var(--card);margin-bottom:4px}.dk-row input,.dk-row select{border:1px solid var(--line);border-radius:8px;padding:8px 9px;font-size:14px;font-family:inherit;background:var(--card);color:var(--ink);box-sizing:border-box;min-width:0}.dk-row .dk-date{flex:0 0 130px}.dk-row .dk-d{flex:0 0 46px;display:flex;flex-direction:column;line-height:1.15}.dk-row .dk-d b{font-size:15px;font-variant-numeric:tabular-nums;color:var(--ink)}.dk-row .dk-d i{font-size:11px;color:var(--ink-soft);font-style:normal}.dk-row select.dk-kind{flex:0 0 92px}.dk-row .dk-amt{flex:1 1 auto}.dk-row .dk-save{flex:0 0 auto;background:var(--brand,#e0483f);color:#fff;border:none;border-radius:9px;padding:9px 13px;font-size:14px;font-weight:700;cursor:pointer}.dk-row .dk-del{flex:0 0 30px;background:none;border:none;color:var(--ink-soft);font-size:15px;cursor:pointer;padding:0}.dk-empty{text-align:center;color:var(--ink-soft);padding:30px 16px;line-height:1.7}"; document.head.appendChild(st); }
+function _ndDrinkCss(){ if(document.getElementById("ndDrinkCss")) return; var st=document.createElement("style"); st.id="ndDrinkCss"; st.textContent=".dk-add-hd{font-size:12.5px;font-weight:800;color:var(--brand,#e0483f);margin:2px 2px 8px}.dk-list-hd{font-size:12px;color:var(--ink-soft);margin:18px 2px 8px}.dk-new{display:flex;align-items:center;gap:7px;border:1px solid var(--line);border-radius:12px;padding:9px 10px;background:var(--card)}.dk-new input,.dk-new select{border:1px solid var(--line);border-radius:8px;padding:9px 10px;font-size:14px;font-family:inherit;background:var(--card);color:var(--ink);box-sizing:border-box;min-width:0}.dk-datewrap{position:relative;flex:0 0 auto}.dk-datechip{border:1px solid var(--line);border-radius:8px;padding:9px 10px;background:var(--card);color:var(--ink);font-size:13px;font-weight:700;white-space:nowrap;cursor:pointer}.dk-datechip b{font-weight:800}.dk-date{position:absolute;inset:0;width:100%;height:100%;opacity:0;border:0;padding:0;cursor:pointer}.dk-new select.dk-kind{flex:0 0 82px;padding-right:4px}.dk-new .dk-amt{flex:1 1 auto}.dk-new .dk-save{flex:0 0 auto;background:var(--brand,#e0483f);color:#fff;border:none;border-radius:9px;padding:9px 14px;font-size:14px;font-weight:700;cursor:pointer}.dk-erow{display:flex;align-items:center;gap:10px;width:100%;text-align:left;background:none;border:none;border-bottom:1px solid var(--line-soft,rgba(160,140,120,.14));padding:11px 2px;cursor:pointer;color:var(--ink)}.dk-erow:active{background:rgba(255,255,255,.03)}.dk-erow .dk-d{flex:0 0 42px;display:flex;flex-direction:column;line-height:1.15}.dk-erow .dk-d b{font-size:15px;font-variant-numeric:tabular-nums}.dk-erow .dk-d i{font-size:11px;color:var(--ink-soft);font-style:normal}.dk-e-main{flex:0 0 auto;display:flex;align-items:baseline;gap:7px}.dk-e-main .dk-e-kind{font-size:15px;font-weight:700}.dk-e-main .dk-e-amt{font-size:13.5px;color:var(--ink-soft)}.dk-e-sub{flex:1 1 auto;min-width:0;font-size:12.5px;color:var(--ink-soft);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-align:right}.dk-empty{text-align:center;color:var(--ink-soft);padding:30px 16px;line-height:1.7}"; document.head.appendChild(st); }
 function _renderDrinkInline(m, rows){
   _ndDrinkCss();
   var list=document.getElementById("list"); if(!list) return;
@@ -5189,29 +5189,38 @@ function _renderDrinkInline(m, rows){
   var kindOpts=function(cur){ return KINDS.map(function(o){ return '<option value="'+esc(o)+'"'+(o===cur?" selected":"")+'>'+(o===""?"술종류":esc(o))+'</option>'; }).join(""); };
   var today=todayStr();
   var html='<div class="dk-add-hd">＋ 오늘 기록</div>'
-    +'<div class="dk-row dk-new"><input class="dk-date" type="date" value="'+esc(today)+'"><select class="dk-kind">'+kindOpts("")+'</select><input class="dk-amt" placeholder="양 (예: 소주 1병)"><button class="dk-save" type="button">기록</button></div>';
+    +'<div class="dk-new"><span class="dk-datewrap"><button type="button" class="dk-datechip">📅 <b class="dk-dlabel">오늘</b></button><input type="date" class="dk-date" value="'+esc(today)+'"></span>'
+    +'<select class="dk-kind">'+kindOpts("")+'</select>'
+    +'<input class="dk-amt" placeholder="얼마나 마셨어요? (예: 소주 1병)">'
+    +'<button class="dk-save" type="button">기록</button></div>';
   if(rows.length){
-    html+='<div class="dk-list-hd">술 마신 날 '+rows.length+'번</div>';
-    html+=rows.map(function(r,i){ return '<div class="dk-row" data-i="'+i+'"><span class="dk-d"><b>'+md(r.date)+'</b><i>'+wd(r.date)+'</i></span><select class="dk-kind">'+kindOpts(r.kind||"")+'</select><input class="dk-amt" value="'+esc(r.amount||"")+'" placeholder="양"><button class="dk-del" type="button" title="삭제">✕</button></div>'; }).join("");
+    html+='<div class="dk-list-hd">술 마신 날 '+rows.length+'번 · 줄을 누르면 수정</div>';
+    html+=rows.map(function(r,i){
+      var sub=[r.place, (r.withWhom?("👥 "+r.withWhom):"")].filter(Boolean).join(" · ");
+      return '<button type="button" class="dk-erow" data-i="'+i+'"><span class="dk-d"><b>'+md(r.date)+'</b><i>'+wd(r.date)+'</i></span>'
+        +'<span class="dk-e-main"><b class="dk-e-kind">'+esc(r.kind||"음주")+'</b>'+(r.amount?'<span class="dk-e-amt">'+esc(r.amount)+'</span>':"")+'</span>'
+        +'<span class="dk-e-sub">'+esc(sub)+'</span></button>';
+    }).join("");
   } else {
     html+='<div class="dk-empty">아직 기록이 없어요.<br>위에서 오늘 한 잔을 남겨보세요 🍺</div>';
   }
   list.innerHTML=html;
   var nw=list.querySelector(".dk-new");
-  if(nw){ nw.querySelector(".dk-save").onclick=async function(){
-    var kind=nw.querySelector(".dk-kind").value, amt=(nw.querySelector(".dk-amt").value||"").trim(), dt=nw.querySelector(".dk-date").value||today;
-    if(!kind && !amt){ try{ nw.querySelector(".dk-kind").focus(); }catch(e){} return; }
-    var row={_id:crypto.randomUUID(), date:dt, kind:kind, amount:amt};
-    var btn=nw.querySelector(".dk-save"); btn.textContent="…"; btn.disabled=true;
-    try{ await saveRecord(m, row, null); var _c=(CACHE[m.id]||[]); _c.push(row); CACHE[m.id]=_c; savePersist(m.id,_c); state.rows=_c.slice(); paintDomain(m); }
-    catch(e){ btn.textContent="기록"; btn.disabled=false; try{ alert("저장 실패: "+((e&&e.message)||e)); }catch(_){} }
-  }; }
-  list.querySelectorAll(".dk-row:not(.dk-new)").forEach(function(rowEl){
-    var i=+rowEl.dataset.i, r=rows[i]; if(!r) return;
-    var sel=rowEl.querySelector(".dk-kind"), amt=rowEl.querySelector(".dk-amt"), del=rowEl.querySelector(".dk-del");
-    if(sel) sel.onchange=function(){ _optiSaveField(m, r, "kind", sel.value); };
-    if(amt) amt.onblur=function(){ _optiSaveField(m, r, "amount", (amt.value||"").trim()); };
-    if(del) del.onclick=function(){ deleteRecord(m, r); };
+  if(nw){
+    var dinp=nw.querySelector(".dk-date"), dlab=nw.querySelector(".dk-dlabel");
+    var updLabel=function(){ var v=dinp.value||today; dlab.textContent=(v===today)?"오늘":md(v); };
+    dinp.onchange=updLabel; updLabel();
+    nw.querySelector(".dk-save").onclick=async function(){
+      var kind=nw.querySelector(".dk-kind").value, amt=(nw.querySelector(".dk-amt").value||"").trim(), dt=dinp.value||today;
+      if(!kind && !amt){ try{ nw.querySelector(".dk-kind").focus(); }catch(e){} return; }
+      var row={_id:crypto.randomUUID(), date:dt, kind:kind, amount:amt};
+      var btn=nw.querySelector(".dk-save"); btn.textContent="…"; btn.disabled=true;
+      try{ await saveRecord(m, row, null); var _c=(CACHE[m.id]||[]); _c.push(row); CACHE[m.id]=_c; savePersist(m.id,_c); state.rows=_c.slice(); paintDomain(m); }
+      catch(e){ btn.textContent="기록"; btn.disabled=false; try{ alert("저장 실패: "+((e&&e.message)||e)); }catch(_){} }
+    };
+  }
+  list.querySelectorAll(".dk-erow").forEach(function(el){
+    el.onclick=function(){ var r=rows[+el.dataset.i]; if(r) openDetail(m, r); };
   });
 }
 function paintDomain(m){   // state.rows를 화면에 그림 (데이터 다시 안 받고 재렌더 가능)
