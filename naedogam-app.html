@@ -1443,7 +1443,7 @@ body{ background:radial-gradient(circle at 50% -10%, rgba(102,78,57,.16), transp
         <svg class="brandmark" width="40" height="30" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg>
         <span class="brandwm"><span class="bwm-ko">내도감</span><span class="bwm-en">NAEDOGAM</span></span>
       </button>
-      <span class="mhver">v499</span>
+      <span class="mhver">v500</span>
       <span class="spacer"></span>
       <span class="src-chip" id="srcChip" style="display:none">데모</span>
       <button class="icon-btn" id="searchToggle" type="button" style="display:none">🔍</button>
@@ -2579,7 +2579,7 @@ function openDomain(id){ if(id==="mbti"){ openMbti(); return; } if(id==="period"
 
 /* 홈: 켜둔 카테고리를 카드로. 건수는 한 번 열어본 분야만 표시(홈을 빠르게 유지). */
 function ndDeep(h){ if(typeof h!=="string"||h.charAt(0)!=="#") h="#8a7a6a"; var n=parseInt(h.slice(1),16),r=(n>>16)&255,g=(n>>8)&255,b=n&255; function d(x,f){return Math.max(0,Math.min(255,Math.round(x*f)));} var d1="rgb("+d(r,.60)+","+d(g,.60)+","+d(b,.60)+")", d2="rgb("+d(r,.20)+","+d(g,.20)+","+d(b,.20)+")"; return "linear-gradient(180deg,rgba(255,255,255,.06),transparent 30%),linear-gradient(150deg,"+d1+","+d2+")"; }
-var ND_LOGO_HTML='<div class="ndh-brand"><svg width="47" height="35" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg><div class="ndh-wm"><b>내도감</b><small>NAEDOGAM</small></div><span class="mhver ndh-ver">v499</span></div><button class="ndh-sync" type="button" title="동기화" aria-label="동기화" onclick="try{syncNow()}catch(e){}">↻</button>';
+var ND_LOGO_HTML='<div class="ndh-brand"><svg width="47" height="35" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg><div class="ndh-wm"><b>내도감</b><small>NAEDOGAM</small></div><span class="mhver ndh-ver">v500</span></div><button class="ndh-sync" type="button" title="동기화" aria-label="동기화" onclick="try{syncNow()}catch(e){}">↻</button>';
 /* 홈 카드 크기: wide(넓게=한 줄 전체) · half(보통=한 줄 2개) · mini(작게=하단 3칸). 기본값=프리셋 */
 var ND_PRESET_SIZE={running:"wide",food:"wide",recipes:"wide",movies:"half",books:"half",period:"half",diary:"half",travel:"half",mountains:"half",culture:"half",albums:"half",cellar:"half",scrap:"half",wish:"half",gift:"half",pet:"half"};
 function getHomeSizes(){ try{ return JSON.parse(store.getItem("nd.homesize")||"{}")||{}; }catch(e){ return {}; } }
@@ -6791,12 +6791,13 @@ function _v2mat(){ try{ var ids=(typeof getActive==="function")?getActive():Obje
 var ND_AB_V2="https://script.google.com/macros/s/AKfycbyAT7ziODV1T3NQAJGsW2EBdkrrP577QDqgvmNv0uiHdU9MS58_sKibYN3JPQMe_EIM/exec";
 function ND_TONE_V2(){ return [
 "[앞의 말투 설정은 무시한다. 처음부터 끝 문장까지 반드시 존댓말로 쓴다.]",
-"너는 이 사람의 기록을 곁에서 오래 지켜본 사람이다. 위에서 평가하지 말고, 옆에 앉아 함께 기록을 넘겨보며 지금 이 사람의 마음을 가만히 짚어주는 자리에서 써라.",
-"[이 글이 하려는 것] 규정하지 마라. 그가 마음 쓴 것들을 곁에서 짚어주다 보면 읽는 사람이 스스로 아 나는 이렇구나 하고 도착하게 하는 것이다. 결론은 읽는 사람 몫으로 남겨라. 별명을 붙이지 마라.",
-"[무엇을 몸통으로] 마음이 실린 것(직접 평점 매기고 감상을 남긴 영화 책 등)이 이 사람이 무엇에 마음이 닿는지의 핵심이다. 단 그 작품의 줄거리나 장면을 이 사람의 이야기로 옮기지 마라. 그가 거기서 무엇에 마음이 움직였는지 그 방향만 읽어라. 감상 문장이나 일기 문장을 그대로 옮기거나 인용하지 마라. 감정의 온도로만 배게 하라.",
-"[지금을 짚어라] 최근 기분 흐름과 요즘 일기로 지금 이 사람이 어떤 상태인지 담담히 짚어 공감하라. 기분이 힘듦에서 나아지는 중이라면 그 방향을 과장 없이 짚어라. 응원도 억지 감동도 아니다. 곁에서 조용히 함께 있어 주는 온도면 된다.",
-"[담백하게] 재료에 없는 동작이나 묘사, 분위기를 지어내지 마라. 성격을 규정하는 형용사(단단한 온화한 고요한 정갈한 같은 말)를 쓰지 마라. 상투적인 미사여구보다 재료에 실제로 있는 구체를 써라. 숫자 세기와 소망-현실 대비를 쓰지 마라. 감상이 부실하거나 끊긴 항목은 버려라. 배경(자동기록)은 몸통으로 쓰지 마라.",
-"[형식] 산문 3~5문단. 마지막 문단을 규정하는 문장으로 닫지 말고, 실제로 있었던 장면이나 그가 스스로 느낄 작은 자각으로 열어둬라. 처음부터 끝까지 존댓말."
+"너는 이 사람의 기록을 곁에서 오래 지켜본 사람이다. 위에서 평가하지 말고, 옆에 앉아 지금 이 사람의 마음을 가만히 짚어주는 자리에서 써라.",
+"[규정하지 마라] 당신은 이런 사람이다라고 못 박지 마라. 별명도 붙이지 마라. 읽는 사람이 스스로 아 나는 이렇구나 하고 도착하게, 결론은 열어둬라.",
+"[몸통은 하나로 깊게] 마음이 실린 것(직접 평점 매기고 감상을 남긴 영화 책 등)에서 그가 무엇에 마음이 움직였는지를 몸통으로 삼되, 여러 개를 나열하지 마라. 가장 깊게 마음이 실린 하나를 골라 파고들어라. 작품의 줄거리나 장면을 이 사람의 이야기로 옮기지 말고, 감상이나 일기 문장을 그대로 인용하지 마라. 감정의 온도로만 배게 하라.",
+"[바깥에서 관찰하지 말고 곁에서] 기록을 보면, ~한 기록이 보입니다, 적어두셨지요 처럼 기록을 바깥에서 들여다보는 말투를 쓰지 마라. 그가 실제로 그렇게 느끼고 살아왔다는 듯 곁에서 함께 짚어라.",
+"[지금을 짚어라] 최근 기분 흐름과 요즘 일기로 지금 이 사람이 어떤 상태인지 담담히 짚어 공감하라. 응원도 억지 감동도 아니다. 곁에서 조용히 함께 있어 주는 온도면 된다.",
+"[담백] 재료에 없는 동작이나 묘사, 분위기를 지어내지 마라. 성격 규정 형용사(단단한 정갈한 온화한 같은 말) 금지. 숫자 세기와 소망-현실 대비 금지. 배경(자동기록)은 몸통으로 쓰지 마라.",
+"[형식] 산문 3~4문단. 마지막을 규정으로 닫지 말고 장면이나 스스로 느낄 작은 자각으로 열어둬라. 끝까지 존댓말."
 ].join("\n\n"); }
 function _buildLifeContextV2(ids,data){
 try{
