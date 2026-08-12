@@ -743,6 +743,11 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
   .lab-head{ display:flex; gap:6px; font-size:11.5px; color:var(--sub); margin:2px 0 5px; padding:0 2px; }
   .lab-head .lab-h1{ flex:2; } .lab-head .lab-h2{ flex:1; } .lab-head .lab-h3{ flex:1; } .lab-head .lab-hx{ flex:0 0 26px; }
   .rf-labrows{ display:flex; flex-direction:column; gap:6px; }
+  .ckcard-vitals{ font-size:14.5px; font-weight:700; color:var(--ink); margin:5px 0 2px; }
+  .rf-bmiwrap{ display:flex; align-items:center; gap:11px; }
+  .rf-bmiwrap .rf-bmi{ width:110px; flex:0 0 auto; background:var(--card); font-weight:800; font-size:16px; text-align:center; }
+  .rf-bmi-judge{ font-size:14.5px; font-weight:800; }
+  .rf-bp-judge{ display:inline-block; margin-top:5px; font-size:13px; font-weight:800; }
   .lab-row{ display:flex; gap:6px; align-items:center; }
   .lab-row input, .lab-row select{ border:1px solid var(--line); border-radius:8px; padding:8px 9px; font-size:14px; font-family:inherit; box-sizing:border-box; min-width:0; background:var(--card); color:var(--ink); }
   .lab-row select.lab-norm{ appearance:none; -webkit-appearance:none; text-align:center; cursor:pointer; }
@@ -1459,7 +1464,7 @@ body{ background:radial-gradient(circle at 50% -10%, rgba(102,78,57,.16), transp
         <svg class="brandmark" width="40" height="30" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg>
         <span class="brandwm"><span class="bwm-ko">내도감</span><span class="bwm-en">NAEDOGAM</span></span>
       </button>
-      <span class="mhver">v523</span>
+      <span class="mhver">v524</span>
       <span class="spacer"></span>
       <span class="src-chip" id="srcChip" style="display:none">데모</span>
       <button class="icon-btn" id="searchToggle" type="button" style="display:none">🔍</button>
@@ -2127,20 +2132,26 @@ const MANIFESTS = {
     card:{ kind:"specimen", thumb:"🍺", memo:"memo",
            title:function(r){ return r.kind||"음주"; },
            meta:function(r){ var d=r.date?(_isoOf(r.date)||r.date):""; return [d, r.amount, r.place, (r.withWhom?("👥 "+r.withWhom):"")].filter(Boolean).join(" · "); } } },
-  checkup:{ id:"checkup", title:"건강검진", icon:"🩺", vol:"卷22", canAdd:true,
+  checkup:{ id:"checkup", title:"건강기록", icon:"🩺", vol:"卷22", canAdd:true,
     source:{ type:"sheet", tab:"건강검진" },
-    fields:[ {k:"name",sheet:"검사명",label:"검사명",type:"text",full:true},
-             {k:"date",sheet:"검사일",label:"검사일",type:"date"},
+    fields:[ {k:"date",sheet:"검사일",label:"날짜",type:"date",today:true},
+             {k:"height",sheet:"키",label:"키 (cm)",type:"number",half:true},
+             {k:"weight",sheet:"몸무게",label:"몸무게 (kg)",type:"number",half:true},
+             {k:"bmi",sheet:"BMI",label:"BMI (자동 계산)",type:"bmi",full:true},
+             {k:"sys",sheet:"수축기",label:"수축기 혈압",type:"number",half:true},
+             {k:"dia",sheet:"이완기",label:"이완기 혈압",type:"number",half:true},
+             {k:"glucose",sheet:"공복혈당",label:"공복혈당",type:"number",half:true},
+             {k:"name",sheet:"검사명",label:"검사명 (병원 검진일 때)",type:"text",full:true},
              {k:"hospital",sheet:"병원",label:"병원",type:"text"},
              {k:"results",sheet:"결과항목",label:"결과 항목 (항목·수치·판정)",type:"labrows"},
              {k:"cover",sheet:"사진",label:"결과지 사진",type:"image"},
              {k:"memo",sheet:"메모",label:"메모",type:"textarea"} ],
     dateSort:"date", search:["name","hospital","memo","results","item"],
-    activity:{ df:"date", when:r=>true, label:"건강검진", name:r=>r.name||r.item },
+    activity:{ df:"date", when:r=>true, label:"건강기록", name:r=>r.name||"건강기록" },
     stats:[ {label:"전체",type:"count"} ],
     card:{ kind:"specimen", thumb:"🩺", memo:"memo",
-           title:function(r){ return r.name||r.item||"(검사)"; },
-           meta:function(r){ var d=r.date?(_isoOf(r.date)||r.date):""; var n=0; try{ var a=JSON.parse(r.results||"[]"); if(Array.isArray(a)) n=a.filter(function(x){return x&&(x.item||x.value);}).length; }catch(e){} if(!n && r.item) n=1; return [d, r.hospital, (n?n+"개 항목":"")].filter(Boolean).join(" · "); } } }
+           title:function(r){ return r.name||"건강기록"; },
+           meta:function(r){ var d=r.date?(_isoOf(r.date)||r.date):""; return [d, r.hospital].filter(Boolean).join(" · "); } } }
 };
 
 /* v471β 건강검진 판정 공용 헬퍼 — 실제 데이터(국가건강검진 판정용어)에 맞춤 */
@@ -2636,7 +2647,7 @@ function openDomain(id){ if(id==="mbti"){ openMbti(); return; } if(id==="period"
 
 /* 홈: 켜둔 카테고리를 카드로. 건수는 한 번 열어본 분야만 표시(홈을 빠르게 유지). */
 function ndDeep(h){ if(typeof h!=="string"||h.charAt(0)!=="#") h="#8a7a6a"; var n=parseInt(h.slice(1),16),r=(n>>16)&255,g=(n>>8)&255,b=n&255; function d(x,f){return Math.max(0,Math.min(255,Math.round(x*f)));} var d1="rgb("+d(r,.60)+","+d(g,.60)+","+d(b,.60)+")", d2="rgb("+d(r,.20)+","+d(g,.20)+","+d(b,.20)+")"; return "linear-gradient(180deg,rgba(255,255,255,.06),transparent 30%),linear-gradient(150deg,"+d1+","+d2+")"; }
-var ND_LOGO_HTML='<div class="ndh-brand" style="cursor:pointer" onclick="try{goHome()}catch(e){}"><svg width="47" height="35" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg><div class="ndh-wm"><b>내도감</b><small>NAEDOGAM</small></div><span class="mhver ndh-ver">v523</span></div><button class="ndh-sync" type="button" title="동기화" aria-label="동기화" onclick="try{syncNow()}catch(e){}">↻</button>';
+var ND_LOGO_HTML='<div class="ndh-brand" style="cursor:pointer" onclick="try{goHome()}catch(e){}"><svg width="47" height="35" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg><div class="ndh-wm"><b>내도감</b><small>NAEDOGAM</small></div><span class="mhver ndh-ver">v524</span></div><button class="ndh-sync" type="button" title="동기화" aria-label="동기화" onclick="try{syncNow()}catch(e){}">↻</button>';
 /* 홈 카드 크기: wide(넓게=한 줄 전체) · half(보통=한 줄 2개) · mini(작게=하단 3칸). 기본값=프리셋 */
 var ND_PRESET_SIZE={running:"wide",food:"wide",recipes:"wide",movies:"half",books:"half",period:"half",diary:"half",travel:"half",mountains:"half",culture:"half",albums:"half",cellar:"half",scrap:"half",wish:"half",gift:"half",pet:"half",drink:"half"};
 function getHomeSizes(){ try{ return JSON.parse(store.getItem("nd.homesize")||"{}")||{}; }catch(e){ return {}; } }
@@ -4123,7 +4134,7 @@ function _ndPicBoot(){ try{ _ndPicScan(document.body); var mo=new MutationObserv
 function ndAutoCover(){ try{ var cache=_ndAC(); var io=new IntersectionObserver(function(ents,obs){ ents.forEach(function(e){ if(!e.isIntersecting) return; var el=e.target; obs.unobserve(el); var t=el.getAttribute("data-ac"); if(!t) return; var key="r|"+t; if(cache[key]==="0") return; if(cache[key]){ _ndACset(el,cache[key]); return; } ndWikiImg(t).then(function(src){ cache[key]=src||"0"; _ndACsave(); if(src&&document.body.contains(el)) _ndACset(el,src); }); }); },{rootMargin:"400px"}); document.querySelectorAll(".rc-img[data-ac], .fl-img[data-ac], .thumb[data-ac]").forEach(function(el){ io.observe(el); }); }catch(e){} }
 function checkupCard(r){
   var esc=function(x){ return String(x==null?"":x).replace(/&/g,"&amp;").replace(/</g,"&lt;"); };
-  var name=r.name||r["검사명"]||r.item||r["항목"]||"(검사)";
+  var name=r.name||r["검사명"]||r.item||r["항목"]||"건강기록";
   var d=r.date?(_isoOf(r.date)||r.date):"";
   var meta=[d,(r.hospital||r["병원"])].filter(Boolean).join(" · ");
   var arr=[]; try{ arr=JSON.parse(r.results||r["결과항목"]||"[]"); if(!Array.isArray(arr)) arr=[]; }catch(e){ arr=[]; }
@@ -4140,7 +4151,13 @@ function checkupCard(r){
   }).join("");
   var more=arr.length>show.length?('<div class="ckcard-more">＋'+(arr.length-show.length)+'개 항목 더</div>'):"";
   var _cov=r.cover||r._cover;
-  var body=rows?('<div class="ckcard-body">'+rows+more+'</div>'):(r.memo?'<div class="cmemo">'+esc(r.memo)+'</div>':"");
+  var _vit=[]; if(r.weight) _vit.push("⚖️ "+esc(r.weight)+"kg");
+  var _bmi=r.bmi; if((_bmi==null||_bmi==="") && r.height && r.weight){ var _bh=parseFloat(r.height),_bw=parseFloat(r.weight); if(_bh>0&&_bw>0) _bmi=(Math.round(_bw/Math.pow(_bh/100,2)*10)/10); }
+  if(_bmi!=null&&_bmi!=="") _vit.push("BMI "+esc(_bmi));
+  if(r.sys||r.dia) _vit.push("🩸 "+esc(r.sys||"–")+"/"+esc(r.dia||"–"));
+  if(r.glucose) _vit.push("혈당 "+esc(r.glucose));
+  var _vitHTML=_vit.length?('<div class="ckcard-vitals">'+_vit.join(" · ")+'</div>'):"";
+  var body=(_vitHTML||rows||r.memo)?('<div class="ckcard-body">'+_vitHTML+rows+more+(rows||_vitHTML?"":(r.memo?'<div class="cmemo">'+esc(r.memo)+'</div>':""))+'</div>'):"";
   var accent=worst>=3?"ckacc-bad":(worst===2?"ckacc-warn":(worst===1?"ckacc-ok":""));
   return '<button class="card catcard ckcard '+accent+'" data-id="'+r._id+'"><span class="thumb">'+(_cov?'<img src="'+esc(_cov).replace(/&amp;/g,"&")+'" alt="">':"🩺")+'</span><span class="body"><h3>'+esc(name)+'</h3>'+(meta?'<div class="meta">'+esc(meta)+'</div>':"")+body+'</span></button>';
 }
@@ -4699,6 +4716,7 @@ function _ndKbFollow(d){
 function openRecordForm(m, existing, prefill){
   const d=$("#add");
   try{ _ndVoiceStop(); if(!d.__ndVoiceBound){ d.__ndVoiceBound=1; d.addEventListener("close", function(){ try{ _ndVoiceStop(); }catch(e){} }); } }catch(e){} const isEdit=!!existing; const fields=(m.fields||[]).filter(f=>!f.hideForm);
+  if(!existing && m && m.id==="checkup"){ try{ var _hc=(CACHE[m.id]||loadPersist(m.id)||[]); var _lh=""; for(var _hi=_hc.length-1;_hi>=0;_hi--){ if(_hc[_hi]&&_hc[_hi].height){ _lh=_hc[_hi].height; break; } } if(_lh){ prefill=prefill||{}; if(prefill.height==null||prefill.height==="") prefill.height=_lh; } }catch(e){} }
   const _cell=f=>{
     const val = existing ? existing[f.k] : ((prefill && prefill[f.k]!=null && prefill[f.k]!=="") ? prefill[f.k] : (f.type==="bool"?false:""));   /* ★v452: prefill을 모든 필드 타입에 적용(도서 검색→폼 프리필) */
     if(f.type==="bool")
@@ -4745,6 +4763,7 @@ function openRecordForm(m, existing, prefill){
       const rowH=t=>`<div class="lab-row"><input class="lab-item" placeholder="항목 (예: 총콜레스테롤)" value="${esc3(t.item)}"><input class="lab-val" placeholder="수치" value="${esc3(t.value)}">${ndLabSelectHTML(t.normal)}<button type="button" class="lab-del" title="이 줄 삭제">✕</button></div>`;
       return `<label>${ndFL(f)}</label>${m.id==="checkup"?'<div class="hint" style="margin:-2px 0 7px;line-height:1.55">수치를 넣으면 표준범위로 <b>정상·경계·질환의심</b>이 자동 표시돼요. ※의학적 진단이 아니며 실제 판정은 <b>검진 결과지가 우선</b>이에요 — 성별·검사기관에 따라 다를 수 있고, 이미 적힌 판정은 그대로 둡니다.</div>':""}<div class="lab-head"><span class="lab-h1">항목</span><span class="lab-h2">수치</span><span class="lab-h3">판정</span><span class="lab-hx"></span></div><div class="rf-labrows" data-k="${f.k}">${arr.map(rowH).join("")}</div>${m.id==="checkup"?`<button type="button" class="lab-add lab-preset" data-k="${f.k}" style="border-style:solid;border-color:var(--brand,#e0483f);color:var(--brand,#e0483f);margin-top:8px">🩺 국가검진 표준항목 불러오기</button>`:""}<button type="button" class="lab-add" data-k="${f.k}">＋ 항목 추가</button>`;
     }
+    if(f.type==="bmi"){ const rv=(val==null||val==="")?"":val; return `<label>${ndFL(f)}</label><div class="rf-bmiwrap"><input class="rf rf-bmi" data-k="${f.k}" data-type="bmi" value="${String(rv).replace(/"/g,'&quot;')}" readonly placeholder="키·몸무게 넣으면 자동"><span class="rf-bmi-judge"></span></div>`; }
     if(f.money||f.comma){ const nz=(val==null||val===""||isNaN(Number(val)))?"":Number(val).toLocaleString(); return `<label>${ndFL(f)}</label><input class="rf" data-k="${f.k}" data-type="money" inputmode="numeric" value="${nz}" autocomplete="off" />`; }
     if(f.type==="checks"){ var _arr=Array.isArray(val)?val.map(String):(val?String(val).split(",").map(function(x){return x.trim();}).filter(Boolean):[]);
       return `<label>${ndFL(f)}</label><div class="rf-checks" data-k="${f.k}">`+(f.options||[]).map(function(o){ var _on=_arr.indexOf(o)>=0; return '<button type="button" class="rf-chk'+(_on?' on':'')+'" data-v="'+String(o).replace(/"/g,"&quot;")+'">'+o+'</button>'; }).join("")+`</div>`; }
@@ -4753,7 +4772,7 @@ function openRecordForm(m, existing, prefill){
   };
   const _wcls=f=> f.third?"rff-third":f.full?"rff-full":(f.half?"rff-half":(f.type==="bool"?"rff-bool":((f.type==="textarea"||f.type==="image"||f.type==="rating"||f.type==="seg"||f.type==="labrows"||f.type==="tiers"||f.type==="quotes"||f.type==="checks")?"rff-full":"rff-half")));
   /* ★v446: 빠른 담기 파일럿(여행) — 제목·상태·별점만 먼저 보이고 나머지는 '자세히'로 접는다. 수정(isEdit)일 땐 전체 표시(기존 동작 유지). */
-  const _quickKeys={ travel:["title","status","rating"], food:["title","status","rating"], recipes:["title","status","rating"], culture:["title","status","rating"], mountains:["title","climbed"], albums:["title","status","rating"], quote:["title","author"], drink:["kind","amount"] };   /* ★v448~v450: 빠른 담기 카테고리 */
+  const _quickKeys={ travel:["title","status","rating"], food:["title","status","rating"], recipes:["title","status","rating"], culture:["title","status","rating"], mountains:["title","climbed"], albums:["title","status","rating"], quote:["title","author"], drink:["kind","amount"], checkup:["date","height","weight","bmi","sys","dia","glucose"] };   /* ★v448~v450: 빠른 담기 카테고리 */
   const _renderCell=f=>`<div class="rff ${_wcls(f)}">${_cell(f)}</div>`;
   const _qk=(!isEdit && _quickKeys[m.id]) ? _quickKeys[m.id].filter(k=>fields.some(f=>f.k===k)) : null;
   let body;
@@ -4841,6 +4860,18 @@ function openRecordForm(m, existing, prefill){
     z.addEventListener("drop",e=>{ const f=e.dataTransfer&&e.dataTransfer.files&&e.dataTransfer.files[0]; if(f) _encImg(f,k); });
     z.addEventListener("click",e=>{ if(e.target.classList.contains("rf-imgfile")) return; const fi=z.querySelector(".rf-imgfile"); if(fi) fi.click(); });
   });
+  if(m.id==="checkup"){ try{
+    var _hh=d.querySelector('.rf[data-k="height"]'), _ww=d.querySelector('.rf[data-k="weight"]'), _bb=d.querySelector('.rf-bmi[data-k="bmi"]');
+    if(_bb){ var _bj=_bb.parentNode.querySelector(".rf-bmi-judge");
+      var _cb=function(){ var h=parseFloat(_hh&&_hh.value), w=parseFloat(_ww&&_ww.value); if(h>0&&w>0){ var b=w/Math.pow(h/100,2); _bb.value=(Math.round(b*10)/10); if(_bj){ var t=b<18.5?"저체중":(b<23?"정상":(b<25?"과체중":"비만")); var c=b<18.5?"#3b82f6":(b<23?"#22c55e":(b<25?"#d9a441":"#e5675f")); _bj.textContent=t; _bj.style.color=c; } } else { _bb.value=""; if(_bj) _bj.textContent=""; } };
+      if(_hh) _hh.addEventListener("input",_cb); if(_ww) _ww.addEventListener("input",_cb); _cb();
+    }
+    var _sy=d.querySelector('.rf[data-k="sys"]'), _di=d.querySelector('.rf[data-k="dia"]');
+    if(_di){ var _pj=document.createElement("span"); _pj.className="rf-bp-judge"; _di.insertAdjacentElement("afterend",_pj);
+      var _pb=function(){ var sv=parseFloat(_sy&&_sy.value), dv=parseFloat(_di&&_di.value); if(sv>0||dv>0){ var t="",c=""; if(sv>=140||dv>=90){ t="고혈압"; c="#e5675f"; } else if(sv>=130||dv>=80){ t="경계"; c="#d9a441"; } else if(sv>0&&dv>0){ t="정상"; c="#22c55e"; } _pj.textContent=t; _pj.style.color=c; } else { _pj.textContent=""; } };
+      if(_sy) _sy.addEventListener("input",_pb); if(_di) _di.addEventListener("input",_pb); _pb();
+    }
+  }catch(e){} }
   $("#rfSave").onclick=async()=>{
     // 한글 마지막 글자 잘림 방지: 조합 확정(blur) → 아주 짧은 틈 뒤 값 읽기
     if(document.activeElement && document.activeElement.blur) document.activeElement.blur();
