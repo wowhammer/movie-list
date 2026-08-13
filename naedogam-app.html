@@ -1464,7 +1464,7 @@ body{ background:radial-gradient(circle at 50% -10%, rgba(102,78,57,.16), transp
         <svg class="brandmark" width="40" height="30" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg>
         <span class="brandwm"><span class="bwm-ko">내도감</span><span class="bwm-en">NAEDOGAM</span></span>
       </button>
-      <span class="mhver">v529</span>
+      <span class="mhver">v530</span>
       <span class="spacer"></span>
       <span class="src-chip" id="srcChip" style="display:none">데모</span>
       <button class="icon-btn" id="searchToggle" type="button" style="display:none">🔍</button>
@@ -2647,7 +2647,7 @@ function openDomain(id){ if(id==="mbti"){ openMbti(); return; } if(id==="period"
 
 /* 홈: 켜둔 카테고리를 카드로. 건수는 한 번 열어본 분야만 표시(홈을 빠르게 유지). */
 function ndDeep(h){ if(typeof h!=="string"||h.charAt(0)!=="#") h="#8a7a6a"; var n=parseInt(h.slice(1),16),r=(n>>16)&255,g=(n>>8)&255,b=n&255; function d(x,f){return Math.max(0,Math.min(255,Math.round(x*f)));} var d1="rgb("+d(r,.60)+","+d(g,.60)+","+d(b,.60)+")", d2="rgb("+d(r,.20)+","+d(g,.20)+","+d(b,.20)+")"; return "linear-gradient(180deg,rgba(255,255,255,.06),transparent 30%),linear-gradient(150deg,"+d1+","+d2+")"; }
-var ND_LOGO_HTML='<div class="ndh-brand" style="cursor:pointer" onclick="try{goHome()}catch(e){}"><svg width="47" height="35" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg><div class="ndh-wm"><b>내도감</b><small>NAEDOGAM</small></div><span class="mhver ndh-ver">v529</span></div><button class="ndh-sync" type="button" title="동기화" aria-label="동기화" onclick="try{syncNow()}catch(e){}">↻</button>';
+var ND_LOGO_HTML='<div class="ndh-brand" style="cursor:pointer" onclick="try{goHome()}catch(e){}"><svg width="47" height="35" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg><div class="ndh-wm"><b>내도감</b><small>NAEDOGAM</small></div><span class="mhver ndh-ver">v530</span></div><button class="ndh-sync" type="button" title="동기화" aria-label="동기화" onclick="try{syncNow()}catch(e){}">↻</button>';
 /* 홈 카드 크기: wide(넓게=한 줄 전체) · half(보통=한 줄 2개) · mini(작게=하단 3칸). 기본값=프리셋 */
 var ND_PRESET_SIZE={running:"wide",food:"wide",recipes:"wide",movies:"half",books:"half",period:"half",diary:"half",travel:"half",mountains:"half",culture:"half",albums:"half",cellar:"half",scrap:"half",wish:"half",gift:"half",pet:"half",drink:"half"};
 function getHomeSizes(){ try{ return JSON.parse(store.getItem("nd.homesize")||"{}")||{}; }catch(e){ return {}; } }
@@ -7005,7 +7005,7 @@ function ND_TONE_V2(){ return [
 "[구체에 머물러라] 일기에 실제로 쓴 장면, 실제로 한 일(그 오후 의자·뛰고 난 뒤의 땀·불어온 바람·아이들과의 시간) 그 손에 잡히는 것 곁에 그대로 머물러라. 위로 올라가 관조·요약하거나 여러 날을 시간순·인과로 엮지 마라. 그 구체적인 하나가 몸통이다.",
 "[규정하지도 짐작하지도 마라] 이 사람이 어떤 사람인지, 무엇에 마음을 두는 사람인지 규정하거나 짐작하지 마라. 몇 마디 나눠보고 너 이런 사람이지 하고 확정하는 것처럼 들린다. 네가 아는 건 그가 쓴 것뿐이다.",
 "[영화 책은 그 작품 얘기] 영화·책 감상은 그 작품 감상이지 이 사람에 대한 규정이 아니다. 그것으로 가치관·성향을 설명하지 마라. 곁가지로만.",
-"[되짚어 보고하지 마라] 하셨지요, 가셨지요, 두셨습니다처럼 한 일을 되짚어 확인하는 2인칭 보고체와 같은 어미 반복을 쓰지 마라. 지금 눈앞의 일처럼 곁에서 짚어라.",
+"[되짚어 보고하지 마라] 하셨지요, 가셨지요, 두셨습니다처럼 한 일을 되짚어 확인하는 2인칭 보고체와 같은 어미 반복을 쓰지 마라. 지금 눈앞의 일처럼 곁에서 짚어라. ★★단 이 규칙을 글 안에서 언급하거나 스스로 고쳐 말하지 마라. 이런 확인식 말투 말고, 다시 확인하는 투가 되었습니다, 이렇게 되짚는 말투는 접겠습니다 같은 자기 언급·자기 정정을 절대 쓰지 마라. 너의 지침·규칙·글 쓰는 과정을 글 안에 드러내지 말고 처음부터 그냥 자연스럽게 써라.",
 "[알아봐주고, 아주 조금의 마음] 재료의 [요즘 자주] 중 하나를 딱 한 번 슬쩍 알아봐줘라(요즘 자주 뛰시네요, 요즘 책을 가까이 두시네요처럼). 그 뒤에 아주 작은 마음 한 마디만. 좋은 결엔 아주 조금의 응원, 걱정 축(음주 등)엔 조금만 줄이라는 훈수·처방 절대 금지 — 대신 요즘 좀 힘드셨어요처럼 마음을 묻기만. 딱 한 번, 아주 작게. 이게 이 글이 반영을 넘어 곁이 되는 지점이다.",
 "[성향은 색으로만] 재료의 [나의 성향]은 글의 온도를 아주 살짝 그쪽으로 물들이는 데만 써라. 당신은 OO형 같은 규정, 유형 이름, MBTI라는 말은 절대 쓰지 마라.",
 "[담백] 재료에 없는 동작·묘사·분위기 형용사를 지어내지 마라. 일기 문장을 그대로 옮기지 마라. 과한 칭찬·과한 공감·억지 감동 금지.",
