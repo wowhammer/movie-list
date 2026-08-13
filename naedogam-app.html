@@ -1464,7 +1464,7 @@ body{ background:radial-gradient(circle at 50% -10%, rgba(102,78,57,.16), transp
         <svg class="brandmark" width="40" height="30" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg>
         <span class="brandwm"><span class="bwm-ko">내도감</span><span class="bwm-en">NAEDOGAM</span></span>
       </button>
-      <span class="mhver">v533</span>
+      <span class="mhver">v534</span>
       <span class="spacer"></span>
       <span class="src-chip" id="srcChip" style="display:none">데모</span>
       <button class="icon-btn" id="searchToggle" type="button" style="display:none">🔍</button>
@@ -2647,7 +2647,7 @@ function openDomain(id){ if(id==="mbti"){ openMbti(); return; } if(id==="period"
 
 /* 홈: 켜둔 카테고리를 카드로. 건수는 한 번 열어본 분야만 표시(홈을 빠르게 유지). */
 function ndDeep(h){ if(typeof h!=="string"||h.charAt(0)!=="#") h="#8a7a6a"; var n=parseInt(h.slice(1),16),r=(n>>16)&255,g=(n>>8)&255,b=n&255; function d(x,f){return Math.max(0,Math.min(255,Math.round(x*f)));} var d1="rgb("+d(r,.60)+","+d(g,.60)+","+d(b,.60)+")", d2="rgb("+d(r,.20)+","+d(g,.20)+","+d(b,.20)+")"; return "linear-gradient(180deg,rgba(255,255,255,.06),transparent 30%),linear-gradient(150deg,"+d1+","+d2+")"; }
-var ND_LOGO_HTML='<div class="ndh-brand" style="cursor:pointer" onclick="try{goHome()}catch(e){}"><svg width="47" height="35" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg><div class="ndh-wm"><b>내도감</b><small>NAEDOGAM</small></div><span class="mhver ndh-ver">v533</span></div><button class="ndh-sync" type="button" title="동기화" aria-label="동기화" onclick="try{syncNow()}catch(e){}">↻</button>';
+var ND_LOGO_HTML='<div class="ndh-brand" style="cursor:pointer" onclick="try{goHome()}catch(e){}"><svg width="47" height="35" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg><div class="ndh-wm"><b>내도감</b><small>NAEDOGAM</small></div><span class="mhver ndh-ver">v534</span></div><button class="ndh-sync" type="button" title="동기화" aria-label="동기화" onclick="try{syncNow()}catch(e){}">↻</button>';
 /* 홈 카드 크기: wide(넓게=한 줄 전체) · half(보통=한 줄 2개) · mini(작게=하단 3칸). 기본값=프리셋 */
 var ND_PRESET_SIZE={running:"wide",food:"wide",recipes:"wide",movies:"half",books:"half",period:"half",diary:"half",travel:"half",mountains:"half",culture:"half",albums:"half",cellar:"half",scrap:"half",wish:"half",gift:"half",pet:"half",drink:"half"};
 function getHomeSizes(){ try{ return JSON.parse(store.getItem("nd.homesize")||"{}")||{}; }catch(e){ return {}; } }
@@ -5284,6 +5284,85 @@ async function _insUndiscovered(m){
   }catch(e){}
 }
 function _ndDrinkCss(){ if(document.getElementById("ndDrinkCss")) return; var st=document.createElement("style"); st.id="ndDrinkCss"; st.textContent=".dk-add-hd{font-size:12.5px;font-weight:800;color:var(--brand,#e0483f);margin:2px 2px 8px}.dk-list-hd{font-size:12px;color:var(--ink-soft);margin:18px 2px 10px}.dk-new{display:flex;align-items:center;gap:7px;border:1px solid var(--line);border-radius:12px;padding:9px 10px;background:var(--card)}.dk-new input,.dk-new select{border:1px solid var(--line);border-radius:8px;padding:9px 10px;font-size:14px;font-family:inherit;background:var(--card);color:var(--ink);box-sizing:border-box;min-width:0}.dk-datewrap{position:relative;flex:0 0 auto}.dk-datechip{border:1px solid var(--line);border-radius:8px;padding:9px 10px;background:var(--card);color:var(--ink);font-size:13px;font-weight:700;white-space:nowrap;cursor:pointer}.dk-datechip b{font-weight:800}.dk-date-in{position:absolute;inset:0;width:100%;height:100%;opacity:0;border:0;padding:0;cursor:pointer}.dk-new select.dk-kind{flex:0 0 82px;padding-right:4px}.dk-new .dk-amt{flex:1 1 auto}.dk-new .dk-save{flex:0 0 auto;background:var(--brand,#e0483f);color:#fff;border:none;border-radius:9px;padding:9px 14px;font-size:14px;font-weight:700;cursor:pointer}.dk-erow{display:grid;grid-template-columns:58px 60px 1fr 14px;align-items:center;gap:10px;width:100%;text-align:left;background:var(--card);border:1px solid var(--line);border-radius:13px;padding:14px 15px;margin-bottom:9px;cursor:pointer;color:var(--ink);box-shadow:0 1px 4px rgba(0,0,0,.09)}.dk-erow:active{transform:scale(.99)}.dk-erow .dk-gd{font-size:14.5px;font-weight:800;font-variant-numeric:tabular-nums;white-space:nowrap;overflow:hidden}.dk-erow .dk-gd .wd{font-size:11px;font-weight:600;color:var(--ink-soft);margin-left:2px}.dk-erow .dk-gk{font-size:15px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.dk-erow .dk-gi{min-width:0;font-size:13.5px;color:var(--ink-soft);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.dk-erow .dk-go{color:var(--ink-soft);font-size:18px;opacity:.5;justify-self:end}.dk-empty{text-align:center;color:var(--ink-soft);padding:30px 16px;line-height:1.7}"; document.head.appendChild(st); }
+function _bmiCat(b){
+  if(!(b>0)) return null;
+  if(b<18.5) return {t:"저체중",c:"#d9a441"};
+  if(b<23)   return {t:"정상",  c:"#4a9e6f"};
+  if(b<25)   return {t:"과체중",c:"#d9a441"};
+  if(b<30)   return {t:"비만",  c:"#e5675f"};
+  return {t:"고도비만",c:"#e5675f"};
+}
+/* v534: 건강기록 몸무게·BMI 추세 카드. 데이터 수에 따라 우아하게(0=없음/1=현재값/2+=선그래프). */
+function _checkupTrendHTML(rows){
+ try{
+  var pts=[];
+  (rows||[]).forEach(function(r){
+    if(!r) return;
+    var del=r._deleted||r.deleted||r["삭제됨"]; if(del===true||del==="Y"||del==="1"||del==="삭제됨") return;
+    var w=parseFloat(r.weight!=null?r.weight:r["몸무게"]); if(!isFinite(w)||w<=0) return;
+    var ds=r.date||r["검사일"]||""; var t=_ndWallTs(ds); if(!t){ var pd=parseDate(ds); t=pd?pd.getTime():0; }
+    var h=parseFloat(r.height!=null?r.height:r["키"]);
+    var bmi=parseFloat(r.bmi!=null?r.bmi:r["BMI"]);
+    if((!isFinite(bmi)||bmi<=0)&&isFinite(h)&&h>0){ bmi=Math.round((w/((h/100)*(h/100)))*10)/10; }
+    pts.push({t:t,ds:ds,w:Math.round(w*10)/10,bmi:(isFinite(bmi)&&bmi>0)?Math.round(bmi*10)/10:null});
+  });
+  if(!pts.length) return "";
+  pts.sort(function(a,b){ return a.t-b.t; });
+  var hasBmi=pts.some(function(p){ return p.bmi!=null; });
+  var metric=(ckTrendMetric==="bmi" && hasBmi)?"bmi":"weight";
+  var val=function(p){ return metric==="bmi"?p.bmi:p.w; };
+  var valid=pts.filter(function(p){ return val(p)!=null; });
+  var last=pts[pts.length-1];
+  var cat=_bmiCat(last.bmi);
+  var md=function(ds){ var q=(_isoOf(ds)||String(ds||"")); var mm=q.match(/(\d{4})-(\d{2})-(\d{2})/); return mm?((+mm[2])+"/"+(+mm[3])):q; };
+  var unit=metric==="bmi"?"":" kg";
+  var curV=(metric==="bmi")?(last.bmi!=null?last.bmi:"—"):last.w;
+  /* header + toggle */
+  var tgl="";
+  if(hasBmi){
+    var mk=function(k,label){ var on=metric===k; return '<button type="button" data-ckm="'+k+'" style="font:600 11px var(--mono);padding:3px 10px;border-radius:11px;border:1px solid '+(on?"#E0483F":"var(--line)")+';cursor:pointer;background:'+(on?"#E0483F":"var(--card)")+';color:'+(on?"#fff":"var(--ink-soft)")+'">'+label+'</button>'; };
+    tgl='<span style="margin-left:auto;display:inline-flex;gap:5px">'+mk("weight","몸무게")+mk("bmi","BMI")+'</span>';
+  }
+  var head='<div style="display:flex;align-items:center;gap:8px;margin-bottom:4px"><span style="font:600 12px var(--mono);color:var(--ink-soft);letter-spacing:.02em">📈 '+(metric==="bmi"?"BMI":"몸무게")+' 추이</span>'+tgl+'</div>';
+  /* delta vs 직전 */
+  var deltaHTML="";
+  if(valid.length>=2){
+    var cv=val(valid[valid.length-1]), pv=val(valid[valid.length-2]);
+    if(cv!=null&&pv!=null){ var d=Math.round((cv-pv)*10)/10; var same=Math.abs(d)<1e-9;
+      deltaHTML='<span style="font:600 12.5px var(--mono);color:'+(same?"var(--ink-soft)":(d>0?"#e5675f":"#4a9e6f"))+'">'+(same?"±0":((d>0?"▲":"▼")+Math.abs(d)))+'</span>'; }
+  }
+  var chip=cat?('<span style="margin-left:auto;font:600 11px var(--mono);color:'+cat.c+';border:1px solid '+cat.c+'66;border-radius:10px;padding:2px 9px">BMI '+(last.bmi!=null?last.bmi:"—")+' · '+cat.t+'</span>'):"";
+  var valLine='<div style="display:flex;align-items:baseline;gap:9px;margin:1px 0 8px">'
+    +'<span style="font:700 26px var(--sans);color:var(--ink);letter-spacing:-.01em">'+curV+'<span style="font-size:13px;font-weight:600;color:var(--ink-soft)">'+unit+'</span></span>'
+    +deltaHTML+chip+'</div>';
+  /* body: 그래프 or 안내 */
+  var body="";
+  if(valid.length>=2){
+    var W=320,H=94,PL=8,PR=8,PT=12,PB=18;
+    var vals=valid.map(val);
+    var mn=Math.min.apply(null,vals), mx=Math.max.apply(null,vals);
+    if(mn===mx){ mn-=1; mx+=1; } else { var pd2=(mx-mn)*0.18; mn-=pd2; mx+=pd2; }
+    var n=valid.length;
+    var X=function(i){ return PL+i*(W-PL-PR)/(n-1); };
+    var Y=function(v){ return PT+(H-PT-PB)*(1-(v-mn)/(mx-mn)); };
+    var dPath=valid.map(function(p,i){ return (i?"L":"M")+X(i).toFixed(1)+" "+Y(val(p)).toFixed(1); }).join(" ");
+    var area='M'+X(0).toFixed(1)+' '+(H-PB)+' '+valid.map(function(p,i){ return "L"+X(i).toFixed(1)+" "+Y(val(p)).toFixed(1); }).join(" ")+' L'+X(n-1).toFixed(1)+' '+(H-PB)+' Z';
+    var dots=valid.map(function(p,i){ return '<circle cx="'+X(i).toFixed(1)+'" cy="'+Y(val(p)).toFixed(1)+'" r="3" fill="#E0483F"/>'; }).join("");
+    var mkX=function(i){ var p=valid[i]; var a=(i===0)?"start":((i===n-1)?"end":"middle"); return '<text x="'+X(i).toFixed(1)+'" y="'+(H-5)+'" font-size="9" fill="var(--ink-soft)" text-anchor="'+a+'">'+md(p.ds)+'</text>'; };
+    var xl=mkX(0)+(n>=3?mkX(Math.floor((n-1)/2)):"")+mkX(n-1);
+    var mkV=function(i){ var p=valid[i]; var a=(i===0)?"start":"end"; var vy=Y(val(p))-6; if(vy<9)vy=9; return '<text x="'+X(i).toFixed(1)+'" y="'+vy.toFixed(1)+'" font-size="9.5" font-weight="700" fill="var(--ink)" text-anchor="'+a+'">'+val(p)+'</text>'; };
+    var vl=mkV(0)+mkV(n-1);
+    body='<svg viewBox="0 0 '+W+' '+H+'" style="width:100%;height:auto;display:block;overflow:visible" role="img" aria-label="'+(metric==="bmi"?"BMI":"몸무게")+' 추세">'
+      +'<path d="'+area+'" fill="#E0483F" opacity="0.07"/>'
+      +'<path d="'+dPath+'" fill="none" stroke="#E0483F" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>'
+      +dots+vl+xl+'</svg>';
+  } else {
+    body='<div style="font-size:12px;color:var(--ink-soft);padding:6px 2px 2px;line-height:1.55">기록이 <b style="color:var(--ink)">2개 이상</b> 쌓이면 여기에 추세선이 그려져요. 지금은 첫 기록이에요 🌱</div>';
+  }
+  var foot=cat?'<div style="font-size:10.5px;color:var(--ink-soft);margin-top:6px;opacity:.85">※ BMI 구간은 표준 참고용이에요(의학적 진단 아님).</div>':"";
+  return '<div class="nd-cktrend" style="background:var(--card);border:1px solid var(--line);border-radius:14px;padding:13px 14px 11px;margin:0 0 12px">'+head+valLine+body+foot+'</div>';
+ }catch(e){ return ""; }
+}
 function _renderDrinkInline(m, rows){
   _ndDrinkCss();
   var list=document.getElementById("list"); if(!list) return;
@@ -5383,6 +5462,7 @@ function paintDomain(m){   // state.rows를 화면에 그림 (데이터 다시 �
   if(typeof AUTO_COVER_CATS!=="undefined" && AUTO_COVER_CATS[m.id]){ try{ ndAutoCover(); }catch(e){} }
   { const na=$("#nrAdd"); if(na) na.onclick=()=>{ if(m.id==="books"){ openAddBook(); const bq=$("#bq"); if(bq){ bq.value=state.query; bq.dispatchEvent(new Event("input")); } } else openRecordForm(m, null); }; }
   if(hasCal(m)){ _mountViewToggle(m); }
+  if(m.id==="checkup"){ try{ var _ckg=_checkupTrendHTML(base); if(_ckg){ $("#list").insertAdjacentHTML("afterbegin", _ckg); $("#list").querySelectorAll("[data-ckm]").forEach(function(_b){ _b.onclick=function(){ ckTrendMetric=_b.dataset.ckm; paintDomain(m); }; }); } }catch(_ce){} }
   if(m.id==="scrap" && total){ $("#list").insertAdjacentHTML("afterbegin", '<button class="btn ghost" id="scrapRnd" type="button" style="width:100%;margin-bottom:10px">🎲 다시보기 (랜덤 소환)</button>'); const _sr=$("#scrapRnd"); if(_sr) _sr.onclick=()=>{ const r=shown[Math.floor(Math.random()*shown.length)]; if(r) openDetail(m,r); }; }
   if(m.id==="mountains") loadCovers(m,"title");
   if(m.id==="running") loadCovers(m,"place");
@@ -5567,6 +5647,7 @@ let bookGenreFilter="";
 let mtnRegion="";
 let diaryTag="";
 let diaryView="list", diaryYM=null, diaryMood="";
+let ckTrendMetric="weight";   /* v534: 건강기록 추세 카드 지표 토글(weight/bmi) */
 let NAV_LIST=[], NAV_CUR=null;
 function carNum(v){ return parseInt(String(v==null?"":v).replace(/[^\d]/g,""),10)||0; }
 const CAR_PALETTE=['#2563eb','#16a34a','#db2777','#d97706','#7c3aed'];
