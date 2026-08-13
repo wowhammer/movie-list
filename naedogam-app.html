@@ -1464,7 +1464,7 @@ body{ background:radial-gradient(circle at 50% -10%, rgba(102,78,57,.16), transp
         <svg class="brandmark" width="40" height="30" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg>
         <span class="brandwm"><span class="bwm-ko">내도감</span><span class="bwm-en">NAEDOGAM</span></span>
       </button>
-      <span class="mhver">v534</span>
+      <span class="mhver">v535</span>
       <span class="spacer"></span>
       <span class="src-chip" id="srcChip" style="display:none">데모</span>
       <button class="icon-btn" id="searchToggle" type="button" style="display:none">🔍</button>
@@ -2647,7 +2647,7 @@ function openDomain(id){ if(id==="mbti"){ openMbti(); return; } if(id==="period"
 
 /* 홈: 켜둔 카테고리를 카드로. 건수는 한 번 열어본 분야만 표시(홈을 빠르게 유지). */
 function ndDeep(h){ if(typeof h!=="string"||h.charAt(0)!=="#") h="#8a7a6a"; var n=parseInt(h.slice(1),16),r=(n>>16)&255,g=(n>>8)&255,b=n&255; function d(x,f){return Math.max(0,Math.min(255,Math.round(x*f)));} var d1="rgb("+d(r,.60)+","+d(g,.60)+","+d(b,.60)+")", d2="rgb("+d(r,.20)+","+d(g,.20)+","+d(b,.20)+")"; return "linear-gradient(180deg,rgba(255,255,255,.06),transparent 30%),linear-gradient(150deg,"+d1+","+d2+")"; }
-var ND_LOGO_HTML='<div class="ndh-brand" style="cursor:pointer" onclick="try{goHome()}catch(e){}"><svg width="47" height="35" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg><div class="ndh-wm"><b>내도감</b><small>NAEDOGAM</small></div><span class="mhver ndh-ver">v534</span></div><button class="ndh-sync" type="button" title="동기화" aria-label="동기화" onclick="try{syncNow()}catch(e){}">↻</button>';
+var ND_LOGO_HTML='<div class="ndh-brand" style="cursor:pointer" onclick="try{goHome()}catch(e){}"><svg width="47" height="35" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg><div class="ndh-wm"><b>내도감</b><small>NAEDOGAM</small></div><span class="mhver ndh-ver">v535</span></div><button class="ndh-sync" type="button" title="동기화" aria-label="동기화" onclick="try{syncNow()}catch(e){}">↻</button>';
 /* 홈 카드 크기: wide(넓게=한 줄 전체) · half(보통=한 줄 2개) · mini(작게=하단 3칸). 기본값=프리셋 */
 var ND_PRESET_SIZE={running:"wide",food:"wide",recipes:"wide",movies:"half",books:"half",period:"half",diary:"half",travel:"half",mountains:"half",culture:"half",albums:"half",cellar:"half",scrap:"half",wish:"half",gift:"half",pet:"half",drink:"half"};
 function getHomeSizes(){ try{ return JSON.parse(store.getItem("nd.homesize")||"{}")||{}; }catch(e){ return {}; } }
@@ -2865,6 +2865,73 @@ async function _ndShareMemory(o){
   try{ if(navigator.canShare){ var file=new File([blob],fname,{type:"image/png"}); if(navigator.canShare({files:[file]})){ await navigator.share({files:[file],text:shareText}); try{ ndGA("share_card_share",{method:"native",cat:o&&o.cat}); }catch(e){} return; } } }catch(e){ if(e&&e.name==="AbortError") return; }
   try{ var url=URL.createObjectURL(blob); var a=document.createElement("a"); a.href=url; a.download=fname; document.body.appendChild(a); a.click(); a.remove(); setTimeout(function(){ URL.revokeObjectURL(url); },1500); ndToast("이미지를 저장했어요"); try{ ndGA("share_card_share",{method:"download",cat:o&&o.cat}); }catch(e){} }catch(e){ try{ ndToast("저장 실패"); }catch(_){} }
 }
+/* v535: '나를 숫자로' 공유 카드 — 기존 _ndShareMemory 파이프라인 재사용. 민감 카테고리 제외, 성향은 별칭만. */
+function _ndShareDateOf(r){ return String((r&&(r.date||r.watchDate||r.visitDate||r.readDate||r.climbDate||r.buyDate||r.playDate||r.day||r.start))||""); }
+var _ND_SHARE_PUB=["movies","books","mountains","running","travel","food","culture","albums","recipes","cellar","quote","bucket","subs"];
+var _ND_SHARE_UNIT={movies:"편",books:"권",mountains:"봉",running:"회",travel:"곳",food:"곳",culture:"편",albums:"장",recipes:"개",cellar:"병",quote:"개",bucket:"개",subs:"개"};
+function _ndCollectShareStats(){
+  var active=[]; try{ active=(typeof _ndHomeCats==="function"?_ndHomeCats():getActive())||[]; }catch(e){ active=[]; }
+  var total=0, cats=0, month=0;
+  var now=new Date(), ym=now.getFullYear()+"-"+String(now.getMonth()+1).padStart(2,"0");
+  var items=[];
+  active.forEach(function(id){
+    var m=MANIFESTS[id]; if(!m) return;
+    var a=(window.CACHE&&CACHE[id])||loadPersist(id)||[];
+    if(id==="period") a=a.filter(function(r){ return r&&r.start&&r.note!=="[삭제됨]"; });
+    var n=a.length; total+=n; cats++;
+    for(var i=0;i<a.length;i++){ var iso=""; try{ iso=String((typeof _isoOf==="function"&&_isoOf(_ndShareDateOf(a[i])))||_ndShareDateOf(a[i])); }catch(e){} if(/^\d{4}-\d{2}/.test(iso)&&iso.slice(0,7)===ym) month++; }
+    if(_ND_SHARE_PUB.indexOf(id)>=0 && n>0) items.push({title:(m.title||""), n:n, unit:(_ND_SHARE_UNIT[id]||"개")});
+  });
+  items.sort(function(a,b){ return b.n-a.n; });
+  var nick=""; try{ var sv=(typeof _mbtiSaved==="function")&&_mbtiSaved(); var ty=sv&&sv.latest&&sv.latest.type; if(ty){ nick=(typeof _ndNick==="function"?_ndNick(ty,(sv.latest.nick||"")):"")||""; } }catch(e){}
+  return { total:total, cats:cats, month:month, nick:nick, items:items.slice(0,8) };
+}
+function _ndDrawStatsCard(s){ return new Promise(function(resolve){ try{
+  var W=1080,H=1920; var cv=document.createElement("canvas"); cv.width=W; cv.height=H; var c=cv.getContext("2d");
+  var f=function(n){ return String(n).replace(/\B(?=(\d{3})+(?!\d))/g,","); };
+  var g=c.createLinearGradient(0,0,0,H); g.addColorStop(0,"#241f1a"); g.addColorStop(1,"#12100c"); c.fillStyle=g; c.fillRect(0,0,W,H);
+  var rg=c.createRadialGradient(W*0.5,H*0.24,80,W*0.5,H*0.24,900); rg.addColorStop(0,"rgba(224,72,63,0.20)"); rg.addColorStop(1,"rgba(224,72,63,0)"); c.fillStyle=rg; c.fillRect(0,0,W,H);
+  c.textAlign="center";
+  c.globalAlpha=0.92; c.fillStyle="#f6eddf"; c.font="800 40px sans-serif"; c.fillText("내도감", W/2, 140); c.globalAlpha=1;
+  c.fillStyle="#E0483F"; c.font="800 50px sans-serif"; c.fillText("나를 숫자로", W/2, 258);
+  var num=f(s.total||0);
+  c.font="900 200px sans-serif"; var nw=c.measureText(num).width;
+  c.font="800 66px sans-serif"; var uw=c.measureText("개").width;
+  var sx0=W/2-(nw+14+uw)/2; c.textAlign="left";
+  c.font="900 200px sans-serif"; c.fillStyle="#f6eddf"; c.fillText(num, sx0, 500);
+  c.font="800 66px sans-serif"; c.fillStyle="#c7b49c"; c.fillText("개", sx0+nw+14, 500);
+  c.textAlign="center";
+  var sub=f(s.cats||0)+"개 카테고리"+(s.nick?("   ·   나의 성향 「"+s.nick+"」"):"");
+  c.fillStyle="#c7b49c"; c.font="600 40px sans-serif"; c.fillText(sub, W/2, 588);
+  c.strokeStyle="rgba(246,237,223,0.14)"; c.lineWidth=2; c.beginPath(); c.moveTo(120,680); c.lineTo(W-120,680); c.stroke();
+  var items=s.items||[]; var cellW=(W-160)/2;
+  for(var i=0;i<items.length;i++){
+    var col=i%2, row=Math.floor(i/2); var cx=80+cellW*col+cellW/2; var ty=800+row*262; var it=items[i];
+    c.fillStyle="#E0483F"; c.font="800 36px sans-serif";
+    var tl=(typeof _ndWrapText==="function")?_ndWrapText(c, it.title, cellW-40, 1):[it.title]; c.fillText(tl[0]||it.title, cx, ty);
+    var vn=f(it.n);
+    c.font="900 78px sans-serif"; var vnw=c.measureText(vn).width;
+    c.font="700 38px sans-serif"; var vuw=c.measureText(it.unit).width;
+    var sx=cx-(vnw+8+vuw)/2; c.textAlign="left";
+    c.font="900 78px sans-serif"; c.fillStyle="#f6eddf"; c.fillText(vn, sx, ty+92);
+    c.font="700 38px sans-serif"; c.fillStyle="#c7b49c"; c.fillText(it.unit, sx+vnw+8, ty+92);
+    c.textAlign="center";
+  }
+  if(s.month>0){ c.fillStyle="#9c9081"; c.font="600 38px sans-serif"; c.fillText("이번 달 +"+f(s.month), W/2, H-172); }
+  c.fillStyle="#c7b49c"; c.font="800 36px sans-serif"; c.fillText("내도감 · app.naedogam.com", W/2, H-92);
+  cv.toBlob(function(b){ resolve(b); }, "image/png");
+}catch(e){ resolve(null); } }); }
+async function _ndShareStats(){
+  try{ ndToast("공유 카드 만드는 중…"); }catch(e){}
+  var s=_ndCollectShareStats();
+  var blob=await _ndDrawStatsCard(s);
+  if(!blob){ try{ ndToast("이미지를 만들지 못했어요"); }catch(e){} return; }
+  try{ ndGA("share_stats_create",{total:s.total,cats:s.cats}); }catch(e){}
+  var fname="naedogam_numbers.png";
+  var shareText="내 기록 "+s.total+"개 · 내도감 app.naedogam.com";
+  try{ if(navigator.canShare){ var file=new File([blob],fname,{type:"image/png"}); if(navigator.canShare({files:[file]})){ await navigator.share({files:[file],text:shareText}); try{ ndGA("share_stats_share",{method:"native"}); }catch(e){} return; } } }catch(e){ if(e&&e.name==="AbortError") return; }
+  try{ var url=URL.createObjectURL(blob); var a=document.createElement("a"); a.href=url; a.download=fname; document.body.appendChild(a); a.click(); a.remove(); setTimeout(function(){ URL.revokeObjectURL(url); },1500); try{ ndToast("이미지를 저장했어요"); }catch(e){} try{ ndGA("share_stats_share",{method:"download"}); }catch(e){} }catch(e){ try{ ndToast("저장 실패"); }catch(_){} }
+}
 /* ★v463 #7: 홈 카드 숫자를 수집(전체) vs 경험(읽음·봤음·다녀옴)으로 구분. 수집형 카테고리만. 활동형(러닝·일기 등)은 매 기록이 경험이라 제외. */
 var _ND_EXP={
   books:    {label:"읽음",   done:function(r){ return r.status==="읽음"; }},
@@ -2947,7 +3014,7 @@ function renderHome(){
   let _hMb=""; try{ const _s=(typeof _mbtiSaved==="function")&&_mbtiSaved(); const _ty=_s&&_s.latest&&_s.latest.type; if(_ty){ const _nk=(typeof _ndNick==="function")?_ndNick(_ty,(_s.latest.nick||"")):""; _hMb=String(_ty)+(_nk?(" "+_nk):""); } }catch(e){}
   let _hMonth=0; { const _n=new Date(); const _ym=_n.getFullYear()+"-"+String(_n.getMonth()+1).padStart(2,"0"); active.forEach(m=>{ const a=rowsOf(m); if(!a) return; a.forEach(r=>{ let iso=""; try{ iso=String((typeof _isoOf==="function"&&_isoOf(_dateOf(r)))||_dateOf(r)); }catch(e){ iso=_dateOf(r); } if(/^\d{4}-\d{2}/.test(iso)&&iso.slice(0,7)===_ym) _hMonth++; }); }); }
   const _hInfo=[`🗂 ${active.length}개 카테고리`, (_hMb?`🧭 나의 성향 ${_hMb}`:""), (_hMonth>0?`📅 이번 달 +${fmt(_hMonth)}`:"")].filter(Boolean).map(c=>`<span>${String(c).replace(/</g,"&lt;")}</span>`).join("");
-  const heroCard = `<article class="card hero" id="ndHeroCard" style="cursor:pointer"><div class="hero-main"><p class="eyebrow">지금까지 수집</p><div class="hero-big"><b id="ndHeroTotal">${fmt(totalItems)}</b><i>개</i></div></div><div class="hero-info">${_hInfo}</div></article>`;
+  const heroCard = `<article class="card hero" id="ndHeroCard" style="cursor:pointer;position:relative"><button id="ndHeroShare" type="button" aria-label="이미지로 공유" title="이미지로 공유" style="position:absolute;top:10px;right:10px;width:40px;height:40px;border-radius:12px;border:1px solid rgba(246,237,223,.28);background:rgba(0,0,0,.20);color:#f6eddf;font-size:17px;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:3;padding:0">📤</button><div class="hero-main"><p class="eyebrow">지금까지 수집</p><div class="hero-big"><b id="ndHeroTotal">${fmt(totalItems)}</b><i>개</i></div></div><div class="hero-info">${_hInfo}</div></article>`;
 
   // 표시 순서 = 설정에서 정한 순서(getActive) 그대로. 크기(넓게/보통/작게)가 폭을 결정.
   // 넓게=한 줄 전체 / 보통=한 줄 2개 / 작게=한 줄 3개. 크기가 바뀌는 지점에서 줄을 끊음.
@@ -2979,6 +3046,7 @@ function renderHome(){
   try{ ndLoadPosters(); }catch(e){}
   { var _ac=home.querySelector("#ndAddCatCard"); if(_ac) _ac.onclick=function(){ ndCatPicker("add"); }; }
   { var _hc=home.querySelector("#ndHeroCard"); if(_hc) _hc.onclick=function(){ ndCollectionWall(); }; }
+  { var _hs=home.querySelector("#ndHeroShare"); if(_hs) _hs.onclick=function(e){ e.stopPropagation(); e.preventDefault(); try{ _ndShareStats(); }catch(_he){} }; }
 
   { const _need=active.filter(m=>{ const _st=(Date.now()-(Number(store.getItem(persistKey(m.id)+"|t")||0)))>NDCACHE_TTL; return !((CACHE[m.id]||loadPersist(m.id)) && !_st); }).map(m=>m.id);
     const _hero=()=>{ const el=home.querySelector("#ndHeroTotal"); if(el){ let t=0; active.forEach(m=>{ let a=CACHE[m.id]||loadPersist(m.id); if(a){ if(m.id==="period") a=a.filter(r=>r&&r.start&&r.note!=="[삭제됨]"); t+=a.length; } }); el.textContent=fmt(t); } };
