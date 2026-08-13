@@ -1464,7 +1464,7 @@ body{ background:radial-gradient(circle at 50% -10%, rgba(102,78,57,.16), transp
         <svg class="brandmark" width="40" height="30" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg>
         <span class="brandwm"><span class="bwm-ko">내도감</span><span class="bwm-en">NAEDOGAM</span></span>
       </button>
-      <span class="mhver">v530</span>
+      <span class="mhver">v531</span>
       <span class="spacer"></span>
       <span class="src-chip" id="srcChip" style="display:none">데모</span>
       <button class="icon-btn" id="searchToggle" type="button" style="display:none">🔍</button>
@@ -2647,7 +2647,7 @@ function openDomain(id){ if(id==="mbti"){ openMbti(); return; } if(id==="period"
 
 /* 홈: 켜둔 카테고리를 카드로. 건수는 한 번 열어본 분야만 표시(홈을 빠르게 유지). */
 function ndDeep(h){ if(typeof h!=="string"||h.charAt(0)!=="#") h="#8a7a6a"; var n=parseInt(h.slice(1),16),r=(n>>16)&255,g=(n>>8)&255,b=n&255; function d(x,f){return Math.max(0,Math.min(255,Math.round(x*f)));} var d1="rgb("+d(r,.60)+","+d(g,.60)+","+d(b,.60)+")", d2="rgb("+d(r,.20)+","+d(g,.20)+","+d(b,.20)+")"; return "linear-gradient(180deg,rgba(255,255,255,.06),transparent 30%),linear-gradient(150deg,"+d1+","+d2+")"; }
-var ND_LOGO_HTML='<div class="ndh-brand" style="cursor:pointer" onclick="try{goHome()}catch(e){}"><svg width="47" height="35" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg><div class="ndh-wm"><b>내도감</b><small>NAEDOGAM</small></div><span class="mhver ndh-ver">v530</span></div><button class="ndh-sync" type="button" title="동기화" aria-label="동기화" onclick="try{syncNow()}catch(e){}">↻</button>';
+var ND_LOGO_HTML='<div class="ndh-brand" style="cursor:pointer" onclick="try{goHome()}catch(e){}"><svg width="47" height="35" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg><div class="ndh-wm"><b>내도감</b><small>NAEDOGAM</small></div><span class="mhver ndh-ver">v531</span></div><button class="ndh-sync" type="button" title="동기화" aria-label="동기화" onclick="try{syncNow()}catch(e){}">↻</button>';
 /* 홈 카드 크기: wide(넓게=한 줄 전체) · half(보통=한 줄 2개) · mini(작게=하단 3칸). 기본값=프리셋 */
 var ND_PRESET_SIZE={running:"wide",food:"wide",recipes:"wide",movies:"half",books:"half",period:"half",diary:"half",travel:"half",mountains:"half",culture:"half",albums:"half",cellar:"half",scrap:"half",wish:"half",gift:"half",pet:"half",drink:"half"};
 function getHomeSizes(){ try{ return JSON.parse(store.getItem("nd.homesize")||"{}")||{}; }catch(e){ return {}; } }
@@ -4877,7 +4877,7 @@ function openRecordForm(m, existing, prefill){
       var _cb=function(){ var h=parseFloat(_hh&&_hh.value), w=parseFloat(_ww&&_ww.value); if(h>0&&w>0){ var b=w/Math.pow(h/100,2); _bb.value=(Math.round(b*10)/10); if(_bj){ var t=b<18.5?"저체중":(b<23?"정상":(b<25?"과체중":"비만")); var c=b<18.5?"#3b82f6":(b<23?"#22c55e":(b<25?"#d9a441":"#e5675f")); _bj.textContent=t; _bj.style.color=c; } } else { _bb.value=""; if(_bj) _bj.textContent=""; } };
       if(_hh) _hh.addEventListener("input",_cb); if(_ww) _ww.addEventListener("input",_cb); _cb();
     }
-    var _sy=d.querySelector('.rf[data-k="sys"]'), _di=d.querySelector('.rf[data-k="dia"]');
+    var _sy=d.querySelector('.rf[data-k="sys"]'), _di=d.querySelector('.rf[data-k="dia"]'); if(_sy)_sy.style.marginTop="0"; if(_di)_di.style.marginTop="0"; /* v531: 혈압 2칸 위정렬(판정글자로 인한 상하 어긋남 수정) */
     if(_di){ var _pj=document.createElement("span"); _pj.className="rf-bp-judge"; _di.insertAdjacentElement("afterend",_pj);
       var _pb=function(){ var sv=parseFloat(_sy&&_sy.value), dv=parseFloat(_di&&_di.value); if(sv>0||dv>0){ var t="",c=""; if(sv>=140||dv>=90){ t="고혈압"; c="#e5675f"; } else if(sv>=130||dv>=80){ t="경계"; c="#d9a441"; } else if(sv>0&&dv>0){ t="정상"; c="#22c55e"; } _pj.textContent=t; _pj.style.color=c; } else { _pj.textContent=""; } };
       if(_sy) _sy.addEventListener("input",_pb); if(_di) _di.addEventListener("input",_pb); _pb();
