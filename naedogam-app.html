@@ -1464,7 +1464,7 @@ body{ background:radial-gradient(circle at 50% -10%, rgba(102,78,57,.16), transp
         <svg class="brandmark" width="40" height="30" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg>
         <span class="brandwm"><span class="bwm-ko">내도감</span><span class="bwm-en">NAEDOGAM</span></span>
       </button>
-      <span class="mhver">v536</span>
+      <span class="mhver">v537</span>
       <span class="spacer"></span>
       <span class="src-chip" id="srcChip" style="display:none">데모</span>
       <button class="icon-btn" id="searchToggle" type="button" style="display:none">🔍</button>
@@ -2647,7 +2647,7 @@ function openDomain(id){ if(id==="mbti"){ openMbti(); return; } if(id==="period"
 
 /* 홈: 켜둔 카테고리를 카드로. 건수는 한 번 열어본 분야만 표시(홈을 빠르게 유지). */
 function ndDeep(h){ if(typeof h!=="string"||h.charAt(0)!=="#") h="#8a7a6a"; var n=parseInt(h.slice(1),16),r=(n>>16)&255,g=(n>>8)&255,b=n&255; function d(x,f){return Math.max(0,Math.min(255,Math.round(x*f)));} var d1="rgb("+d(r,.60)+","+d(g,.60)+","+d(b,.60)+")", d2="rgb("+d(r,.20)+","+d(g,.20)+","+d(b,.20)+")"; return "linear-gradient(180deg,rgba(255,255,255,.06),transparent 30%),linear-gradient(150deg,"+d1+","+d2+")"; }
-var ND_LOGO_HTML='<div class="ndh-brand" style="cursor:pointer" onclick="try{goHome()}catch(e){}"><svg width="47" height="35" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg><div class="ndh-wm"><b>내도감</b><small>NAEDOGAM</small></div><span class="mhver ndh-ver">v536</span></div><button class="ndh-sync" type="button" title="동기화" aria-label="동기화" onclick="try{syncNow()}catch(e){}">↻</button>';
+var ND_LOGO_HTML='<div class="ndh-brand" style="cursor:pointer" onclick="try{goHome()}catch(e){}"><svg width="47" height="35" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg><div class="ndh-wm"><b>내도감</b><small>NAEDOGAM</small></div><span class="mhver ndh-ver">v537</span></div><button class="ndh-sync" type="button" title="동기화" aria-label="동기화" onclick="try{syncNow()}catch(e){}">↻</button>';
 /* 홈 카드 크기: wide(넓게=한 줄 전체) · half(보통=한 줄 2개) · mini(작게=하단 3칸). 기본값=프리셋 */
 var ND_PRESET_SIZE={running:"wide",food:"wide",recipes:"wide",movies:"half",books:"half",period:"half",diary:"half",travel:"half",mountains:"half",culture:"half",albums:"half",cellar:"half",scrap:"half",wish:"half",gift:"half",pet:"half",drink:"half"};
 function getHomeSizes(){ try{ return JSON.parse(store.getItem("nd.homesize")||"{}")||{}; }catch(e){ return {}; } }
@@ -6219,6 +6219,7 @@ function mbtiIntro(){
    +'<div class="wsec" style="text-align:center"><div class="wem" style="font-size:44px">🧠</div><p class="wpp" style="margin-top:10px">두 문장 중 <b>더 나에 가까운 쪽</b>을 고르면 됩니다.<br>정답은 없어요. 떠오르는 대로 편하게.</p>'
    +(hasPg?('<button class="wsave mbStart" id="mbResume" style="margin-top:20px;width:100%;padding:14px">이어서 풀기 ('+pg.i+'/'+MBTI_Q.length+') →</button><button class="wsave mbStart mbStartGhost" id="mbGo" style="margin-top:10px;width:100%;padding:12px">처음부터 다시</button>'):'<button class="wsave mbStart" id="mbGo" style="margin-top:20px;width:100%;padding:14px">시작하기 →</button>')
    +'</div>';
+  try{ c.insertAdjacentHTML("beforeend", _attachEntryHTML()); var _ta=document.getElementById("mbToAttach"); if(_ta) _ta.onclick=function(){ openAttach(); }; }catch(_ae){}
   var rb=document.getElementById("mbResume"); if(rb) rb.onclick=function(){ mbtiRun(true); };
   document.getElementById("mbGo").onclick=function(){ _mbtiProgClear(); mbtiRun(false); };
 }
@@ -6281,6 +6282,7 @@ function mbtiShowResult(res, isSaved){
              :'<button class="wclose mbBtn" id="mbRetry" style="flex:1;padding:13px">다시 하기</button><button class="wsave mbBtn" id="mbSave" style="flex:1;padding:13px">저장하기</button>')
     +'</div>'
     +'<div id="mbSyncMsg" class="wcap" style="text-align:center;padding:0 18px 16px">'+(isSaved?'☁️ 구글시트에 저장됨 (기기간 공유)':'')+'</div>';
+  try{ c.insertAdjacentHTML("beforeend", _attachEntryHTML()); var _ta2=document.getElementById("mbToAttach"); if(_ta2) _ta2.onclick=function(){ openAttach(); }; }catch(_ae2){}
   var rt=document.getElementById("mbRetry"); if(rt) rt.onclick=function(){ mbtiRun(); };
   var sv=document.getElementById("mbSave"); if(sv) sv.onclick=function(){ mbtiSave(res); };
   var sh=document.getElementById("mbShare"); if(sh) sh.onclick=function(){ _wCardExport("mbtiCard","내도감_나의성향.png", sh); };
@@ -6297,6 +6299,104 @@ function mbtiSave(res){
     mbtiShowResult(res, true);
     try{ if(typeof toast==="function") toast("저장됨 · 구글시트에 기록(기기간 공유)"); }catch(e){}
   }catch(e){ alert("저장 실패: "+(e&&e.message||e)); }
+}
+/* ══════════════ v537: 애착유형 자가 테스트 (재미=거울 파일럿) ══════════════
+   「나의 성향」 옆 선반. mbti UI/CSS 재사용, 콘텐츠·저장(nd.attach)만 신규. localStorage only.
+   결과가 또 하나의 '나' 데이터 → AI 이야기 재료로 복리. 진단 아님(참고용). */
+var ATTACH_Q=[
+ {t:"소중한 사람과 연락이 뜸해지면 마음이 불안해진다.", d:"anx"},
+ {t:"상대가 나만큼 나를 생각하지 않을까 봐 자주 걱정된다.", d:"anx"},
+ {t:"가까운 사람에게 서운하면 그 감정이 오래 간다.", d:"anx"},
+ {t:"관계에서 확인받고 싶은 마음이 클 때가 많다.", d:"anx"},
+ {t:"혼자 남겨지는 상황이 유독 두렵다.", d:"anx"},
+ {t:"상대의 작은 반응 변화에도 예민해진다.", d:"anx"},
+ {t:"너무 가까워지면 오히려 부담스러워 거리를 두고 싶다.", d:"avo"},
+ {t:"힘든 일이 있어도 남에게 잘 기대지 않는 편이다.", d:"avo"},
+ {t:"속마음을 깊이 털어놓는 게 어렵다.", d:"avo"},
+ {t:"혼자 있는 시간이 관계보다 편할 때가 많다.", d:"avo"},
+ {t:"누군가 너무 의지하려 하면 답답하게 느껴진다.", d:"avo"},
+ {t:"감정을 표현하기보다 혼자 정리하는 편이다.", d:"avo"}
+];
+var ATTACH_SCALE=["전혀 아니다","아니다","그렇다","매우 그렇다"];
+var ATTACH_INFO={
+ SEC:{name:"안정형", nick:"너른 항구", line:"가까워져도, 멀어져도 크게 흔들리지 않는 사람",
+   desc:"관계에서 나를 지키면서도 상대에게 마음을 열 줄 알아요. 갈등이 생겨도 '그럴 수 있지' 하고 넘길 여유가 있고, 곁을 주는 일도 곁을 두는 일도 자연스럽습니다."},
+ ANX:{name:"불안형", nick:"그리움", line:"마음이 상대에게 먼저 가 있는, 애정이 깊은 사람",
+   desc:"사랑에 진심이고 관계에 깊이 몰입해요. 그만큼 상대의 온도에 민감해서 확인받고 싶을 때가 많죠. 그 예민함은 사실 '이 관계를 아낀다'는 신호예요. 그 다정함을 나 자신에게도 조금 나눠주면 좋아요."},
+ AVO:{name:"회피형", nick:"혼자의 방", line:"거리를 둘 때 오히려 편안해지는, 독립적인 사람",
+   desc:"혼자서도 단단하고, 감정을 스스로 정리하는 힘이 있어요. 다만 가까워지는 순간 한 발 물러서고 싶어지죠. 기대는 게 약함이 아니라는 걸 가끔 떠올리면 관계가 한결 편해집니다."},
+ FEA:{name:"혼란형", nick:"밀물썰물", line:"다가가고 싶다가도 한 발 물러서게 되는 사람",
+   desc:"가까워지고 싶은 마음과 상처받기 싫은 마음이 함께 있어요. 밀고 당기는 건 변덕이 아니라, 관계를 아끼는 만큼 조심스러운 거예요. 안전하다고 느껴지는 사람 곁에서 조금씩 편해집니다."}
+};
+function _attachSaved(){ try{ var r=store.getItem("nd.attach"); return r?JSON.parse(r):null; }catch(e){ return null; } }
+function _attachEsc(x){ return String(x==null?"":x).replace(/&/g,"&amp;").replace(/</g,"&lt;"); }
+function _attachDate(){ var d=new Date(); return d.getFullYear()+"."+String(d.getMonth()+1).padStart(2,"0")+"."+String(d.getDate()).padStart(2,"0"); }
+function _attachEntryHTML(){ var s=_attachSaved(); var badge=(s&&s.latest)?(' · <b style="color:#E0483F">'+_attachEsc(s.latest.name||"")+'</b>'):''; return '<div class="wsec" style="border-bottom:none;padding-top:4px"><button class="wclose mbBtn" id="mbToAttach" style="width:100%;padding:13px">🧭 애착유형 알아보기'+badge+' →</button></div>'; }
+function openAttach(){
+  state.domain="mbti"; state.query=""; state.pick=""; state.statFilter=null; state.page=0;
+  showView("domain"); try{ renderTabs(); }catch(e){}
+  var _s=$("#search"); if(_s){ _s.value=""; _s.style.display="none"; }
+  ["mvselect","scope","picker","recoBtn","addBtn"].forEach(function(id){ var e=document.getElementById(id); if(e) e.style.display="none"; });
+  try{ _ndHideSelectUI(); }catch(e){}
+  $("#stats").style.display="none"; $("#stats").innerHTML=""; $("#count").innerHTML="";
+  $("#list").innerHTML='<div class="pdInlineBar"><button class="wclose" id="atBack" style="padding:6px 10px;margin-right:6px">← 나의 성향</button><span class="pdTitle">🧭 애착유형</span></div><div class="wcard mbInline" id="attachCard"></div>';
+  var bk=document.getElementById("atBack"); if(bk) bk.onclick=function(){ try{ openMbti(); }catch(e){} };
+  var sv=_attachSaved();
+  if(sv&&sv.latest) attachShowResult(sv.latest,true); else attachIntro();
+}
+function attachIntro(){
+  var c=document.getElementById("attachCard"); if(!c) return;
+  c.innerHTML='<div class="wsec whead"><div class="wlogo">내도감 · INSIGHT</div><div class="wtitle">애착유형</div><div class="wdate">12문항 · 약 2분 · 관계 속의 나</div></div>'
+   +'<div class="wsec" style="text-align:center"><div class="wem" style="font-size:44px">🧭</div><p class="wpp" style="margin-top:10px">사람과 가까워질 때 <b>나는 어떤 사람인지</b>,<br>12문장에 답하며 살펴봐요. 정답은 없어요.</p>'
+   +'<button class="wsave mbStart" id="atGo" style="margin-top:20px;width:100%;padding:14px">시작하기 →</button></div>';
+  document.getElementById("atGo").onclick=function(){ attachRun(); };
+}
+function attachRun(){
+  var n=ATTACH_Q.length; var st={i:0,ans:[]};
+  var ov=document.getElementById("attachTest"); if(ov) ov.remove();
+  ov=document.createElement("div"); ov.id="attachTest"; ov.className="mbTestOv"; document.body.appendChild(ov);
+  function draw(){
+    var q=ATTACH_Q[st.i]; var pct=Math.round(st.i/n*100);
+    var opts=ATTACH_SCALE.map(function(lb,vi){ return '<button class="mbOpt" data-v="'+(vi+1)+'">'+lb+'</button>'; }).join("");
+    ov.innerHTML='<div class="mbTestTop"><button class="mbQuit" id="atQuit">✕ 그만두기</button><div class="mbCount">'+(st.i+1)+' / '+n+'</div></div>'
+     +'<div class="mbProg2"><i style="width:'+pct+'%"></i></div>'
+     +'<div class="mbTestBody"><div class="mbQ">'+_attachEsc(q.t)+'</div>'+opts
+     +(st.i>0?'<button class="mbBack" id="atBk">← 이전</button>':'')+'</div>';
+    ov.querySelectorAll(".mbOpt").forEach(function(b){ b.onclick=function(){ st.ans[st.i]={d:q.d,v:+b.dataset.v}; st.i++; if(st.i>=n){ ov.remove(); attachScore(st.ans); } else draw(); }; });
+    var bk=document.getElementById("atBk"); if(bk) bk.onclick=function(){ st.i--; draw(); };
+    document.getElementById("atQuit").onclick=function(){ ov.remove(); if(document.getElementById("attachCard")) attachIntro(); };
+  }
+  draw();
+}
+function attachScore(ans){
+  var aS=0,aN=0,vS=0,vN=0;
+  ans.forEach(function(o){ if(!o) return; if(o.d==="anx"){ aS+=o.v; aN++; } else { vS+=o.v; vN++; } });
+  var anxAvg=aN?aS/aN:1, avoAvg=vN?vS/vN:1;
+  var anxHi=anxAvg>=2.5, avoHi=avoAvg>=2.5;
+  var key=anxHi?(avoHi?"FEA":"ANX"):(avoHi?"AVO":"SEC");
+  var info=ATTACH_INFO[key];
+  var res={type:key, name:info.name, nick:info.nick, line:info.line, desc:info.desc,
+    anxPct:Math.round((anxAvg-1)/3*100), avoPct:Math.round((avoAvg-1)/3*100), date:_attachDate()};
+  attachShowResult(res,false);
+}
+function _attachBar(label, pct){
+  return '<div class="mbAxis"><div class="mbAxL"><b>'+label+'</b><b class="on">'+(pct>=50?"높음":"낮음")+'</b></div><div class="mbBar"><i style="width:'+pct+'%"></i></div><div class="mbAxP">'+pct+'%</div></div>';
+}
+function attachShowResult(res, isSaved){
+  var c=document.getElementById("attachCard"); if(!c) return;
+  c.innerHTML='<div class="wsec whead"><div class="wlogo">내도감 · 애착유형</div>'
+    +'<div class="mbType" style="font-size:32px">'+_attachEsc(res.name)+'</div><div class="mbNick">'+_attachEsc(res.nick)+'</div>'
+    +'<div class="wdate" style="margin-top:6px">'+_attachEsc(res.line)+'</div></div>'
+   +'<div class="wsec"><div class="wh2">📊 두 가지 마음</div>'+_attachBar("불안 · 가까움을 원함",res.anxPct)+_attachBar("회피 · 거리를 둠",res.avoPct)+'</div>'
+   +'<div class="wsec"><div class="winsight">'+_attachEsc(res.desc)+'</div></div>'
+   +'<div class="wsec"><div class="wcap" style="line-height:1.6">※ 심리학의 애착이론을 바탕으로 내도감이 만든 <b>참고용</b> 검사예요. 진단이 아니고 <b>지금의 나</b>고요. 몇 달 뒤 다시 해보면 변화가 보여요.</div></div>'
+   +'<div class="wsec" style="display:flex;gap:10px;border-bottom:none"><button class="wclose mbBtn" id="atRetry" style="flex:1;padding:13px">'+(isSaved?"다시 측정":"다시 하기")+'</button>'+(isSaved?'':'<button class="wsave mbBtn" id="atSave" style="flex:1;padding:13px">저장하기</button>')+'</div>'
+   +(isSaved?'<div class="wcap" style="text-align:center;padding:0 18px 16px">🔒 이 기기에 저장됨 · AI 이야기 재료로도 쓰여요</div>':'');
+  var rt=document.getElementById("atRetry"); if(rt) rt.onclick=function(){ attachRun(); };
+  var sv=document.getElementById("atSave"); if(sv) sv.onclick=function(){ attachSave(res); };
+}
+function attachSave(res){
+  try{ var cur=_attachSaved()||{history:[]}; cur.latest=res; cur.history=(cur.history||[]); cur.history.unshift(res); if(cur.history.length>30) cur.history=cur.history.slice(0,30); store.setItem("nd.attach", JSON.stringify(cur)); try{ ndGA("attach_save",{type:res.type}); }catch(e){} attachShowResult(res,true); try{ if(typeof ndToast==="function") ndToast("저장됨 · 결과가 AI 이야기 재료로 쓰여요"); }catch(e){} }catch(e){ try{ alert("저장 실패: "+(e&&e.message||e)); }catch(_){} }
 }
 /* ══════════════ 생리주기 (Period Tracker) ══════════════
    저장: localStorage nd.period {cycles:[{_id,start,end,flow,symptoms:[],mood,note}]}
