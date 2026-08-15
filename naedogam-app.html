@@ -1464,7 +1464,7 @@ body{ background:radial-gradient(circle at 50% -10%, rgba(102,78,57,.16), transp
         <svg class="brandmark" width="40" height="30" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg>
         <span class="brandwm"><span class="bwm-ko">내도감</span><span class="bwm-en">NAEDOGAM</span></span>
       </button>
-      <span class="mhver">v541</span>
+      <span class="mhver">v542</span>
       <span class="spacer"></span>
       <span class="src-chip" id="srcChip" style="display:none">데모</span>
       <button class="icon-btn" id="searchToggle" type="button" style="display:none">🔍</button>
@@ -2647,7 +2647,7 @@ function openDomain(id){ if(id==="mbti"){ openMbti(); return; } if(id==="period"
 
 /* 홈: 켜둔 카테고리를 카드로. 건수는 한 번 열어본 분야만 표시(홈을 빠르게 유지). */
 function ndDeep(h){ if(typeof h!=="string"||h.charAt(0)!=="#") h="#8a7a6a"; var n=parseInt(h.slice(1),16),r=(n>>16)&255,g=(n>>8)&255,b=n&255; function d(x,f){return Math.max(0,Math.min(255,Math.round(x*f)));} var d1="rgb("+d(r,.60)+","+d(g,.60)+","+d(b,.60)+")", d2="rgb("+d(r,.20)+","+d(g,.20)+","+d(b,.20)+")"; return "linear-gradient(180deg,rgba(255,255,255,.06),transparent 30%),linear-gradient(150deg,"+d1+","+d2+")"; }
-var ND_LOGO_HTML='<div class="ndh-brand" style="cursor:pointer" onclick="try{goHome()}catch(e){}"><svg width="47" height="35" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg><div class="ndh-wm"><b>내도감</b><small>NAEDOGAM</small></div><span class="mhver ndh-ver">v541</span></div><button class="ndh-sync" type="button" title="동기화" aria-label="동기화" onclick="try{syncNow()}catch(e){}">↻</button>';
+var ND_LOGO_HTML='<div class="ndh-brand" style="cursor:pointer" onclick="try{goHome()}catch(e){}"><svg width="47" height="35" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg><div class="ndh-wm"><b>내도감</b><small>NAEDOGAM</small></div><span class="mhver ndh-ver">v542</span></div><button class="ndh-sync" type="button" title="동기화" aria-label="동기화" onclick="try{syncNow()}catch(e){}">↻</button>';
 /* 홈 카드 크기: wide(넓게=한 줄 전체) · half(보통=한 줄 2개) · mini(작게=하단 3칸). 기본값=프리셋 */
 var ND_PRESET_SIZE={running:"wide",food:"wide",recipes:"wide",movies:"half",books:"half",period:"half",diary:"half",travel:"half",mountains:"half",culture:"half",albums:"half",cellar:"half",scrap:"half",wish:"half",gift:"half",pet:"half",drink:"half"};
 function getHomeSizes(){ try{ return JSON.parse(store.getItem("nd.homesize")||"{}")||{}; }catch(e){ return {}; } }
@@ -6217,6 +6217,13 @@ function mbtiHomeCard(){
   var ic='<span class="ci" style="color:#7c3aed"><svg class="ci-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 3.6-6 8-6s8 2 8 6"/></svg></span>';
   return '<button class="cat-card'+(n?'':' cat-card-zero')+'" data-mbti="1">'+ic+'<span class="cn">나의 성향</span><span class="cc">'+(n?(lt+' · '+n+'회'):'측정하기')+'</span></button>';
 }
+function _ndTestTabsHTML(active){
+  var mk=function(k,label,on){ return '<button type="button" class="ndTestTab" data-tt="'+k+'" style="flex:1;padding:11px 8px;border-radius:11px;cursor:pointer;font:700 13.5px var(--sans);'+(on?'background:var(--ink);color:var(--paper);border:1px solid var(--ink)':'background:transparent;color:var(--ink-soft);border:1px solid var(--line)')+'">'+label+'</button>'; };
+  return '<div class="nd-testtabs" style="display:flex;gap:8px;margin:2px 0 12px">'+mk("mbti","🧠 나의 성향",active==="mbti")+mk("attach","🧭 애착유형",active==="attach")+'</div>';
+}
+function _ndBindTestTabs(){
+  try{ var box=$("#list"); if(!box) return; box.querySelectorAll(".ndTestTab").forEach(function(b){ b.onclick=function(){ var k=b.dataset.tt; if(k==="attach"){ try{ openAttach(); }catch(e){} } else { try{ openMbti(); }catch(e){} } }; }); }catch(e){}
+}
 async function openMbti(){
   state.domain="mbti"; state.query=""; state.pick=""; state.statFilter=null; state.page=0;
   showView("domain"); renderTabs();
@@ -6224,7 +6231,8 @@ async function openMbti(){
   ["mvselect","scope","picker","recoBtn","addBtn"].forEach(function(id){ var e=document.getElementById(id); if(e) e.style.display="none"; });
   _ndHideSelectUI();   /* ★v431 */
   $("#stats").style.display="none"; $("#stats").innerHTML=""; $("#count").innerHTML="";
-  $("#list").innerHTML='<div class="pdInlineBar"><span class="pdTitle">🧠 나의 성향</span></div><div class="wcard mbInline" id="mbtiCard"></div>';
+  $("#list").innerHTML=_ndTestTabsHTML("mbti")+'<div class="wcard mbInline" id="mbtiCard"></div>';
+  _ndBindTestTabs();
   var saved=_mbtiSaved();
   if(saved && saved.latest) mbtiShowResult(saved.latest, true);
   else mbtiIntro();
@@ -6237,7 +6245,6 @@ function mbtiIntro(){
    +'<div class="wsec" style="text-align:center"><div class="wem" style="font-size:44px">🧠</div><p class="wpp" style="margin-top:10px">두 문장 중 <b>더 나에 가까운 쪽</b>을 고르면 됩니다.<br>정답은 없어요. 떠오르는 대로 편하게.</p>'
    +(hasPg?('<button class="wsave mbStart" id="mbResume" style="margin-top:20px;width:100%;padding:14px">이어서 풀기 ('+pg.i+'/'+MBTI_Q.length+') →</button><button class="wsave mbStart mbStartGhost" id="mbGo" style="margin-top:10px;width:100%;padding:12px">처음부터 다시</button>'):'<button class="wsave mbStart" id="mbGo" style="margin-top:20px;width:100%;padding:14px">시작하기 →</button>')
    +'</div>';
-  try{ c.insertAdjacentHTML("beforeend", _attachEntryHTML()); var _ta=document.getElementById("mbToAttach"); if(_ta) _ta.onclick=function(){ openAttach(); }; }catch(_ae){}
   var rb=document.getElementById("mbResume"); if(rb) rb.onclick=function(){ mbtiRun(true); };
   document.getElementById("mbGo").onclick=function(){ _mbtiProgClear(); mbtiRun(false); };
 }
@@ -6300,7 +6307,6 @@ function mbtiShowResult(res, isSaved){
              :'<button class="wclose mbBtn" id="mbRetry" style="flex:1;padding:13px">다시 하기</button><button class="wsave mbBtn" id="mbSave" style="flex:1;padding:13px">저장하기</button>')
     +'</div>'
     +'<div id="mbSyncMsg" class="wcap" style="text-align:center;padding:0 18px 16px">'+(isSaved?'☁️ 구글시트에 저장됨 (기기간 공유)':'')+'</div>';
-  try{ c.insertAdjacentHTML("beforeend", _attachEntryHTML()); var _ta2=document.getElementById("mbToAttach"); if(_ta2) _ta2.onclick=function(){ openAttach(); }; }catch(_ae2){}
   var rt=document.getElementById("mbRetry"); if(rt) rt.onclick=function(){ mbtiRun(); };
   var sv=document.getElementById("mbSave"); if(sv) sv.onclick=function(){ mbtiSave(res); };
   var sh=document.getElementById("mbShare"); if(sh) sh.onclick=function(){ _wCardExport("mbtiCard","내도감_나의성향.png", sh); };
@@ -6378,8 +6384,8 @@ function openAttach(){
   ["mvselect","scope","picker","recoBtn","addBtn"].forEach(function(id){ var e=document.getElementById(id); if(e) e.style.display="none"; });
   try{ _ndHideSelectUI(); }catch(e){}
   $("#stats").style.display="none"; $("#stats").innerHTML=""; $("#count").innerHTML="";
-  $("#list").innerHTML='<div class="pdInlineBar"><button class="wclose" id="atBack" style="padding:6px 10px;margin-right:6px">← 나의 성향</button><span class="pdTitle">🧭 애착유형</span></div><div class="wcard mbInline" id="attachCard"></div>';
-  var bk=document.getElementById("atBack"); if(bk) bk.onclick=function(){ try{ openMbti(); }catch(e){} };
+  $("#list").innerHTML=_ndTestTabsHTML("attach")+'<div class="wcard mbInline" id="attachCard"></div>';
+  _ndBindTestTabs();
   var sv=_attachSaved();
   if(sv&&sv.latest) attachShowResult(sv.latest,true); else attachIntro();
   try{ attachSheetLoad().then(function(hist){ if(hist&&hist.length){ var cur=_attachSaved()||{}; cur.history=hist; cur.latest=hist[0]; try{ store.setItem("nd.attach", JSON.stringify(cur)); }catch(e){} if(document.getElementById("attachCard") && !document.getElementById("attachTest")){ attachShowResult(hist[0], true); } } }).catch(function(){}); }catch(e){}
