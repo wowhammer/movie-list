@@ -1464,7 +1464,7 @@ body{ background:radial-gradient(circle at 50% -10%, rgba(102,78,57,.16), transp
         <svg class="brandmark" width="40" height="30" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg>
         <span class="brandwm"><span class="bwm-ko">내도감</span><span class="bwm-en">NAEDOGAM</span></span>
       </button>
-      <span class="mhver">v543</span>
+      <span class="mhver">v544</span>
       <span class="spacer"></span>
       <span class="src-chip" id="srcChip" style="display:none">데모</span>
       <button class="icon-btn" id="searchToggle" type="button" style="display:none">🔍</button>
@@ -2647,7 +2647,7 @@ function openDomain(id){ if(id==="mbti"){ openMbti(); return; } if(id==="period"
 
 /* 홈: 켜둔 카테고리를 카드로. 건수는 한 번 열어본 분야만 표시(홈을 빠르게 유지). */
 function ndDeep(h){ if(typeof h!=="string"||h.charAt(0)!=="#") h="#8a7a6a"; var n=parseInt(h.slice(1),16),r=(n>>16)&255,g=(n>>8)&255,b=n&255; function d(x,f){return Math.max(0,Math.min(255,Math.round(x*f)));} var d1="rgb("+d(r,.60)+","+d(g,.60)+","+d(b,.60)+")", d2="rgb("+d(r,.20)+","+d(g,.20)+","+d(b,.20)+")"; return "linear-gradient(180deg,rgba(255,255,255,.06),transparent 30%),linear-gradient(150deg,"+d1+","+d2+")"; }
-var ND_LOGO_HTML='<div class="ndh-brand" style="cursor:pointer" onclick="try{goHome()}catch(e){}"><svg width="47" height="35" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg><div class="ndh-wm"><b>내도감</b><small>NAEDOGAM</small></div><span class="mhver ndh-ver">v543</span></div><button class="ndh-sync" type="button" title="동기화" aria-label="동기화" onclick="try{syncNow()}catch(e){}">↻</button>';
+var ND_LOGO_HTML='<div class="ndh-brand" style="cursor:pointer" onclick="try{goHome()}catch(e){}"><svg width="47" height="35" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg><div class="ndh-wm"><b>내도감</b><small>NAEDOGAM</small></div><span class="mhver ndh-ver">v544</span></div><button class="ndh-sync" type="button" title="동기화" aria-label="동기화" onclick="try{syncNow()}catch(e){}">↻</button>';
 /* 홈 카드 크기: wide(넓게=한 줄 전체) · half(보통=한 줄 2개) · mini(작게=하단 3칸). 기본값=프리셋 */
 var ND_PRESET_SIZE={running:"wide",food:"wide",recipes:"wide",movies:"half",books:"half",period:"half",diary:"half",travel:"half",mountains:"half",culture:"half",albums:"half",cellar:"half",scrap:"half",wish:"half",gift:"half",pet:"half",drink:"half"};
 function getHomeSizes(){ try{ return JSON.parse(store.getItem("nd.homesize")||"{}")||{}; }catch(e){ return {}; } }
@@ -4751,6 +4751,25 @@ function _ndKbFollow(d){
     d.__ndKbFix=1;
   }catch(e){}
 }
+function _ndTagCss(){ if(document.getElementById("ndTagCss")) return; var st=document.createElement("style"); st.id="ndTagCss";
+  st.textContent=".rf-tagsel{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px}.rf-tagsel:empty{display:none}.rf-tagchip{display:inline-flex;align-items:center;gap:5px;background:rgba(224,72,63,.12);border:1px solid rgba(224,72,63,.5);color:var(--ink);border-radius:14px;padding:4px 6px 4px 11px;font-size:13px}.rf-tagx{background:none;border:none;color:var(--ink-soft);cursor:pointer;font-size:11px;padding:0 2px;line-height:1}.rf-tagaddrow{display:flex;gap:6px;margin-bottom:8px}.rf-tagnew{flex:1;min-width:0;padding:9px 11px;border:1px solid var(--line);border-radius:8px;background:var(--card);color:var(--ink);font-size:14px;font-family:inherit;box-sizing:border-box}.rf-tagadd{flex:0 0 auto;width:42px;border:1px solid var(--line);border-radius:8px;background:var(--card);color:#E0483F;font-size:19px;cursor:pointer}.rf-taglist{display:flex;flex-wrap:wrap;gap:6px;max-height:170px;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:2px}.rf-taglist:empty{display:none}.rf-tagopt{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);background:transparent;color:var(--ink-soft);border-radius:14px;padding:6px 11px;font-size:13px;cursor:pointer}.rf-tagopt.on{background:rgba(224,72,63,.12);border-color:rgba(224,72,63,.5);color:var(--ink)}.rf-tagc{font-size:11px;color:var(--ink-soft);font-weight:600}.rf-tagopt.on .rf-tagc{color:#E0483F}.rf-tagopt[hidden]{display:none}";
+  document.head.appendChild(st); }
+function _ndTagPickHTML(mid, sel, f){
+  var esc=function(x){ return String(x==null?"":x).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/"/g,"&quot;"); };
+  var selArr=Array.isArray(sel)?sel.slice():(sel?String(sel).split(",").map(function(x){return x.trim();}).filter(Boolean):[]);
+  var rows=(window.CACHE&&CACHE[mid])||(typeof loadPersist==="function"?loadPersist(mid):[])||[];
+  var cnt={}; rows.forEach(function(r){ (typeof rowTags==="function"?rowTags(r):[]).forEach(function(t){ t=String(t).trim(); if(t) cnt[t]=(cnt[t]||0)+1; }); });
+  var allTags=Object.keys(cnt).sort(function(a,b){ return cnt[b]-cnt[a]; });
+  var low={}; selArr.forEach(function(t){ low[t.toLowerCase()]=1; });
+  var chips=selArr.map(function(t){ return '<span class="rf-tagchip" data-t="'+esc(t)+'">'+esc(t)+'<button type="button" class="rf-tagx" data-t="'+esc(t)+'">✕</button></span>'; }).join("");
+  var list=allTags.map(function(t){ var on=!!low[t.toLowerCase()]; return '<button type="button" class="rf-tagopt'+(on?" on":"")+'" data-t="'+esc(t)+'"><span class="rf-tagn">'+esc(t)+'</span><span class="rf-tagc">'+cnt[t]+'</span></button>'; }).join("");
+  return '<label>'+ndFL(f)+'</label>'
+    +'<div class="rf-tagpick" data-k="'+f.k+'">'
+    +'<div class="rf-tagsel" data-k="'+f.k+'">'+chips+'</div>'
+    +'<div class="rf-tagaddrow"><input class="rf-tagnew" data-k="'+f.k+'" placeholder="태그 검색·추가 (없으면 새로)" autocomplete="off"><button type="button" class="rf-tagadd" data-k="'+f.k+'" aria-label="태그 추가">＋</button></div>'
+    +'<div class="rf-taglist" data-k="'+f.k+'">'+list+'</div>'
+    +'<input type="hidden" class="rf" data-k="'+f.k+'" data-type="tags" value="'+esc(selArr.join(", "))+'"></div>';
+}
 function openRecordForm(m, existing, prefill){
   const d=$("#add");
   try{ _ndVoiceStop(); if(!d.__ndVoiceBound){ d.__ndVoiceBound=1; d.addEventListener("close", function(){ try{ _ndVoiceStop(); }catch(e){} }); } }catch(e){} const isEdit=!!existing; const fields=(m.fields||[]).filter(f=>!f.hideForm);
@@ -4805,10 +4824,11 @@ function openRecordForm(m, existing, prefill){
     if(f.money||f.comma){ const nz=(val==null||val===""||isNaN(Number(val)))?"":Number(val).toLocaleString(); return `<label>${ndFL(f)}</label><input class="rf" data-k="${f.k}" data-type="money" inputmode="numeric" value="${nz}" autocomplete="off" />`; }
     if(f.type==="checks"){ var _arr=Array.isArray(val)?val.map(String):(val?String(val).split(",").map(function(x){return x.trim();}).filter(Boolean):[]);
       return `<label>${ndFL(f)}</label><div class="rf-checks" data-k="${f.k}">`+(f.options||[]).map(function(o){ var _on=_arr.indexOf(o)>=0; return '<button type="button" class="rf-chk'+(_on?' on':'')+'" data-v="'+String(o).replace(/"/g,"&quot;")+'">'+o+'</button>'; }).join("")+`</div>`; }
+    if(f.type==="tags"){ try{ _ndTagCss(); }catch(_tc){} return _ndTagPickHTML(m.id, val, f); }
     const v = (f.type==="tags" && Array.isArray(val)) ? val.join(", ") : (val==null?"":val);
     return `<label>${ndFL(f)}</label><input class="rf" data-k="${f.k}" data-type="${f.type}" value="${String(v).replace(/"/g,'&quot;')}" placeholder="${ndFP(f)}" autocomplete="off" />`;
   };
-  const _wcls=f=> f.third?"rff-third":f.full?"rff-full":(f.half?"rff-half":(f.type==="bool"?"rff-bool":((f.type==="textarea"||f.type==="image"||f.type==="rating"||f.type==="seg"||f.type==="labrows"||f.type==="tiers"||f.type==="quotes"||f.type==="checks")?"rff-full":"rff-half")));
+  const _wcls=f=> f.third?"rff-third":f.full?"rff-full":(f.half?"rff-half":(f.type==="bool"?"rff-bool":((f.type==="textarea"||f.type==="image"||f.type==="rating"||f.type==="seg"||f.type==="labrows"||f.type==="tiers"||f.type==="quotes"||f.type==="checks"||f.type==="tags")?"rff-full":"rff-half")));
   /* ★v446: 빠른 담기 파일럿(여행) — 제목·상태·별점만 먼저 보이고 나머지는 '자세히'로 접는다. 수정(isEdit)일 땐 전체 표시(기존 동작 유지). */
   const _quickKeys={ travel:["title","status","rating"], food:["title","status","rating"], recipes:["title","status","rating"], culture:["title","status","rating"], mountains:["title","climbed"], albums:["title","status","rating"], quote:["title","author"], drink:["kind","amount"], checkup:["date","height","weight","bmi","sys","dia","glucose"] };   /* ★v448~v450: 빠른 담기 카테고리 */
   const _renderCell=f=>`<div class="rff ${_wcls(f)}">${_cell(f)}</div>`;
@@ -4880,6 +4900,31 @@ function openRecordForm(m, existing, prefill){
     if(presetBtn) presetBtn.onclick=()=>{ var have={}; box.querySelectorAll(".lab-item").forEach(function(i){ var k=_ndLabNorm(i.value); if(k) have[k]=1; }); (typeof ND_LAB_PRESET!=="undefined"?ND_LAB_PRESET:[]).forEach(function(nm){ if(have[_ndLabNorm(nm)]) return; var tp=document.createElement("template"); tp.innerHTML=rowTpl; var nr=tp.content.firstChild; nr.querySelector(".lab-item").value=nm; box.appendChild(nr); wireRow(nr); }); box.querySelectorAll(".lab-row").forEach(function(rw){ if(box.querySelectorAll(".lab-row").length<=1) return; var it=rw.querySelector(".lab-item"), iv=rw.querySelector(".lab-val"); if(it&&iv&&!it.value.trim()&&!iv.value.trim()) rw.remove(); }); };
   });
   d.querySelectorAll('input[data-type="money"]').forEach(inp=>{ inp.addEventListener("input",()=>{ const raw=inp.value.replace(/[^0-9]/g,""); inp.value=raw?Number(raw).toLocaleString():""; }); });
+  d.querySelectorAll(".rf-tagpick").forEach(function(pick){
+    var hidden=pick.querySelector('input.rf[data-type="tags"]');
+    var selBox=pick.querySelector(".rf-tagsel"), listBox=pick.querySelector(".rf-taglist");
+    var newInp=pick.querySelector(".rf-tagnew"), addBtn=pick.querySelector(".rf-tagadd");
+    if(!hidden||!selBox||!listBox||!newInp||!addBtn) return;
+    var norm=function(x){ return String(x==null?"":x).trim().replace(/\s+/g," "); };
+    var esc=function(x){ return String(x==null?"":x).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/"/g,"&quot;"); };
+    var getSel=function(){ return hidden.value.split(",").map(function(x){return x.trim();}).filter(Boolean); };
+    var syncList=function(arr){ var lo={}; arr.forEach(function(t){ lo[t.toLowerCase()]=1; }); listBox.querySelectorAll(".rf-tagopt").forEach(function(b){ if(lo[(b.dataset.t||"").toLowerCase()]) b.classList.add("on"); else b.classList.remove("on"); }); };
+    var setSel, renderSel;
+    renderSel=function(arr){ selBox.innerHTML=arr.map(function(t){ return '<span class="rf-tagchip" data-t="'+esc(t)+'">'+esc(t)+'<button type="button" class="rf-tagx" data-t="'+esc(t)+'">✕</button></span>'; }).join("");
+      selBox.querySelectorAll(".rf-tagx").forEach(function(x){ x.onclick=function(){ var t=(x.dataset.t||"").toLowerCase(); setSel(getSel().filter(function(s){return s.toLowerCase()!==t;})); }; }); };
+    setSel=function(arr){ var seen={},out=[]; arr.forEach(function(t){ t=norm(t); if(!t) return; var key=t.toLowerCase(); if(seen[key]) return; seen[key]=1; out.push(t); }); hidden.value=out.join(", "); renderSel(out); syncList(out); };
+    var bindOpt=function(b){ b.onclick=function(){ var t=b.dataset.t||""; var sel=getSel(); if(sel.some(function(s){return s.toLowerCase()===t.toLowerCase();})) setSel(sel.filter(function(s){return s.toLowerCase()!==t.toLowerCase();})); else setSel(sel.concat([t])); }; };
+    listBox.querySelectorAll(".rf-tagopt").forEach(bindOpt);
+    var doFilter=function(){ var q=norm(newInp.value).toLowerCase(); listBox.querySelectorAll(".rf-tagopt").forEach(function(b){ var t=(b.dataset.t||"").toLowerCase(); b.hidden = !!q && t.indexOf(q)<0; }); };
+    newInp.addEventListener("input", doFilter);
+    var addNew=function(){ var raw=norm(newInp.value); if(!raw) return; var canon=raw, known=false;
+      listBox.querySelectorAll(".rf-tagopt").forEach(function(b){ if((b.dataset.t||"").toLowerCase()===raw.toLowerCase()){ canon=b.dataset.t; known=true; } });
+      if(!known){ var nb=document.createElement("button"); nb.type="button"; nb.className="rf-tagopt on"; nb.dataset.t=canon; nb.innerHTML='<span class="rf-tagn">'+esc(canon)+'</span><span class="rf-tagc">+</span>'; bindOpt(nb); listBox.insertBefore(nb, listBox.firstChild); }
+      setSel(getSel().concat([canon])); newInp.value=""; doFilter(); try{ newInp.focus(); }catch(_f){} };
+    addBtn.onclick=addNew;
+    newInp.addEventListener("keydown", function(e){ if(e.key==="Enter"){ e.preventDefault(); addNew(); } });
+    renderSel(getSel()); syncList(getSel());
+  });
   d.querySelectorAll(".rf-starbox").forEach(box=>{ const inp=box.querySelector("input.rf"), numEl=box.querySelector(".rf-star-num");
     const w=wireStarWidget(box, inp.value, numEl, v=>{ inp.value=v; });
     const clr=box.querySelector(".rf-star-clr"); if(clr) clr.onclick=()=>{ inp.value=""; w.set(0); }; });
