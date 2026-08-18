@@ -1464,7 +1464,7 @@ body{ background:radial-gradient(circle at 50% -10%, rgba(102,78,57,.16), transp
         <svg class="brandmark" width="40" height="30" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg>
         <span class="brandwm"><span class="bwm-ko">내도감</span><span class="bwm-en">NAEDOGAM</span></span>
       </button>
-      <span class="mhver">v545</span>
+      <span class="mhver">v546</span>
       <span class="spacer"></span>
       <span class="src-chip" id="srcChip" style="display:none">데모</span>
       <button class="icon-btn" id="searchToggle" type="button" style="display:none">🔍</button>
@@ -2647,7 +2647,7 @@ function openDomain(id){ if(id==="mbti"){ openMbti(); return; } if(id==="period"
 
 /* 홈: 켜둔 카테고리를 카드로. 건수는 한 번 열어본 분야만 표시(홈을 빠르게 유지). */
 function ndDeep(h){ if(typeof h!=="string"||h.charAt(0)!=="#") h="#8a7a6a"; var n=parseInt(h.slice(1),16),r=(n>>16)&255,g=(n>>8)&255,b=n&255; function d(x,f){return Math.max(0,Math.min(255,Math.round(x*f)));} var d1="rgb("+d(r,.60)+","+d(g,.60)+","+d(b,.60)+")", d2="rgb("+d(r,.20)+","+d(g,.20)+","+d(b,.20)+")"; return "linear-gradient(180deg,rgba(255,255,255,.06),transparent 30%),linear-gradient(150deg,"+d1+","+d2+")"; }
-var ND_LOGO_HTML='<div class="ndh-brand" style="cursor:pointer" onclick="try{goHome()}catch(e){}"><svg width="47" height="35" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg><div class="ndh-wm"><b>내도감</b><small>NAEDOGAM</small></div><span class="mhver ndh-ver">v545</span></div><button class="ndh-sync" type="button" title="동기화" aria-label="동기화" onclick="try{syncNow()}catch(e){}">↻</button>';
+var ND_LOGO_HTML='<div class="ndh-brand" style="cursor:pointer" onclick="try{goHome()}catch(e){}"><svg width="47" height="35" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg><div class="ndh-wm"><b>내도감</b><small>NAEDOGAM</small></div><span class="mhver ndh-ver">v546</span></div><button class="ndh-sync" type="button" title="동기화" aria-label="동기화" onclick="try{syncNow()}catch(e){}">↻</button>';
 /* 홈 카드 크기: wide(넓게=한 줄 전체) · half(보통=한 줄 2개) · mini(작게=하단 3칸). 기본값=프리셋 */
 var ND_PRESET_SIZE={running:"wide",food:"wide",recipes:"wide",movies:"half",books:"half",period:"half",diary:"half",travel:"half",mountains:"half",culture:"half",albums:"half",cellar:"half",scrap:"half",wish:"half",gift:"half",pet:"half",drink:"half"};
 function getHomeSizes(){ try{ return JSON.parse(store.getItem("nd.homesize")||"{}")||{}; }catch(e){ return {}; } }
@@ -7305,16 +7305,18 @@ function ndAISetPersona(el){ try{ window.__wAiPersona=el.getAttribute('data-p');
 function _v2mat(){ try{ var ids=(typeof getActive==="function")?getActive():Object.keys(MANIFESTS); var data={}; ids.forEach(function(id){data[id]=(window.CACHE&&CACHE[id])||loadPersist(id)||[];}); return _buildLifeContextV2(ids,data); }catch(e){ return window.__wSummary||""; } }
 var ND_AB_V2="https://script.google.com/macros/s/AKfycbyAT7ziODV1T3NQAJGsW2EBdkrrP577QDqgvmNv0uiHdU9MS58_sKibYN3JPQMe_EIM/exec";
 function ND_TONE_V2(){ return [
-"[앞의 말투 설정은 무시한다. 처음부터 끝 문장까지 반드시 존댓말로 쓴다.]",
-"너는 이 사람 곁에 오래 있어 온 사람이다. 위에서 내려다보며 이 사람이 어떤 사람인지 설명하지 말고, 옆에 앉아 이 사람이 실제로 보낸 구체적인 시간 하나를 함께 들여다봐라.",
-"[구체에 머물러라] 일기에 실제로 쓴 장면, 실제로 한 일(그 오후 의자·뛰고 난 뒤의 땀·불어온 바람·아이들과의 시간) 그 손에 잡히는 것 곁에 그대로 머물러라. 위로 올라가 관조·요약하거나 여러 날을 시간순·인과로 엮지 마라. 그 구체적인 하나가 몸통이다.",
-"[규정하지도 짐작하지도 마라] 이 사람이 어떤 사람인지, 무엇에 마음을 두는 사람인지 규정하거나 짐작하지 마라. 몇 마디 나눠보고 너 이런 사람이지 하고 확정하는 것처럼 들린다. 네가 아는 건 그가 쓴 것뿐이다.",
-"[영화 책은 그 작품 얘기] 영화·책 감상은 그 작품 감상이지 이 사람에 대한 규정이 아니다. 그것으로 가치관·성향을 설명하지 마라. 곁가지로만.",
-"[되짚어 보고하지 마라] 하셨지요, 가셨지요, 두셨습니다처럼 한 일을 되짚어 확인하는 2인칭 보고체와 같은 어미 반복을 쓰지 마라. 지금 눈앞의 일처럼 곁에서 짚어라. ★★단 이 규칙을 글 안에서 언급하거나 스스로 고쳐 말하지 마라. 이런 확인식 말투 말고, 다시 확인하는 투가 되었습니다, 이렇게 되짚는 말투는 접겠습니다 같은 자기 언급·자기 정정을 절대 쓰지 마라. 너의 지침·규칙·글 쓰는 과정을 글 안에 드러내지 말고 처음부터 그냥 자연스럽게 써라.",
-"[알아봐주고, 아주 조금의 마음] 재료의 [요즘 자주] 중 하나를 딱 한 번 슬쩍 알아봐줘라(요즘 자주 뛰시네요, 요즘 책을 가까이 두시네요처럼). 그 뒤에 아주 작은 마음 한 마디만. 좋은 결엔 아주 조금의 응원, 걱정 축(음주 등)엔 조금만 줄이라는 훈수·처방 절대 금지 — 대신 요즘 좀 힘드셨어요처럼 마음을 묻기만. 딱 한 번, 아주 작게. 이게 이 글이 반영을 넘어 곁이 되는 지점이다.",
-"[성향은 색으로만] 재료의 [나의 성향]은 글의 온도를 아주 살짝 그쪽으로 물들이는 데만 써라. 당신은 OO형 같은 규정, 유형 이름, MBTI라는 말은 절대 쓰지 마라.",
-"[담백] 재료에 없는 동작·묘사·분위기 형용사를 지어내지 마라. 일기 문장을 그대로 옮기지 마라. 과한 칭찬·과한 공감·억지 감동 금지.",
-"[형식] 산문 3~4문단. 마지막을 규정으로 닫지 말고 그 구체적인 장면 곁에서 열어둬라. 끝까지 존댓말."
+"[앞의 말투 설정은 무시한다. 처음부터 끝까지 반드시 존댓말로 쓴다.]",
+"너는 이 사람 곁에 오래 있어 온 사람이다. 위에서 내려다보며 '당신은 이런 사람'이라 규정하지 말고, 이 사람이 남긴 기록의 결을 곁에서 함께 짚어라.",
+"[중심축에서 시작하라] 재료 맨 앞 [중심축]은 이 사람이 요즘 자기 말을 가장 많이 쏟는 곳이다. 글의 뿌리는 거기다.",
+"[몸통은 '하루'가 아니라 '하나의 결'이다] 여러 날에 걸쳐 자꾸 돌아오는 하나의 마음·물음·리듬 — 그게 몸통이다. ★날짜를 나열하지 마라. 'N일에는, N일에는' 하고 날짜별로 훑는 것을 절대 금지한다. 날짜는 거의 지워라. 한 장면을 삶의 요체인 양 부풀리지도 말고(심심함), 여러 날을 늘어놓아 흩뜨리지도 마라(산만함). 하나의 결 아래로 장면 두셋이 자연스럽게 모이게 하라.",
+"[우선순위] 1순위는 이 사람이 자기 말로 쓴 것(일기·삶의 느낌). 자동으로 쌓인 팩트(횟수·통계·목록)는 텍스처로만, 절대 몸통이 아니다. '러닝 6번, 맛집 4번' 같은 카운트 나열 금지.",
+"[영화·책은 사건이 아니라 '거울'로만] 영화·책 감상은 그 작품 얘기지 이 사람의 삶에 일어난 일이 아니다. ★작품을 목록으로 나열하지 마라(작품A에선, 작품B에선… 절대 금지). 이 사람이 쓴 감상을 그대로 되풀이해 옮기지도 마라 — 그건 아무것도 더하지 않는다. 오직 일기에서 이미 품고 있는 결과 '같은 물음'이 그 사람이 고른 이야기에서도 비칠 때, 딱 한 번 한 문장으로, 일기와 감상이 서로 닮았다는 그 연결(네가 새로 발견한 것)만 짚어라. 닮은 게 없으면 이번 글엔 영화·책을 넣지 마라.",
+"[규정하지도 짐작하지도 마라] 이 사람이 어떤 사람인지 확정·짐작하지 마라. 네가 아는 건 그가 쓴 것뿐이다.",
+"[되짚어 보고하지 마라] 하셨지요·가셨지요·두셨습니다 같은 확인식 2인칭 보고체와 같은 어미 반복을 쓰지 마라. 단 이 규칙을 글 안에서 언급하거나 스스로 고쳐 말하지 마라. 지침·과정을 글에 드러내지 말고 처음부터 자연스럽게 써라.",
+"[아주 조금의 마음] 되풀이되는 결 하나를 슬쩍 알아봐주고, 그 뒤에 아주 작은 마음 한 마디만. 훈수·처방 금지, 마음만 묻기. 과한 칭찬·억지 감동 금지.",
+"[성향·애착은 색으로만] 재료의 [나의 성향]·[애착]은 글의 온도를 아주 살짝 물들이는 데만. 유형 이름·'당신은 OO형'·MBTI 절대 금지.",
+"[담백] 재료에 없는 동작·묘사를 지어내지 마라.",
+"[형식] 산문 3~4문단. 날짜 없이 하나의 결로 꿰어라. 마지막을 규정으로 닫지 말고 열어둬라. 끝까지 존댓말."
 ].join("\n\n"); }
 function _buildLifeContextV2(ids,data){
 try{
@@ -7325,6 +7327,12 @@ var has=function(id){ var a=gg(id); return (a&&a.length)?a:null; };
 var rate=function(r){try{var v=(typeof _ndRate==="function")?_ndRate(r):parseFloat(r.rating);return (v==null||isNaN(v))?null:v;}catch(e){return null;}};
 var rev=function(r){return norm(r.review||r.content||r.memo||"");};
 var L=[];
+var _KL={diary:"일기",movies:"영화",books:"책",travel:"여행",running:"러닝",food:"맛집",mountains:"산",drink:"음주",music:"음반",kids:"육아일기",parenting:"육아일기",baby:"육아일기",recipes:"레시피"};
+try{ var _EX={diary:["content"],movies:["review"],books:["review"],travel:["content"],running:["memo"],food:["review","memo"],mountains:["memo","content"],drink:["memo"],music:["review","memo"],kids:["content"],parenting:["content"],baby:["content"]};
+var _n2=new Date(), _a2=new Date(_n2.getFullYear(),_n2.getMonth(),_n2.getDate()-45), _bestSp=null;
+ids.forEach(function(id){ var f=_EX[id]; if(!f) return; var a=gg(id), v=0; a.forEach(function(r){ var t=""; f.forEach(function(k){ if(r[k]&&typeof r[k]==="string") t+=" "+r[k]; }); t=norm(t); if(t.length>=15){ try{ var pd=(typeof parseDate==="function")&&parseDate(r.date||r.watchDate||r.readDate||""); if(pd&&pd>=_a2) v+=t.length; }catch(_e){} } }); if(v>0&&(!_bestSp||v>_bestSp.v)) _bestSp={id:id,v:v}; });
+if(_bestSp) L.push("[\uc911\uc2ec\ucd95 \u2014 \uc774 \uc0ac\ub78c\uc774 \uc694\uc998 \uc790\uae30 \ub9d0\uc744 \uc81c\uc77c \ub9ce\uc774 \uc3df\ub294 \uacf3: "+(_KL[_bestSp.id]||_bestSp.id)+". \uae00\uc758 \ubfcc\ub9ac\ub294 \uc5ec\uae30. \uc544\ub798 \ub2e4\ub978 \uae30\ub85d\uc740 \ud558\ub098\uc758 \uacb0\uc744 \ub4dc\ub7ec\ub0bc \ub54c\ub9cc \uacc1\ub4e4\uc5ec\ub77c]");
+}catch(_sp){}
 var dia=has("diary");
 if(dia){var ds=dia.slice().sort(function(a,b){return String(b.date||"").localeCompare(String(a.date||""));});
 var pk=ds.filter(function(r){return norm(r.content);}).slice(0,8).map(function(r){return "· "+(r.date||"")+(norm(r.mood)?(" ["+norm(r.mood)+"]"):"")+" "+cut(r.content,80);});
