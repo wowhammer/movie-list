@@ -1464,7 +1464,7 @@ body{ background:radial-gradient(circle at 50% -10%, rgba(102,78,57,.16), transp
         <svg class="brandmark" width="40" height="30" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg>
         <span class="brandwm"><span class="bwm-ko">내도감</span><span class="bwm-en">NAEDOGAM</span></span>
       </button>
-      <span class="mhver">v548</span>
+      <span class="mhver">v549</span>
       <span class="spacer"></span>
       <span class="src-chip" id="srcChip" style="display:none">데모</span>
       <button class="icon-btn" id="searchToggle" type="button" style="display:none">🔍</button>
@@ -2647,7 +2647,7 @@ function openDomain(id){ if(id==="mbti"){ openMbti(); return; } if(id==="period"
 
 /* 홈: 켜둔 카테고리를 카드로. 건수는 한 번 열어본 분야만 표시(홈을 빠르게 유지). */
 function ndDeep(h){ if(typeof h!=="string"||h.charAt(0)!=="#") h="#8a7a6a"; var n=parseInt(h.slice(1),16),r=(n>>16)&255,g=(n>>8)&255,b=n&255; function d(x,f){return Math.max(0,Math.min(255,Math.round(x*f)));} var d1="rgb("+d(r,.60)+","+d(g,.60)+","+d(b,.60)+")", d2="rgb("+d(r,.20)+","+d(g,.20)+","+d(b,.20)+")"; return "linear-gradient(180deg,rgba(255,255,255,.06),transparent 30%),linear-gradient(150deg,"+d1+","+d2+")"; }
-var ND_LOGO_HTML='<div class="ndh-brand" style="cursor:pointer" onclick="try{goHome()}catch(e){}"><svg width="47" height="35" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg><div class="ndh-wm"><b>내도감</b><small>NAEDOGAM</small></div><span class="mhver ndh-ver">v548</span></div><button class="ndh-sync" type="button" title="동기화" aria-label="동기화" onclick="try{syncNow()}catch(e){}">↻</button>';
+var ND_LOGO_HTML='<div class="ndh-brand" style="cursor:pointer" onclick="try{goHome()}catch(e){}"><svg width="47" height="35" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg><div class="ndh-wm"><b>내도감</b><small>NAEDOGAM</small></div><span class="mhver ndh-ver">v549</span></div><button class="ndh-sync" type="button" title="동기화" aria-label="동기화" onclick="try{syncNow()}catch(e){}">↻</button>';
 /* 홈 카드 크기: wide(넓게=한 줄 전체) · half(보통=한 줄 2개) · mini(작게=하단 3칸). 기본값=프리셋 */
 var ND_PRESET_SIZE={running:"wide",food:"wide",recipes:"wide",movies:"half",books:"half",period:"half",diary:"half",travel:"half",mountains:"half",culture:"half",albums:"half",cellar:"half",scrap:"half",wish:"half",gift:"half",pet:"half",drink:"half"};
 function getHomeSizes(){ try{ return JSON.parse(store.getItem("nd.homesize")||"{}")||{}; }catch(e){ return {}; } }
@@ -5132,41 +5132,40 @@ async function _ndDelOne(m, r){
 }
 async function ndBulkDelete(m){
   const ids=[...NDSEL]; if(!ids.length) return;
-  if(!confirm(ids.length+"\uac1c\ub97c \uc0ad\uc81c\ud560\uae4c\uc694? \ub418\ub3cc\ub9b4 \uc218 \uc5c6\uc5b4\uc694.")) return;
-  const byId={}; (state.rows||[]).forEach(r=>{ byId[String(r._id)]=r; }); (CACHE[m.id]||[]).forEach(r=>{ if(!byId[String(r._id)]) byId[String(r._id)]=r; });
-  const bar=document.getElementById("ndSelBar"); const db=bar?bar.querySelector(".nd-seldel"):null;
-  let done=0, fail=0;
-  /* ★v397: 한 번에 삭제(통신 3회 고정). 예전엔 1개당 3회씩 순차라 20개면 60회였다. */
+  if(!confirm(ids.length+"개를 삭제할까요? 되돌릴 수 없어요.")) return;
+  const byId={}; (state.rows||[]).forEach(function(r){ byId[String(r._id)]=r; }); (CACHE[m.id]||[]).forEach(function(r){ if(!byId[String(r._id)]) byId[String(r._id)]=r; });
+  const _rows=ids.map(function(id){ return byId[String(id)]; }).filter(Boolean);
+  const _idset={}; ids.forEach(function(x){ _idset[String(x)]=1; });
+  /* ★v549: 낙관적 삭제 — 화면에서 먼저 지우고 시트 반영은 뒤에서. 실패하면 되돌린다.
+     (네트워크가 느려도 "삭제 중" 대기 없이 즉시 지워진 느낌) */
+  const _prev=(CACHE[m.id]||[]).slice();
+  const _uid=function(r){ return Object.assign({_id:r._id||(crypto.randomUUID?crypto.randomUUID():String(Math.random()))}, r); };
+  const _repaint=function(arr){ try{ CACHE[m.id]=arr; savePersist(m.id, arr); }catch(e){}
+    try{ state.rows=applyComputed(m, arr.map(_uid)); }catch(e){}
+    try{ paintDomain(m); }catch(e){} };
+  // 1) 즉시 화면에서 제거 + 선택 해제
+  _repaint(_prev.filter(function(r){ return !_idset[String(r._id)]; }));
+  ids.forEach(function(id){ try{ unmarkPending(m.id, id); }catch(e){} });
+  NDSEL.clear(); state.selMode=false; _ndSelBar(null);
+  try{ ndToast(_rows.length+"개 지웠어요 · 저장 중…"); }catch(e){}
+  // 2) 뒤에서 시트 삭제
   const _S=sheetSrc();
   const _tab=(typeof _S.tabOf==="function")?_S.tabOf(m.id):null;
-  const _idKey=(m.id==="movies")?"\uc6d0\uc81c":((m.id==="carlog"&&typeof _S.idkeyOf==="function")?_S.idkeyOf("carlog"):"_id");
+  const _idKey=(m.id==="movies")?"원제":((m.id==="carlog"&&typeof _S.idkeyOf==="function")?_S.idkeyOf("carlog"):"_id");
   const _keyOf=(m.id==="movies")?(function(r){ return r.orig||r._id; }):(function(r){ return r._id; });
-  const _rows=ids.map(function(id){ return byId[String(id)]; }).filter(Boolean);
-  let _batched=false;
-  if(_tab && _rows.length && typeof _S._deleteRows==="function"){
-    if(db) db.textContent="\uc0ad\uc81c \uc911\u2026 ("+_rows.length+"\uac1c \ud55c \ubc88\uc5d0)";
-    try{
+  let _ok=false, _err=null;
+  try{
+    if(_tab && _rows.length && typeof _S._deleteRows==="function"){
       const _res=await _S._deleteRows(_tab, _idKey, _rows.map(_keyOf));
-      if(_res && !_res.error){
-        _batched=true; done=_rows.length; fail=ids.length-_rows.length;
-        ids.forEach(function(id){ try{ unmarkPending(m.id, id); }catch(e){} });
-        const _c=CACHE[m.id]; if(_c){ const _set={}; ids.forEach(function(x){ _set[String(x)]=1; });
-          CACHE[m.id]=_c.filter(function(x){ return !_set[String(x._id)]; }); savePersist(m.id, CACHE[m.id]); }
-      }
-    }catch(e){ _batched=false; }
-  }
-  if(!_batched){   /* 폴백: 예전 방식(1개씩) — 배치가 안 되는 소스·오류 상황 대비 */
-    done=0; fail=0;
-    for(const id of ids){
-      const r=byId[String(id)]; if(!r){ fail++; continue; }
-      try{ await _ndDelOne(m, r); const _c=CACHE[m.id]; if(_c){ CACHE[m.id]=_c.filter(x=>String(x._id)!==String(id)); savePersist(m.id, CACHE[m.id]); } done++; }
-      catch(e){ fail++; }
-      if(db) db.textContent="\uc0ad\uc81c \uc911 "+done+"/"+ids.length;
+      _ok=!!(_res && !_res.error); if(!_ok) _err=(_res&&_res.error)||"삭제 실패";
+    } else {
+      for(const r of _rows){ try{ await _ndDelOne(m, r); }catch(e){ _err=(e&&e.message)||String(e); } }
+      _ok=!_err;
     }
-  }
-  NDSEL.clear(); state.selMode=false; _ndSelBar(null);
-  try{ ndToast(done+"\uac1c \uc0ad\uc81c\ub428"+(fail?(" \u00b7 "+fail+"\uac1c \uc2e4\ud328"):"")); }catch(e){}
-  refreshDomain();
+  }catch(e){ _ok=false; _err=(e&&e.message)||String(e); }
+  // 3) 결과
+  if(_ok){ try{ ndToast(_rows.length+"개 삭제됨"); }catch(e){} }
+  else { _repaint(_prev); try{ ndToast("삭제 실패 — 되돌렸어요"+(_err?(" · "+_err):"")); }catch(e){} }
 }
 function _ndSelBar(m){
   var bar=document.getElementById("ndSelBar");
