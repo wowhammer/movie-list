@@ -1464,7 +1464,7 @@ body{ background:radial-gradient(circle at 50% -10%, rgba(102,78,57,.16), transp
         <svg class="brandmark" width="40" height="30" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg>
         <span class="brandwm"><span class="bwm-ko">내도감</span><span class="bwm-en">NAEDOGAM</span></span>
       </button>
-      <span class="mhver">v549</span>
+      <span class="mhver">v550</span>
       <span class="spacer"></span>
       <span class="src-chip" id="srcChip" style="display:none">데모</span>
       <button class="icon-btn" id="searchToggle" type="button" style="display:none">🔍</button>
@@ -2647,7 +2647,7 @@ function openDomain(id){ if(id==="mbti"){ openMbti(); return; } if(id==="period"
 
 /* 홈: 켜둔 카테고리를 카드로. 건수는 한 번 열어본 분야만 표시(홈을 빠르게 유지). */
 function ndDeep(h){ if(typeof h!=="string"||h.charAt(0)!=="#") h="#8a7a6a"; var n=parseInt(h.slice(1),16),r=(n>>16)&255,g=(n>>8)&255,b=n&255; function d(x,f){return Math.max(0,Math.min(255,Math.round(x*f)));} var d1="rgb("+d(r,.60)+","+d(g,.60)+","+d(b,.60)+")", d2="rgb("+d(r,.20)+","+d(g,.20)+","+d(b,.20)+")"; return "linear-gradient(180deg,rgba(255,255,255,.06),transparent 30%),linear-gradient(150deg,"+d1+","+d2+")"; }
-var ND_LOGO_HTML='<div class="ndh-brand" style="cursor:pointer" onclick="try{goHome()}catch(e){}"><svg width="47" height="35" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg><div class="ndh-wm"><b>내도감</b><small>NAEDOGAM</small></div><span class="mhver ndh-ver">v549</span></div><button class="ndh-sync" type="button" title="동기화" aria-label="동기화" onclick="try{syncNow()}catch(e){}">↻</button>';
+var ND_LOGO_HTML='<div class="ndh-brand" style="cursor:pointer" onclick="try{goHome()}catch(e){}"><svg width="47" height="35" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg><div class="ndh-wm"><b>내도감</b><small>NAEDOGAM</small></div><span class="mhver ndh-ver">v550</span></div><button class="ndh-sync" type="button" title="동기화" aria-label="동기화" onclick="try{syncNow()}catch(e){}">↻</button>';
 /* 홈 카드 크기: wide(넓게=한 줄 전체) · half(보통=한 줄 2개) · mini(작게=하단 3칸). 기본값=프리셋 */
 var ND_PRESET_SIZE={running:"wide",food:"wide",recipes:"wide",movies:"half",books:"half",period:"half",diary:"half",travel:"half",mountains:"half",culture:"half",albums:"half",cellar:"half",scrap:"half",wish:"half",gift:"half",pet:"half",drink:"half"};
 function getHomeSizes(){ try{ return JSON.parse(store.getItem("nd.homesize")||"{}")||{}; }catch(e){ return {}; } }
@@ -7336,14 +7336,16 @@ var has=function(id){ var a=gg(id); return (a&&a.length)?a:null; };
 var rate=function(r){try{var v=(typeof _ndRate==="function")?_ndRate(r):parseFloat(r.rating);return (v==null||isNaN(v))?null:v;}catch(e){return null;}};
 var rev=function(r){return norm(r.review||r.content||r.memo||"");};
 var L=[];
+/* v550: "일기 내용도 포함" 체크박스를 클로드(v2) 경로에서도 존중 */
+var _dOn=true; try{ _dOn=(store.getItem("nd.aiDiaryOn")!=="0"); }catch(e){}
 var _KL={diary:"일기",movies:"영화",books:"책",travel:"여행",running:"러닝",food:"맛집",mountains:"산",drink:"음주",music:"음반",kids:"육아일기",parenting:"육아일기",baby:"육아일기",recipes:"레시피"};
 try{ var _EX={diary:["content"],movies:["review"],books:["review"],travel:["content"],running:["memo"],food:["review","memo"],mountains:["memo","content"],drink:["memo"],music:["review","memo"],kids:["content"],parenting:["content"],baby:["content"]};
 var _n2=new Date(), _a2=new Date(_n2.getFullYear(),_n2.getMonth(),_n2.getDate()-45), _bestSp=null;
-ids.forEach(function(id){ var f=_EX[id]; if(!f) return; var a=gg(id), v=0; a.forEach(function(r){ var t=""; f.forEach(function(k){ if(r[k]&&typeof r[k]==="string") t+=" "+r[k]; }); t=norm(t); if(t.length>=15){ try{ var pd=(typeof parseDate==="function")&&parseDate(r.date||r.watchDate||r.readDate||""); if(pd&&pd>=_a2) v+=t.length; }catch(_e){} } }); if(v>0&&(!_bestSp||v>_bestSp.v)) _bestSp={id:id,v:v}; });
+ids.forEach(function(id){ if(id==="diary"&&!_dOn) return; var f=_EX[id]; if(!f) return; var a=gg(id), v=0; a.forEach(function(r){ var t=""; f.forEach(function(k){ if(r[k]&&typeof r[k]==="string") t+=" "+r[k]; }); t=norm(t); if(t.length>=15){ try{ var pd=(typeof parseDate==="function")&&parseDate(r.date||r.watchDate||r.readDate||""); if(pd&&pd>=_a2) v+=t.length; }catch(_e){} } }); if(v>0&&(!_bestSp||v>_bestSp.v)) _bestSp={id:id,v:v}; });
 if(_bestSp) L.push("[\uc911\uc2ec\ucd95 \u2014 \uc774 \uc0ac\ub78c\uc774 \uc694\uc998 \uc790\uae30 \ub9d0\uc744 \uc81c\uc77c \ub9ce\uc774 \uc3df\ub294 \uacf3: "+(_KL[_bestSp.id]||_bestSp.id)+". \uae00\uc758 \ubfcc\ub9ac\ub294 \uc5ec\uae30. \uc544\ub798 \ub2e4\ub978 \uae30\ub85d\uc740 \ud558\ub098\uc758 \uacb0\uc744 \ub4dc\ub7ec\ub0bc \ub54c\ub9cc \uacc1\ub4e4\uc5ec\ub77c]");
 }catch(_sp){}
 var dia=has("diary");
-if(dia){var ds=dia.slice().sort(function(a,b){return String(b.date||"").localeCompare(String(a.date||""));});
+if(dia&&_dOn){var ds=dia.slice().sort(function(a,b){return String(b.date||"").localeCompare(String(a.date||""));});
 var pk=ds.filter(function(r){return norm(r.content);}).slice(0,8).map(function(r){return "· "+(r.date||"")+(norm(r.mood)?(" ["+norm(r.mood)+"]"):"")+" "+cut(r.content,80);});
 if(pk.length) L.push("[B·일기 — 직접 쓴 글. 이 사람 감정의 유일한 출처. 원문 인용·나열 금지, 온도로만]\n"+pk.join("\n"));
 var mo=ds.slice(0,6).map(function(r){return norm(r.mood);}).filter(Boolean);
@@ -7367,7 +7369,7 @@ var loved=[];
 a.forEach(function(r){var rv=rev(r),rt=rate(r); if(rv&&rv.length>=15&&(rt==null||rt>=6)){loved.push({cat:p[1],title:norm(r.title),rate:rt,rv:cut(rv,70),score:(rt||3)*2+Math.min(rv.length/20,5)});}});});
 loved.sort(function(a,b){return b.score-a.score;});
 if(loved.length) L.push("[취향의 결 — 좋아한 것만. 곁가지로만, 몸통·핵심 아님. 작품 내용 옮기지 말고 결만]\n"+loved.slice(0,5).map(function(x){return "· "+x.cat+" 「"+x.title+"」"+(x.rate!=null?(" ★"+x.rate):"")+" — "+x.rv;}).join("\n"));
-var nd=[]; if(dia) dia.forEach(function(r){var n=norm(r.nddaily);if(n)nd.push(n);});
+var nd=[]; if(dia&&_dOn) dia.forEach(function(r){var n=norm(r.nddaily);if(n)nd.push(n);});
 if(nd.length) L.push("[배경(자동기록, 팩트만·감정 아님·몸통 금지)] 최근 접한 것: "+cut(nd.join(" / "),140));
 try{var _s=(typeof _mbtiSaved==="function")?_mbtiSaved():null; var lt=_s&&_s.latest; if(lt&&lt.axes){var A=lt.axes; var parts=[];
 if(A.TF) parts.push(A.TF.letter==="F"?("감정을 앞세우는 편"+(A.TF.pct>=75?"(강함)":"")):"논리를 앞세우는 편");
