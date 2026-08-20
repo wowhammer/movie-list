@@ -1464,7 +1464,7 @@ body{ background:radial-gradient(circle at 50% -10%, rgba(102,78,57,.16), transp
         <svg class="brandmark" width="40" height="30" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg>
         <span class="brandwm"><span class="bwm-ko">내도감</span><span class="bwm-en">NAEDOGAM</span></span>
       </button>
-      <span class="mhver">v550</span>
+      <span class="mhver">v551</span>
       <span class="spacer"></span>
       <span class="src-chip" id="srcChip" style="display:none">데모</span>
       <button class="icon-btn" id="searchToggle" type="button" style="display:none">🔍</button>
@@ -2647,7 +2647,7 @@ function openDomain(id){ if(id==="mbti"){ openMbti(); return; } if(id==="period"
 
 /* 홈: 켜둔 카테고리를 카드로. 건수는 한 번 열어본 분야만 표시(홈을 빠르게 유지). */
 function ndDeep(h){ if(typeof h!=="string"||h.charAt(0)!=="#") h="#8a7a6a"; var n=parseInt(h.slice(1),16),r=(n>>16)&255,g=(n>>8)&255,b=n&255; function d(x,f){return Math.max(0,Math.min(255,Math.round(x*f)));} var d1="rgb("+d(r,.60)+","+d(g,.60)+","+d(b,.60)+")", d2="rgb("+d(r,.20)+","+d(g,.20)+","+d(b,.20)+")"; return "linear-gradient(180deg,rgba(255,255,255,.06),transparent 30%),linear-gradient(150deg,"+d1+","+d2+")"; }
-var ND_LOGO_HTML='<div class="ndh-brand" style="cursor:pointer" onclick="try{goHome()}catch(e){}"><svg width="47" height="35" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg><div class="ndh-wm"><b>내도감</b><small>NAEDOGAM</small></div><span class="mhver ndh-ver">v550</span></div><button class="ndh-sync" type="button" title="동기화" aria-label="동기화" onclick="try{syncNow()}catch(e){}">↻</button>';
+var ND_LOGO_HTML='<div class="ndh-brand" style="cursor:pointer" onclick="try{goHome()}catch(e){}"><svg width="47" height="35" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg><div class="ndh-wm"><b>내도감</b><small>NAEDOGAM</small></div><span class="mhver ndh-ver">v551</span></div><button class="ndh-sync" type="button" title="동기화" aria-label="동기화" onclick="try{syncNow()}catch(e){}">↻</button>';
 /* 홈 카드 크기: wide(넓게=한 줄 전체) · half(보통=한 줄 2개) · mini(작게=하단 3칸). 기본값=프리셋 */
 var ND_PRESET_SIZE={running:"wide",food:"wide",recipes:"wide",movies:"half",books:"half",period:"half",diary:"half",travel:"half",mountains:"half",culture:"half",albums:"half",cellar:"half",scrap:"half",wish:"half",gift:"half",pet:"half",drink:"half"};
 function getHomeSizes(){ try{ return JSON.parse(store.getItem("nd.homesize")||"{}")||{}; }catch(e){ return {}; } }
@@ -6221,6 +6221,7 @@ async function openAIStory(from){
   var build=function(id,raw){ var m=MANIFESTS[id]; data[id]=applyComputed(m,(raw||[]).map(function(r){return Object.assign({_id:r._id||crypto.randomUUID()},r);})); };
   var had={};
   ids.forEach(function(id){ had[id]=!!CACHE[id]; var raw=CACHE[id]||loadPersist(id); if(raw&&!CACHE[id])CACHE[id]=raw; build(id,raw||[]); });
+  try{ await _aiEnsureSelfData(); }catch(e){}   /* ★v551 */
   try{ window.__wSummary=_buildLifeContext(ids,data); }catch(e){}
   window.__aiCtx={ids:ids,data:data};
   var todo=ids.filter(function(id){return !had[id];});
@@ -7074,6 +7075,12 @@ function _buildLifeContext(ids, data){
       }
     }catch(e){}
     try{ var _hasP=false; for(var _i=0;_i<L.length;_i++){ if(L[_i].indexOf('[성격]')===0){_hasP=true;break;} } if(!_hasP){ var _md=has('mbti'); if(_md){ var _lm=_md[_md.length-1]||{}; var _ty=norm(_lm.type||_lm['유형']); var _nk=_ndNick(_ty, norm(_lm.nick||_lm['별칭'])); if(_ty) L.push('[성격] 스스로 규정한 나: '+_ty+(_nk?(' ('+_nk+')'):'')); } } }catch(e){}
+    /* ★v551: 애착 층 — 지금까지 클로드(v2) 재료에만 있었다. 유형명·진단 금지는 라벨에 내장. */
+    try{ var _at=(typeof _attachSaved==='function')?_attachSaved():null; var _al=_at&&_at.latest;
+      if(_al){ var _an=Number(_al.anxPct), _av=Number(_al.avoPct); var _hiA=_an>=50, _hiV=_av>=50;
+        var _ph=(_hiA&&_hiV)?"관계에선 다가가고 싶다가도 조심스러워지는 편":(_hiA?"관계에선 마음이 상대에게 먼저 가닿는, 정이 깊은 편":(_hiV?"가까움엔 한 발 거리를 두고 스스로를 지키는, 독립적인 편":"가까워져도 저를 잃지 않고 곁을 내주는 편"));
+        L.push("[애착(참고·살짝만. 글 온도만 물들이기. 유형명·'당신은 OO형'·진단 절대 출력 금지, 규정 금지)] "+_ph+"."); } }catch(e){}
+
     var run=has('running');
     if(run){
       var rd=run.map(function(r){ return iso(r.date); }).filter(Boolean).sort();
@@ -7597,6 +7604,38 @@ function _aiRenderPast(extra){
 }
 function _aiDlgOpen(){ try{ var d=document.getElementById("aiDlg"); return !!(d && d.open); }catch(e){ return false; } }
 /* 화면 열릴 때 미리 만들어두기(사용자가 말투 고르는 동안 진행) */
+/* ★v551: AI 재료용 '나' 데이터 보강.
+   성향(nd.mbti)·애착(nd.attach)은 지금까지 「나의 성향」/「애착유형」 화면을 직접 열 때만
+   시트에서 기기로 내려왔다 → 기기가 바뀌면 AI 재료에서 통째로 빠졌다.
+   AI 글쓰기 직전에 로컬이 비어 있을 때만 시트에서 1회 끌어온다. 있으면 아무것도 안 한다.
+   실패해도 글쓰기는 그대로 진행(규칙7 fail-safe). 세션당 1회만(메모이즈). */
+function _aiEnsureSelfData(){
+  if(window.__aiSelfP) return window.__aiSelfP;
+  window.__aiSelfP=(async function(){
+    var got={mbti:false,attach:false};
+    try{
+      var _m=(typeof _mbtiSaved==="function")?_mbtiSaved():null;
+      if(!(_m&&_m.latest) && typeof mbtiSheetLoad==="function"){
+        var h=await mbtiSheetLoad();
+        if(h&&h.length){ var cur=_m||{}; cur.history=h; cur.latest=h[0];
+          try{ store.setItem("nd.mbti", JSON.stringify(cur)); }catch(e){}
+          try{ window._mbtiLatest=h[0]; }catch(e){}
+          got.mbti=true; }
+      }
+    }catch(e){}
+    try{
+      var _a=(typeof _attachSaved==="function")?_attachSaved():null;
+      if(!(_a&&_a.latest) && typeof attachSheetLoad==="function"){
+        var ah=await attachSheetLoad();
+        if(ah&&ah.length){ var acur=_a||{}; acur.history=ah; acur.latest=ah[0];
+          try{ store.setItem("nd.attach", JSON.stringify(acur)); }catch(e){}
+          got.attach=true; }
+      }
+    }catch(e){}
+    return got;
+  })();
+  return window.__aiSelfP;
+}
 function _aiPrewarm(){
   try{
     if(!CONFIG.AI_PROXY_URL) return;
@@ -7619,6 +7658,8 @@ function _aiShowStory(out, text, cached){
 async function ndAIWrite(force){
   var out=document.getElementById("wAiOut"), btn=document.getElementById("wAiBtn");
   if(!CONFIG.AI_PROXY_URL) return;
+  /* ★v551: 성향·애착이 로컬에 없으면 시트에서 보강한 뒤 재료를 다시 만든다 */
+  try{ await _aiEnsureSelfData(); if(window.__aiCtx) window.__wSummary=_buildLifeContext(window.__aiCtx.ids,window.__aiCtx.data); }catch(e){}
   var persona=window.__wAiPersona||"warm", summary=(persona==="v2"?_v2mat():(window.__wSummary||""));
   if(!summary){ if(out){ out.style.display=""; out.textContent="아직 담긴 기록이 없어요."; } return; }
   var _lv=(typeof _aiLivedCount==="function")?_aiLivedCount():999;
