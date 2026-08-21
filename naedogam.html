@@ -44,6 +44,37 @@ const CONFIG = {
   TMDB_BASE: 'https://api.themoviedb.org/3'
 };
 try { document.title = CONFIG.APP_NAME; } catch(e){}
+
+/* ★v144: 백엔드 접근키 — 파일에 절대 박지 않는다(이 파일은 공개 저장소에 있다).
+   이 기기의 localStorage['nd.key'] 에만 둔다. 없으면 딱 한 번 물어본다.
+   키를 바꾸거나 지우려면 콘솔에서 ndKeyReset() 실행. */
+var _ndKeyCache = null, _ndKeyAsked = false;
+function ndKey(){
+  try{
+    if(_ndKeyCache) return _ndKeyCache;
+    var k = localStorage.getItem('nd.key') || '';
+    if(!k && !_ndKeyAsked){
+      _ndKeyAsked = true;
+      k = (window.prompt('내도감 접근키를 입력하세요.\n(이 기기에 한 번만 저장됩니다)') || '').trim();
+      if(k) localStorage.setItem('nd.key', k);
+    }
+    _ndKeyCache = k;
+    return k;
+  }catch(e){ return ''; }
+}
+function ndQ(u){
+  var k = ndKey(); if(!k) return u;
+  return u + (u.indexOf('?') >= 0 ? '&' : '?') + 'k=' + encodeURIComponent(k);
+}
+function ndBody(o){
+  var k = ndKey(); if(k) o.k = k;
+  return o;
+}
+function ndKeyReset(){
+  try{ localStorage.removeItem('nd.key'); }catch(e){}
+  _ndKeyCache = null; _ndKeyAsked = false;
+  alert('접근키를 지웠습니다. 새로고침하면 다시 물어봅니다.');
+}
 </script>
 
 <script src="https://accounts.google.com/gsi/client" async defer></script>
@@ -500,7 +531,7 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
         <svg class="brandmark" width="34" height="30" viewBox="26 28 62 54" aria-hidden="true"><rect x="28" y="40" width="12" height="38" rx="5" fill="#F7F5F0"/><rect x="44" y="30" width="12" height="48" rx="5" fill="#F7F5F0"/><rect x="60" y="32" width="12" height="46" rx="5" fill="#E0483F" transform="rotate(16 66 78)"/></svg>
         <span class="brandwm"><span class="bwm-ko">내도감</span><span class="bwm-en">NAEDOGAM</span></span>
       </button>
-      <span class="mhver">v143</span>
+      <span class="mhver">v144</span>
       <span class="spacer"></span>
       <span class="src-chip" id="srcChip" style="display:none">데모</span>
       <button class="icon-btn" id="searchToggle" type="button" style="display:none">🔍</button>
@@ -1215,13 +1246,13 @@ class AppsScriptDataSource {
   async list(id){
     const m=MANIFESTS[id];
     const q=m.source?.sheet ? ("?sheet="+encodeURIComponent(m.source.sheet)) : "";
-    const res=await fetch(this.url+q);
+    const res=await fetch(ndQ(this.url+q));
     if(!res.ok) throw new Error("HTTP "+res.status+" (Apps Script 배포/권한 확인)");
     const raw=await res.json();
     return (Array.isArray(raw)?raw:[]).map(row=>mapRow(m,row));
   }
   async post(payload){   // 기존 영화·차계부 백엔드 액션 호출(예: 시청여부 업데이트)
-    const res=await fetch(this.url,{method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify(payload)});
+    const res=await fetch(this.url,{method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify(ndBody(payload))});
     const t=await res.text(); let j; try{ j=JSON.parse(t); }catch(e){ j={}; }
     if(j && j.ok===false) throw new Error(j.error||"실패");
     if(j && j.error) throw new Error(j.error);
@@ -1239,7 +1270,7 @@ class SheetDataSource {
   _flatten(m, r){ const o={_id:sheetCell(r._id)}; (m.fields||[]).forEach(f=>{ o[f.sheet||f.k]=sheetCell(r[f.k]); }); return o; }
   async _post(payload){   // 탭 만들기·한 줄 추가 같은 '쓰기'. text/plain로 보내야 브라우저가 안 막음.
     const res=await fetch(this.url,{method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},
-      body:JSON.stringify(Object.assign({nd:1},payload))});
+      body:JSON.stringify(ndBody(Object.assign({nd:1},payload)))});
     const t=await res.text(); let j; try{ j=JSON.parse(t); }catch(e){ j={}; }
     if(j && j.error) throw new Error(j.error);
     return j;
@@ -1260,7 +1291,7 @@ class SheetDataSource {
       : [m.source.tab, m.source.tabAlt].filter(Boolean);
     let raw=[], used=cands[0]||m.source.tab, got=false;
     for(const t of cands){
-      const res=await fetch(this.url+"?nd=1&action=read&tab="+encodeURIComponent(t));
+      const res=await fetch(ndQ(this.url+"?nd=1&action=read&tab="+encodeURIComponent(t)));
       if(!res.ok) continue;
       const j=await res.json();
       if(j && j.error) throw new Error(j.error);
@@ -1276,7 +1307,7 @@ class SheetDataSource {
       if(o[ek]===undefined || o[ek]===null || o[ek]==="") o[ek]=val;   // 중복 열: 첫 비어있지않은 값 우선
     } return clean?clean(o):o; }).filter(Boolean);
   }
-  async readTab(tab){ const res=await fetch(this.url+"?nd=1&action=read&tab="+encodeURIComponent(tab)); if(!res.ok) return []; let j; try{ j=await res.json(); }catch(e){ return []; } if(j&&j.error) return []; return Array.isArray(j)?j:[]; }
+  async readTab(tab){ const res=await fetch(ndQ(this.url+"?nd=1&action=read&tab="+encodeURIComponent(tab))); if(!res.ok) return []; let j; try{ j=await res.json(); }catch(e){ return []; } if(j&&j.error) return []; return Array.isArray(j)?j:[]; }
   tabOf(id){ return this._tab[id] || (MANIFESTS[id] && MANIFESTS[id].source.tab); }
   idkeyOf(id){ return this._idkey[id] || (MANIFESTS[id] && MANIFESTS[id].source.idCol) || "_id"; }
   async upsert(id,row){   // 탭 맨 아래에 한 줄 추가(저장)
