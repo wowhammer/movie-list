@@ -1467,7 +1467,7 @@ body{ background:radial-gradient(circle at 50% -10%, rgba(102,78,57,.16), transp
         <svg class="brandmark" width="40" height="30" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg>
         <span class="brandwm"><span class="bwm-ko">내도감</span><span class="bwm-en">NAEDOGAM</span></span>
       </button>
-      <span class="mhver">v557</span>
+      <span class="mhver">v558</span>
       <span class="spacer"></span>
       <span class="src-chip" id="srcChip" style="display:none">데모</span>
       <button class="icon-btn" id="searchToggle" type="button" style="display:none">🔍</button>
@@ -2653,7 +2653,7 @@ function openDomain(id){ if(id==="mbti"){ openMbti(); return; } if(id==="period"
 
 /* 홈: 켜둔 카테고리를 카드로. 건수는 한 번 열어본 분야만 표시(홈을 빠르게 유지). */
 function ndDeep(h){ if(typeof h!=="string"||h.charAt(0)!=="#") h="#8a7a6a"; var n=parseInt(h.slice(1),16),r=(n>>16)&255,g=(n>>8)&255,b=n&255; function d(x,f){return Math.max(0,Math.min(255,Math.round(x*f)));} var d1="rgb("+d(r,.60)+","+d(g,.60)+","+d(b,.60)+")", d2="rgb("+d(r,.20)+","+d(g,.20)+","+d(b,.20)+")"; return "linear-gradient(180deg,rgba(255,255,255,.06),transparent 30%),linear-gradient(150deg,"+d1+","+d2+")"; }
-var ND_LOGO_HTML='<div class="ndh-brand" style="cursor:pointer" onclick="try{goHome()}catch(e){}"><svg width="47" height="35" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg><div class="ndh-wm"><b>내도감</b><small>NAEDOGAM</small></div><span class="mhver ndh-ver">v557</span></div><button class="ndh-sync" type="button" title="동기화" aria-label="동기화" onclick="try{syncNow()}catch(e){}">↻</button>';
+var ND_LOGO_HTML='<div class="ndh-brand" style="cursor:pointer" onclick="try{goHome()}catch(e){}"><svg width="47" height="35" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg><div class="ndh-wm"><b>내도감</b><small>NAEDOGAM</small></div><span class="mhver ndh-ver">v558</span></div><button class="ndh-sync" type="button" title="동기화" aria-label="동기화" onclick="try{syncNow()}catch(e){}">↻</button>';
 /* 홈 카드 크기: wide(넓게=한 줄 전체) · half(보통=한 줄 2개) · mini(작게=하단 3칸). 기본값=프리셋 */
 var ND_PRESET_SIZE={running:"wide",food:"wide",recipes:"wide",movies:"half",books:"half",period:"half",diary:"half",travel:"half",mountains:"half",culture:"half",albums:"half",cellar:"half",scrap:"half",wish:"half",gift:"half",pet:"half",drink:"half"};
 function getHomeSizes(){ try{ return JSON.parse(store.getItem("nd.homesize")||"{}")||{}; }catch(e){ return {}; } }
@@ -4519,7 +4519,7 @@ async function openMovieDetailDeploy(m, r){
   const d=$("#detail");
   const people=[personSpan(r.director,"director"), personSpan(r.actors,"actor")].filter(Boolean).join(' <span style="color:var(--line)">/</span> ');
   const stream=_ndArr(r.streaming).map(t=>`<span class="tag">${t}</span>`).join("");
-  const metaBits=[r.year, r.country, (r.tmdbRating?("⭐"+r.tmdbRating):"")].filter(Boolean).join(" · ");
+  const metaBits=[r.year, ndCountryKoAll(r.country), (r.tmdbRating?("⭐"+r.tmdbRating):"")].filter(Boolean).join(" · ");
   d.innerHTML=`<div class="dhead"><h3>${r.title||"(제목 없음)"}</h3><div class="dh-actions"><button class="dh-btn" id="dEdit">수정</button><button class="dh-btn dh-del" id="dDel">삭제</button><button class="dclose-x" onclick="this.closest('dialog').close()" aria-label="닫기">✕</button></div></div>
     <div class="mvtop">
       <div class="mvposter" id="mvPoster">${r.cover?`<img src="${String(r.cover).replace(/"/g,'&quot;')}" alt="">`:"🎬"}</div>
@@ -4570,7 +4570,7 @@ async function openMovieDetail(m, r){
     <div class="mvtop">
       <div class="mvposter" id="mvPoster">🎬</div>
       <div class="mvinfo" style="min-width:0">
-        <div class="mvmeta">${[r.year,r.country,(r.rating!=null?("⭐ "+r.rating):"")].filter(Boolean).join(" · ")}</div>
+        <div class="mvmeta">${[r.year,ndCountryKoAll(r.country),(r.rating!=null?("⭐ "+r.rating):"")].filter(Boolean).join(" · ")}</div>
         ${r.orig&&r.orig!==r.title?`<div class="mvorig">${r.orig}</div>`:""}
         ${people?`<div class="mvpeople">${people}</div>`:""}
         ${stream?`<div class="tags">${stream}</div>`:""}${rec?`<div class="tags" style="margin-top:6px">${rec}</div>`:""}
@@ -5602,12 +5602,43 @@ function _ndArr(v){
   if(v==null || v==="") return [];
   return String(v).split(/[|,\/]+/).map(function(x){ return x.trim(); }).filter(Boolean);
 }
+/* ★v558: TMDB는 국가를 영문 원문(production_countries[].name)으로 준다.
+   시트에 영문으로 쌓인 15건이 있어 화면에서 한글로 되돌린다. 모르는 나라는 원문 그대로(안전).
+   ISO→한글은 여행에서 쓰던 COUNTRY_ISO(한글→ISO)를 뒤집어 재사용한다. */
+var ND_ISO_KO=null;
+function _ndIsoKo(){ if(ND_ISO_KO) return ND_ISO_KO; var m={};
+  try{ Object.keys(COUNTRY_ISO).forEach(function(k){ var v=COUNTRY_ISO[k]; if(!m[v]) m[v]=k; }); }catch(e){}
+  ND_ISO_KO=m; return m; }
+var ND_EN_ISO={"united states of america":"US","united states":"US","usa":"US","u.s.a.":"US",
+"united kingdom":"GB","uk":"GB","england":"GB","great britain":"GB","scotland":"GB","wales":"GB",
+"south korea":"KR","korea":"KR","republic of korea":"KR","north korea":"KR",
+"japan":"JP","china":"CN","taiwan":"TW","hong kong":"HK","macao":"MO","macau":"MO",
+"france":"FR","germany":"DE","italy":"IT","spain":"ES","portugal":"PT","netherlands":"NL","belgium":"BE",
+"switzerland":"CH","austria":"AT","czech republic":"CZ","czechia":"CZ","hungary":"HU","poland":"PL",
+"greece":"GR","turkey":"TR","russia":"RU","sweden":"SE","norway":"NO","denmark":"DK","finland":"FI",
+"ireland":"IE","iceland":"IS","croatia":"HR","slovenia":"SI","slovakia":"SK","romania":"RO",
+"bulgaria":"BG","ukraine":"UA","canada":"CA","mexico":"MX","brazil":"BR","argentina":"AR",
+"peru":"PE","chile":"CL","colombia":"CO","cuba":"CU","australia":"AU","new zealand":"NZ",
+"india":"IN","nepal":"NP","sri lanka":"LK","mongolia":"MN","thailand":"TH","vietnam":"VN",
+"philippines":"PH","indonesia":"ID","malaysia":"MY","singapore":"SG","cambodia":"KH",
+"iran":"IR","israel":"IL","egypt":"EG","morocco":"MA","south africa":"ZA","kenya":"KE"};
+function ndCountryKo(v){
+  var t=String(v==null?"":v).trim(); if(!t) return "";
+  if(/[\uac00-\ud7a3]/.test(t)) return t;                      /* 이미 한글이면 그대로 */
+  var iso=ND_EN_ISO[t.toLowerCase()] || (/^[A-Za-z]{2}$/.test(t)?t.toUpperCase():null);
+  var ko=iso?_ndIsoKo()[iso]:null;
+  return ko||t;                                                 /* 모르면 원문 유지 */
+}
+function ndCountryKoAll(v){
+  var t=String(v==null?"":v).trim(); if(!t) return "";
+  return t.split(/[,\uff0c\/]/).map(function(x){ return ndCountryKo(x); }).filter(Boolean).join("/");
+}
 function movieCard(r, no){
   const wb = ((r.watched==="O"||r.watched===true)?`<span class="wb wb-W">시청</span>`:"")
     + ((r.rating!=null&&r.rating!=="")?`<span class="wb" style="background:#fef3c7;color:#b45309">★ ${r.rating}</span>`:"")
     + (r.rewatch?`<span class="wb wb-R">다시볼것</span>`:"")
     + (r.pick?`<span class="wb wb-P">찜</span>`:"");
-  const yc = [r.year, (String(r.country||"").split(/[,，\/]/)[0].trim()), (r.tmdbRating!=null&&r.tmdbRating!==""?("⭐"+r.tmdbRating):"")].filter(Boolean).join(" · ");
+  const yc = [r.year, ndCountryKo(String(r.country||"").split(/[,，\/]/)[0].trim()), (r.tmdbRating!=null&&r.tmdbRating!==""?("⭐"+r.tmdbRating):"")].filter(Boolean).join(" · ");
   const dir = personSpan(r.director,"director");
   const actorFirst = (r.actors||"").split(/[,，]/)[0].trim();
   const act = actorFirst ? personSpan(actorFirst,"actor") : "";
@@ -6921,7 +6952,7 @@ function wrapStats(ids, data){
   // 영화
   if((data.movies||[]).length){ var mv=data.movies; var w=mv.filter(function(r){return _wTruthy(r.watched);});
     var cc={},dc={},sum=0,cnt=0,best=null;
-    w.forEach(function(r){ var c=String(r.country||"").trim(); if(c) cc[c]=(cc[c]||0)+1; var d=String(r.director||"").trim(); if(d) dc[d]=(dc[d]||0)+1; var rt=_wNum(r.rating); if(rt!=null){sum+=rt;cnt++; if(!best||rt>best.rating)best={rating:rt,title:r.title};} });
+    w.forEach(function(r){ var c=ndCountryKo(String(r.country||"").split(/[,，\/]/)[0].trim()); if(c) cc[c]=(cc[c]||0)+1;   /* ★v558: 미국/United States 가 따로 세어지던 것 합침 */ var d=String(r.director||"").trim(); if(d) dc[d]=(dc[d]||0)+1; var rt=_wNum(r.rating); if(rt!=null){sum+=rt;cnt++; if(!best||rt>best.rating)best={rating:rt,title:r.title};} });
     var top=function(o){return Object.keys(o).map(function(k){return [k,o[k]];}).sort(function(a,b){return b[1]-a[1];});};
     S.movies={watched:w.length,avg:cnt?Math.round(sum/cnt*10)/10:null,country:top(cc),director:top(dc).slice(0,4),best:best};
   }
@@ -8650,7 +8681,7 @@ async function fetchMovieExtra(id){   // 감독·배우·국적 (두 번째 호�
     ]);
     return { director:(cred.crew||[]).filter(c=>c.job==="Director").map(c=>c.name).join(", "),
              actors:(cred.cast||[]).slice(0,4).map(c=>c.name).join(", "),
-             country:(det.production_countries||[]).map(c=>c.name).join(", ") };
+             country:(det.production_countries||[]).map(c=>(_ndIsoKo()[c.iso_3166_1]||c.name)).join(", ") };   /* ★v558: 저장부터 한글로 */
   }catch(e){ return {director:"",actors:"",country:""}; }
 }
 /* ── 배포용 영화 폼에 TMDB 검색 자동채움 붙이기 ── */
