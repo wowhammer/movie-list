@@ -468,6 +468,7 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
   .card.nd-sel{ outline:2.5px solid #E0483F; outline-offset:-2px; background:rgba(224,72,63,.10); }
   #list.nd-selecting .card::before{ content:""; position:absolute; top:8px; left:8px; width:23px; height:23px; border-radius:50%; border:2px solid #cfc5b8; background:rgba(255,255,255,.92); z-index:6; box-sizing:border-box; }
   #list.nd-selecting .card.nd-sel::before{ content:"\2713"; background:#E0483F; border-color:#E0483F; color:#fff; display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:900; }
+  #list.nd-selecting{ padding-bottom:calc(env(safe-area-inset-bottom) + 88px); }   /* ★v559: 선택바가 맨 아래 "더 보기" 를 가리던 문제. 선택모드에서만 적용 = 평소 레이아웃 불변 */
   #ndSelBar{ position:fixed; left:50%; transform:translateX(-50%); bottom:calc(env(safe-area-inset-bottom) + 78px); z-index:80; display:flex; align-items:center; justify-content:space-between; gap:12px; width:calc(100% - 24px); max-width:440px; background:#232019; color:#f6eddf; border:1px solid rgba(238,224,205,.18); border-radius:14px; padding:11px 14px; box-shadow:0 16px 36px rgba(0,0,0,.42); }
   #ndSelBar .nd-selcnt{ font-size:14px; font-weight:800; }
   #ndSelBar .nd-selacts{ display:flex; gap:8px; }
@@ -1467,7 +1468,7 @@ body{ background:radial-gradient(circle at 50% -10%, rgba(102,78,57,.16), transp
         <svg class="brandmark" width="40" height="30" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg>
         <span class="brandwm"><span class="bwm-ko">내도감</span><span class="bwm-en">NAEDOGAM</span></span>
       </button>
-      <span class="mhver">v558</span>
+      <span class="mhver">v559</span>
       <span class="spacer"></span>
       <span class="src-chip" id="srcChip" style="display:none">데모</span>
       <button class="icon-btn" id="searchToggle" type="button" style="display:none">🔍</button>
@@ -2653,7 +2654,7 @@ function openDomain(id){ if(id==="mbti"){ openMbti(); return; } if(id==="period"
 
 /* 홈: 켜둔 카테고리를 카드로. 건수는 한 번 열어본 분야만 표시(홈을 빠르게 유지). */
 function ndDeep(h){ if(typeof h!=="string"||h.charAt(0)!=="#") h="#8a7a6a"; var n=parseInt(h.slice(1),16),r=(n>>16)&255,g=(n>>8)&255,b=n&255; function d(x,f){return Math.max(0,Math.min(255,Math.round(x*f)));} var d1="rgb("+d(r,.60)+","+d(g,.60)+","+d(b,.60)+")", d2="rgb("+d(r,.20)+","+d(g,.20)+","+d(b,.20)+")"; return "linear-gradient(180deg,rgba(255,255,255,.06),transparent 30%),linear-gradient(150deg,"+d1+","+d2+")"; }
-var ND_LOGO_HTML='<div class="ndh-brand" style="cursor:pointer" onclick="try{goHome()}catch(e){}"><svg width="47" height="35" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg><div class="ndh-wm"><b>내도감</b><small>NAEDOGAM</small></div><span class="mhver ndh-ver">v558</span></div><button class="ndh-sync" type="button" title="동기화" aria-label="동기화" onclick="try{syncNow()}catch(e){}">↻</button>';
+var ND_LOGO_HTML='<div class="ndh-brand" style="cursor:pointer" onclick="try{goHome()}catch(e){}"><svg width="47" height="35" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg><div class="ndh-wm"><b>내도감</b><small>NAEDOGAM</small></div><span class="mhver ndh-ver">v559</span></div><button class="ndh-sync" type="button" title="동기화" aria-label="동기화" onclick="try{syncNow()}catch(e){}">↻</button>';
 /* 홈 카드 크기: wide(넓게=한 줄 전체) · half(보통=한 줄 2개) · mini(작게=하단 3칸). 기본값=프리셋 */
 var ND_PRESET_SIZE={running:"wide",food:"wide",recipes:"wide",movies:"half",books:"half",period:"half",diary:"half",travel:"half",mountains:"half",culture:"half",albums:"half",cellar:"half",scrap:"half",wish:"half",gift:"half",pet:"half",drink:"half"};
 function getHomeSizes(){ try{ return JSON.parse(store.getItem("nd.homesize")||"{}")||{}; }catch(e){ return {}; } }
@@ -5150,9 +5151,12 @@ async function ndBulkDelete(m){
     try{ state.rows=applyComputed(m, arr.map(_uid)); }catch(e){}
     try{ paintDomain(m); }catch(e){} };
   // 1) 즉시 화면에서 제거 + 선택 해제
-  _repaint(_prev.filter(function(r){ return !_idset[String(r._id)]; }));
   ids.forEach(function(id){ try{ unmarkPending(m.id, id); }catch(e){} });
-  NDSEL.clear(); state.selMode=false; _ndSelBar(null);
+  /* ★v559: 상태를 먼저 끄고 그린다. 순서가 반대면 selMode=true 로 그려져 카드가 선택모드로 남고,
+     그 뒤 _ndSelBar(null) 은 바만 지운다 → "삭제했는데 아직 삭제모드" + "더보기 누르면 그때 풀림". */
+  NDSEL.clear(); state.selMode=false;
+  _repaint(_prev.filter(function(r){ return !_idset[String(r._id)]; }));
+  _ndSelBar(null);
   try{ ndToast(_rows.length+"개 지웠어요 · 저장 중…"); }catch(e){}
   // 2) 뒤에서 시트 삭제
   const _S=sheetSrc();
@@ -5206,7 +5210,7 @@ function ndApplySelectUI(m){
   var list=document.getElementById("list"); if(!list) return;
   var cards=list.querySelectorAll(".card");
   var _ab=document.getElementById("addBtn"); if(_ab) _ab.style.display = (state.selMode ? "none" : ((m&&m.canAdd) ? "flex" : "none"));
-  if(!cards.length){ _ndSelBar(null); return; }
+  if(!cards.length){ list.classList.remove("nd-selecting"); _ndSelBar(null); return; }   /* ★v559: 전부 지워 목록이 비어도 선택모드가 남던 것 */
   list.classList.toggle("nd-selecting", !!state.selMode);
   if(state.selMode){
     try{ _ndDelBesideSearch(m,false); }catch(e){}
