@@ -505,6 +505,7 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
   .mv-titlerow{ display:flex; justify-content:space-between; align-items:baseline; gap:8px; }
   .mv-title{ font-family:var(--sans); font-size:15px; font-weight:600; color:#1a1a1a; line-height:1.35; word-break:keep-all; overflow-wrap:break-word; }
   .mv-year{ font-family:var(--sans); font-size:12px; color:#aaa; white-space:nowrap; flex-shrink:1; min-width:0; overflow:hidden; text-overflow:ellipsis; max-width:62%; }
+  .mv-yc{ font-family:var(--sans); color:#aaa; }   /* v555: 영화 카드 — 연도·국가·평점을 감독 줄로 내림 */
   .mv-orig{ font-family:var(--sans); font-size:11px; color:#bbb; margin-top:2px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
   .mv-sub{ font-family:var(--sans); font-size:12px; color:#888; margin-top:5px; line-height:1.5; }
   .mv-sub .plink{ color:#555; border-bottom:1px dashed #bbb; text-decoration:none; cursor:pointer; }
@@ -1278,6 +1279,7 @@ body.home-dark .bnav-i.on .bnav-ic svg{ stroke:#f6eddf !important; }
 [data-theme="dark"] .mv-sub{ color:#e6ddce; }
 [data-theme="dark"] .mv-sub .plink{ color:#f4ecdd; text-decoration-color:#8d8377; }
 [data-theme="dark"] .mv-year,
+[data-theme="dark"] .mv-yc,
 [data-theme="dark"] .mv-orig,
 [data-theme="dark"] .body .meta,
 [data-theme="dark"] .nr-t,
@@ -1464,7 +1466,7 @@ body{ background:radial-gradient(circle at 50% -10%, rgba(102,78,57,.16), transp
         <svg class="brandmark" width="40" height="30" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg>
         <span class="brandwm"><span class="bwm-ko">내도감</span><span class="bwm-en">NAEDOGAM</span></span>
       </button>
-      <span class="mhver">v554</span>
+      <span class="mhver">v555</span>
       <span class="spacer"></span>
       <span class="src-chip" id="srcChip" style="display:none">데모</span>
       <button class="icon-btn" id="searchToggle" type="button" style="display:none">🔍</button>
@@ -2647,7 +2649,7 @@ function openDomain(id){ if(id==="mbti"){ openMbti(); return; } if(id==="period"
 
 /* 홈: 켜둔 카테고리를 카드로. 건수는 한 번 열어본 분야만 표시(홈을 빠르게 유지). */
 function ndDeep(h){ if(typeof h!=="string"||h.charAt(0)!=="#") h="#8a7a6a"; var n=parseInt(h.slice(1),16),r=(n>>16)&255,g=(n>>8)&255,b=n&255; function d(x,f){return Math.max(0,Math.min(255,Math.round(x*f)));} var d1="rgb("+d(r,.60)+","+d(g,.60)+","+d(b,.60)+")", d2="rgb("+d(r,.20)+","+d(g,.20)+","+d(b,.20)+")"; return "linear-gradient(180deg,rgba(255,255,255,.06),transparent 30%),linear-gradient(150deg,"+d1+","+d2+")"; }
-var ND_LOGO_HTML='<div class="ndh-brand" style="cursor:pointer" onclick="try{goHome()}catch(e){}"><svg width="47" height="35" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg><div class="ndh-wm"><b>내도감</b><small>NAEDOGAM</small></div><span class="mhver ndh-ver">v554</span></div><button class="ndh-sync" type="button" title="동기화" aria-label="동기화" onclick="try{syncNow()}catch(e){}">↻</button>';
+var ND_LOGO_HTML='<div class="ndh-brand" style="cursor:pointer" onclick="try{goHome()}catch(e){}"><svg width="47" height="35" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg><div class="ndh-wm"><b>내도감</b><small>NAEDOGAM</small></div><span class="mhver ndh-ver">v555</span></div><button class="ndh-sync" type="button" title="동기화" aria-label="동기화" onclick="try{syncNow()}catch(e){}">↻</button>';
 /* 홈 카드 크기: wide(넓게=한 줄 전체) · half(보통=한 줄 2개) · mini(작게=하단 3칸). 기본값=프리셋 */
 var ND_PRESET_SIZE={running:"wide",food:"wide",recipes:"wide",movies:"half",books:"half",period:"half",diary:"half",travel:"half",mountains:"half",culture:"half",albums:"half",cellar:"half",scrap:"half",wish:"half",gift:"half",pet:"half",drink:"half"};
 function getHomeSizes(){ try{ return JSON.parse(store.getItem("nd.homesize")||"{}")||{}; }catch(e){ return {}; } }
@@ -5601,11 +5603,14 @@ function movieCard(r, no){
     + ((r.rating!=null&&r.rating!=="")?`<span class="wb" style="background:#fef3c7;color:#b45309">★ ${r.rating}</span>`:"")
     + (r.rewatch?`<span class="wb wb-R">다시볼것</span>`:"")
     + (r.pick?`<span class="wb wb-P">찜</span>`:"");
-  const yc = [r.year, (String(r.country||"").split(/[,，]/)[0].trim()), (r.tmdbRating!=null&&r.tmdbRating!==""?("⭐"+r.tmdbRating):"")].filter(Boolean).join(" · ");
+  const yc = [r.year, (String(r.country||"").split(/[,，\/]/)[0].trim()), (r.tmdbRating!=null&&r.tmdbRating!==""?("⭐"+r.tmdbRating):"")].filter(Boolean).join(" · ");
   const dir = personSpan(r.director,"director");
   const actorFirst = (r.actors||"").split(/[,，]/)[0].trim();
   const act = actorFirst ? personSpan(actorFirst,"actor") : "";
-  const sub = (dir||act) ? dir + (dir&&act?` <span style="color:#ddd">/</span> `:"") + act : "";
+  const _who = (dir||act) ? dir + (dir&&act?` <span style="color:#ddd">/</span> `:"") + act : "";
+  /* ★v555: 제목줄을 좌우로 쪼개지 않는다. 오른쪽 칸이 최대 62%를 먹어 한글 제목이 두 줄로 잘렸다(word-break:keep-all). */
+  const _ycS = yc ? `<span class="mv-yc">${yc}</span>` : "";
+  const sub = _ycS + ((_ycS&&_who)?` <span class="mv-yc">·</span> `:"") + _who;
   const stream=_ndArr(r.streaming).map(t=>{ const x=SC[t]||{bg:'#f0f0f0',c:'#666'}; return `<span class="sbadge" style="background:${x.bg};color:${x.c}">${t}</span>`; }).join("");
   const _recArr=_ndArr(r.recommendList).length?_ndArr(r.recommendList):_ndArr(r.recommend);
   const rec=_recArr.map(t=>{
@@ -5617,7 +5622,7 @@ function movieCard(r, no){
   return `<div class="card mvcard" data-id="${r._id}">
     <span class="thumb" data-poster data-title="${kq}" data-orig="${q}" data-year="${r.year||''}">🎬</span>
     <div class="mvinfo">
-      <div class="mv-titlerow"><span class="mv-title">${r.title}${wb}</span><span class="mv-year">${yc}</span></div>
+      <div class="mv-titlerow"><span class="mv-title">${r.title}${wb}</span></div>
       ${r.orig&&r.orig!==r.title?`<div class="mv-orig">${r.orig}</div>`:""}
       ${sub?`<div class="mv-sub">${sub}</div>`:""}
       ${(stream||rec||srcMiniHTML(r))?`<div class="mvbadges">${stream}${rec?`<span class="reclbl">추천</span>${rec}`:""}${srcMiniHTML(r)}</div>`:""}
