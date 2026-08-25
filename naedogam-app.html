@@ -1485,7 +1485,7 @@ document.documentElement.setAttribute("data-theme","dark");</script>
         <svg class="brandmark" width="40" height="30" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg>
         <span class="brandwm"><span class="bwm-ko">내도감</span><span class="bwm-en">NAEDOGAM</span></span>
       </button>
-      <span class="mhver">v563</span>
+      <span class="mhver">v564</span>
       <span class="spacer"></span>
       <span class="src-chip" id="srcChip" style="display:none">데모</span>
       <button class="icon-btn" id="searchToggle" type="button" style="display:none">🔍</button>
@@ -2671,7 +2671,7 @@ function openDomain(id){ if(id==="mbti"){ openMbti(); return; } if(id==="period"
 
 /* 홈: 켜둔 카테고리를 카드로. 건수는 한 번 열어본 분야만 표시(홈을 빠르게 유지). */
 function ndDeep(h){ if(typeof h!=="string"||h.charAt(0)!=="#") h="#8a7a6a"; var n=parseInt(h.slice(1),16),r=(n>>16)&255,g=(n>>8)&255,b=n&255; function d(x,f){return Math.max(0,Math.min(255,Math.round(x*f)));} var d1="rgb("+d(r,.60)+","+d(g,.60)+","+d(b,.60)+")", d2="rgb("+d(r,.20)+","+d(g,.20)+","+d(b,.20)+")"; return "linear-gradient(180deg,rgba(255,255,255,.06),transparent 30%),linear-gradient(150deg,"+d1+","+d2+")"; }
-var ND_LOGO_HTML='<div class="ndh-brand" style="cursor:pointer" onclick="try{goHome()}catch(e){}"><svg width="47" height="35" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg><div class="ndh-wm"><b>내도감</b><small>NAEDOGAM</small></div><span class="mhver ndh-ver">v563</span></div><button class="ndh-sync" type="button" title="동기화" aria-label="동기화" onclick="try{syncNow()}catch(e){}">↻</button>';
+var ND_LOGO_HTML='<div class="ndh-brand" style="cursor:pointer" onclick="try{goHome()}catch(e){}"><svg width="47" height="35" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg><div class="ndh-wm"><b>내도감</b><small>NAEDOGAM</small></div><span class="mhver ndh-ver">v564</span></div><button class="ndh-sync" type="button" title="동기화" aria-label="동기화" onclick="try{syncNow()}catch(e){}">↻</button>';
 /* 홈 카드 크기: wide(넓게=한 줄 전체) · half(보통=한 줄 2개) · mini(작게=하단 3칸). 기본값=프리셋 */
 var ND_PRESET_SIZE={running:"wide",food:"wide",recipes:"wide",movies:"half",books:"half",period:"half",diary:"half",travel:"half",mountains:"half",culture:"half",albums:"half",cellar:"half",scrap:"half",wish:"half",gift:"half",pet:"half",drink:"half"};
 function getHomeSizes(){ try{ return JSON.parse(store.getItem("nd.homesize")||"{}")||{}; }catch(e){ return {}; } }
@@ -9332,6 +9332,14 @@ function _ndIosLoginFallback(gb, gm){
 }
 /* ★v399: 음성일기 — 브라우저 내장 받아쓰기로 말한 것을 일기 '내용' 칸에 그대로 적는다.
    별도 카테고리를 만들지 않는 이유: 기록이 두 곳으로 갈라지면 AI 이야기·회고·통계가 반쪽이 된다. */
+/* ★v564: 마이크 푸는 법은 기기마다 다르다. 예전 문구는 PC 크롬 기준이라
+   안드로이드·아이폰 사용자가 그 자물쇠를 찾을 수 없었다. */
+function _ndMicHelp(){
+  var ua=(navigator.userAgent||"").toLowerCase();
+  if(/iphone|ipad|ipod/.test(ua)) return "아이폰 설정 → 앱(사파리/크롬) → 마이크를 켜주세요";
+  if(/android/.test(ua))          return "주소창 왼쪽 아이콘 → 권한 → 마이크 → 허용";
+  return "주소창 왼쪽 자물쇠 → 사이트 설정 → 마이크 → 허용";
+}
 function _ndVoiceOK(){ try{ return !!(window.SpeechRecognition||window.webkitSpeechRecognition); }catch(e){ return false; } }
 function _ndVoiceStop(msg){
   /* 여러 번 불려도 안전(멱등). 핸들러를 먼저 떼어 onend→stop 재귀를 끊는다. */
@@ -9405,6 +9413,24 @@ function _ndVoiceAttach(el, autoStart){
       hint.textContent="키보드 마이크(🎤)로도 말로 쓸 수 있어요";
       return;
     }
+    /* ★v564: 권한이 이미 막혀 있으면 눌러도 소용없다. 미리 알려준다. */
+    try{
+      if(navigator.permissions && navigator.permissions.query){
+        navigator.permissions.query({name:"microphone"}).then(function(p){
+          var paint=function(){
+            if(btn.dataset.on==="1") return;            /* 듣는 중이면 건드리지 않는다 */
+            if(p.state==="denied"){
+              btn.style.background="#9b9b9b";
+              hint.textContent="마이크가 차단돼 있어요 · "+_ndMicHelp();
+            }else{
+              btn.style.background="#7c3aed";
+              if(/차단돼 있어요/.test(hint.textContent||"")) hint.textContent="";
+            }
+          };
+          paint(); try{ p.onchange=paint; }catch(e){}
+        }).catch(function(){});
+      }
+    }catch(e){}
     var SR=window.SpeechRecognition||window.webkitSpeechRecognition;
     var parts=[], committed=[], head="";
     var _fin=false;   /* 멈춤 여부 — 마지막 조각 부호는 멈출 때만 */
@@ -9442,7 +9468,7 @@ function _ndVoiceAttach(el, autoStart){
         rec.onerror=function(ev){
           var c=(ev&&ev.error)||"";
           if(c==="no-speech") return;
-          if(c==="not-allowed"||c==="service-not-allowed"){ _ndVoiceStop("마이크 권한이 필요해요. 주소창 옆 자물쇠(또는 설정)에서 마이크를 허용해 주세요."); return; }
+          if(c==="not-allowed"||c==="service-not-allowed"){ _ndVoiceStop("마이크가 막혀 있어요 · "+_ndMicHelp()); return; }   /* ★v564 */
           hint.textContent="받아쓰기 오류("+c+") · 다시 눌러보세요";
         };
         rec.onend=function(){
