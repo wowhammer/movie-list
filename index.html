@@ -8,7 +8,7 @@
 <link rel="canonical" href="https://naedogam.com/">
 <link rel="icon" type="image/png" href="/favicon.png?v=566">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png?v=566">
-<meta name="theme-color" content="#ffffff">
+<meta name="theme-color" content="#16130f">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="내도감">
 <meta property="og:title" content="내도감 — 내 삶을 수집하는 도감">
@@ -17,9 +17,10 @@
 <meta property="og:image" content="https://naedogam.com/icon-512.png?v=566">
 <meta name="twitter:card" content="summary">
 <style>
+  /* ★앱 다크 테마에서 실제로 쓰는 값 그대로 (naedogam-app.html [data-theme="dark"]) */
   :root{
-    --ink:#1a1a1a; --soft:#6b6b6b; --line:#e7e4df; --paper:#ffffff;
-    --wash:#faf8f5; --red:#e02d26; --radius:16px;
+    --ink:#f6eddf; --soft:#a99e8d; --line:#35302a; --paper:#16130f;
+    --wash:#1d1914; --card:#232019; --red:#e02d26; --radius:16px;
     --sans:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Pretendard","Noto Sans KR",system-ui,sans-serif;
   }
   *{box-sizing:border-box}
@@ -30,7 +31,7 @@
   .wrap{max-width:960px;margin:0 auto;padding:0 20px}
 
   /* 헤더 */
-  header{position:sticky;top:0;z-index:50;background:rgba(255,255,255,.92);
+  header{position:sticky;top:0;z-index:50;background:rgba(22,19,15,.88);
          backdrop-filter:saturate(180%) blur(12px);border-bottom:1px solid var(--line)}
   .hd{display:flex;align-items:center;gap:10px;height:60px;max-width:960px;margin:0 auto;padding:0 20px}
   .logo{display:flex;align-items:center;gap:9px;text-decoration:none;font-weight:800;letter-spacing:-.02em}
@@ -59,28 +60,28 @@
   /* 히어로 */
   .hero{padding:64px 0 56px;text-align:center}
   .hero h1{font-size:clamp(30px,7vw,48px);line-height:1.28;letter-spacing:-.03em;margin:0 0 18px;font-weight:900}
-  .hero h1 .hl{color:var(--red)}
+  .hero h1 .hl{color:#ff6f66}
   .hero p{font-size:clamp(15px,3.6vw,18px);color:var(--soft);margin:0 auto 30px;max-width:520px}
   .cta{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
   .trust{margin-top:22px;font-size:12.5px;color:var(--soft)}
 
   /* 목업 */
   .mock{margin:44px auto 0;max-width:360px;border:1px solid var(--line);border-radius:22px;
-        background:var(--paper);box-shadow:0 12px 40px rgba(0,0,0,.09);overflow:hidden;text-align:left}
+        background:var(--card);box-shadow:0 14px 44px rgba(0,0,0,.45);overflow:hidden;text-align:left}
   .mock .mh{display:flex;align-items:center;gap:8px;padding:13px 15px;border-bottom:1px solid var(--line)}
   .mock .mh svg{width:22px;height:22px}
   .mock .mh b{font-size:14.5px;letter-spacing:-.02em}
-  .mock .mh .v{margin-left:auto;font-size:10px;font-weight:800;color:var(--red);
+  .mock .mh .v{margin-left:auto;font-size:10px;font-weight:800;color:#ff6f66;
                background:rgba(224,45,38,.09);padding:3px 7px;border-radius:6px}
   .mock .grid{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--line)}
-  .mock .cell{background:var(--paper);padding:13px 15px}
+  .mock .cell{background:var(--card);padding:13px 15px}
   .mock .cell .n{font-size:12.5px;color:var(--soft);font-weight:600}
   .mock .cell .c{font-size:19px;font-weight:800;letter-spacing:-.02em;margin-top:1px}
-  .mock .cell.z .c{color:#c9c4bc}
+  .mock .cell.z .c{color:#5c554b}
 
   /* 섹션 */
   section{padding:64px 0;border-top:1px solid var(--line)}
-  .eyebrow{font-size:12px;font-weight:800;color:var(--red);letter-spacing:.1em;text-transform:uppercase;
+  .eyebrow{font-size:12px;font-weight:800;color:#ff6f66;letter-spacing:.1em;text-transform:uppercase;
            text-align:center;margin-bottom:10px}
   h2{font-size:clamp(23px,5.2vw,32px);line-height:1.35;letter-spacing:-.025em;text-align:center;margin:0 0 10px;font-weight:900}
   .lead{text-align:center;color:var(--soft);font-size:15.5px;margin:0 auto 36px;max-width:560px}
@@ -91,17 +92,17 @@
   .quote .kick{display:block;margin-top:12px;font-weight:800;letter-spacing:-.02em}
 
   .cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px}
-  .card{border:1px solid var(--line);border-radius:var(--radius);padding:22px 20px;background:var(--paper)}
+  .card{border:1px solid var(--line);border-radius:var(--radius);padding:22px 20px;background:var(--card)}
   .card h3{margin:0 0 8px;font-size:17px;letter-spacing:-.02em;font-weight:800}
   .card p{margin:0;font-size:14.5px;color:var(--soft)}
   .card .ic{font-size:22px;margin-bottom:10px;display:block}
 
   .chips{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;max-width:720px;margin:0 auto}
-  .chip{border:1px solid var(--line);border-radius:999px;padding:8px 14px;font-size:13.5px;font-weight:600;background:var(--paper)}
-  .chip.make{border-color:var(--red);color:var(--red);border-style:dashed;font-weight:800}
+  .chip{border:1px solid var(--line);border-radius:999px;padding:8px 14px;font-size:13.5px;font-weight:600;background:var(--card)}
+  .chip.make{border-color:var(--red);color:#ff6f66;border-style:dashed;font-weight:800;background:rgba(224,45,38,.08)}
 
   .steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:14px;counter-reset:s}
-  .step{border:1px solid var(--line);border-radius:var(--radius);padding:22px 20px;position:relative}
+  .step{border:1px solid var(--line);border-radius:var(--radius);padding:22px 20px;position:relative;background:var(--card)}
   .step::before{counter-increment:s;content:counter(s);position:absolute;top:-13px;left:20px;
     width:27px;height:27px;border-radius:50%;background:var(--red);color:#fff;
     display:flex;align-items:center;justify-content:center;font-size:13.5px;font-weight:800}
@@ -112,7 +113,7 @@
   table{border-collapse:collapse;width:100%;min-width:520px;font-size:14.5px}
   th,td{border-bottom:1px solid var(--line);padding:14px 12px;text-align:left}
   thead th{font-size:13px;color:var(--soft);font-weight:700}
-  thead th:last-child{color:var(--red)}
+  thead th:last-child{color:#ff6f66}
   tbody th{font-weight:700;white-space:nowrap}
   td:last-child{font-weight:800}
 
@@ -122,13 +123,13 @@
   @media(max-width:640px){
     .tblwrap{display:none}
     .cmp{display:grid;gap:12px}
-    .cmp .row{border:1px solid var(--line);border-radius:var(--radius);overflow:hidden}
+    .cmp .row{border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;background:var(--card)}
     .cmp .row>.t{background:var(--wash);padding:11px 15px;font-weight:800;font-size:14.5px;letter-spacing:-.02em}
     .cmp .row>.v{display:flex;justify-content:space-between;gap:12px;padding:10px 15px;
                  border-top:1px solid var(--line);font-size:14px}
     .cmp .row>.v .k{color:var(--soft);font-weight:600;flex:0 0 auto}
     .cmp .row>.v .d{text-align:right}
-    .cmp .row>.v.me{background:rgba(224,45,38,.05)}
+    .cmp .row>.v.me{background:rgba(224,45,38,.12)}
     .cmp .row>.v.me .k{color:var(--red);font-weight:800}
     .cmp .row>.v.me .d{font-weight:800}
   }
@@ -148,7 +149,7 @@
   <div class="hd">
     <a class="logo" href="/">
       <svg viewBox="0 0 100 100" aria-hidden="true">
-        <rect x="4" y="4" width="92" height="92" rx="22" fill="#fff" stroke="#e7e4df"/>
+        <rect x="4" y="4" width="92" height="92" rx="22" fill="#fff"/>
         <rect x="22" y="42" width="10" height="34" rx="4" fill="#1a1a1a"/>
         <rect x="37" y="33" width="10" height="43" rx="4" fill="#1a1a1a"/>
         <rect x="52" y="26" width="10" height="50" rx="4" fill="#1a1a1a"/>
@@ -181,11 +182,11 @@
     <div class="mock">
       <div class="mh">
         <svg viewBox="0 0 100 100" aria-hidden="true">
-          <rect x="22" y="42" width="10" height="34" rx="4" fill="#1a1a1a"/>
-          <rect x="37" y="33" width="10" height="43" rx="4" fill="#1a1a1a"/>
-          <rect x="52" y="26" width="10" height="50" rx="4" fill="#1a1a1a"/>
+          <rect x="22" y="42" width="10" height="34" rx="4" fill="#f6eddf"/>
+          <rect x="37" y="33" width="10" height="43" rx="4" fill="#f6eddf"/>
+          <rect x="52" y="26" width="10" height="50" rx="4" fill="#f6eddf"/>
           <rect x="68" y="30" width="10" height="46" rx="4" fill="#e02d26" transform="rotate(17 73 53)"/>
-          <rect x="19" y="78" width="62" height="6" rx="3" fill="#1a1a1a"/>
+          <rect x="19" y="78" width="62" height="6" rx="3" fill="#f6eddf"/>
         </svg>
         <b>내도감</b><span class="v">v566</span>
       </div>
