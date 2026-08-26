@@ -3581,7 +3581,16 @@ function openQuickRec(m, r){
   function bindStars(){ dlg.querySelectorAll(".ms-hit,.ms-clear").forEach(function(el){ el.onclick=function(){ setMovieRatingDeploy(m, r, parseFloat(el.dataset.val)); var rc=dlg.querySelector("#qrRate"); if(rc){ rc.innerHTML='<span class="drate-l">내 별점</span> '+myStarsHTML(r.rating); bindStars(); } }; }); }
   bindStars();
   dlg.querySelector("#qrClose").onclick=function(){ dlg.close(); };
-  dlg.addEventListener("click",function(e){ if(e.target===dlg) dlg.close(); });
+  /* ★v567: 한줄평을 쓰다가 바깥을 탭하면 그냥 닫혀서 쓴 글이 사라졌다.
+     연 시점의 값과 달라졌을 때만 물어본다(안 고쳤으면 그냥 닫힌다). */
+  var _qrOrig = taKey ? String(r[taKey]==null?"":r[taKey]) : "";
+  dlg.addEventListener("click",function(e){
+    if(e.target!==dlg) return;
+    var _ta=dlg.querySelector("#qrTa");
+    var _now=_ta?String(_ta.value==null?"":_ta.value):"";
+    if(_ta && _now!==_qrOrig && !confirm("쓴 한줄평이 저장되지 않았어요. 그냥 닫을까요?")) return;
+    dlg.close();
+  });
   dlg.querySelector("#qrSave").onclick=async function(){
     var sv=dlg.querySelector("#qrSave"); sv.disabled=true; sv.textContent="저장 중…";
     try{
@@ -5059,6 +5068,22 @@ function openRecordForm(m, existing, prefill){
       if(m.id==="books" && _hasRt && _rev && !row.status) row.status="읽음";
     }catch(e){}
     if(m.activity && m.activity.when(row) && !row[m.activity.df]) row[m.activity.df]=todayStr();   // 완료 날짜 기록(폼 경로)
+    /* ★v567: 아무것도 안 쓰고 저장하면 빈 줄이 시트에 들어갔다.
+       막지 않고 한 번 묻는다 — 차계부·러닝은 일부러 날짜만 남기기도 한다. */
+    try{
+      var _filled=0;
+      fields.forEach(function(f){
+        if(f.today || f.hideForm) return;          /* 자동 날짜·폼에 없는 칸은 '작성 내용' 아님 */
+        var v=row[f.k];
+        if(v===undefined || v===null) return;
+        if(typeof v==="boolean"){ if(v) _filled++; return; }
+        if(Array.isArray(v)){ if(v.length) _filled++; return; }
+        var t=String(v).trim();
+        if(t==="" || t==="[]") return;
+        _filled++;
+      });
+      if(_filled===0 && !confirm("작성 내용이 없는데 저장할까요?")) return;
+    }catch(e){}
     const btn=$("#rfSave"); btn.textContent="저장 중…"; btn.disabled=true;
     /* v395: 8초 넘으면 "느립니다" 표시 — 멈춘 건지 기다리는 건지 알 수 있게. */
     try{ var _oh=document.getElementById("ndNetHint"); if(_oh&&_oh.parentNode) _oh.parentNode.removeChild(_oh); }catch(_e){}
