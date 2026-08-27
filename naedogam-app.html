@@ -1505,7 +1505,7 @@ document.documentElement.setAttribute("data-theme","dark");</script>
         <svg class="brandmark" width="40" height="30" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg>
         <span class="brandwm"><span class="bwm-ko">내도감</span><span class="bwm-en">NAEDOGAM</span></span>
       </button>
-      <span class="mhver">v571</span>
+      <span class="mhver">v572</span>
       <span class="spacer"></span>
       <span class="src-chip" id="srcChip" style="display:none">데모</span>
       <button class="icon-btn" id="searchToggle" type="button" style="display:none">🔍</button>
@@ -2701,7 +2701,7 @@ function openDomain(id){
 
 /* 홈: 켜둔 카테고리를 카드로. 건수는 한 번 열어본 분야만 표시(홈을 빠르게 유지). */
 function ndDeep(h){ if(typeof h!=="string"||h.charAt(0)!=="#") h="#8a7a6a"; var n=parseInt(h.slice(1),16),r=(n>>16)&255,g=(n>>8)&255,b=n&255; function d(x,f){return Math.max(0,Math.min(255,Math.round(x*f)));} var d1="rgb("+d(r,.60)+","+d(g,.60)+","+d(b,.60)+")", d2="rgb("+d(r,.20)+","+d(g,.20)+","+d(b,.20)+")"; return "linear-gradient(180deg,rgba(255,255,255,.06),transparent 30%),linear-gradient(150deg,"+d1+","+d2+")"; }
-var ND_LOGO_HTML='<div class="ndh-brand" style="cursor:pointer" onclick="try{goHome()}catch(e){}"><svg width="47" height="35" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg><div class="ndh-wm"><b>내도감</b><small>NAEDOGAM</small></div><span class="mhver ndh-ver">v571</span></div><button class="ndh-sync" type="button" title="동기화" aria-label="동기화" onclick="try{syncNow()}catch(e){}">↻</button>';
+var ND_LOGO_HTML='<div class="ndh-brand" style="cursor:pointer" onclick="try{goHome()}catch(e){}"><svg width="47" height="35" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg><div class="ndh-wm"><b>내도감</b><small>NAEDOGAM</small></div><span class="mhver ndh-ver">v572</span></div><button class="ndh-sync" type="button" title="동기화" aria-label="동기화" onclick="try{syncNow()}catch(e){}">↻</button>';
 /* 홈 카드 크기: wide(넓게=한 줄 전체) · half(보통=한 줄 2개) · mini(작게=하단 3칸). 기본값=프리셋 */
 var ND_PRESET_SIZE={running:"wide",food:"wide",recipes:"wide",movies:"half",books:"half",period:"half",diary:"half",travel:"half",mountains:"half",culture:"half",albums:"half",cellar:"half",scrap:"half",wish:"half",gift:"half",pet:"half",drink:"half"};
 function getHomeSizes(){ try{ return JSON.parse(store.getItem("nd.homesize")||"{}")||{}; }catch(e){ return {}; } }
@@ -2751,7 +2751,7 @@ function _ndLoadSettingsSheet(){
 }
 function ndEffSize(id){ var o; try{o=getHomeSizes();}catch(e){o={};} return o[id]||ND_PRESET_SIZE[id]||"mini"; }
 function ndNat(id){ if(id==="running")return "run"; if(id==="food"||id==="recipes")return "food"; if(id==="period")return "cycle"; if(id==="diary")return "diary"; return "coll"; }
-var ND_STARTERS=["movies","books","mountains","running","diary","bucket","food","travel","quote","wish","mbti","drink"];
+var ND_STARTERS=["movies","books","mountains","running","diary","bucket","food","travel","quote","wish","mbti"];   /* ★v572 drink는 「그 외」로 — 온보딩 첫 화면에 건강 항목 0개 */
 /* ★기본 숨김 카테고리 — 홈/추천/피커에서 숨기고 설정에서만 켠다. nd.active·데이터·AI재료는 그대로 보존(가역). */
 var ND_HIDDEN_CATS=["albums"];
 function _ndCatHidden(id){ return ND_HIDDEN_CATS.indexOf(id)>=0; }
@@ -9387,13 +9387,12 @@ function _ndSensConsent(ids,cb){
   var d=document.createElement("dialog"); d.id="ndSensDlg";
   d.innerHTML=
      '<div tabindex="-1" style="outline:none;padding:20px 18px 17px;border:1px solid var(--line,rgba(238,224,205,.22));border-radius:18px;background:var(--card,#1f1a15);box-shadow:0 18px 48px rgba(0,0,0,.45)">'
-    +'<div style="font-size:16px;font-weight:800;color:var(--ink);letter-spacing:-.02em">건강 기록 — 켜기 전에 한 번만</div>'
+    +'<div style="font-size:16px;font-weight:800;color:var(--ink);letter-spacing:-.02em">내도감은 이 기록을 볼 수 없습니다</div>'
     +'<div style="font-size:12.5px;line-height:1.65;color:var(--ink-soft);margin-top:8px">'
-    +'건강에 관한 기록은 법에서 <b style="color:var(--ink)">「민감정보」</b>로 따로 다룹니다. 그래서 다른 기능과 분리해 한 번 여쭙습니다.'
+    +'다른 기록과 똑같이 <b style="color:var(--ink)">내 구글 드라이브의 ‘내도감 Data’ 시트</b>에만 저장되고, 만든 사람도 열어볼 수 없습니다. 다만 법에서 <b style="color:var(--ink)">「민감정보」</b>로 따로 다루는 항목이라, 켜시기 전에 한 번만 여쭙습니다.'
     +'</div>'
     +'<div style="margin-top:12px;padding:10px 12px;border-radius:12px;background:var(--chip,rgba(255,255,255,.05));font-size:13px;font-weight:700;color:var(--ink);line-height:1.6">지금 켜려는 것 — '+names.join(" · ")+'</div>'
     +'<div style="font-size:12.5px;line-height:1.75;color:var(--ink-soft);margin-top:12px">'
-    +'· <b style="color:var(--ink)">저장 위치</b> — 다른 기록과 똑같이 내 구글 드라이브의 ‘내도감 Data’ 시트에만 저장되며, 만든 사람도 열어볼 수 없습니다.<br>'
     +'· <b style="color:var(--ink)">AI 글쓰기</b> — '+aiLine+'<br>'
     +'· <b style="color:var(--ink)">언제든 철회</b> — 설정 → 계정 → 「건강 기록 동의」에서 끕니다. 철회해도 <b style="color:var(--ink)">이미 적은 기록은 지워지지 않습니다.</b>'
     +'</div>'
