@@ -1049,7 +1049,7 @@ dialog.nd-hasnav .wsec.whead{ display:none !important; }
 .insTx i{font-style:normal;font-size:12.5px;color:#b9b2e0;margin-top:3px}
 .insGo{font-size:20px;color:#ffd66b}
 .insLight{background:#fbf7f8;color:#2b2622}
-.insLight::backdrop{background:rgba(0,0,0,.4)}
+.insLight::backdrop{background:rgba(0,0,0,.4)}/* ★v573: .winsight 는 color:#efeaff(밝은 글씨) 하드코딩이라 라이트 배경(#fbf7f8) 위에서 안 보였다. 다크는 그대로 두고 라이트에서만 덮는다. */html:not([data-theme="dark"]) .insLight .winsight{color:#2b2622}html:not([data-theme="dark"]) .insLight .winsight b{color:var(--brand,#e0483f)}
 .insLight .wtop{background:#fff;border-bottom:1px solid #f0e6ea}
 .insLight .wclose{background:#f1eaec;color:#5a4a50}
 .insLight .mbTitle{color:#2b2622}
@@ -2701,7 +2701,7 @@ function openDomain(id){
 
 /* 홈: 켜둔 카테고리를 카드로. 건수는 한 번 열어본 분야만 표시(홈을 빠르게 유지). */
 function ndDeep(h){ if(typeof h!=="string"||h.charAt(0)!=="#") h="#8a7a6a"; var n=parseInt(h.slice(1),16),r=(n>>16)&255,g=(n>>8)&255,b=n&255; function d(x,f){return Math.max(0,Math.min(255,Math.round(x*f)));} var d1="rgb("+d(r,.60)+","+d(g,.60)+","+d(b,.60)+")", d2="rgb("+d(r,.20)+","+d(g,.20)+","+d(b,.20)+")"; return "linear-gradient(180deg,rgba(255,255,255,.06),transparent 30%),linear-gradient(150deg,"+d1+","+d2+")"; }
-var ND_LOGO_HTML='<div class="ndh-brand" style="cursor:pointer" onclick="try{goHome()}catch(e){}"><svg width="47" height="35" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg><div class="ndh-wm"><b>내도감</b><small>NAEDOGAM</small></div><span class="mhver ndh-ver">v572</span></div><button class="ndh-sync" type="button" title="동기화" aria-label="동기화" onclick="try{syncNow()}catch(e){}">↻</button>';
+var ND_LOGO_HTML='<div class="ndh-brand" style="cursor:pointer" onclick="try{goHome()}catch(e){}"><svg width="47" height="35" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg><div class="ndh-wm"><b>내도감</b><small>NAEDOGAM</small></div><span class="mhver ndh-ver">v573</span></div><button class="ndh-sync" type="button" title="동기화" aria-label="동기화" onclick="try{syncNow()}catch(e){}">↻</button>';
 /* 홈 카드 크기: wide(넓게=한 줄 전체) · half(보통=한 줄 2개) · mini(작게=하단 3칸). 기본값=프리셋 */
 var ND_PRESET_SIZE={running:"wide",food:"wide",recipes:"wide",movies:"half",books:"half",period:"half",diary:"half",travel:"half",mountains:"half",culture:"half",albums:"half",cellar:"half",scrap:"half",wish:"half",gift:"half",pet:"half",drink:"half"};
 function getHomeSizes(){ try{ return JSON.parse(store.getItem("nd.homesize")||"{}")||{}; }catch(e){ return {}; } }
@@ -6371,7 +6371,7 @@ async function openAIStory(from){
   try{ _aiRenderPast(); }catch(e){}   /* v407: 지난 이야기 목록 */
   try{ _aiLoadSheet().then(function(rows){ try{ _aiRenderPast(rows); }catch(e){} }).catch(function(){}); }catch(e){}   /* v408: 시트 보관분 */
   try{ var _pl=_aiPastList(); if(_pl.length){ var _o=_ndEl("wAiOut");
-    if(_o){ _o.style.display=""; _aiShowStory(_o, _pl[0].text, true); }
+    if(_o){ _o.style.display=""; _aiShowStory(_o, _pl[0].text, true, _pl[0]); }
     var _b=_ndEl("wAiBtn"); if(_b){ _b.textContent="✨ 새로 쓰기"; _b.onclick=function(){ ndAIWrite(true); }; } } }catch(e){}
   /* ★v561: 아직 안 물어봤으면 동의를 먼저 받는다. 결정 전에는 선생성도 하지 않는다 —
      여기서 미리 만들면 고르기도 전에 일기가 이미 나간다(규칙46: 선생성도 같은 갈래). */
@@ -7603,10 +7603,10 @@ function _aiKey(persona, summary){
   return String(persona)+"_"+(h>>>0).toString(36)+"_"+s.length;
 }
 function _aiCacheGet(key){ try{ var o=JSON.parse(store.getItem("nd.aiStory")||"{}"); return o&&o[key]?o[key]:null; }catch(e){ return null; } }
-function _aiCacheSet(key,text){
+function _aiCacheSet(key,text,model){
   try{ var o=JSON.parse(store.getItem("nd.aiStory")||"{}");
     if(Object.keys(o).length>8) o={};
-    o[key]={text:text,at:Date.now(),persona:String(key).split("_")[0]}; store.setItem("nd.aiStory", JSON.stringify(o));
+    o[key]={text:text,at:Date.now(),persona:String(key).split("_")[0],model:String(model||"")}; store.setItem("nd.aiStory", JSON.stringify(o));
   }catch(e){}
 }
 function _aiClean(t){
@@ -7638,9 +7638,9 @@ function _aiFetchStory(persona, summary){
         var r=await fetch(_u,{method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},body:_bd,signal:(ac?ac.signal:undefined)});
         if(tid) clearTimeout(tid);
         var txt=await r.text(), j=null; try{ j=JSON.parse(txt); }catch(e){ j=null; }
-        if(j && j.ok && j.text){ var _t=_aiClean(j.text); _aiCacheSet(key,_t);
+        if(j && j.ok && j.text){ var _t=_aiClean(j.text); var _md=String((j&&j.model)||""); _aiCacheSet(key,_t,_md);
           try{ _aiSaveSheet(_t, persona); }catch(e){}   /* v408: 시트에도 보관(실패해도 무시) */
-          return {ok:true,text:_t}; }
+          return {ok:true,text:_t,model:_md,at:Date.now()}; }
         last=(j&&j.error)?String(j.error):("서버가 글 대신 오류를 보냈어요("+r.status+")");
       }catch(e){
         if(tid) clearTimeout(tid);
@@ -7650,7 +7650,7 @@ function _aiFetchStory(persona, summary){
     return {ok:false,error:last};
   })();
   job.then(function(res){ try{ window.__aiAttempt=0; }catch(e){}
-    try{ if(res && res.ok && res.text){ window.__aiReadyStory={text:res.text, persona:persona, at:Date.now()}; } }catch(e){}   /* v461: 완성된 글을 붙잡아 둔다 — 알림 '보기'에서 요약 키 불일치로 다시 쓰던 문제 방지 */
+    try{ if(res && res.ok && res.text){ window.__aiReadyStory={text:res.text, persona:persona, at:Date.now(), model:String((res&&res.model)||"")}; } }catch(e){}   /* v461: 완성된 글을 붙잡아 둔다 — 알림 '보기'에서 요약 키 불일치로 다시 쓰던 문제 방지 */
     /* v406: 결과가 나왔는데 화면이 닫혀 있으면 배너로 알린다(선생성만 한 경우는 조용히) */
     try{ if(res && res.ok && window.__aiWanted && !_aiDlgOpen()){ window.__aiWanted=false; _aiNotifyReady(); } }catch(e){}
   }, function(){ try{ window.__aiAttempt=0; }catch(e){} });
@@ -7671,7 +7671,7 @@ function _aiNotifyReady(){
       try{ openAIStory(); setTimeout(function(){   /* v461: 완성된 글을 바로 표시(키 재계산·재작성 없이). 준비된 글 없으면 기존 경로로 폴백 */
         try{
           var _o=_ndEl("wAiOut"), _sb=_ndEl("wAiBtn"), _rs=window.__aiReadyStory;
-          if(_rs && _rs.text && _o){ _o.style.display=""; _aiShowStory(_o, _rs.text, false); if(_sb){ _sb.disabled=false; _sb.textContent="✨ 새로 쓰기"; _sb.onclick=function(){ ndAIWrite(true); }; } }
+          if(_rs && _rs.text && _o){ _o.style.display=""; _aiShowStory(_o, _rs.text, false, _rs); if(_sb){ _sb.disabled=false; _sb.textContent="✨ 새로 쓰기"; _sb.onclick=function(){ ndAIWrite(true); }; } }
           else { ndAIWrite(); }
         }catch(e){ try{ ndAIWrite(); }catch(_e){} }
       }, 320); }catch(e){}
@@ -7725,7 +7725,7 @@ async function _aiLoadSheet(){
 }
 function _aiPastList(){
   try{ var o=JSON.parse(store.getItem("nd.aiStory")||"{}");
-    return Object.keys(o).map(function(k){ return {key:k, text:(o[k]&&o[k].text)||"", at:(o[k]&&o[k].at)||0, persona:(o[k]&&o[k].persona)||""}; })
+    return Object.keys(o).map(function(k){ return {key:k, text:(o[k]&&o[k].text)||"", at:(o[k]&&o[k].at)||0, persona:(o[k]&&o[k].persona)||"", model:(o[k]&&o[k].model)||""}; })
       .filter(function(x){ return x.text; }).sort(function(a,b){ return b.at-a.at; });
   }catch(e){ return []; }
 }
@@ -7749,7 +7749,7 @@ function _aiRenderPast(extra){
         }).join("");
     box.querySelectorAll(".aiPastBtn").forEach(function(b){
       b.onclick=function(){ var x=list[parseInt(b.dataset.i,10)]; if(!x) return;
-        var out=_ndEl("wAiOut"); if(out){ out.style.display=""; _aiShowStory(out, x.text, true);
+        var out=_ndEl("wAiOut"); if(out){ out.style.display=""; _aiShowStory(out, x.text, true, x);
           /* v489: 지난 이야기 칩이 '무반응'처럼 보이던 문제 — 결과칸이 화면 아래로 넘치고 첫 줄이 매번 같아서였다. 선택칩 강조 + 그 글로 스크롤. */
           try{ box.querySelectorAll(".aiPastBtn").forEach(function(o){ o.classList.remove("on"); o.style.background=""; o.style.color=""; }); b.classList.add("on"); b.style.background="var(--brand,#e0483f)"; b.style.color="#fff"; }catch(e){}
           try{ if(out.scrollIntoView) out.scrollIntoView({block:"start",behavior:"smooth"}); }catch(e){}
@@ -7819,11 +7819,56 @@ function _ndEl(id){
     return all[all.length-1];
   }catch(e){ try{ return document.getElementById(id); }catch(_){ return null; } }
 }
-function _aiShowStory(out, text, cached){
+/* ★v573 계측: 이 글을 누가 언제 썼는지 글 아래 한 줄로 남긴다.
+   제미나이는 pro가 실패하면 조용히 flash로 내려간다 — 표시가 없으면 알 방법이 0이었다.
+   구조는 그대로 두고 '보여주기'만 더한다(대전제 0-Z). */
+function _aiModelKo(m){
+  var t=String(m||"").toLowerCase();
+  if(!t) return "";
+  if(t.indexOf("gemini")>=0){
+    if(t.indexOf("flash-lite")>=0) return "\uc81c\ubbf8\ub098\uc774 flash-lite";
+    if(t.indexOf("flash")>=0) return "\uc81c\ubbf8\ub098\uc774 flash";
+    if(t.indexOf("pro")>=0) return "\uc81c\ubbf8\ub098\uc774 pro";
+    return "\uc81c\ubbf8\ub098\uc774";
+  }
+  if(t.indexOf("claude")>=0){
+    if(t.indexOf("opus")>=0) return "\ud074\ub85c\ub4dc opus";
+    if(t.indexOf("sonnet")>=0) return "\ud074\ub85c\ub4dc sonnet";
+    if(t.indexOf("haiku")>=0) return "\ud074\ub85c\ub4dc haiku";
+    return "\ud074\ub85c\ub4dc";
+  }
+  return String(m);
+}
+function _aiWhenKo(at, when){
+  try{
+    var d=null;
+    if(at) d=new Date(at);
+    else if(when) d=new Date(String(when).replace(" ","T"));
+    if(!d || isNaN(d.getTime())) return String(when||"");
+    var n=new Date();
+    var hh=("0"+d.getHours()).slice(-2), mm=("0"+d.getMinutes()).slice(-2);
+    if(d.getFullYear()===n.getFullYear() && d.getMonth()===n.getMonth() && d.getDate()===n.getDate())
+      return "\uc624\ub298 "+hh+":"+mm;
+    return (d.getMonth()+1)+"\uc6d4 "+d.getDate()+"\uc77c "+hh+":"+mm;
+  }catch(e){ return ""; }
+}
+function _aiByline(m){
+  try{
+    if(!m) return "";
+    var who=_aiModelKo(m.model);
+    if(!who){ var p=String(m.persona||""); who=(p==="v2")?"\ud074\ub85c\ub4dc":((p==="warm")?"\uc81c\ubbf8\ub098\uc774":String(m.personaLabel||"")); }
+    var wh=_aiWhenKo(m.at, m.when);
+    var a=[]; if(who) a.push(who); if(wh) a.push(wh);
+    if(!a.length) return "";
+    return '<div style="font-size:11.5px;opacity:.55;margin-top:12px">'+a.join(" \u00b7 ")+'</div>';
+  }catch(e){ return ""; }
+}
+function _aiShowStory(out, text, cached, meta){
   try{
     window.__aiLastText=text;
     var _t=String(text).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/\n{2,}/g,"<br><br>").replace(/\n/g,"<br>");
     out.innerHTML=(cached?'<div style="font-size:11.5px;opacity:.6;margin-bottom:8px">이전에 쓴 글이에요 · 아래 “새로 쓰기”를 누르면 다시 씁니다</div>':"")+_t;
+    try{ var _by=_aiByline(meta); if(_by) out.innerHTML+=_by; }catch(e){}
     try{ var _nz=_aiNudgeHTML(); if(_nz) out.innerHTML+=_nz; }catch(e){}
     var _sv=_ndEl("wAiSave"); if(_sv) _sv.style.display="";
   }catch(e){}
@@ -7846,10 +7891,10 @@ async function ndAIWrite(force){
   if(out) out.style.display="";
   if(!force){
     var hit=_aiCacheGet(key);
-    if(hit && hit.text){ _aiShowStory(out, hit.text, true); if(btn){ btn.disabled=false; btn.textContent="✨ 새로 쓰기"; btn.onclick=function(){ ndAIWrite(true); }; } return; }
+    if(hit && hit.text){ _aiShowStory(out, hit.text, true, hit); if(btn){ btn.disabled=false; btn.textContent="✨ 새로 쓰기"; btn.onclick=function(){ ndAIWrite(true); }; } return; }
     /* v461: 캐시 키가 어긋나도(요약 재계산 등) 방금 완성된 글이 있으면 그걸 보여준다 — '완성인데 쓰는중' 방지 */
     var _rs=window.__aiReadyStory;
-    if(_rs && _rs.text && _rs.persona===persona && (Date.now()-_rs.at)<600000){ _aiShowStory(out, _rs.text, false); if(btn){ btn.disabled=false; btn.textContent="✨ 새로 쓰기"; btn.onclick=function(){ ndAIWrite(true); }; } return; }
+    if(_rs && _rs.text && _rs.persona===persona && (Date.now()-_rs.at)<600000){ _aiShowStory(out, _rs.text, false, _rs); if(btn){ btn.disabled=false; btn.textContent="✨ 새로 쓰기"; btn.onclick=function(){ ndAIWrite(true); }; } return; }
   }
   if(force){ try{ if(window.__aiJobs) delete window.__aiJobs[key]; }catch(e){} }   /* v491: '새로쓰기'는 완료된 job 캐시를 버리고 진짜 다시 생성한다(같은 말투+같은 재료면 재활용돼 무반응이던 것 수정) */
   if(btn){ btn.disabled=true; btn.textContent="✨ 쓰는 중…"; }
@@ -7874,7 +7919,7 @@ async function ndAIWrite(force){
   var _sec=Math.round((Date.now()-t0)/1000);
   try{ window.__aiWanted=false; }catch(e){}
   try{ _aiRenderPast(); }catch(e){}
-  if(res && res.ok){ _aiShowStory(out,res.text,false); if(btn){ btn.disabled=false; btn.textContent="✨ 새로 쓰기"; btn.onclick=function(){ ndAIWrite(true); }; } }
+  if(res && res.ok){ _aiShowStory(out,res.text,false,res); if(btn){ btn.disabled=false; btn.textContent="✨ 새로 쓰기"; btn.onclick=function(){ ndAIWrite(true); }; } }
   else if(out){
     out.innerHTML='<div style="line-height:1.7;text-align:left">글을 받아오지 못했어요 <span style="opacity:.6">('+_sec+'초)</span>'
       +'<div style="font-size:12.5px;opacity:.75;margin-top:6px">'+String((res&&res.error)||"알 수 없는 오류").replace(/</g,"&lt;")+'</div>'
