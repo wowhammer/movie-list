@@ -2022,6 +2022,75 @@ const MANIFESTS = {
                       r.status==="하는중"?{t:"하는중",cls:"on"}:0,
                       r.status==="예정"?{t:"예정",cls:"on"}:0,
                       r.status==="보류"?{t:"보류",cls:"on"}:0 ] } },
+  memo:{
+    id:"memo", title:"메모", icon:"📝", vol:"卷24", canAdd:true,
+    source:{ type:"sheet", tab:"메모" },
+    fields:[
+      {k:"title",sheet:"제목",label:"제목",type:"text",full:true},
+      {k:"content",sheet:"내용",label:"내용",type:"textarea",full:true,rows:8},
+      {k:"tags",sheet:"태그",label:"태그(쉼표로 여러 개)",type:"tags"},
+      {k:"date",sheet:"날짜",label:"날짜",type:"date",today:true},
+      {k:"status",sheet:"상태",label:"고정",type:"seg",options:["일반","고정"]}
+    ],
+    search:["title","content","tags"],
+    filterBy:{ field:"tags", allLabel:"전체" },
+    newestFirst:true,
+    stats:[
+      {label:"전체",type:"count"},
+      {label:"고정",type:"countIf",field:"status",eq:"고정",c:"#e0a86a"}
+    ],
+    card:{ kind:"specimen", thumb:"📝", memo:"content", tags:"tags",
+      meta:r=>[ (r.date?(_isoOf(r.date)||String(r.date).slice(0,10)):"") ].filter(Boolean).join(" · "),
+      flags:r=>[] }
+  },
+
+  shopping:{
+    id:"shopping", title:"장보기", icon:"🛒", vol:"卷25", canAdd:true,
+    source:{ type:"sheet", tab:"장보기" },
+    fields:[
+      {k:"title",sheet:"품목",label:"살 것",type:"text",full:true},
+      {k:"qty",sheet:"수량",label:"수량",type:"text"},
+      {k:"place",sheet:"어디서",label:"어디서",type:"text"},
+      {k:"price",sheet:"예상가격",label:"예상 가격(원)",type:"number",money:true},
+      {k:"status",sheet:"상태",label:"상태",type:"seg",options:["살 것","샀음"]},
+      {k:"content",sheet:"메모",label:"메모",type:"textarea"},
+      {k:"date",sheet:"날짜",label:"적은 날",type:"date",today:true}
+    ],
+    search:["title","place","content"],
+    newestFirst:true,
+    stats:[
+      {label:"전체",type:"count"},
+      {label:"살 것",type:"countIf",field:"status",eq:"살 것",c:"#c2410c"},
+      {label:"샀음",type:"countIf",field:"status",eq:"샀음",c:"#16a34a"}
+    ],
+    card:{ kind:"specimen", thumb:"🛒", memo:"content",
+      meta:r=>[ r.qty, r.place, (r.price?Number(r.price).toLocaleString()+"원":""), r.status ].filter(Boolean).join(" · "),
+      flags:r=>[] }
+  },
+
+  karaoke:{
+    id:"karaoke", title:"노래방 18번", icon:"🎤", vol:"卷26", canAdd:true,
+    source:{ type:"sheet", tab:"노래방18번" },
+    fields:[
+      {k:"title",sheet:"곡명",label:"곡명",type:"text",full:true},
+      {k:"artist",sheet:"가수",label:"가수",type:"text"},
+      {k:"songno",sheet:"노래방번호",label:"노래방 번호 (TJ·금영)",type:"text"},
+      {k:"songkey",sheet:"키",label:"키 (높낮이)",type:"text"},
+      {k:"rating",sheet:"자신도",label:"자신도",type:"rating"},
+      {k:"content",sheet:"메모",label:"메모",type:"textarea"},
+      {k:"date",sheet:"등록일",label:"등록일",type:"date",today:true},
+      {k:"status",sheet:"상태",label:"찜",type:"seg",options:["일반","찜"]}
+    ],
+    search:["title","artist","songno","content"],
+    newestFirst:true,
+    stats:[
+      {label:"전체",type:"count"},
+      {label:"찜",type:"countIf",field:"status",eq:"찜",c:"#e0a86a"}
+    ],
+    card:{ kind:"specimen", thumb:"🎤", memo:"content",
+      meta:r=>[ r.artist, (r.songno?"번호 "+r.songno:""), (r.songkey?"키 "+r.songkey:"") ].filter(Boolean).join(" · "),
+      flags:r=>[] }
+  },
 
   quote:{ id:"quote", title:"명언", icon:"❝", vol:"卷15", canAdd:true,
     source:{ type:"sheet", tab:"명언" },
@@ -2701,7 +2770,7 @@ function openDomain(id){
 
 /* 홈: 켜둔 카테고리를 카드로. 건수는 한 번 열어본 분야만 표시(홈을 빠르게 유지). */
 function ndDeep(h){ if(typeof h!=="string"||h.charAt(0)!=="#") h="#8a7a6a"; var n=parseInt(h.slice(1),16),r=(n>>16)&255,g=(n>>8)&255,b=n&255; function d(x,f){return Math.max(0,Math.min(255,Math.round(x*f)));} var d1="rgb("+d(r,.60)+","+d(g,.60)+","+d(b,.60)+")", d2="rgb("+d(r,.20)+","+d(g,.20)+","+d(b,.20)+")"; return "linear-gradient(180deg,rgba(255,255,255,.06),transparent 30%),linear-gradient(150deg,"+d1+","+d2+")"; }
-var ND_LOGO_HTML='<div class="ndh-brand" style="cursor:pointer" onclick="try{goHome()}catch(e){}"><svg width="47" height="35" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg><div class="ndh-wm"><b>내도감</b><small>NAEDOGAM</small></div><span class="mhver ndh-ver">v576</span></div><button class="ndh-sync" type="button" title="동기화" aria-label="동기화" onclick="try{syncNow()}catch(e){}">↻</button>';
+var ND_LOGO_HTML='<div class="ndh-brand" style="cursor:pointer" onclick="try{goHome()}catch(e){}"><svg width="47" height="35" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg><div class="ndh-wm"><b>내도감</b><small>NAEDOGAM</small></div><span class="mhver ndh-ver">v577</span></div><button class="ndh-sync" type="button" title="동기화" aria-label="동기화" onclick="try{syncNow()}catch(e){}">↻</button>';
 /* 홈 카드 크기: wide(넓게=한 줄 전체) · half(보통=한 줄 2개) · mini(작게=하단 3칸). 기본값=프리셋 */
 var ND_PRESET_SIZE={running:"wide",food:"wide",recipes:"wide",movies:"half",books:"half",period:"half",diary:"half",travel:"half",mountains:"half",culture:"half",albums:"half",cellar:"half",scrap:"half",wish:"half",gift:"half",pet:"half",drink:"half"};
 function getHomeSizes(){ try{ return JSON.parse(store.getItem("nd.homesize")||"{}")||{}; }catch(e){ return {}; } }
