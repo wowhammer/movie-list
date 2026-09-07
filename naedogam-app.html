@@ -1562,7 +1562,7 @@ document.documentElement.setAttribute("data-theme","dark");</script>
         <svg class="brandmark" width="40" height="30" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg>
         <span class="brandwm"><span class="bwm-ko">내도감</span><span class="bwm-en">NAEDOGAM</span></span>
       </button>
-      <span class="mhver">v584</span>
+      <span class="mhver">v585</span>
       <span class="spacer"></span>
       <span class="src-chip" id="srcChip" style="display:none">데모</span>
       <button class="icon-btn" id="searchToggle" type="button" style="display:none">🔍</button>
@@ -2827,7 +2827,7 @@ function openDomain(id){
 
 /* 홈: 켜둔 카테고리를 카드로. 건수는 한 번 열어본 분야만 표시(홈을 빠르게 유지). */
 function ndDeep(h){ if(typeof h!=="string"||h.charAt(0)!=="#") h="#8a7a6a"; var n=parseInt(h.slice(1),16),r=(n>>16)&255,g=(n>>8)&255,b=n&255; function d(x,f){return Math.max(0,Math.min(255,Math.round(x*f)));} var d1="rgb("+d(r,.60)+","+d(g,.60)+","+d(b,.60)+")", d2="rgb("+d(r,.20)+","+d(g,.20)+","+d(b,.20)+")"; return "linear-gradient(180deg,rgba(255,255,255,.06),transparent 30%),linear-gradient(150deg,"+d1+","+d2+")"; }
-var ND_LOGO_HTML='<div class="ndh-brand" style="cursor:pointer" onclick="try{goHome()}catch(e){}"><svg width="47" height="35" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg><div class="ndh-wm"><b>내도감</b><small>NAEDOGAM</small></div><span class="mhver ndh-ver">v584</span></div><button class="ndh-sync" type="button" title="동기화" aria-label="동기화" onclick="try{syncNow()}catch(e){}">↻</button>';
+var ND_LOGO_HTML='<div class="ndh-brand" style="cursor:pointer" onclick="try{goHome()}catch(e){}"><svg width="47" height="35" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg><div class="ndh-wm"><b>내도감</b><small>NAEDOGAM</small></div><span class="mhver ndh-ver">v585</span></div><button class="ndh-sync" type="button" title="동기화" aria-label="동기화" onclick="try{syncNow()}catch(e){}">↻</button>';
 /* 홈 카드 크기: wide(넓게=한 줄 전체) · half(보통=한 줄 2개) · mini(작게=하단 3칸). 기본값=프리셋 */
 var ND_PRESET_SIZE={running:"wide",food:"wide",recipes:"wide",movies:"half",books:"half",period:"half",diary:"half",travel:"half",mountains:"half",culture:"half",albums:"half",cellar:"half",scrap:"half",wish:"half",gift:"half",pet:"half",drink:"half"};
 function getHomeSizes(){ try{ return JSON.parse(store.getItem("nd.homesize")||"{}")||{}; }catch(e){ return {}; } }
@@ -4972,6 +4972,70 @@ function _ndKbFollow(d){
     d.__ndKbFix=1;
   }catch(e){}
 }
+/* ★v585: 「쓰다 만 글」 임시 보관 — 기기 안에만 담는다(시트·네트워크 안 씀).
+   저장실패 안전망 nd.dfail.<id> 과 같은 모양이라 복구 막대도 그대로 재사용한다.
+   긴 글 카테고리만 · 새로 쓸 때만 · 사진은 안 담는다(data URL 이라 저장공간이 터진다). */
+var ND_DRAFT_CATS = { diary:1, memo:1 };
+var ND_DRAFT_TTL  = 7*24*3600*1000;      /* 7일 지난 건 없는 셈 친다 */
+function _ndDraftKey(id){ return "nd.draft."+id; }
+function _ndDraftOn(id){ return !!ND_DRAFT_CATS[id]; }
+function _ndDraftCollect(d){                /* 글자 칸만 모은다 */
+  var o={}, tot=0;
+  try{
+    d.querySelectorAll("input.rf, textarea.rf").forEach(function(el){
+      var k=el.dataset && el.dataset.k; if(!k) return;
+      if((el.dataset.type||"")==="image") return;      /* 사진 제외 */
+      var v=String(el.value==null?"":el.value);
+      if(!v.trim()) return;
+      if(v.length>8000) v=v.slice(0,8000);
+      if(tot+v.length>20000) return;                    /* 전체 상한 */
+      tot+=v.length; o[k]=v;
+    });
+  }catch(e){}
+  return { n:Object.keys(o).length, v:o, len:tot };
+}
+function _ndDraftSave(d, id){
+  try{
+    if(!_ndDraftOn(id)) return;
+    var c=_ndDraftCollect(d);
+    /* 제목만 있고 본문이 없으면 담지 않는다 — 실수로 연 폼까지 복구 막대가 뜨면 성가시다 */
+    var body=(c.v.content||c.v.memo||c.v.review||"");
+    if(!c.n || String(body).trim().length<10){ _ndDraftClear(id); return; }
+    var cur=JSON.stringify({at:0,v:c.v});
+    if(d.__ndDraftLast===cur) return;                   /* 안 바뀌었으면 안 쓴다 */
+    d.__ndDraftLast=cur;
+    store.setItem(_ndDraftKey(id), JSON.stringify({ at:Date.now(), v:c.v }));
+  }catch(e){}
+}
+function _ndDraftRead(id){
+  try{
+    if(!_ndDraftOn(id)) return null;
+    var raw=store.getItem(_ndDraftKey(id)); if(!raw) return null;
+    var o=JSON.parse(raw);
+    if(!o || !o.v || !Object.keys(o.v).length) return null;
+    if(!o.at || (Date.now()-o.at) > ND_DRAFT_TTL){ _ndDraftClear(id); return null; }
+    return o;
+  }catch(e){ return null; }
+}
+function _ndDraftClear(id){ try{ store.removeItem(_ndDraftKey(id)); }catch(e){} }
+function _ndDraftAgo(at){
+  var m=Math.floor((Date.now()-at)/60000);
+  if(m<1) return "방금"; if(m<60) return m+"분 전";
+  var h=Math.floor(m/60); if(h<24) return h+"시간 전";
+  return Math.floor(h/24)+"일 전";
+}
+function _ndDraftWatch(d, id){              /* 쓰는 동안 계속 담는다 */
+  try{
+    if(!_ndDraftOn(id) || d.__ndDraftWatch) return;
+    d.__ndDraftWatch=1;
+    var t=null, tick=function(){ clearTimeout(t); t=setTimeout(function(){ _ndDraftSave(d,id); }, 700); };
+    d.addEventListener("input", tick, true);
+    d.addEventListener("change", tick, true);
+    /* ★말로 쓰기는 값을 직접 넣어 input 이벤트가 안 뜰 수 있다 → 주기적으로도 한 번 */
+    var iv=setInterval(function(){ if(!d.open){ clearInterval(iv); return; } _ndDraftSave(d,id); }, 3000);
+    d.addEventListener("close", function(){ try{ clearTimeout(t); clearInterval(iv); d.__ndDraftWatch=0; }catch(e){} });
+  }catch(e){}
+}
 function _ndTagCss(){ if(document.getElementById("ndTagCss")) return; var st=document.createElement("style"); st.id="ndTagCss";
   st.textContent=".rf-tagsel{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px}.rf-tagsel:empty{display:none}.rf-tagchip{display:inline-flex;align-items:center;gap:5px;background:rgba(224,72,63,.12);border:1px solid rgba(224,72,63,.5);color:var(--ink);border-radius:14px;padding:4px 6px 4px 11px;font-size:13px}.rf-tagx{background:none;border:none;color:var(--ink-soft);cursor:pointer;font-size:11px;padding:0 2px;line-height:1}.rf-tagaddrow{display:flex;gap:6px;margin-bottom:8px}.rf-tagnew{flex:1;min-width:0;padding:9px 11px;border:1px solid var(--line);border-radius:8px;background:var(--card);color:var(--ink);font-size:14px;font-family:inherit;box-sizing:border-box}.rf-tagadd{flex:0 0 auto;width:42px;border:1px solid var(--line);border-radius:8px;background:var(--card);color:#E0483F;font-size:19px;cursor:pointer}.rf-taglist{display:flex;flex-wrap:wrap;gap:6px;max-height:170px;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:2px}.rf-taglist:empty{display:none}.rf-tagopt{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);background:transparent;color:var(--ink-soft);border-radius:14px;padding:6px 11px;font-size:13px;cursor:pointer}.rf-tagopt.on{background:rgba(224,72,63,.12);border-color:rgba(224,72,63,.5);color:var(--ink)}.rf-tagc{font-size:11px;color:var(--ink-soft);font-weight:600}.rf-tagopt.on .rf-tagc{color:#E0483F}.rf-tagopt[hidden]{display:none}";
   document.head.appendChild(st); }
@@ -5088,10 +5152,37 @@ function openRecordForm(m, existing, prefill){
             _bd.insertBefore(_bn,_bd.firstChild);
             _bn.querySelector("._dfGo").onclick=function(){ try{ window.__ndSkipDfail=true; d.close(); openRecordForm(m,_dfo); }catch(_e){ window.__ndSkipDfail=false; } };
             _bn.querySelector("._dfDel").onclick=function(){ try{ store.removeItem(_dfk); }catch(_e){} try{ _bn.remove(); }catch(_e){} };
+            window.__ndDfBarShown=1;
           }
         }
       }
     }
+  }catch(_e){}
+  /* ★v585: 쓰다 만 글 복구 막대. 저장실패 막대가 이미 떠 있으면 띄우지 않는다(막대 두 개 금지). */
+  try{
+    var _drO = (!existing && !window.__ndDfBarShown) ? _ndDraftRead(m.id) : null;
+    window.__ndDfBarShown=0;
+    if(_drO){
+      var _drB=d.querySelector(".dbody");
+      if(_drB){
+        var _dn=document.createElement("div");
+        _dn.style.cssText="flex:1 1 100%;background:var(--line-soft,rgba(255,255,255,.06));border:1px solid var(--line);border-radius:10px;padding:10px 12px;margin-bottom:10px;font-size:13px;color:var(--ink);display:flex;align-items:center;gap:8px;flex-wrap:wrap";
+        _dn.innerHTML="<span style='flex:1 1 auto;opacity:.85'>쓰다 만 글이 있어요 · "+_ndDraftAgo(_drO.at)+"</span>"
+          +"<button type='button' class='_drGo' style='background:var(--brand,#e0483f);color:#fff;border:none;border-radius:8px;padding:6px 12px;font-weight:800;font-size:12.5px;cursor:pointer'>이어서 쓰기</button>"
+          +"<button type='button' class='_drDel' style='background:transparent;color:var(--ink-soft);border:1px solid var(--line);border-radius:8px;padding:6px 10px;font-weight:700;font-size:12.5px;cursor:pointer'>지우기</button>";
+        _drB.insertBefore(_dn,_drB.firstChild);
+        /* ★폼을 다시 열지 않는다 — 지금 화면의 칸에 값만 넣는다(수정 모드로 새는 것 방지) */
+        _dn.querySelector("._drGo").onclick=function(){
+          try{ Object.keys(_drO.v).forEach(function(k){
+                 var el=d.querySelector('input.rf[data-k="'+k+'"], textarea.rf[data-k="'+k+'"]');
+                 if(el){ el.value=_drO.v[k]; try{ el.dispatchEvent(new Event("input",{bubbles:true})); }catch(_x){} }
+               }); }catch(_e){}
+          try{ _dn.remove(); }catch(_e){}
+        };
+        _dn.querySelector("._drDel").onclick=function(){ _ndDraftClear(m.id); try{ _dn.remove(); }catch(_e){} };
+      }
+    }
+    if(!existing) _ndDraftWatch(d, m.id);
   }catch(_e){}
   d.querySelectorAll(".rf-bool").forEach(b=>b.onclick=()=>{ b.classList.toggle("on"); });
   d.querySelectorAll(".rf-seg").forEach(seg=>seg.querySelectorAll(".rf-segbtn").forEach(b=>b.onclick=()=>{ const was=b.classList.contains("on"); seg.querySelectorAll(".rf-segbtn").forEach(x=>x.classList.remove("on")); if(!was) b.classList.add("on"); }));
@@ -5261,6 +5352,7 @@ function openRecordForm(m, existing, prefill){
       try{ store.setItem("nd.dfail."+m.id, JSON.stringify(row)); }catch(_df){}
       await saveRecord(m, row, existing);
       try{ store.removeItem("nd.dfail."+m.id); }catch(_df){}
+      try{ _ndDraftClear(m.id); }catch(_df){}   /* ★v585: 시트에 들어갔으니 임시 보관은 지운다 */
       _ndNetSet(""); d.close(); afterSave(m, row);
     }catch(e){ btn.textContent="저장 실패 · 다시 시도"; btn.disabled=false; _ndNetSet("저장 안 됨 — "+((e&&e.message)||e)+" · 작성 내용은 임시 보관됐어요(다시 열면 복구)"); }
     finally{ try{ clearTimeout(_slowT); }catch(_e){} }
