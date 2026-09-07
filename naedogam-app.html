@@ -661,6 +661,19 @@ try { document.title = CONFIG.APP_NAME; } catch(e){}
 #add[data-cat="diary"] .rff-full > *{ order:2; flex:1 1 100%; }
 #add[data-cat="diary"] .rff-full > label{ order:0; flex:0 0 auto; margin:0; }
 #add[data-cat="diary"] .rff-full > .ndMicRow{ order:1; flex:0 0 auto; margin:0 !important; }
+/* ★v580: 글이 주인공인 칸은 테두리를 지우고 화면 폭을 최대한 쓴다.
+   실측 304px → 349px. 다른 카테고리는 테두리가 칸의 경계를 알려주므로 건드리지 않는다. */
+#add[data-cat="diary"]{ width:97%; }
+#add[data-cat="diary"] .dbody{ padding-left:12px; padding-right:12px; }
+#add[data-cat="diary"] .rf[data-k="title"],
+#add[data-cat="diary"] .rf[data-k="content"],
+#add[data-cat="diary"] .rf[data-k="nddaily"]{
+  border-color:transparent !important; background:transparent !important;
+  border-radius:0 !important; padding-left:4px !important; padding-right:4px !important; }
+#add[data-cat="diary"] .rf[data-k="title"]:focus,
+#add[data-cat="diary"] .rf[data-k="content"]:focus,
+#add[data-cat="diary"] .rf[data-k="nddaily"]:focus{
+  background:rgba(255,255,255,.03); }
 
   .dbody.set.rfgrid > .rff-half > .rf, .dbody.set.rfgrid > .rff-half > select.rf, .dbody.set.rfgrid > .rff-half > .rf-starbox{ margin-top:auto; }
   .dbody.set.rfgrid > .rff-full:has(textarea.rf), .dbody.set.rfgrid > .rff-full:has(.rf-quotes), .dbody.set.rfgrid > .rff-full:has(.rf-labrows){ border-top:1px solid rgba(160,140,120,.18); margin-top:6px; padding-top:10px; }
@@ -1785,8 +1798,8 @@ const MANIFESTS = {
   diary:{ id:"diary", title:"일기", icon:"📔", vol:"卷6", canAdd:true,
     source:{ type:"sheet", tab:"일기" },
     fields:[ {k:"date",sheet:"날짜",label:"날짜",type:"date",today:true},
-             {k:"title",sheet:"제목",label:"제목",type:"text",full:true},
-             {k:"content",sheet:"내용",label:"내용",type:"textarea",full:true,rows:10},
+             {k:"title",sheet:"제목",label:"제목",type:"text",full:true,ph:"제목"},
+             {k:"content",sheet:"내용",label:"내용",type:"textarea",full:true,rows:10,ph:"오늘 어땠나요"},
              {k:"nddaily",sheet:"오늘내도감",label:"오늘 내도감 (자동)",type:"textarea",rows:3},
              {k:"mood",sheet:"기분",label:"기분",type:"select",options:["","😊 좋음","😐 보통","😔 힘듦","😡 화남","😢 슬픔","🥰 설렘"],hideForm:true},
              {k:"weather",sheet:"날씨",label:"날씨",type:"select",options:["","☀️ 맑음","⛅ 구름","🌧️ 비","❄️ 눈","🌫️ 흐림"],hideForm:true},
@@ -2783,7 +2796,7 @@ function openDomain(id){
 
 /* 홈: 켜둔 카테고리를 카드로. 건수는 한 번 열어본 분야만 표시(홈을 빠르게 유지). */
 function ndDeep(h){ if(typeof h!=="string"||h.charAt(0)!=="#") h="#8a7a6a"; var n=parseInt(h.slice(1),16),r=(n>>16)&255,g=(n>>8)&255,b=n&255; function d(x,f){return Math.max(0,Math.min(255,Math.round(x*f)));} var d1="rgb("+d(r,.60)+","+d(g,.60)+","+d(b,.60)+")", d2="rgb("+d(r,.20)+","+d(g,.20)+","+d(b,.20)+")"; return "linear-gradient(180deg,rgba(255,255,255,.06),transparent 30%),linear-gradient(150deg,"+d1+","+d2+")"; }
-var ND_LOGO_HTML='<div class="ndh-brand" style="cursor:pointer" onclick="try{goHome()}catch(e){}"><svg width="47" height="35" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg><div class="ndh-wm"><b>내도감</b><small>NAEDOGAM</small></div><span class="mhver ndh-ver">v579</span></div><button class="ndh-sync" type="button" title="동기화" aria-label="동기화" onclick="try{syncNow()}catch(e){}">↻</button>';
+var ND_LOGO_HTML='<div class="ndh-brand" style="cursor:pointer" onclick="try{goHome()}catch(e){}"><svg width="47" height="35" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg><div class="ndh-wm"><b>내도감</b><small>NAEDOGAM</small></div><span class="mhver ndh-ver">v580</span></div><button class="ndh-sync" type="button" title="동기화" aria-label="동기화" onclick="try{syncNow()}catch(e){}">↻</button>';
 /* 홈 카드 크기: wide(넓게=한 줄 전체) · half(보통=한 줄 2개) · mini(작게=하단 3칸). 기본값=프리셋 */
 var ND_PRESET_SIZE={running:"wide",food:"wide",recipes:"wide",movies:"half",books:"half",period:"half",diary:"half",travel:"half",mountains:"half",culture:"half",albums:"half",cellar:"half",scrap:"half",wish:"half",gift:"half",pet:"half",drink:"half"};
 function getHomeSizes(){ try{ return JSON.parse(store.getItem("nd.homesize")||"{}")||{}; }catch(e){ return {}; } }
@@ -4970,7 +4983,7 @@ function openRecordForm(m, existing, prefill){
       if(raw){ const _mm=raw.match(/(\d{4})[-./ ]?\s*(\d{1,2})/); if(_mm) mv=_mm[1]+"-"+String(_mm[2]).padStart(2,"0"); }
       else if(f.today && !isEdit) mv=todayStr().slice(0,7);
       return `<label>${ndFL(f)}</label><input type="month" class="rf" data-k="${f.k}" data-type="text" value="${mv}" onclick="try{this.showPicker&&this.showPicker()}catch(e){}">`; }
-    if(f.type==="textarea"){ const tv=(val==null?"":String(val)).replace(/&/g,'&amp;').replace(/</g,'&lt;'); return `<label>${ndFL(f)}</label><textarea class="rf" data-k="${f.k}" data-type="text" rows="${f.rows||5}" style="width:100%;font-family:inherit;font-size:15px;padding:9px 11px;border:1px solid var(--line);border-radius:9px;box-sizing:border-box;resize:vertical" autocomplete="off">${tv}</textarea>`; }
+    if(f.type==="textarea"){ const tv=(val==null?"":String(val)).replace(/&/g,'&amp;').replace(/</g,'&lt;'); return `<label>${ndFL(f)}</label><textarea class="rf" data-k="${f.k}" data-type="text" rows="${f.rows||5}" placeholder="${ndFP(f)}" style="width:100%;font-family:inherit;font-size:15px;padding:9px 11px;border:1px solid var(--line);border-radius:9px;box-sizing:border-box;resize:vertical" autocomplete="off">${tv}</textarea>`; }
     if(f.type==="rating"){ const rv=(val==null||val==='')?'':val; return `<div class="rf-ratewrap" data-k="${f.k}"><label>${ndFL(f)}</label><div class="rf-starbox" data-k="${f.k}"><input type="hidden" class="rf" data-k="${f.k}" data-type="number" value="${rv}">${starBarHTML(rv===''?0:parseFloat(rv))}<span class="rf-star-num"></span><button type="button" class="rf-star-clr">✕</button></div><div class="rf-ratehint" style="display:none;font-size:12.5px;color:var(--sub);margin-top:5px">‘읽음’ 상태로 표시하면 내 평점을 매길 수 있어요</div></div>`; }
     if(f.type==="seg") return `<label>${ndFL(f)}</label><div class="rf-seg" data-k="${f.k}">${(f.options||[]).map(o=>`<button type="button" class="btn ghost rf-segbtn ${String(val||'')===o?'on':''}" data-v="${o}">${o}</button>`).join("")}</div>`;
     if(f.type==="tiers"){
