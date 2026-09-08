@@ -1573,7 +1573,7 @@ document.documentElement.setAttribute("data-theme","dark");</script>
         <svg class="brandmark" width="40" height="30" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg>
         <span class="brandwm"><span class="bwm-ko">내도감</span><span class="bwm-en">NAEDOGAM</span></span>
       </button>
-      <span class="mhver">v588</span>
+      <span class="mhver">v589</span>
       <span class="spacer"></span>
       <span class="src-chip" id="srcChip" style="display:none">데모</span>
       <button class="icon-btn" id="searchToggle" type="button" style="display:none">🔍</button>
@@ -2838,7 +2838,7 @@ function openDomain(id){
 
 /* 홈: 켜둔 카테고리를 카드로. 건수는 한 번 열어본 분야만 표시(홈을 빠르게 유지). */
 function ndDeep(h){ if(typeof h!=="string"||h.charAt(0)!=="#") h="#8a7a6a"; var n=parseInt(h.slice(1),16),r=(n>>16)&255,g=(n>>8)&255,b=n&255; function d(x,f){return Math.max(0,Math.min(255,Math.round(x*f)));} var d1="rgb("+d(r,.60)+","+d(g,.60)+","+d(b,.60)+")", d2="rgb("+d(r,.20)+","+d(g,.20)+","+d(b,.20)+")"; return "linear-gradient(180deg,rgba(255,255,255,.06),transparent 30%),linear-gradient(150deg,"+d1+","+d2+")"; }
-var ND_LOGO_HTML='<div class="ndh-brand" style="cursor:pointer" onclick="try{goHome()}catch(e){}"><svg width="47" height="35" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg><div class="ndh-wm"><b>내도감</b><small>NAEDOGAM</small></div><span class="mhver ndh-ver">v588</span></div><button class="ndh-sync" type="button" title="동기화" aria-label="동기화" onclick="try{syncNow()}catch(e){}">↻</button>';
+var ND_LOGO_HTML='<div class="ndh-brand" style="cursor:pointer" onclick="try{goHome()}catch(e){}"><svg width="47" height="35" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg><div class="ndh-wm"><b>내도감</b><small>NAEDOGAM</small></div><span class="mhver ndh-ver">v589</span></div><button class="ndh-sync" type="button" title="동기화" aria-label="동기화" onclick="try{syncNow()}catch(e){}">↻</button>';
 /* 홈 카드 크기: wide(넓게=한 줄 전체) · half(보통=한 줄 2개) · mini(작게=하단 3칸). 기본값=프리셋 */
 var ND_PRESET_SIZE={running:"wide",food:"wide",recipes:"wide",movies:"half",books:"half",period:"half",diary:"half",travel:"half",mountains:"half",culture:"half",albums:"half",cellar:"half",scrap:"half",wish:"half",gift:"half",pet:"half",drink:"half"};
 function getHomeSizes(){ try{ return JSON.parse(store.getItem("nd.homesize")||"{}")||{}; }catch(e){ return {}; } }
@@ -5025,9 +5025,14 @@ function _ndDraftSave(d, id){
        지우는 것은 ①저장 성공 ②「지우기」 두 곳에서만. */
     if(!c.n || longest<10){ return; }
     var cur=JSON.stringify({at:0,v:c.v});
+    /* ★★v589: 사람이 손댄 적이 없으면 저장도, 안내 버튼 제거도 하지 않는다.
+       타이핑=input · 말로 쓰기 멈추기=change(v402) 만 이 플래그를 켠다.
+       앱이 코드로 값을 채우는 것은 어떤 이벤트도 안 쏘므로 여기서 걸러진다.
+       (아무것도 안 썼는데 담기고 「이어서 쓰기」가 3초 만에 사라지던 문제 — 폰에서만 나던 것) */
+    if(!d.__ndDraftTouched) return;
     if(d.__ndDraftLast===cur) return;                   /* 안 바뀌었으면 안 쓴다 */
     d.__ndDraftLast=cur;
-    store.setItem(_ndDraftKey(id), JSON.stringify({ at:Date.now(), v:c.v }));
+    store.setItem(_ndDraftKey(id), JSON.stringify({ at:Date.now(), b:c.body, v:c.v }));
     _ndDraftHint(d, "임시 보관됨 · 방금");   /* ★v586: 담긴 걸 눈으로 볼 수 있게(규칙70) */
   }catch(e){}
 }
@@ -5038,6 +5043,14 @@ function _ndDraftRead(id){
     var o=JSON.parse(raw);
     if(!o || !o.v || !Object.keys(o.v).length) return null;
     if(!o.at || (Date.now()-o.at) > ND_DRAFT_TTL){ _ndDraftClear(id); return null; }
+    /* ★v589: 본문이 부실하면 제안하지 않는다. 누르면 아무것도 안 나오는 헛버튼을 막는다.
+       b 가 없는 옛 기록은 날짜 같은 값(2026-09-08)을 빼고 가장 긴 값으로 판정한다. */
+    var b=o.b;
+    if(b==null){ b=0; try{ Object.keys(o.v).forEach(function(k){
+      var s2=String(o.v[k]||"").trim();
+      if(/^\d{4}-\d{2}-\d{2}$/.test(s2)) return;      /* 날짜는 본문이 아니다 */
+      if(s2.length>b) b=s2.length; }); }catch(e){} }
+    if(b<10){ _ndDraftClear(id); return null; }
     return o;
   }catch(e){ return null; }
 }
@@ -5081,11 +5094,12 @@ function _ndDraftWatch(d, id){              /* 쓰는 동안 계속 담는다 */
        nd.draft.diary 를 덮어쓴다(실측 확인). 규칙75. */
     if(d.__ndDraftOff){ try{ d.__ndDraftOff(); }catch(e){} }
     if(!id || !_ndDraftOn(id)) return;
-    var t=null, tick=function(){ clearTimeout(t); t=setTimeout(function(){ _ndDraftSave(d,id); }, 700); };
+    d.__ndDraftTouched = 0;                    /* ★v589: 사람이 손댄 적 있는가 */
+    var t=null, tick=function(){ d.__ndDraftTouched = 1; clearTimeout(t); t=setTimeout(function(){ _ndDraftSave(d,id); }, 700); };
     var off=function(){
       try{ clearTimeout(t); clearInterval(iv); }catch(e){}
       try{ d.removeEventListener("input", tick, true); d.removeEventListener("change", tick, true); }catch(e){}
-      if(d.__ndDraftOff===off){ d.__ndDraftOff=null; d.__ndDraftLast=null; }
+      if(d.__ndDraftOff===off){ d.__ndDraftOff=null; d.__ndDraftLast=null; d.__ndDraftTouched=0; }
     };
     /* ★v586: close 이벤트는 쓰지 않는다. 한 박자 늦게 와서
        "닫고 곧바로 다른 폼 열기"일 때 새로 붙은 감시를 떼어버렸다(실측 재현).
