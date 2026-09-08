@@ -1573,7 +1573,7 @@ document.documentElement.setAttribute("data-theme","dark");</script>
         <svg class="brandmark" width="40" height="30" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg>
         <span class="brandwm"><span class="bwm-ko">내도감</span><span class="bwm-en">NAEDOGAM</span></span>
       </button>
-      <span class="mhver">v587</span>
+      <span class="mhver">v588</span>
       <span class="spacer"></span>
       <span class="src-chip" id="srcChip" style="display:none">데모</span>
       <button class="icon-btn" id="searchToggle" type="button" style="display:none">🔍</button>
@@ -2838,7 +2838,7 @@ function openDomain(id){
 
 /* 홈: 켜둔 카테고리를 카드로. 건수는 한 번 열어본 분야만 표시(홈을 빠르게 유지). */
 function ndDeep(h){ if(typeof h!=="string"||h.charAt(0)!=="#") h="#8a7a6a"; var n=parseInt(h.slice(1),16),r=(n>>16)&255,g=(n>>8)&255,b=n&255; function d(x,f){return Math.max(0,Math.min(255,Math.round(x*f)));} var d1="rgb("+d(r,.60)+","+d(g,.60)+","+d(b,.60)+")", d2="rgb("+d(r,.20)+","+d(g,.20)+","+d(b,.20)+")"; return "linear-gradient(180deg,rgba(255,255,255,.06),transparent 30%),linear-gradient(150deg,"+d1+","+d2+")"; }
-var ND_LOGO_HTML='<div class="ndh-brand" style="cursor:pointer" onclick="try{goHome()}catch(e){}"><svg width="47" height="35" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg><div class="ndh-wm"><b>내도감</b><small>NAEDOGAM</small></div><span class="mhver ndh-ver">v587</span></div><button class="ndh-sync" type="button" title="동기화" aria-label="동기화" onclick="try{syncNow()}catch(e){}">↻</button>';
+var ND_LOGO_HTML='<div class="ndh-brand" style="cursor:pointer" onclick="try{goHome()}catch(e){}"><svg width="47" height="35" viewBox="18 26 70 56" aria-hidden="true"><rect x="22" y="46" width="11" height="32" rx="4" fill="#f6eddf"/><rect x="37" y="38" width="11" height="40" rx="4" fill="#f6eddf"/><rect x="52" y="30" width="11" height="48" rx="4" fill="#f6eddf"/><rect x="67" y="34" width="11" height="44" rx="4" fill="#E0483F" transform="rotate(14 72 78)"/><rect x="20" y="80" width="60" height="3.5" rx="1.75" fill="#f6eddf"/></svg><div class="ndh-wm"><b>내도감</b><small>NAEDOGAM</small></div><span class="mhver ndh-ver">v588</span></div><button class="ndh-sync" type="button" title="동기화" aria-label="동기화" onclick="try{syncNow()}catch(e){}">↻</button>';
 /* 홈 카드 크기: wide(넓게=한 줄 전체) · half(보통=한 줄 2개) · mini(작게=하단 3칸). 기본값=프리셋 */
 var ND_PRESET_SIZE={running:"wide",food:"wide",recipes:"wide",movies:"half",books:"half",period:"half",diary:"half",travel:"half",mountains:"half",culture:"half",albums:"half",cellar:"half",scrap:"half",wish:"half",gift:"half",pet:"half",drink:"half"};
 function getHomeSizes(){ try{ return JSON.parse(store.getItem("nd.homesize")||"{}")||{}; }catch(e){ return {}; } }
@@ -5048,17 +5048,30 @@ function _ndDraftAgo(at){
   var h=Math.floor(m/60); if(h<24) return h+"시간 전";
   return Math.floor(h/24)+"일 전";
 }
-function _ndDraftHint(d, txt){
+function _ndDraftHint(d, txt, offer){
+  /* ★v588: 저장 버튼 바로 위 한 줄. 글자만 넣을 수도, 「이어서 쓰기·지우기」를 같이 넣을 수도 있다.
+     저장 줄은 sticky 라 항상 보인다 → 스크롤해도 안 놓친다. */
   try{
     var row=d.querySelector("#rfSaveRow"); if(!row) return;
     var h=row.querySelector("#rfDraftHint");
     if(!h){
       row.style.flexWrap="wrap";                 /* 인라인이라 CSS보다 확실하다 */
-      h=document.createElement("span"); h.id="rfDraftHint";
-      h.style.cssText="flex:1 1 100%;order:-1;font-size:11.5px;opacity:.5;margin:0 0 3px 2px";
+      h=document.createElement("div"); h.id="rfDraftHint";
+      h.style.cssText="flex:1 1 100%;order:-1;display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:0 0 7px 2px";
       row.insertBefore(h, row.firstChild);
     }
-    h.textContent=txt||"";
+    h.innerHTML="";
+    var sp=document.createElement("span");
+    sp.style.cssText="flex:1 1 auto;font-size:11.5px;opacity:"+(offer?".8":".5");
+    sp.textContent=txt||""; h.appendChild(sp);
+    if(offer && offer.go){
+      var b1=document.createElement("button"); b1.type="button"; b1.textContent="이어서 쓰기";
+      b1.style.cssText="flex:0 0 auto;background:var(--brand,#e0483f);color:#fff;border:none;border-radius:7px;padding:5px 11px;font-weight:800;font-size:12px;cursor:pointer";
+      b1.onclick=offer.go; h.appendChild(b1);
+      var b2=document.createElement("button"); b2.type="button"; b2.textContent="지우기";
+      b2.style.cssText="flex:0 0 auto;background:transparent;color:var(--ink-soft);border:1px solid var(--line);border-radius:7px;padding:5px 9px;font-weight:700;font-size:12px;cursor:pointer";
+      b2.onclick=offer.del; h.appendChild(b2);
+    }
   }catch(e){}
 }
 function _ndDraftWatch(d, id){              /* 쓰는 동안 계속 담는다 */
@@ -5209,30 +5222,23 @@ function openRecordForm(m, existing, prefill){
       }
     }
   }catch(_e){}
-  /* ★v585: 쓰다 만 글 복구 막대. 저장실패 막대가 이미 떠 있으면 띄우지 않는다(막대 두 개 금지). */
+  /* ★v588: 쓰다 만 글 안내를 저장 버튼 줄로 옮겼다(위쪽 막대는 스크롤하면 사라져 놓친다).
+     ★저장 실패 막대(빨강)가 이미 떠 있으면 이건 띄우지 않는다. */
   try{
     var _drO = (!existing && !window.__ndDfBarShown) ? _ndDraftRead(m.id) : null;
     window.__ndDfBarShown=0;
     if(_drO){
-      var _drB=d.querySelector(".dbody");
-      if(_drB){
-        var _dn=document.createElement("div");
-        _dn.style.cssText="flex:1 1 100%;background:var(--line-soft,rgba(255,255,255,.06));border:1px solid var(--line);border-radius:10px;padding:10px 12px;margin-bottom:10px;font-size:13px;color:var(--ink);display:flex;align-items:center;gap:8px;flex-wrap:wrap";
-        _dn.innerHTML="<span style='flex:1 1 auto;opacity:.85'>쓰다 만 글이 있어요 · "+_ndDraftAgo(_drO.at)+"</span>"
-          +"<button type='button' class='_drGo' style='background:var(--brand,#e0483f);color:#fff;border:none;border-radius:8px;padding:6px 12px;font-weight:800;font-size:12.5px;cursor:pointer'>이어서 쓰기</button>"
-          +"<button type='button' class='_drDel' style='background:transparent;color:var(--ink-soft);border:1px solid var(--line);border-radius:8px;padding:6px 10px;font-weight:700;font-size:12.5px;cursor:pointer'>지우기</button>";
-        _drB.insertBefore(_dn,_drB.firstChild);
+      _ndDraftHint(d, "쓰다 만 글 · "+_ndDraftAgo(_drO.at), {
         /* ★폼을 다시 열지 않는다 — 지금 화면의 칸에 값만 넣는다(수정 모드로 새는 것 방지) */
-        _dn.querySelector("._drGo").onclick=function(){
+        go:function(){
           try{ Object.keys(_drO.v).forEach(function(k){
                  var el=d.querySelector('input.rf[data-k="'+k+'"], textarea.rf[data-k="'+k+'"]');
                  if(el){ el.value=_drO.v[k]; try{ el.dispatchEvent(new Event("input",{bubbles:true})); }catch(_x){} }
                }); }catch(_e){}
-          try{ _dn.remove(); }catch(_e){}
           try{ _ndDraftHint(d, "쓰다 만 글을 되살렸어요"); }catch(_e){}
-        };
-        _dn.querySelector("._drDel").onclick=function(){ _ndDraftClear(m.id); try{ _dn.remove(); }catch(_e){} try{ _ndDraftHint(d, ""); }catch(_e){} };
-      }
+        },
+        del:function(){ _ndDraftClear(m.id); try{ _ndDraftHint(d, ""); }catch(_e){} }
+      });
     }
     _ndDraftWatch(d, existing ? null : m.id);   /* ★v586: 항상 부른다 — 이전 감시를 떼야 하므로 */
   }catch(_e){}
